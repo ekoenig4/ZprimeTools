@@ -34,9 +34,9 @@ maxEvents = argv[4]
 reportEvery = argv[5]
 label = argv[6]
 #Remove any old condor files
-# system("rm .status/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/"+output.replace(".root","")+"* >/dev/null 2>&1")
+system("rm .status/*"+label+"* >/dev/null 2>&1" )
+system("rm .output/*"+label+"* >/dev/null 2>&1" )
+system("rm .output/"+output.replace(".root","")+"* >/dev/null 2>&1")
 
 if (len(argv) == 8):nBatches=int(argv[7].replace("split_",""))
 else:nBatches = 1

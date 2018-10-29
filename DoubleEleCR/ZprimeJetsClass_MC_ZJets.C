@@ -140,7 +140,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery)
     //cout<<"bosonPID: "<<bosonPID<<endl;
     //cout<<"bosonPt: "<<bosonPt<<endl;
     //}
-    jetCand = getJetCand(200,2.4,0.8,0.1);
+    jetCand = getJetCand(200,2.5,0.8,0.1);
     
     float metcut= 0.0;
     //metcut = (fabs(pfMET-caloMET))/pfMET;
@@ -329,26 +329,31 @@ void ZprimeJetsClass::BookHistos(const char* file2)
 		     780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1400.,1800.,2000.,2500.};
 
   float PtBins[49]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
-		     780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1050.,1100.,1200.,1300.,1400.,1500.,2000.,2500.};
+		    780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1050.,1100.,1200.,1300.,1400.,1500.,2000.,2500.};
+  
+  float LeadingLeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
-  h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
+  float subLeadingLeptonPtBins[26] = {10.,20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
+  
   h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
+  h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",50,0,3000); h_metFilters[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 16, 0, 16);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
     h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
-    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -2.5, 2.5);h_j1Eta[i]->Sumw2();
-    h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();     
+    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
+    h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidh; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
-    h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1NConstituents; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
+    h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
     h_PF123PtFraction[i]= new TH1F(("PF123PtFraction"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction[i]->Sumw2();
     h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",25,0,50);h_j1TotPFCands[i]->Sumw2();
     h_j1ChPFCands[i] = new TH1F(("j1ChPFCands"+histname).c_str(),"j1ChPFCands;# of PF charged hadrons in Leading Jet",25,0,50);h_j1ChPFCands[i]->Sumw2();
@@ -361,15 +366,15 @@ void ZprimeJetsClass::BookHistos(const char* file2)
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
     //CR Histograms
-    h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",28,0.,1400.);h_leadingLeptonPt[i]->Sumw2();
+    h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();
     h_leadingLeptonEta[i] = new TH1F(("h_leadingLeptonEta"+histname).c_str(),"h_leadingLeptonEta",30,-3.0,3.0);h_leadingLeptonEta[i]->Sumw2();
     h_leadingLeptonPhi[i] = new TH1F(("h_leadingLeptonPhi"+histname).c_str(),"h_leadingLeptonPhi",10,0.,3.1416);h_leadingLeptonPhi[i]->Sumw2();
-    h_subleadingLeptonPt[i] = new TH1F(("h_subleadingLeptonPt"+histname).c_str(),"h_subleadingLeptonPt",28,0.,1400.);h_subleadingLeptonPt[i]->Sumw2();
+    h_subleadingLeptonPt[i] = new TH1F(("h_subleadingLeptonPt"+histname).c_str(),"h_subleadingLeptonPt",25,subLeadingLeptonPtBins);h_subleadingLeptonPt[i]->Sumw2();
     h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
     h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",10,0.,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
     h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
-    h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",32,40.,200.);h_dileptonM[i]->Sumw2();
+    h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
   }
 }
 
@@ -407,7 +412,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight)
     h_subleadingLeptonPt[histoNumber]->Fill(elePt->at(lepindex_subleading),event_weight);
     h_subleadingLeptonEta[histoNumber]->Fill(eleEta->at(lepindex_subleading),event_weight);
     h_subleadingLeptonPhi[histoNumber]->Fill(elePhi->at(lepindex_subleading),event_weight);}
-  if(dilepton_pt >= 0 && dilepton_mass >= 0){
+  if(dilepton_pt >= 0 && dilepton_mass >= 0){  
     h_recoil[histoNumber]->Fill(Recoil,event_weight);
     h_dileptonPt[histoNumber]->Fill(dilepton_pt,event_weight);
     h_dileptonM[histoNumber]->Fill(dilepton_mass,event_weight);}
@@ -425,9 +430,9 @@ void ZprimeJetsClass::getPt123Frac()
   Pt123Fraction=(Pt123/jetPt->at(jetCand[0]));
 }
 
-void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates)
+void ZprimeJetsClass::AllPFCand(vector<int> jetCand, vector<int> PFCandidates)
 {
-  //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
+  //getPFCandidatesMethod
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
   PFCandidates = getPFCandidates();
   //cout<<"Vector of Pairs should have size 4: "<<PFCandidates.size()<<endl;
@@ -446,7 +451,7 @@ void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates)
   if(PFCandidates.size()>3){
     NeutralPFCandidates=PFCandidates.at(3);}
   //cout<<"TotalNeutralPFCandidates: "<<NeutralPFCandidates<<endl;}
-  
+   
   Pt123Fraction=0.0;
   //We are using these conditions so we only calculate the following quantities for the signal we are interested in
   //This will also make it faster to process the events
@@ -526,17 +531,14 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int leading_ele_index, int subleadi
       double deltar_subleading = 0.0;
       deltar_leading = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(leading_ele_index),elePhi->at(leading_ele_index));
       deltar_subleading = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(subleading_ele_index),elePhi->at(subleading_ele_index));
-      if(deltar_leading>0.4 && deltar_subleading>0.4 && jetPt->at(i) >30.0 && jetPFLooseId->at(i)==1)
+      if(deltar_leading>0.4 && deltar_subleading>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
         {
           jetindex.push_back(i);
         }
-
-
     }
-
   return jetindex;
-
 }
+
 //Return a vector of pairs. "0" = #pfCands, "1"=#chargedPFCands , "3"=#neutralPFCands,"2"=#photonPFCands
 vector<int>ZprimeJetsClass::getPFCandidates(){
   vector<int>PFCands;
@@ -545,7 +547,7 @@ vector<int>ZprimeJetsClass::getPFCandidates(){
       int TotPFCands;
       if(i==0){
 	TotPFCands = j1PFConsPID.size();
-	//cout<<TotPFCands<<endl;
+	//cout<<"Total PFCands: "<<TotPFCands<<endl;
 	PFCands.push_back(TotPFCands);
 	int ChPFCands,NeuPFCands,GammaPFCands;
 	ChPFCands=NeuPFCands=GammaPFCands=0;
@@ -572,7 +574,7 @@ bool ZprimeJetsClass::btagVeto() {
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
     {
-      if(jetPt->at(i) >20.0 && jetEta->at(i) < 2.4 && jetCSV2BJetTags->at(i) > 0.8484)
+      if(jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8484)
         btagVeto = false;
     }
   return btagVeto;
@@ -592,7 +594,7 @@ bool ZprimeJetsClass::dPhiJetMETcut(vector<int> jets)
   int j=0;
   for(;j< njetsMax; j++){
     //cout<<"DeltaPhi b/w Jet and MET"<<endl;
-    //cout<<"jet "<<j<<":"<<DeltaPhi((*jetPhi)[j],pfMETPhi)<<endl; 
+    //cout<<"jet "<<j<<":"<<DeltaPhi((*jetPhi)[j],pfMETPhi)<<endl;
     if(DeltaPhi((*jetPhi)[j],pfMETPhi) < 0.5)
       break;
   }
@@ -603,6 +605,7 @@ bool ZprimeJetsClass::dPhiJetMETcut(vector<int> jets)
   return passes;
 
 }
+
 vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut)
 {
   vector<int> ele_cands;
@@ -613,15 +616,18 @@ vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut
       //Electron passes Tight Electron ID cuts
       if(eleIDbit->at(i)>>3&1 == 1)
 	{
-	  //Electron passes pt cut
-	  if(elePt->at(i) > elePtCut)
-	    {
-	      //Electron does not overlap photon
-	      if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-		{
-		  ele_cands.push_back(i);
-		}
-	    }
+	  //Electron passes eta cut
+	  if (fabs(eleEta->at(i)) < 2.5) {
+	    //Electron passes pt cut
+	    if(elePt->at(i) > elePtCut)
+	      {
+		//Electron does not overlap photon
+		if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+		  {
+		    ele_cands.push_back(i);
+		  }
+	      }
+	  }
 	}
     }
   return ele_cands;
@@ -668,15 +674,18 @@ vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut)
       // if(pass_iso && pass_globalMuon && pass_PFMuon && pass_chi2ndf && pass_chamberHit && pass_matchedStations && pass_dxy && pass_dz && pass_pixelHits && pass_trackLayers)
       if(pass_iso && muIDbit->at(i)>>2&1==1)
 	{
-	  //Muon passes pt cut
-	  if(muPt->at(i) > muPtCut)
-	    {
-	      //Muon does not overlap photon
-	      if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-		{
-		  mu_cands.push_back(i);
-		}
-	    }
+	  //Muon passes eta cut
+	  if(fabs(muEta->at(i)) < 2.4) {
+	    //Muon passes pt cut
+	    if(muPt->at(i) > muPtCut)
+	      {
+		//Muon does not overlap photon
+		if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+		  {
+		    mu_cands.push_back(i);
+		  }
+	      }
+	  }
 	}
     }
   return mu_cands;
@@ -686,19 +695,22 @@ vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int leading_mu
 {
   vector<int> ele_cands;
   ele_cands.clear();
-  
+
   for(int i = 0; i < nEle; i++)
     {
       //Electron passes Loose Electron ID cuts
       if(eleIDbit->at(i)>>1&1 == 1)
 	{
-	//Electron passes pt cut
-	if(elePt->at(i) > elePtCut)
-	  {
-	    //Electron does not overlap photon
-	    if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	  //Electron passes eta cut
+	  if(fabs(eleEta->at(i)) < 2.5) {
+	    //Electron passes pt cut
+	    if(elePt->at(i) > elePtCut)
 	      {
-		ele_cands.push_back(i);
+		//Electron does not overlap photon
+		if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+		  {
+		    ele_cands.push_back(i);
+		  }
 	      }
 	  }
 	}
@@ -718,15 +730,18 @@ vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int leading_ele_in
     {
       if(muIDbit->at(i)>>0&1==1)
 	{
-	  //Muon passes pt cut
-	  if(muPt->at(i) > muPtCut)
-	    {
-	      //Muon does not overlap photon
-	      if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(leading_ele_index),elePhi->at(leading_ele_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(subleading_ele_index),elePhi->at(subleading_ele_index)) > 0.5)
-		{
-		  mu_cands.push_back(i);
-		}
-	    }
+	  //Muon passes eta cut
+	  if (fabs(muEta->at(i)) < 2.4) {
+	    //Muon passes pt cut
+	    if(muPt->at(i) > muPtCut)
+	      {
+		//Muon does not overlap photon
+		if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(leading_ele_index),elePhi->at(leading_ele_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(subleading_ele_index),elePhi->at(subleading_ele_index)) > 0.5)
+		  {
+		    mu_cands.push_back(i);
+		  }
+	      }
+	  }
 	}
     }
   return mu_cands;
