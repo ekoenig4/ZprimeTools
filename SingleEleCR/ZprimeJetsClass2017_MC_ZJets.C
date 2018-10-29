@@ -268,7 +268,7 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
     h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
-    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -2.5, 2.5);h_j1Eta[i]->Sumw2();
+    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0,3.0);h_j1Eta[i]->Sumw2();
     h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidh; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
@@ -410,10 +410,8 @@ vector<int> ZprimeJetsClass2017::getJetCand(double jetPtCut, double jetEtaCut, d
   for(int p=0;p<nJet;p++){
       bool kinematic = (*jetPt)[p] > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
       bool tightJetID = false;
-      bool loosePUID = false;
       if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
-      if ((*jetPUFullID)[p]&(1<<2)) loosePUID = true;
-      if(kinematic && tightJetID && loosePUID)
+      if(kinematic && tightJetID)
         tmpCand.push_back(p);
     }
   return tmpCand;
@@ -426,10 +424,8 @@ vector<int> ZprimeJetsClass2017::JetVetoDecision(int jet_index, int ele_index) {
     double deltar_ele = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index));
     double deltar_jet = deltaR(jetEta->at(i),jetPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index));
     bool tightJetID = false;
-    bool loosePUID = false;
     if ((*jetID)[i]>>0&1 == 1) tightJetID = true;
-    if ((*jetPUFullID)[i]&(1<<2)) loosePUID = true;
-    if(deltar_ele>0.4 && deltar_jet>0.4 && jetPt->at(i) >30.0 && tightJetID && loosePUID)
+    if(deltar_ele>0.4 && deltar_jet>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && tightJetID)
       jetindex.push_back(i);
   }
   return jetindex;
