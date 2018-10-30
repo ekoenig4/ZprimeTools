@@ -352,10 +352,9 @@ vector<int> ZprimeJetsClass2017::JetVetoDecision(int jet_index, int mu_index) {
   vector<int> jetindex;
   for(int i = 0; i < nJet; i++){
     double deltar_mu = deltaR(jetEta->at(i),jetPhi->at(i),muEta->at(mu_index),muPhi->at(mu_index));
-    double deltar_jet = deltaR(jetEta->at(i),jetPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index));
     bool tightJetID = false;
     if ((*jetID)[i]>>0&1 == 1) tightJetID = true;
-    if(deltar_mu>0.4 && deltar_jet>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && tightJetID)
+    if(deltar_mu>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && tightJetID)
       jetindex.push_back(i);
   }
   return jetindex;
