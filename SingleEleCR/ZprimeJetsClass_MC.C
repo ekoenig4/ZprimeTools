@@ -454,9 +454,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int ele_index) {
     {
       double deltar_ele = 0.0;
       deltar_ele = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index));
-      double deltar_jet = 0.0;
-      deltar_jet = deltaR(jetEta->at(i),jetPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index));
-      if(deltar_ele>0.4 && deltar_jet>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
+      if(deltar_ele>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
         {
           jetindex.push_back(i);
         }

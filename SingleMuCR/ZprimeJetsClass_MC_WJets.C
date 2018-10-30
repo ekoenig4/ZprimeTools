@@ -123,7 +123,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery)
     //binContent as event_weight
     int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
     event_weight = PU->GetBinContent(bin);
-    cout<<"event_weight: "<<event_weight<<endl;
+    // cout<<"event_weight: "<<event_weight<<endl;
     int bosonPID;
     double bosonPt;
     bool Wfound = false;
@@ -495,9 +495,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int mu_index) {
     {
       double deltar_mu = 0.0;
       deltar_mu = deltaR(jetEta->at(i),jetPhi->at(i),muEta->at(mu_index),muPhi->at(mu_index));
-      double deltar_jet = 0.0;
-      deltar_jet = deltaR(jetEta->at(i),jetPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index));
-      if(deltar_mu>0.4 && deltar_jet>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
+      if(deltar_mu>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
         {
           jetindex.push_back(i);
         }

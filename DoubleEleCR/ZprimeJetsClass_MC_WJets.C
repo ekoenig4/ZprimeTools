@@ -124,7 +124,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery)
     //binContent as event_weight
     int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
     event_weight = PU->GetBinContent(bin);
-    cout<<"event_weight: "<<event_weight<<endl;
+    // cout<<"event_weight: "<<event_weight<<endl;
     int bosonPID;
     double bosonPt;
     bool Wfound = false;
