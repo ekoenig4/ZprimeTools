@@ -32,7 +32,7 @@ public :
   TFile *output;
   TTree *tree;
 
-  static const int nHisto = 9;
+  static const int nHisto = 10;
 
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
