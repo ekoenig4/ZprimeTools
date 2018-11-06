@@ -21,7 +21,7 @@ for variable in argv[1:]:
     
     pad1 = TPad("pad1","pad1",0.01,0.25,0.99,0.99);
     pad1.Draw(); pad1.cd();
-    if (samples.name != "Z Mass (GeV)"): pad1.SetLogy();
+    pad1.SetLogy();
     pad1.SetFillColor(0); pad1.SetFrameBorderMode(0); pad1.SetBorderMode(0);
     pad1.SetBottomMargin(0.);
 
@@ -51,13 +51,18 @@ for variable in argv[1:]:
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
 
     hs_order = {}
-    for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
+    if (samples.name == "Cutflow"):
+        if samples.region == "SignalRegion":lastBin = 9
+        else:lastBin = 11
+        for key in samples.SampleList:
+            if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
+    else:
+        for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
-    for order in keylist: hs_datamc.Add(samples.histo[hs_order[order]])
+    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
-    if (samples.name != "Z Mass (GeV)"): min=0.1;max=pow(10,2.5);
-    else:min = 0;max = 1.3;
+    min=0.1;max=pow(10,2.5);
     hs_datamc.SetMinimum(min);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
@@ -65,13 +70,13 @@ for variable in argv[1:]:
 
     samples.histo['Data'].Draw('pex0same')
 
-    if samples.signal != 'null':samples.histo[samples.signal[0]].Draw("HIST SAME")
+    if samples.signal != None:samples.histo[samples.signal[0]].Draw("HIST SAME")
 
     #################################################
 
     leg = TLegend(0.62,0.60,0.86,0.887173,"");
     leg.AddEntry(samples.histo['Data'],"Data","lp");
-    if (samples.signal != 'null'): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
+    if (samples.signal != None): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
     leg.AddEntry(samples.histo['WJets'],"W#rightarrowl#nu","f");
     leg.AddEntry(samples.histo['DYJets'],"Z#rightarrow ll","F"); 
     leg.AddEntry(samples.histo['DiBoson'],"WW/WZ/ZZ","F");
@@ -86,13 +91,14 @@ for variable in argv[1:]:
 
     lumi_label = '';
     if (samples.lumi == 35900): lumi_label="35.9";
-    elif (samples.lumi == 1885): lumi_label="1.89";
+    if (samples.lumi == 1885): lumi_label="1.89";
+    if (samples.lumi == 3375): lumi_label="3.38";
     texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary}");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2017)");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -197,11 +203,8 @@ for variable in argv[1:]:
     yaxis.Draw("SAME");
     
     dir = getcwd().split("/")[-1]
-    rfile=TFile("cutflow.root","recreate")
-    c.Write()
-    rfile.Close()
     c.SaveAs((str(variable)+str(".pdf")));
     c.SaveAs((str(variable)+str(".png")));
-    system((str("mv ")+str(variable)+str(".pdf ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".pdf")));
-    system((str("mv ")+str(variable)+str(".png ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".png")));
+    system((str("mv ")+str(variable)+str(".pdf ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".pdf")));
+    system((str("mv ")+str(variable)+str(".png ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".png")));
   
