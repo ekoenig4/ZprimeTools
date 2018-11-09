@@ -28,6 +28,64 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
+double EletriggerSF(float pt, float eta){
+  double sf = 1.0;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
+    if(pt < 40.0) sf = 0.75;
+    if(pt > 40.0 && pt < 50.0) sf = 0.92;
+    if(pt > 50.0 && pt < 60.0) sf = 0.95;
+    if(pt > 60.0 && pt < 70.0) sf = 0.96;
+    if(pt > 70.0 && pt < 80.0) sf = 0.96;
+    if(pt > 80.0 && pt < 90.0) sf = 0.97;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.97;
+    if(pt > 150. && pt < 200.) sf = 0.97;
+    if(pt > 200. && pt < 250.) sf = 0.98;
+    if(pt > 250) sf = 0.93;
+  }
+  if(fabs(eta) >= 0.8   && fabs(eta) < 1.5){
+    if(pt < 40.0) sf = 0.64;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.96;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+    
+  if(fabs(eta) >= 1.5   && fabs(eta) < 2. ) {
+    if(pt < 40.0) sf = 0.63;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.95;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.99;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+  if(fabs(eta) >= 2.) {
+    if(pt < 40.0) sf = 0.5;
+    if(pt > 40.0 && pt < 50.0) sf = 0.83;
+    if(pt > 50.0 && pt < 60.0) sf = 0.89;
+    if(pt > 60.0 && pt < 70.0) sf = 0.90;
+    if(pt > 70.0 && pt < 80.0) sf = 0.92;
+    if(pt > 80.0 && pt < 90.0) sf = 0.93;
+    if(pt > 90.0 && pt < 100.) sf = 0.94;
+    if(pt > 100. && pt < 150.) sf = 0.94;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 1.0;
+    if(pt > 250) sf = 1.0;
+  }
+  return sf;
+}
+
 void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
@@ -71,8 +129,9 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
-    double eleRecoSF_corr=1.0;
-    double eleEffSF_corr=1.0;
+    double eleRecoSF_corr = 1.0;
+    double eleEffSF_corr = 1.0;
+    double eleTriggSF = 1.0;
     //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
     //binContent as event_weight
     int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
@@ -100,6 +159,7 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 	    nCRSelection+=event_weight;
 	    fillHistos(2,event_weight);
 	    lepindex = elelist[0];
+	    // cout<< "elePt = " << elePt->at(elelist[0]) <<" eleEta = " << eleEta->at(elelist[0]) << endl;
 	    if (elePt->at(elelist[0]) < 500) {
 	      eleRecoSF_corr=h_eleRecoSF_highpt->GetBinContent(h_eleRecoSF_highpt->GetXaxis()->FindBin(eleEta->at(elelist[0])),h_eleRecoSF_highpt->GetYaxis()->FindBin(elePt->at(elelist[0])));
 	      // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
@@ -112,7 +172,9 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 	      eleEffSF_corr=h_eleIDSF->GetBinContent(h_eleIDSF->GetXaxis()->FindBin(2.49),h_eleIDSF->GetYaxis()->FindBin(499));
 	      // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
 	    }
-	    event_weight=event_weight*eleRecoSF_corr*eleEffSF_corr;
+	    eleTriggSF = EletriggerSF(elePt->at(elelist[0]),eleEta->at(elelist[0]));
+	    // cout<<"eleTriggSF = " << eleTriggSF << endl;
+	    event_weight=event_weight*eleRecoSF_corr*eleEffSF_corr*eleTriggSF;
 	    vector<int> mulist = muon_veto_looseID(jetCand[0],elelist[0],10.);
 	    jetveto = JetVetoDecision(jetCand[0],elelist[0]);
 	    TLorentzVector lep_4vec;
@@ -244,7 +306,8 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
     h_j1ChMultiplicity[i] = new TH1F(("j1ChMultiplicity"+histname).c_str(),"j1ChMultiplicity;Charged Multiplicity of Leading Jet",25,0,50);h_j1ChMultiplicity[i]->Sumw2();
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2();  
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
-    h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2(); 
+    h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
+    h_PtFrac_PtEta[i] = new TH3F(("PtFrac_PtEta"+histname).c_str(),"PtFraction;Leading Jet P_{T};Leading Jet #eta",50,0,2000,50,-3.0,3.0,50,0,1);
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
@@ -278,6 +341,7 @@ void ZprimeJetsClass2017::fillHistos(int histoNumber,double event_weight) {
     h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
     h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
     h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
+    h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction,event_weight);
   }
   //CR Histograms
   if(lepindex >= 0){ 
@@ -369,12 +433,12 @@ vector<int> ZprimeJetsClass2017::getJetCand(double jetPtCut, double jetEtaCut, d
   vector<int> tmpCand;
   tmpCand.clear();
   for(int p=0;p<nJet;p++){
-      bool kinematic = (*jetPt)[p] > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
-      bool tightJetID = false;
-      if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
-      if(kinematic && tightJetID)
-        tmpCand.push_back(p);
-    }
+    bool kinematic = (*jetPt)[p] > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
+    bool tightJetID = false;
+    if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
+    if(kinematic && tightJetID)
+      tmpCand.push_back(p);
+  }
   return tmpCand;
 }
 
@@ -421,7 +485,7 @@ bool ZprimeJetsClass2017::btagVeto() {
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
     if(jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8838)
-	btagVeto = false;
+      btagVeto = false;
   return btagVeto;
 }
 
@@ -444,18 +508,18 @@ vector<int> ZprimeJetsClass2017::electron_veto_tightID(int jet_index, float eleP
   vector<int> ele_cands;
   ele_cands.clear();
   for(int i = 0; i < nEle; i++) {
-      //Electron passes Tight Electron ID cuts
-      if(eleIDbit->at(i)>>2&1 == 1) {
-	//Electron passes Eta cut
-	if (fabs(eleEta->at(i)) < 2.5) {
-	  //Electron passes pt cut
-	  if(elePt->at(i) > elePtCut) {
-	    //Electron does not overlap photon
-	    if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-	      ele_cands.push_back(i);
-	  }
+    //Electron passes Tight Electron ID cuts
+    if(eleIDbit->at(i)>>2&1 == 1) {
+      //Electron passes Eta cut
+      if (fabs(eleEta->at(i)) < 2.5) {
+	//Electron passes pt cut
+	if(elePt->at(i) > elePtCut) {
+	  //Electron does not overlap photon
+	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	    ele_cands.push_back(i);
 	}
       }
+    }
   }
   return ele_cands;
 }

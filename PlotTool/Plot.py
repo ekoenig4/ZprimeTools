@@ -10,7 +10,8 @@ class datamc(object):
     def __init__(self,command="noCommand",show=1):
 
         #Luminosity
-        self.lumi=3375
+        self.lumi=41453
+        # self.lumi=3375
 
         self.show = show
 
