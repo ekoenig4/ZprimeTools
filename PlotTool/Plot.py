@@ -7,10 +7,10 @@ signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/Zp
 
 class datamc(object):
 
-    def __init__(self,command="noCommand",show=1):
+    def __init__(self,command="noCommand",show=1,lumi=35900):
 
         #Luminosity
-        self.lumi=35900
+        self.lumi=lumi
 
         self.show = show
 
@@ -174,6 +174,7 @@ class datamc(object):
                 self.total[sample].append(cutflow.GetBinContent(1))
 
     def ScaleHistogram(self):
+        print "Scaling Histograms to " + str(self.lumi) + " pb^{-1}"
         for sample in self.SampleList:
             if sample == 'Data':
                 integral=(self.histo[sample].Integral())
