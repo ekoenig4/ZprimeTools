@@ -11,7 +11,6 @@ class datamc(object):
 
         #Luminosity
         self.lumi=41453
-        # self.lumi=3375
 
         self.show = show
 

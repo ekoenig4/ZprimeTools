@@ -93,6 +93,7 @@ for variable in argv[1:]:
     if (samples.lumi == 35900): lumi_label="35.9";
     if (samples.lumi == 1885): lumi_label="1.89";
     if (samples.lumi == 3375): lumi_label="3.38";
+    if (samples.lumi == 41453): lumi_label="41.5"
     texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
     texS.SetNDC();
     texS.SetTextFont(42);
