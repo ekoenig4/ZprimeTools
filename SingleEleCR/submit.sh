@@ -1,3 +1,4 @@
+
 DATE=May2018
 DATE_2=29May
 DATE_DATA=19May
@@ -6,45 +7,45 @@ echo "Do the CR data samples"
 
 ./rootcom ZprimeJetsClass analyzedata
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0000/ postSingleEle_0.root -1 10000 Ele_0 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0000/ postSingleEle_0.root -1 10000 Ele_0 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0001/ postSingleEle_1.root -1 10000 Ele_1 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0001/ postSingleEle_1.root -1 10000 Ele_1 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0002/ postSingleEle_2.root -1 10000 Ele_2 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0002/ postSingleEle_2.root -1 10000 Ele_2 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0003/ postSingleEle_3.root -1 10000 Ele_3 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset1/180529_*/0003/ postSingleEle_3.root -1 10000 Ele_3 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset2/180529_*/0000/ postSingleEle_4.root -1 10000 Ele_4 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset2/180529_*/0000/ postSingleEle_4.root -1 10000 Ele_4 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset2/180529_*/0001/ postSingleEle_5.root -1 10000 Ele_5 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset2/180529_*/0001/ postSingleEle_5.root -1 10000 Ele_5 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset3/180529_*/0000/ postSingleEle_6.root -1 10000 Ele_6 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset3/180529_*/0000/ postSingleEle_6.root -1 10000 Ele_6 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset3/180529_*/0001/ postSingleEle_7.root -1 10000 Ele_7 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset3/180529_*/0001/ postSingleEle_7.root -1 10000 Ele_7 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset4/180529_*/0000/ postSingleEle_8.root -1 10000 Ele_8 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset4/180529_*/0000/ postSingleEle_8.root -1 10000 Ele_8 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset4/180529_*/0001/ postSingleEle_9.root -1 10000 Ele_9 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset4/180529_*/0001/ postSingleEle_9.root -1 10000 Ele_9 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset5/180529_*/0000/ postSingleEle_10.root -1 10000 Ele_10 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset5/180529_*/0000/ postSingleEle_10.root -1 10000 Ele_10 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset5/180529_*/0001/ postSingleEle_11.root -1 10000 Ele_11 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset5/180529_*/0001/ postSingleEle_11.root -1 10000 Ele_11 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0000/ postSingleEle_12.root -1 10000 Ele_12 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0000/ postSingleEle_12.root -1 10000 Ele_12 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0001/ postSingleEle_13.root -1 10000 Ele_13 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0001/ postSingleEle_13.root -1 10000 Ele_13 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0002/ postSingleEle_14.root -1 10000 Ele_14 split_-1
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset6/180529_*/0002/ postSingleEle_14.root -1 10000 Ele_14 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0000/ postSingleEle_15.root -1 10000 Ele_15 split_-1  
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0000/ postSingleEle_15.root -1 10000 Ele_15 split_-1  
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0001/ postSingleEle_16.root -1 10000 Ele_16 split_-1  
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0001/ postSingleEle_16.root -1 10000 Ele_16 split_-1  
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0002/ postSingleEle_17.root -1 10000 Ele_17 split_-1  
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0002/ postSingleEle_17.root -1 10000 Ele_17 split_-1  
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0003/ postSingleEle_18.root -1 10000 Ele_18 split_-1  
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset7/180529_*/0003/ postSingleEle_18.root -1 10000 Ele_18 split_-1  
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset8/180529_*/0000/ postSingleEle_19.root -1 10000 Ele_19 split_-1 
+# ./../SubmitCondor.py analyzedata /hdfs/store/user/gomber/MonoZprime_Ntuples_${DATE_DATA}_CR/SingleElectron/crab_dataset8/180529_*/0000/ postSingleEle_19.root -1 10000 Ele_19 split_-1 
 
 
 echo "Do the MC samples"
@@ -84,7 +85,7 @@ echo "Do the MC samples"
 ./../SubmitCondor.py analyze /hdfs/store/user/uhussain/Zprime_Ntuples_${DATE}/WZ_TuneCUETP8M1_13TeV-pythia8/crab_WZ/180528_*/0000/ postWZ.root -1 10000 WZ split_-1
 
 ./../SubmitCondor.py analyze /hdfs/store/user/uhussain/Zprime_Ntuples_${DATE}/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ/180528_*/0000/ postZZ.root -1 10000 ZZ split_-1
-
+exit
 
 #WJets
 
