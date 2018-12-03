@@ -34,16 +34,15 @@ maxEvents = argv[4]
 reportEvery = argv[5]
 label = argv[6]
 #Remove any old condor files
-# system("rm .status/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/"+output.replace(".root","")+"* >/dev/null 2>&1")
+statusFn = [remove(".status/"+fn) for fn in listdir(".status/") if label in fn]
+outputFn = [remove(".output/"+fn) for fn in listdir(".output/") if (label in fn or output.replace(".root","") in fn)]
 
 if (len(argv) == 8):nBatches=int(argv[7].replace("split_",""))
 else:nBatches = 1
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 60
+    nfile_per_batch = 30
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
@@ -112,6 +111,6 @@ with open(".output/condor_"+label,"w") as condor:
 
 #Move into .output/ and run newly made condor_submit file
 chdir(".output/")
-system("condor_submit condor_"+label)
+# system("condor_submit condor_"+label)
     
     
