@@ -109,13 +109,13 @@ echo "Do the MC samples"
 #WJets
 ./rootcom ZprimeJetsClass2017_MC_WJets analyzeWJets
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 W_0 split_-1
+./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0000/ postWJets_MLM_1.root -1 10000 W_1 split_-1
+./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0000/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0001/ postWJets_MLM_1.root -1 10000 W_1 split_-1
+./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0001/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0002/ postWJets_MLM_1.root -1 10000 W_1 split_-1
+./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0002/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
 
 ./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT100To200/ postW100to200_0.root -1 10000 W100_0 split_-1
 
