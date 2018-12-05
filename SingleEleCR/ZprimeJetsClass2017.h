@@ -45,7 +45,7 @@ public :
 
   double Pt123Fraction,Pt123,PFConsPt;
   double PtFirst3[3];
-  double Pt123Hadrons[3];
+  double PtFracHadrons[3];
   //CR variables
   int lepindex;
   double lepton_pt,Recoil;
@@ -55,13 +55,13 @@ public :
    
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto], *h_Pt123[nHisto], *h_PFConsPt[nHisto],*h_Pt1[nHisto],*h_Pt2[nHisto],*h_Pt3[nHisto]; 
-  TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
+  TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1GammaEnF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
 
   TH1F *h_j1Pt_PU25[nHisto],*h_j1Pt_PUInf[nHisto];
   TH1F *h_Pt123_PU25[nHisto],*h_Pt123_PUInf[nHisto];
   TH1F *h_PF123PtFraction_PU25[nHisto],*h_PF123PtFraction_PUInf[nHisto];
 
-  TH1F *h_Pt123NH[nHisto],*h_Pt123CH[nHisto],*h_Pt123G[nHisto];
+  TH1F *h_PtFracNH[nHisto],*h_PtFracCH[nHisto],*h_PtFracG[nHisto];
 
   TH2F *h_nPFCons_jetPt[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123JetPt[nHisto];

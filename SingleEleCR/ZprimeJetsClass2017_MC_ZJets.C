@@ -360,6 +360,7 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
     h_j1GammaPFCands[i] = new TH1F(("j1GammaPFCands"+histname).c_str(),"j1GammaPFCands;# of PF gammas in Leading Jet",20,0,40);h_j1GammaPFCands[i]->Sumw2();
     h_j1CHF[i] = new TH1F(("j1CHF"+histname).c_str(),"j1CHF;Charged Hadron Energy Fraction in Leading Jet",50,0,1.1);h_j1CHF[i]->Sumw2(); 
     h_j1NHF[i] = new TH1F(("j1NHF"+histname).c_str(),"j1NHF;Neutral Hadron Energy Fraction in Leading Jet",50,0,1.1);h_j1NHF[i]->Sumw2(); 
+    h_j1GammaEnF[i] = new TH1F(("j1GammaEnF"+histname).c_str(),"j1GammaEnF;Photon Energy Fraction in Leading Jet",50,0,1.1);h_j1GammaEnF[i]->Sumw2();
     h_j1ChMultiplicity[i] = new TH1F(("j1ChMultiplicity"+histname).c_str(),"j1ChMultiplicity;Charged Multiplicity of Leading Jet",25,0,50);h_j1ChMultiplicity[i]->Sumw2();
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2();  
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
@@ -376,9 +377,9 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
 
 
-    h_Pt123NH[i] = new TH1F(("Pt123NH"+histname).c_str(),"Pt123NH;P_{T} sum carried by 3 leading Neutral Hadron daughters of the Pencil Jet",58,Pt123Bins);h_Pt123NH[i]->Sumw2();
-    h_Pt123CH[i] = new TH1F(("Pt123CH"+histname).c_str(),"Pt123CH;P_{T} sum carried by 3 leading Charged Hadron daughters of the Pencil Jet",58,Pt123Bins);h_Pt123CH[i]->Sumw2();
-    h_Pt123G[i] = new TH1F(("Pt123G"+histname).c_str(),"Pt123G;P_{T} sum carried by 3 leading Photon daughters of the Pencil Jet",58,Pt123Bins);h_Pt123G[i]->Sumw2();
+    h_PtFracNH[i] = new TH1F(("PtFracNH"+histname).c_str(),"PtFracNH;P_{T} Fraction carried by 3 leading Neutral Hadron daughters of the Pencil Jet",50,0,1);h_PtFracNH[i]->Sumw2();
+    h_PtFracCH[i] = new TH1F(("PtFracCH"+histname).c_str(),"PtFracCH;P_{T} Fraction carried by 3 leading Charged Hadron daughters of the Pencil Jet",50,0,1);h_PtFracCH[i]->Sumw2();
+    h_PtFracG[i] = new TH1F(("PtFracG"+histname).c_str(),"PtFracG;P_{T} Fraction carried by 3 leading Photon daughters of the Pencil Jet",50,0,1);h_PtFracG[i]->Sumw2();
     h_Pt1[i] = new TH1F(("Pt1"+histname).c_str(),"Pt1;P_{T} of first constituent of Pencil Jet",58,Pt123Bins);h_Pt1[i]->Sumw2();
     h_Pt2[i] = new TH1F(("Pt2"+histname).c_str(),"Pt2;P_{T} of first constituent of Pencil Jet",58,Pt123Bins);h_Pt2[i]->Sumw2();
     h_Pt3[i] = new TH1F(("Pt3"+histname).c_str(),"Pt3;P_{T} of first constituent of Pencil Jet",58,Pt123Bins);h_Pt3[i]->Sumw2();
@@ -405,9 +406,9 @@ void ZprimeJetsClass2017::fillHistos(int histoNumber,double event_weight) {
     h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
     h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
     h_Pt123[histoNumber]->Fill(Pt123,event_weight);
-    h_Pt123NH[histoNumber]->Fill(Pt123Hadrons[0],event_weight);
-    h_Pt123CH[histoNumber]->Fill(Pt123Hadrons[1],event_weight);
-    h_Pt123G[histoNumber]->Fill(Pt123Hadrons[2],event_weight);
+    h_PtFracNH[histoNumber]->Fill(PtFracHadrons[0],event_weight);
+    h_PtFracCH[histoNumber]->Fill(PtFracHadrons[1],event_weight);
+    h_PtFracG[histoNumber]->Fill(PtFracHadrons[2],event_weight);
     h_PFConsPt[histoNumber]->Fill(PFConsPt,event_weight);
     h_Pt1[histoNumber]->Fill(PtFirst3[0],event_weight);
     h_Pt2[histoNumber]->Fill(PtFirst3[1],event_weight);
@@ -418,6 +419,7 @@ void ZprimeJetsClass2017::fillHistos(int histoNumber,double event_weight) {
     h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates,event_weight);
     h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]),event_weight);
     h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]),event_weight);
+    h_j1GammaEnF[histoNumber]->Fill(jetPhotonEnF->at(jetCand[0]),event_weight);
     h_j1ChMultiplicity[histoNumber]->Fill(jetNCharged->at(jetCand[0]),event_weight);
     h_j1NeutMultiplicity[histoNumber]->Fill(jetNNeutral->at(jetCand[0]),event_weight);
     h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]),event_weight);
@@ -458,17 +460,19 @@ void ZprimeJetsClass2017::getPt123Frac() {
       Pt123 += j1PFConsPt.at(i);
       PtFirst3[i] = j1PFConsPt.at(i);
       // Neutral Hadrons
-      if (j1PFConsPID.at(i) == 130)
-	Pt123Hadrons[0] += j1PFConsPt.at(i);
+      if (abs(j1PFConsPID.at(i)) == 130)
+	PtFracHadrons[0] += j1PFConsPt.at(i);
       // Charged Hadrons
-      if (j1PFConsPID.at(i) == 211)
-	Pt123Hadrons[1] += j1PFConsPt.at(i);
+      if (abs(j1PFConsPID.at(i)) == 211)
+	PtFracHadrons[1] += j1PFConsPt.at(i);
       // Photons
-      if (j1PFConsPID.at(i) == 22)
-	Pt123Hadrons[2] += j1PFConsPt.at(i);
+      if (abs(j1PFConsPID.at(i)) == 22)
+	PtFracHadrons[2] += j1PFConsPt.at(i);
     }
   }
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
+  for (int i = 0; i < 3; i++)
+    PtFracHadrons[i] /= jetPt->at(jetCand[0]);
 }
 
 void ZprimeJetsClass2017::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
@@ -477,7 +481,10 @@ void ZprimeJetsClass2017::AllPFCand(vector<int> jetCand,vector<int> PFCandidates
     
   Pt123Fraction=Pt123=PFConsPt=0.0;
 
-  for (int i = 0; i < 3; i++) PtFirst3[i] = 0.;
+  for (int i = 0; i < 3; i++) {
+    PtFirst3[i] = 0.;
+    PtFracHadrons[i] = 0.;
+  }
   //We are using these conditions so we only calculate the following quantities for the signal we are interested in
   //This will also make it faster to process the events
   if(jetCand.size()>0) {
