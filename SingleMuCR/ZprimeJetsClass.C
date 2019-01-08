@@ -1,5 +1,5 @@
-#define ZprimeJetsClass2017_cxx
-#include "ZprimeJetsClass2017.h"
+#define ZprimeJetsClass_cxx
+#include "ZprimeJetsClass.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -23,12 +23,12 @@ int main(int argc, const char* argv[]) {
       cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
       return 1;
     }
-  ZprimeJetsClass2017 t(argv[1],argv[2],argv[5]);
+  ZprimeJetsClass t(argv[1],argv[2],argv[5]);
   t.Loop(maxEvents,reportEvery);
   return 0;
 }
 
-void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
+void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
   Long64_t nentries = fChain->GetEntries();
@@ -43,21 +43,12 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
   vector<int> PFCandidates;
   float dphimin = -99;
 
-  //This is the PU histogram obtained from Nick's recipe
-  TFile *weights = TFile::Open("PU_Central.root");
-  TH1D* PU = (TH1D*)weights->Get("pileup");
-
-  TFile *f_muSF_ISO = new TFile("RunBCDEF_SF_ISO.root");
-  TFile *f_muSF_ID = new TFile("RunBCDEF_SF_ID.root");
-  TH2F *h_tightMuSF_ISO = (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
-  TH2F *h_tightMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_genTracks_pt_abseta");
-
   if (maxEvents != -1LL && nentries > maxEvents)
     nentriesToCheck = maxEvents;
   nTotal = nentriesToCheck;
   cout<<"Running over "<<nTotal<<" events."<<endl;
   Long64_t nbytes = 0, nb = 0;
-  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -71,14 +62,6 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
-    double tightMuISO_SF_corr = 1.;
-    double tightMuID_SF_corr = 1.;
-    //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
-    //binContent as event_weight
-    int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
-    event_weight = PU->GetBinContent(bin);
-    //cout<<"event_weight: "<<event_weight<<endl;
-    fabs(genWeight) > 0.0 ? event_weight*=genWeight/fabs(genWeight) : event_weight =0.0;
     float metcut = 0.0;
 
     jetCand = getJetCand(200,2.5,0.8,0.1);
@@ -89,7 +72,7 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
     if (metFilters == 0) {
       nFilters++;
       fillHistos(1,event_weight);
-      if (true) {
+      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1) {
 	nHLT++;
 	fillHistos(2,event_weight);
 	if (jetCand.size() > 0) {
@@ -181,7 +164,7 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(11,nDphiJetMET);
 }
 
-void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
+void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   output = new TFile(outputFilename,"RECREATE");
   tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
@@ -276,77 +259,77 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
   }
 }
 
-void ZprimeJetsClass2017::fillHistos(int histoNumber,double event_weight) {
-  h_nVtx[histoNumber]->Fill(nVtx,event_weight);
-  h_metFilters[histoNumber]->Fill(metFilters,event_weight);
-  h_nJets[histoNumber]->Fill(nJet,event_weight);
-  h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMET[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMETPhi[histoNumber]->Fill(pfMETPhi,event_weight);
+void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
+  h_nVtx[histoNumber]->Fill(nVtx);
+  h_metFilters[histoNumber]->Fill(metFilters);
+  h_nJets[histoNumber]->Fill(nJet);
+  h_pfMETall[histoNumber]->Fill(pfMET);
+  h_pfMET200[histoNumber]->Fill(pfMET);
+  h_pfMET[histoNumber]->Fill(pfMET);
+  h_pfMETPhi[histoNumber]->Fill(pfMETPhi);
   if(jetCand.size()>0){
-    h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-    h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]),event_weight);
-    h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
-    h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
-    h_Pt123[histoNumber]->Fill(Pt123,event_weight);
-    h_PFConsPt[histoNumber]->Fill(PFConsPt,event_weight);
-    h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
-    h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates,event_weight);
-    h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates,event_weight);
-    h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates,event_weight);
-    h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]),event_weight);
-    h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]),event_weight);
-    h_j1ChMultiplicity[histoNumber]->Fill(jetNCharged->at(jetCand[0]),event_weight);
-    h_j1NeutMultiplicity[histoNumber]->Fill(jetNNeutral->at(jetCand[0]),event_weight);
-    h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]),event_weight);
-    h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
-    h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
-    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
-    h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction,event_weight);
-    h_PtFrac_PtPhi[histoNumber]->Fill(jetPt->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
-    h_PtFrac_EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
-    h_PtFrac_Pt123PFConsPt[histoNumber]->Fill(Pt123,PFConsPt,Pt123Fraction,event_weight);
-    h_nPFCons_jetPt[histoNumber]->Fill(jetPt->at(jetCand[0]),TotalPFCandidates,event_weight);
+    h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]));
+    h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]));
+    h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]));
+    h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction);
+    h_Pt123[histoNumber]->Fill(Pt123);
+    h_PFConsPt[histoNumber]->Fill(PFConsPt);
+    h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates);
+    h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates);
+    h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates);
+    h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates);
+    h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]));
+    h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]));
+    h_j1ChMultiplicity[histoNumber]->Fill(jetNCharged->at(jetCand[0]));
+    h_j1NeutMultiplicity[histoNumber]->Fill(jetNNeutral->at(jetCand[0]));
+    h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]));
+    h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]));
+    h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]));
+    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]));
+    h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction);
+    h_PtFrac_PtPhi[histoNumber]->Fill(jetPt->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction);
+    h_PtFrac_EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction);
+    h_PtFrac_Pt123PFConsPt[histoNumber]->Fill(Pt123,PFConsPt,Pt123Fraction);
+    h_nPFCons_jetPt[histoNumber]->Fill(jetPt->at(jetCand[0]),TotalPFCandidates);
 
     if (Pt123 <= 400) {
-      h_Pt123_Pt400[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_Pt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_Pt400[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_Pt400[histoNumber]->Fill(Pt123);
+      h_j1Pt_Pt400[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_Pt400[histoNumber]->Fill(Pt123Fraction);
     } else if (400 < Pt123 && Pt123 <= 600) {
-      h_Pt123_Pt600[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_Pt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_Pt600[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_Pt600[histoNumber]->Fill(Pt123);
+      h_j1Pt_Pt600[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_Pt600[histoNumber]->Fill(Pt123Fraction);
     } else if (600 < Pt123) {
-      h_Pt123_PtInf[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_PtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_PtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_PtInf[histoNumber]->Fill(Pt123);
+      h_j1Pt_PtInf[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_PtInf[histoNumber]->Fill(Pt123Fraction);
     }
     if (jetPt->at(jetCand[0]) <= 400) {
-      h_Pt123_jetPt400[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_jetPt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_jetPt400[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_jetPt400[histoNumber]->Fill(Pt123);
+      h_j1Pt_jetPt400[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_jetPt400[histoNumber]->Fill(Pt123Fraction);
     } else if (400 < jetPt->at(jetCand[0]) && jetPt->at(jetCand[0]) <= 600) {
-      h_Pt123_jetPt600[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_jetPt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_jetPt600[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_jetPt600[histoNumber]->Fill(Pt123);
+      h_j1Pt_jetPt600[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_jetPt600[histoNumber]->Fill(Pt123Fraction);
     } else if (600 < jetPt->at(jetCand[0])) {
-      h_Pt123_jetPtInf[histoNumber]->Fill(Pt123,event_weight);
-      h_j1Pt_jetPtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-      h_PF123PtFraction_jetPtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
+      h_Pt123_jetPtInf[histoNumber]->Fill(Pt123);
+      h_j1Pt_jetPtInf[histoNumber]->Fill(jetPt->at(jetCand[0]));
+      h_PF123PtFraction_jetPtInf[histoNumber]->Fill(Pt123Fraction);
     }
   }
   //CR Histograms
   if(lepindex >= 0){ 
-    h_LeptonPt[histoNumber]->Fill(muPt->at(lepindex),event_weight);
-    h_LeptonEta[histoNumber]->Fill(muEta->at(lepindex),event_weight);
-    h_LeptonPhi[histoNumber]->Fill(muPhi->at(lepindex),event_weight);
+    h_LeptonPt[histoNumber]->Fill(muPt->at(lepindex));
+    h_LeptonEta[histoNumber]->Fill(muEta->at(lepindex));
+    h_LeptonPhi[histoNumber]->Fill(muPhi->at(lepindex));
   }
   if(lepton_pt > 0){
-    h_recoil[histoNumber]->Fill(Recoil,event_weight);}
+    h_recoil[histoNumber]->Fill(Recoil);}
 }
 
-void ZprimeJetsClass2017::getPt123Frac() {
+void ZprimeJetsClass::getPt123Frac() {
   for (int i = 0; i < j1PFConsPID.size(); i++) {
     PFConsPt += j1PFConsPt.at(i);
     if (i < 3)
@@ -355,7 +338,7 @@ void ZprimeJetsClass2017::getPt123Frac() {
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
 }
 
-void ZprimeJetsClass2017::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
+void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
   PFCandidates = getPFCandidates();
@@ -390,7 +373,7 @@ void ZprimeJetsClass2017::AllPFCand(vector<int> jetCand,vector<int> PFCandidates
 }
 
 //Function to calculate regular deltaR separate from jet width variable 'dR'
-double ZprimeJetsClass2017::deltaR(double eta1, double phi1, double eta2, double phi2) {
+double ZprimeJetsClass::deltaR(double eta1, double phi1, double eta2, double phi2) {
   double deltaeta = abs(eta1 - eta2);
   double deltaphi = DeltaPhi(phi1, phi2);
   double deltar = sqrt(deltaeta*deltaeta + deltaphi*deltaphi);
@@ -399,7 +382,7 @@ double ZprimeJetsClass2017::deltaR(double eta1, double phi1, double eta2, double
 
 //Gives the (minimum) separation in phi between the specified phi values
 //Must return a positive value
-float ZprimeJetsClass2017::DeltaPhi(float phi1, float phi2) {
+float ZprimeJetsClass::DeltaPhi(float phi1, float phi2) {
   float pi = TMath::Pi();
   float dphi = fabs(phi1-phi2);
   if(dphi>pi)
@@ -407,7 +390,7 @@ float ZprimeJetsClass2017::DeltaPhi(float phi1, float phi2) {
   return dphi;
 }
 
-float ZprimeJetsClass2017::dPhiJetMETmin(vector<int> jets) {
+float ZprimeJetsClass::dPhiJetMETmin(vector<int> jets) {
   float dPhimin=TMath::Pi();
   int njetsMax = jets.size();
   if(njetsMax > 4)
@@ -423,7 +406,7 @@ float ZprimeJetsClass2017::dPhiJetMETmin(vector<int> jets) {
   return dPhimin;
 }
 
-vector<int> ZprimeJetsClass2017::getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut) {
+vector<int> ZprimeJetsClass::getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut) {
   vector<int> tmpCand;
   tmpCand.clear();
   for(int p=0;p<nJet;p++){
@@ -436,7 +419,7 @@ vector<int> ZprimeJetsClass2017::getJetCand(double jetPtCut, double jetEtaCut, d
   return tmpCand;
 }
 
-vector<int> ZprimeJetsClass2017::JetVetoDecision(int jet_index, int mu_index) {
+vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int mu_index) {
   bool jetVeto=true;
   vector<int> jetindex;
   for(int i = 0; i < nJet; i++){
@@ -451,7 +434,7 @@ vector<int> ZprimeJetsClass2017::JetVetoDecision(int jet_index, int mu_index) {
 
 //Return a vector of pairs. "0" = #pfCands, "1"=#chargedPFCands , "3"=#neutralPFCands,"2"=#photonPFCands
 //get PF Candidates of the selected Jet ->jetCand[0]
-vector<int>ZprimeJetsClass2017::getPFCandidates() {
+vector<int>ZprimeJetsClass::getPFCandidates() {
   vector<int>PFCands;
   for(int i = 0;i < nJet; i++) {
     int TotPFCands;
@@ -475,7 +458,7 @@ vector<int>ZprimeJetsClass2017::getPFCandidates() {
   }
   return PFCands;
 }
-bool ZprimeJetsClass2017::btagVeto() {
+bool ZprimeJetsClass::btagVeto() {
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
     if(jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8838)
@@ -483,7 +466,7 @@ bool ZprimeJetsClass2017::btagVeto() {
   return btagVeto;
 }
 
-bool ZprimeJetsClass2017::dPhiJetMETcut(vector<int> jets) {
+bool ZprimeJetsClass::dPhiJetMETcut(vector<int> jets) {
   //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 
   bool passes = false;
   int njetsMax = jets.size();
@@ -498,7 +481,7 @@ bool ZprimeJetsClass2017::dPhiJetMETcut(vector<int> jets) {
     passes = true;
   return passes;
 }
-vector<int> ZprimeJetsClass2017::electron_veto_tightID(int jet_index, float elePtCut) {
+vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut) {
   vector<int> ele_cands;
   ele_cands.clear();
   for(int i = 0; i < nEle; i++) {
@@ -518,7 +501,7 @@ vector<int> ZprimeJetsClass2017::electron_veto_tightID(int jet_index, float eleP
   return ele_cands;
 }
 
-vector<int> ZprimeJetsClass2017::muon_veto_tightID(int jet_index, float muPtCut) {
+vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut) {
   // bool veto_passed = true; //pass veto if no good muon found
   vector<int> mu_cands;
   mu_cands.clear();
@@ -539,7 +522,7 @@ vector<int> ZprimeJetsClass2017::muon_veto_tightID(int jet_index, float muPtCut)
   return mu_cands;
 }
 
-vector<int> ZprimeJetsClass2017::electron_veto_looseID(int jet_index, int mu_index, float elePtCut) {
+vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int mu_index, float elePtCut) {
   vector<int> ele_cands;
   ele_cands.clear();
   for(int i = 0; i < nEle; i++) {
@@ -560,7 +543,7 @@ vector<int> ZprimeJetsClass2017::electron_veto_looseID(int jet_index, int mu_ind
 }
 
 //Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5
-vector<int> ZprimeJetsClass2017::muon_veto_looseID(int jet_index, int ele_index, float muPtCut) {
+vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int ele_index, float muPtCut) {
   vector<int> mu_cands;
   mu_cands.clear();
   for(int i = 0; i < nMu; i++) {

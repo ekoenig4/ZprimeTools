@@ -88,12 +88,8 @@ for variable in argv[1:]:
     leg.SetFillStyle(0);
     leg.SetTextSize(0.025);
     leg.Draw();
-
-    lumi_label = '';
-    if (samples.lumi == 35900): lumi_label="35.9";
-    if (samples.lumi == 1885): lumi_label="1.89";
-    if (samples.lumi == 3375): lumi_label="3.38";
-    if (samples.lumi == 41453): lumi_label="41.5"
+    
+    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.))
     texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
     texS.SetNDC();
     texS.SetTextFont(42);

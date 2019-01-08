@@ -5,8 +5,8 @@
 // found on file: /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT100To200/MC_DYJetsToLL_HT100-200_1.root
 //////////////////////////////////////////////////////////
 
-#ifndef ZprimeJetsClass2017_h
-#define ZprimeJetsClass2017_h
+#ifndef ZprimeJetsClass_h
+#define ZprimeJetsClass_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -23,7 +23,7 @@
 
 using namespace std;
 
-class ZprimeJetsClass2017 {
+class ZprimeJetsClass {
 private:
   int DataOrMC = -1;
   
@@ -45,15 +45,14 @@ public :
 
   double Pt123Fraction,Pt123,PFConsPt;
   //CR variables
-  int lepindex_leading, lepindex_subleading;
-  double dilepton_mass,dilepton_pt,Recoil;
-  float leptoMET_phi_to_use;
+  int lepindex;
+  double lepton_pt,Recoil;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[nHisto],*h_metcut, *h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
-  TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto], *h_Pt123[nHisto], *h_PFConsPt[nHisto]; 
+  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
+  TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto],*h_PFConsPt[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
 
   TH1F *h_j1Pt_Pt400[nHisto],*h_j1Pt_Pt600[nHisto],*h_j1Pt_PtInf[nHisto],*h_j1Pt_jetPt400[nHisto],*h_j1Pt_jetPt600[nHisto],*h_j1Pt_jetPtInf[nHisto];
@@ -63,7 +62,7 @@ public :
   TH2F *h_nPFCons_jetPt[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123PFConsPt[nHisto];
   //CR histograms
-  TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
+  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
   
   TH1D *h_cutflow;
   // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -844,8 +843,8 @@ public :
   TBranch        *b_mcStatusFlag;   //!
   TBranch        *b_mcIndex;   //!
 
-  ZprimeJetsClass2017(const char* inputFilename,const char* outputFilename,const char* fileRange);
-  virtual ~ZprimeJetsClass2017();
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange);
+  virtual ~ZprimeJetsClass();
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
@@ -858,14 +857,14 @@ public :
   virtual float DeltaPhi(float phi1, float phi2);
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
-  virtual vector<int> JetVetoDecision(int leading_ele_index, int subleading_ele_index);
+  virtual vector<int> JetVetoDecision(int jet_index, int ele_index);
   virtual bool btagVeto();
   virtual bool dPhiJetMETcut(vector<int> jets);
   virtual float dPhiJetMETmin(vector<int> jets);
   virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
-  virtual vector<int> electron_veto_looseID(int jet_index, int leading_mu_index, int subleading_mu_index, float elePtCut);
+  virtual vector<int> electron_veto_looseID(int jet_index, int mu_index,float elePtCut);
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
-  virtual vector<int> muon_veto_looseID(int jet_index, int leading_ele_index, int subleading_ele_index, float muPtCut);
+  virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
   virtual void AllPFCand(vector<int> jetCand,vector<int> PFCandidates);
@@ -873,7 +872,7 @@ public :
 
 #endif
 
-#ifdef ZprimeJetsClass2017_cxx
+#ifdef ZprimeJetsClass_cxx
 vector<string> split(string str,string delim) {
   vector<string> splitString;
   char strChar[str.size() + 1];
@@ -909,7 +908,7 @@ bool fileSelection(string filename,string fileRange)
   return false;
 }
 
-ZprimeJetsClass2017::ZprimeJetsClass2017(const char* inputFilename,const char* outputFilename,const char* fileRange) 
+ZprimeJetsClass::ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange) 
 {
   TChain *chain = new TChain("phoJetNtuplizer/eventTree");
   TString path = inputFilename;
@@ -957,7 +956,7 @@ ZprimeJetsClass2017::ZprimeJetsClass2017(const char* inputFilename,const char* o
   BookHistos(outputFilename);
 }
 
-ZprimeJetsClass2017::~ZprimeJetsClass2017()
+ZprimeJetsClass::~ZprimeJetsClass()
 {
   if (!fChain) return;
   delete fChain->GetCurrentFile();
@@ -967,13 +966,13 @@ ZprimeJetsClass2017::~ZprimeJetsClass2017()
   output->Close();
 }
 
-Int_t ZprimeJetsClass2017::GetEntry(Long64_t entry)
+Int_t ZprimeJetsClass::GetEntry(Long64_t entry)
 {
   // Read contents of entry.
   if (!fChain) return 0;
   return fChain->GetEntry(entry);
 }
-Long64_t ZprimeJetsClass2017::LoadTree(Long64_t entry)
+Long64_t ZprimeJetsClass::LoadTree(Long64_t entry)
 {
   // Set the environment to read one entry
   if (!fChain) return -5;
@@ -986,7 +985,7 @@ Long64_t ZprimeJetsClass2017::LoadTree(Long64_t entry)
   return centry;
 }
 
-void ZprimeJetsClass2017::Init(TTree *tree)
+void ZprimeJetsClass::Init(TTree *tree)
 {
   // The Init() function is called when the selector needs to initialize
   // a new tree or chain. Typically here the branch addresses and branch
@@ -1723,7 +1722,7 @@ void ZprimeJetsClass2017::Init(TTree *tree)
   Notify();
 }
 
-Bool_t ZprimeJetsClass2017::Notify()
+Bool_t ZprimeJetsClass::Notify()
 {
   // The Notify() function is called when a new file is opened. This
   // can be either for a new TTree in a TChain or when when a new TTree
@@ -1734,18 +1733,18 @@ Bool_t ZprimeJetsClass2017::Notify()
   return kTRUE;
 }
 
-void ZprimeJetsClass2017::Show(Long64_t entry)
+void ZprimeJetsClass::Show(Long64_t entry)
 {
   // Print contents of entry.
   // If entry is not specified, print current entry
   if (!fChain) return;
   fChain->Show(entry);
 }
-Int_t ZprimeJetsClass2017::Cut(Long64_t entry)
+Int_t ZprimeJetsClass::Cut(Long64_t entry)
 {
   // This function may be called from Loop.
   // returns  1 if entry is accepted.
   // returns -1 otherwise.
   return 1;
 }
-#endif // #ifdef ZprimeJetsClass2017_cxx
+#endif // #ifdef ZprimeJetsClass_cxx

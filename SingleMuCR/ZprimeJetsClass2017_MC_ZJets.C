@@ -116,15 +116,17 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
     lepindex = -1;
-    nTotalEvents+=event_weight;
+    nTotalEvents++;
+    fillHistos(0,event_weight);
     if (metFilters == 0 && inclusiveCut(genHT)) {
-      nFilters+=event_weight;
-      fillHistos(0,event_weight);
+      nFilters++;
+      fillHistos(1,event_weight);
       if (true) {
-	nHLT+=event_weight;
-	fillHistos(1,event_weight);
+	nHLT++;
+	fillHistos(2,event_weight);
 	if (jetCand.size() > 0) {
-	  nJetSelection+=event_weight;
+	  nJetSelection++;
+	  fillHistos(3,event_weight);
 	  EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
 	  NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
 	  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
@@ -132,11 +134,12 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 	  else
 	    kfactor=1.23;
 	  event_weight*=kfactor;
+	  if (event_weight < 0) cout<<"event_weight kfactor: "<<event_weight<<endl;
 	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
 	  vector<int> looseMu = muon_veto_looseID(jetCand[0],0,10.);
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    nCRSelection+=event_weight;
-	    fillHistos(2,event_weight);
+	    fillHistos(4,event_weight);
 	    if (20 < muPt->at(mulist[0]) && muPt->at(mulist[0]) < 120) {
 		tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(muPt->at(mulist[0])),h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(muEta->at(mulist[0]))));
 		tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(muPt->at(mulist[0])),h_tightMuSF_ID->GetYaxis()->FindBin(fabs(muEta->at(mulist[0]))));
@@ -147,6 +150,7 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 		tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(119.99),h_tightMuSF_ISO->GetYaxis()->FindBin(2.39));
 		tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(119.99),h_tightMuSF_ID->GetYaxis()->FindBin(2.39));
 	      }
+	    event_weight*=tightMuISO_SF_corr*tightMuID_SF_corr;
 	    lepindex = mulist[0];
 	    vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
 	    jetveto = JetVetoDecision(jetCand[0],lepindex);
@@ -161,24 +165,24 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 	    Recoil = leptoMET;
 	    metcut = (fabs(pfMET))/Recoil; //should be subtracted by caloMET
 	    if (leptoMET > 250) {
-	      nMET200+=event_weight;
-	      fillHistos(3,event_weight);
+	      nMET200++;
+	      fillHistos(5,event_weight);
 	      if (elelist.size() == 0) {
-		nNoElectrons+=event_weight;
-		fillHistos(4,event_weight);
+		nNoElectrons++;
+		fillHistos(6,event_weight);
 		float dPhiLepMet = DeltaPhi(muPhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		h_lepMET_MT->Fill(lepMET_MT);
 		if (lepMET_MT < 160) {
-		  lepMET_MT160+=event_weight;
-		  fillHistos(5,event_weight);
+		  lepMET_MT160++;
+		  fillHistos(7,event_weight);
 		  h_metcut->Fill(metcut);
 		  if (true) {
-		    nMETcut+=event_weight;
-		    fillHistos(6,event_weight);
+		    nMETcut++;
+		    fillHistos(8,event_weight);
 		    if (btagVeto()) {
-		      nbtagVeto+=event_weight;
-		      fillHistos(7,event_weight);
+		      nbtagVeto++;
+		      fillHistos(9,event_weight);
 		      double minDPhiJetMET_first4 = TMath::Pi();
 		      for (int i = 0; i < jetveto.size(); i++) {
 			double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
@@ -189,10 +193,18 @@ void ZprimeJetsClass2017::Loop(Long64_t maxEvents, int reportEvery) {
 		      }
 		      h_dphimin->Fill(minDPhiJetMET_first4);
 		      if (dPhiJetMETcut(jetveto)) {
-			nDphiJetMET+=event_weight;
-			fillHistos(8,event_weight);
+			nDphiJetMET++;
+			fillHistos(10,event_weight);
 			if (Pt123Fraction > 0.6)
-			  fillHistos(9,event_weight);
+			  fillHistos(11,event_weight);
+			if (Pt123Fraction > 0.7)
+			  fillHistos(12,event_weight);
+			if (Pt123Fraction > 0.8)
+			  fillHistos(13,event_weight);
+			if (Pt123Fraction > 0.85)
+			  fillHistos(14,event_weight);
+			if (Pt123Fraction > 0.9)
+			  fillHistos(15,event_weight);
 		      }
 		    }
 		  }
@@ -281,15 +293,37 @@ void ZprimeJetsClass2017::BookHistos(const char* outputFilename) {
     h_j1ChMultiplicity[i] = new TH1F(("j1ChMultiplicity"+histname).c_str(),"j1ChMultiplicity;Charged Multiplicity of Leading Jet",25,0,50);h_j1ChMultiplicity[i]->Sumw2();
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2();  
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
-    h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2(); 
-    h_PtFrac_PtEta[i] = new TH3F(("PtFrac_PtEta"+histname).c_str(),"PtFraction;Leading Jet P_{T};Leading Jet #eta",50,0,2000,50,-3.0,3.0,50,0,1);
-    h_PtFrac_PtPhi[i] = new TH3F(("PtFrac_PtPhi"+histname).c_str(),"PtFraction;Leading Jet P_{T};Leading Jet #phi",50,0,2000,50,-3.0,3.0,50,0,1);
-    h_PtFrac_EtaPhi[i] = new TH3F(("PtFrac_EtaPhi"+histname).c_str(),"PtFraction;Leading Jet #eta;Leading Jet #phi",50,-3.0,3.0,50,-3.0,3.0,50,0,1);
+    h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
+    h_nPFCons_jetPt[i] = new TH2F(("nPFCons_jetPt"+histname).c_str(),"Number Of PFCons vs. jetPt;Leading Jet P_{T};# of PF Constituents in the Pencil Jet",50,0,2000,25,0,50);
+    h_PtFrac_PtEta[i] = new TH3F(("PtFrac_PtEta"+histname).c_str(),"PtFraction;Leading Jet P_{T};Leading Jet #eta;PtFraction",50,0,2000,50,-3.0,3.0,50,0,1);
+    h_PtFrac_PtPhi[i] = new TH3F(("PtFrac_PtPhi"+histname).c_str(),"PtFraction;Leading Jet P_{T};Leading Jet #phi;PtFraction",50,0,2000,50,-3.0,3.0,50,0,1);
+    h_PtFrac_EtaPhi[i] = new TH3F(("PtFrac_EtaPhi"+histname).c_str(),"PtFraction;Leading Jet #eta;Leading Jet #phi;PtFraction",50,-3.0,3.0,50,-3.0,3.0,50,0,1);
+    h_PtFrac_Pt123PFConsPt[i] = new TH3F(("PtFrac_Pt123PFConsPt"+histname).c_str(),"PtFraction;Pt123;PFConsPt;PtFraction",50,0,2000,50,0,2000,50,0,1);
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
     h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",30,0.,3.1416);h_LeptonPhi[i]->Sumw2();
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
+
+    
+    h_Pt123_Pt400[i] = new TH1F(("Pt123_Pt400"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_Pt400[i]->Sumw2();
+    h_Pt123_Pt600[i] = new TH1F(("Pt123_Pt600"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_Pt600[i]->Sumw2();
+    h_Pt123_PtInf[i] = new TH1F(("Pt123_PtInf"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_PtInf[i]->Sumw2();
+    h_j1Pt_Pt400[i]  = new TH1F(("j1pT_Pt400"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_Pt400[i]->Sumw2();
+    h_j1Pt_Pt600[i]  = new TH1F(("j1pT_Pt600"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_Pt600[i]->Sumw2();
+    h_j1Pt_PtInf[i]  = new TH1F(("j1pT_PtInf"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_PtInf[i]->Sumw2();
+    h_PF123PtFraction_Pt400[i]= new TH1F(("PF123PtFraction_Pt400"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_Pt400[i]->Sumw2();
+    h_PF123PtFraction_Pt600[i]= new TH1F(("PF123PtFraction_Pt600"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_Pt600[i]->Sumw2();
+    h_PF123PtFraction_PtInf[i]= new TH1F(("PF123PtFraction_PtInf"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_PtInf[i]->Sumw2();
+    h_Pt123_jetPt400[i] = new TH1F(("Pt123_jetPt400"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_jetPt400[i]->Sumw2();
+    h_Pt123_jetPt600[i] = new TH1F(("Pt123_jetPt600"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_jetPt600[i]->Sumw2();
+    h_Pt123_jetPtInf[i] = new TH1F(("Pt123_jetPtInf"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,PtBins);h_Pt123_jetPtInf[i]->Sumw2();
+    h_j1Pt_jetPt400[i]  = new TH1F(("j1pT_jetPt400"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_jetPt400[i]->Sumw2();
+    h_j1Pt_jetPt600[i]  = new TH1F(("j1pT_jetPt600"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_jetPt600[i]->Sumw2();
+    h_j1Pt_jetPtInf[i]  = new TH1F(("j1pT_jetPtInf"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt_jetPtInf[i]->Sumw2();
+    h_PF123PtFraction_jetPt400[i]= new TH1F(("PF123PtFraction_jetPt400"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_jetPt400[i]->Sumw2();
+    h_PF123PtFraction_jetPt600[i]= new TH1F(("PF123PtFraction_jetPt600"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_jetPt600[i]->Sumw2();
+    h_PF123PtFraction_jetPtInf[i]= new TH1F(("PF123PtFraction_jetPtInf"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction_jetPtInf[i]->Sumw2();
   }
 }
 
@@ -323,6 +357,35 @@ void ZprimeJetsClass2017::fillHistos(int histoNumber,double event_weight) {
     h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction,event_weight);
     h_PtFrac_PtPhi[histoNumber]->Fill(jetPt->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
     h_PtFrac_EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
+    h_PtFrac_Pt123PFConsPt[histoNumber]->Fill(Pt123,PFConsPt,Pt123Fraction,event_weight);
+    h_nPFCons_jetPt[histoNumber]->Fill(jetPt->at(jetCand[0]),TotalPFCandidates,event_weight);
+
+    if (Pt123 <= 400) {
+      h_Pt123_Pt400[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_Pt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_Pt400[histoNumber]->Fill(Pt123Fraction,event_weight);
+    } else if (400 < Pt123 && Pt123 <= 600) {
+      h_Pt123_Pt600[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_Pt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_Pt600[histoNumber]->Fill(Pt123Fraction,event_weight);
+    } else if (600 < Pt123) {
+      h_Pt123_PtInf[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_PtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_PtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
+    }
+    if (jetPt->at(jetCand[0]) <= 400) {
+      h_Pt123_jetPt400[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPt400[histoNumber]->Fill(Pt123Fraction,event_weight);
+    } else if (400 < jetPt->at(jetCand[0]) && jetPt->at(jetCand[0]) <= 600) {
+      h_Pt123_jetPt600[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPt600[histoNumber]->Fill(Pt123Fraction,event_weight);
+    } else if (600 < jetPt->at(jetCand[0])) {
+      h_Pt123_jetPtInf[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
+    }
   }
   //CR Histograms
   if(lepindex >= 0){ 

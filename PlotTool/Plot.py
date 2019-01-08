@@ -1,5 +1,6 @@
 from ROOT import *
 from os import path,system,getcwd,listdir
+from samplenames import samplenames
 
 
 signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools2016/monoZprime_XS-2016-correctPDF.txt"
@@ -141,10 +142,9 @@ class datamc(object):
         # if not path.isfile(AllFiles['Data'][0].split("_")[0]+"_final.root"): system('hadd -f '+AllFiles['Data'][0].split("_")[0]+"_final.root "+AllFiles['Data'][0].split("_")[0]+"_{0.."+nData+"}.root")
 
     def GetVariableName(self,variable):
-        with open("PlotTool/samplenames.txt") as f:
-            text = f.readlines()
-            for l in range(len(text)):
-                if text[l].replace("\n","") in variable: self.name = text[l+1].replace("\n","");break
+        for title in samplenames:
+            if title+"_" in variable:
+                self.name = samplenames[title]
                     
     def GetVariable(self,variable):
         self.histo = {}

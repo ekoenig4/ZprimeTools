@@ -5,7 +5,7 @@ DATE_DATA=19May
 
 echo "Do the CR data samples"
 
-./rootcom ZprimeJetsClass2017 analyzedata
+./rootcom ZprimeJetsClass analyzedata
  
 ./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017B/ postDoubleEle_0.root -1 10000 Ele_0 split_-1
 
@@ -19,7 +19,7 @@ echo "Do the CR data samples"
 
 echo "Do the MC samples"
 
-./rootcom ZprimeJetsClass2017_MC analyze
+./rootcom ZprimeJetsClass_MC analyze
 
 #QCD Samples
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/QCD/QCD_HT100-200/0000/ postQCD100to200_0.root -1 10000 QCD100_0 split_-1
@@ -107,7 +107,7 @@ echo "Do the MC samples"
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/EWK/ZZ/ postZZ.root -1 10000 ZZ_0 split_-1
 
 #WJets
-./rootcom ZprimeJetsClass2017_MC_WJets analyzeWJets
+./rootcom ZprimeJetsClass_MC_WJets analyzeWJets
 
 ./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 W_0 split_-1
 
@@ -132,7 +132,7 @@ echo "Do the MC samples"
 ./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT2500ToInf/ postW2500toInf_0.root -1 10000 W2500_0 split_-1
 
 #ZJets
-./rootcom ZprimeJetsClass2017_MC_ZJets analyzeZJets
+./rootcom ZprimeJetsClass_MC_ZJets analyzeZJets
 
 #DYJets
 
