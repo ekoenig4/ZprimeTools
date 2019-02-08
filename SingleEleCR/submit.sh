@@ -1,25 +1,24 @@
 
+
 DATE=May2018
 DATE_2=29May
 DATE_DATA=19May
 
+make
+
 echo "Do the CR data samples"
-
-./rootcom ZprimeJetsClass analyzedata
  
-./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017B/ postSingleEle_0.root -1 10000 Ele_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017B/ postSingleEle_0.root -1 10000 Ele_0 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017C/ postSingleEle_1.root -1 10000 Ele_1 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017C/ postSingleEle_1.root -1 10000 Ele_1 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017D/ postSingleEle_2.root -1 10000 Ele_2 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017D/ postSingleEle_2.root -1 10000 Ele_2 split_-1
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017E/ postSingleEle_3.root -1 10000 Ele_3 split_-1  
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017E/ postSingleEle_3.root -1 10000 Ele_3 split_-1  
 
-./../SubmitCondor.py analyzedata /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017F/ postSingleEle_4.root -1 10000 Ele_4 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_94X/SingleEle/SingleEle2017F/ postSingleEle_4.root -1 10000 Ele_4 split_-1
 
 echo "Do the MC samples"
-
-./rootcom ZprimeJetsClass_MC analyze
 
 #QCD Samples
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/QCD/QCD_HT100-200/0000/ postQCD100to200_0.root -1 10000 QCD100_0 split_-1
@@ -107,64 +106,62 @@ echo "Do the MC samples"
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/EWK/ZZ/ postZZ.root -1 10000 ZZ_0 split_-1
 
 #WJets
-./rootcom ZprimeJetsClass_MC_WJets analyzeWJets
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0000/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0000/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0001/ postWJets_MLM_2.root -1 10000 WMLM_2 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0001/ postWJets_MLM_2.root -1 10000 WMLM_2 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0002/ postWJets_MLM_3.root -1 10000 WMLM_3 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJetsToLNu_Incl/v2/0002/ postWJets_MLM_3.root -1 10000 WMLM_3 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT100To200/ postW100to200_0.root -1 10000 W100_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT100To200/ postW100to200_0.root -1 10000 W100_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT200To400/ postW200to400_0.root -1 10000 W200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT200To400/ postW200to400_0.root -1 10000 W200_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT400To600/ postW400to600_0.root -1 10000 W400_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT400To600/ postW400to600_0.root -1 10000 W400_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT600To800/ postW600to800_0.root -1 10000 W600_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT600To800/ postW600to800_0.root -1 10000 W600_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT800To1200/ postW800to1200_0.root -1 10000 W800_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT800To1200/ postW800to1200_0.root -1 10000 W800_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT1200To2500/ postW1200to2500_0.root -1 10000 W1200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT1200To2500/ postW1200to2500_0.root -1 10000 W1200_0 split_-1
 
-./../SubmitCondor.py analyzeWJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT2500ToInf/ postW2500toInf_0.root -1 10000 W2500_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/WJets/WJetsToLNu_HT2500ToInf/ postW2500toInf_0.root -1 10000 W2500_0 split_-1
 
 #ZJets
-./rootcom ZprimeJetsClass_MC_ZJets analyzeZJets
 
 #DYJets
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_FXFX/v1/ postDY_MLM_0.root -1 10000 DYMLM_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_FXFX/v1/ postDY_MLM_0.root -1 10000 DYMLM_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT70To100/ postDY70to100_0.root -1 10000 DY70_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT70To100/ postDY70to100_0.root -1 10000 DY70_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT100To200/ postDY100to200_0.root -1 10000 DY100_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT100To200/ postDY100to200_0.root -1 10000 DY100_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT200To400/ postDY200to400_0.root -1 10000 DY200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT200To400/ postDY200to400_0.root -1 10000 DY200_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT400To600/ postDY400to600_0.root -1 10000 DY400_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT400To600/ postDY400to600_0.root -1 10000 DY400_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT600To800/ postDY600to800_0.root -1 10000 DY600_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT600To800/ postDY600to800_0.root -1 10000 DY600_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT800To1200/ postDY800to1200_0.root -1 10000 DY800_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT800To1200/ postDY800to1200_0.root -1 10000 DY800_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT1200To2500/ postDY1200to2500_0.root -1 10000 DY1200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT1200To2500/ postDY1200to2500_0.root -1 10000 DY1200_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT2500ToInf/ postDY2500toInf_0.root -1 10000 DY2500_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/DYJets/DYJetsToLL_HT2500ToInf/ postDY2500toInf_0.root -1 10000 DY2500_0 split_-1
 
 #ZJets
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT100To200/ postZ100to200_0.root -1 10000 Z100_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT100To200/ postZ100to200_0.root -1 10000 Z100_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT200To400/ postZ200to400_0.root -1 10000 Z200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT200To400/ postZ200to400_0.root -1 10000 Z200_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT400To600/ postZ400to600_0.root -1 10000 Z400_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT400To600/ postZ400to600_0.root -1 10000 Z400_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT600To800/ postZ600to800_0.root -1 10000 Z600_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT600To800/ postZ600to800_0.root -1 10000 Z600_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT800To1200/ postZ800to1200_0.root -1 10000 Z800_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT800To1200/ postZ800to1200_0.root -1 10000 Z800_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT1200To2500/ postZ1200to2500_0.root -1 10000 Z1200_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT1200To2500/ postZ1200to2500_0.root -1 10000 Z1200_0 split_-1
 
-./../SubmitCondor.py analyzeZJets /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT2500ToInf/ postZ2500toInf_0.root -1 10000 Z2500_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_94X/ZJets/ZJetsToNuNu_HT2500ToInf/ postZ2500toInf_0.root -1 10000 Z2500_0 split_-1
