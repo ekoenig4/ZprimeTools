@@ -28,6 +28,39 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
+double ZprimeJetsClass::getSF(int mu_index) {
+  double tightMuISO_SF_corr = 1;
+  double tightMuID_SF_corr = 1;
+  if (20 < muPt->at(mu_index) && muPt->at(mu_index) < 120) {
+    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(muPt->at(mu_index)),h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(muEta->at(mu_index))));
+    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(muPt->at(mu_index)),h_tightMuSF_ID->GetYaxis()->FindBin(fabs(muEta->at(mu_index))));
+  } else if (muPt->at(mu_index) <= 20) {
+    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(20.01),h_tightMuSF_ISO->GetYaxis()->FindBin(0.01));
+    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(20.01),h_tightMuSF_ID->GetYaxis()->FindBin(0.01));
+  } else if (muPt->at(mu_index) >= 120) {
+    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(119.99),h_tightMuSF_ISO->GetYaxis()->FindBin(2.39));
+    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(119.99),h_tightMuSF_ID->GetYaxis()->FindBin(2.39));
+  }
+  return tightMuISO_SF_corr*tightMuID_SF_corr;
+}
+
+double ZprimeJetsClass::getKfactor(double bosonPt) {
+  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
+  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
+  double kfactor = 1;
+  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
+    kfactor = (EWK_corrected_weight/NNLO_weight);
+  else
+    kfactor= sample.type == WJets ? 1.21 : 1.23;
+  return kfactor;
+}
+
+bool ZprimeJetsClass::inclusiveCut() {
+  if (sample.isInclusive)
+    return genHT < 100;
+  return true;
+}
+
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
@@ -42,6 +75,28 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
+
+  if (!sample.isData) {
+    //This is the PU histogram obtained from Nick's recipe
+    TFile *weights = TFile::Open("PU_Central.root");
+    PU = (TH1D*)weights->Get("pileup");
+    
+    TFile *f_muSF_ISO = new TFile("RunBCDEF_SF_ISO.root");
+    TFile *f_muSF_ID = new TFile("RunBCDEF_SF_ID.root");
+    h_tightMuSF_ISO = (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
+    h_tightMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_genTracks_pt_abseta");
+    if (sample.isW_or_ZJet()) {
+      //This is the root file with EWK Corrections
+      TFile *file = new TFile("kfactors.root");
+      if (sample.type == WJets) {
+	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
+	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
+      } else {
+	ewkCorrection = (TH1D*)file->Get("EWKcorr/Z");
+	NNLOCorrection = (TH1D*)file->Get("ZJets_LO/inv_pt");
+      }
+    }
+  }
 
   if (maxEvents != -1LL && nentries > maxEvents)
     nentriesToCheck = maxEvents;
@@ -62,6 +117,25 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    int bosonPID;
+    double bosonPt;
+    bool WorZfound = false;
+    if (!sample.isData) {
+      //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
+      //binContent as event_weight
+      int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
+      event_weight = PU->GetBinContent(bin);
+      //cout<<"event_weight: "<<event_weight<<endl;
+      fabs(genWeight) > 0.0 ? event_weight*=genWeight/fabs(genWeight) : event_weight =0.0;
+      if (sample.isW_or_ZJet()) {
+	for (int i = 0; i < nMC; i++)
+	  if ((*mcPID)[i] == sample.PID) {
+	    WorZfound = true;
+	    bosonPID = (*mcPID)[i];
+	    bosonPt = (*mcPt)[i];
+	  }
+      }
+    }
     float metcut = 0.0;
 
     jetCand = getJetCand(200,2.5,0.8,0.1);
@@ -69,20 +143,22 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     lepindex = -1;
     nTotalEvents++;
     fillHistos(0,event_weight);
-    if (metFilters == 0) {
+    if (metFilters == 0 && inclusiveCut()) {
       nFilters++;
       fillHistos(1,event_weight);
-      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1) {
+      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
 	nHLT++;
 	fillHistos(2,event_weight);
 	if (jetCand.size() > 0) {
 	  nJetSelection++;
 	  fillHistos(3,event_weight);
+	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
 	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
 	  vector<int> looseMu = muon_veto_looseID(jetCand[0],0,10.);
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    nCRSelection++;
 	    fillHistos(4,event_weight);
+	    if (!sample.isData) event_weight *= getSF(mulist[0]);
 	    lepindex = mulist[0];
 	    vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
 	    jetveto = JetVetoDecision(jetCand[0],lepindex);
@@ -260,73 +336,75 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 }
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
-  h_nVtx[histoNumber]->Fill(nVtx);
-  h_metFilters[histoNumber]->Fill(metFilters);
-  h_nJets[histoNumber]->Fill(nJet);
-  h_pfMETall[histoNumber]->Fill(pfMET);
-  h_pfMET200[histoNumber]->Fill(pfMET);
-  h_pfMET[histoNumber]->Fill(pfMET);
-  h_pfMETPhi[histoNumber]->Fill(pfMETPhi);
+  if (sample.isData) event_weight = 1;
+  
+  h_nVtx[histoNumber]->Fill(nVtx,event_weight);
+  h_metFilters[histoNumber]->Fill(metFilters,event_weight);
+  h_nJets[histoNumber]->Fill(nJet,event_weight);
+  h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
+  h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
+  h_pfMET[histoNumber]->Fill(pfMET,event_weight);
+  h_pfMETPhi[histoNumber]->Fill(pfMETPhi,event_weight);
   if(jetCand.size()>0){
-    h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]));
-    h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]));
-    h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]));
-    h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction);
-    h_Pt123[histoNumber]->Fill(Pt123);
-    h_PFConsPt[histoNumber]->Fill(PFConsPt);
-    h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates);
-    h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates);
-    h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates);
-    h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates);
-    h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]));
-    h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]));
-    h_j1ChMultiplicity[histoNumber]->Fill(jetNCharged->at(jetCand[0]));
-    h_j1NeutMultiplicity[histoNumber]->Fill(jetNNeutral->at(jetCand[0]));
-    h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]));
-    h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]));
-    h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]));
-    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]));
-    h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction);
-    h_PtFrac_PtPhi[histoNumber]->Fill(jetPt->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction);
-    h_PtFrac_EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction);
-    h_PtFrac_Pt123PFConsPt[histoNumber]->Fill(Pt123,PFConsPt,Pt123Fraction);
-    h_nPFCons_jetPt[histoNumber]->Fill(jetPt->at(jetCand[0]),TotalPFCandidates);
+    h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+    h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]),event_weight);
+    h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
+    h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
+    h_Pt123[histoNumber]->Fill(Pt123,event_weight);
+    h_PFConsPt[histoNumber]->Fill(PFConsPt,event_weight);
+    h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
+    h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates,event_weight);
+    h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates,event_weight);
+    h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates,event_weight);
+    h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]),event_weight);
+    h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]),event_weight);
+    h_j1ChMultiplicity[histoNumber]->Fill(jetNCharged->at(jetCand[0]),event_weight);
+    h_j1NeutMultiplicity[histoNumber]->Fill(jetNNeutral->at(jetCand[0]),event_weight);
+    h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]),event_weight);
+    h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
+    h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
+    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
+    h_PtFrac_PtEta[histoNumber]->Fill(jetPt->at(jetCand[0]),jetEta->at(jetCand[0]),Pt123Fraction,event_weight);
+    h_PtFrac_PtPhi[histoNumber]->Fill(jetPt->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
+    h_PtFrac_EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),Pt123Fraction,event_weight);
+    h_PtFrac_Pt123PFConsPt[histoNumber]->Fill(Pt123,PFConsPt,Pt123Fraction,event_weight);
+    h_nPFCons_jetPt[histoNumber]->Fill(jetPt->at(jetCand[0]),TotalPFCandidates,event_weight);
 
     if (Pt123 <= 400) {
-      h_Pt123_Pt400[histoNumber]->Fill(Pt123);
-      h_j1Pt_Pt400[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_Pt400[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_Pt400[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_Pt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_Pt400[histoNumber]->Fill(Pt123Fraction,event_weight);
     } else if (400 < Pt123 && Pt123 <= 600) {
-      h_Pt123_Pt600[histoNumber]->Fill(Pt123);
-      h_j1Pt_Pt600[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_Pt600[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_Pt600[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_Pt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_Pt600[histoNumber]->Fill(Pt123Fraction,event_weight);
     } else if (600 < Pt123) {
-      h_Pt123_PtInf[histoNumber]->Fill(Pt123);
-      h_j1Pt_PtInf[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_PtInf[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_PtInf[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_PtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_PtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
     }
     if (jetPt->at(jetCand[0]) <= 400) {
-      h_Pt123_jetPt400[histoNumber]->Fill(Pt123);
-      h_j1Pt_jetPt400[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_jetPt400[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_jetPt400[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPt400[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPt400[histoNumber]->Fill(Pt123Fraction,event_weight);
     } else if (400 < jetPt->at(jetCand[0]) && jetPt->at(jetCand[0]) <= 600) {
-      h_Pt123_jetPt600[histoNumber]->Fill(Pt123);
-      h_j1Pt_jetPt600[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_jetPt600[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_jetPt600[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPt600[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPt600[histoNumber]->Fill(Pt123Fraction,event_weight);
     } else if (600 < jetPt->at(jetCand[0])) {
-      h_Pt123_jetPtInf[histoNumber]->Fill(Pt123);
-      h_j1Pt_jetPtInf[histoNumber]->Fill(jetPt->at(jetCand[0]));
-      h_PF123PtFraction_jetPtInf[histoNumber]->Fill(Pt123Fraction);
+      h_Pt123_jetPtInf[histoNumber]->Fill(Pt123,event_weight);
+      h_j1Pt_jetPtInf[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
+      h_PF123PtFraction_jetPtInf[histoNumber]->Fill(Pt123Fraction,event_weight);
     }
   }
   //CR Histograms
   if(lepindex >= 0){ 
-    h_LeptonPt[histoNumber]->Fill(muPt->at(lepindex));
-    h_LeptonEta[histoNumber]->Fill(muEta->at(lepindex));
-    h_LeptonPhi[histoNumber]->Fill(muPhi->at(lepindex));
+    h_LeptonPt[histoNumber]->Fill(muPt->at(lepindex),event_weight);
+    h_LeptonEta[histoNumber]->Fill(muEta->at(lepindex),event_weight);
+    h_LeptonPhi[histoNumber]->Fill(muPhi->at(lepindex),event_weight);
   }
   if(lepton_pt > 0){
-    h_recoil[histoNumber]->Fill(Recoil);}
+    h_recoil[histoNumber]->Fill(Recoil,event_weight);}
 }
 
 void ZprimeJetsClass::getPt123Frac() {
