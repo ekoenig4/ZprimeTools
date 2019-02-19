@@ -103,7 +103,7 @@ double ZprimeJetsClass::getKfactor(double bosonPt) {
   if(EWK_corrected_weight!=0 && NNLO_weight!=0)
     kfactor = (EWK_corrected_weight/NNLO_weight);
   else
-    kfactor=1.21;
+    kfactor= sample.type == WJets ? 1.21 : 1.23;
   return kfactor;
 }
 
@@ -215,7 +215,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    double leptoMET = fabs(leptoMET_4vec.Pt());
 	    double leptoMETphi = leptoMET_4vec.Phi();
 	    Recoil = leptoMET;
-	    metcut = (fabs(pfMET))/Recoil; //should be subtracted by caloMET
+	    metcut = (fabs(pfMET-caloMET))/Recoil; //should be subtracted by caloMET
 	    if (leptoMET > 250) {
 	      nMET200++;
 	      fillHistos(5,event_weight);
@@ -327,6 +327,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",50,0,3000); h_metFilters[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 10, 0, 10);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -411,7 +412,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if (sample.type == Data) event_weight = 1;
-  
+
+  h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
   h_nVtx[histoNumber]->Fill(nVtx,event_weight);
   h_metFilters[histoNumber]->Fill(metFilters,event_weight);
   h_nJets[histoNumber]->Fill(nJet,event_weight);
@@ -430,7 +432,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
     h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
     
-    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
+    h_j1nCons[histoNumber]->Fill(jetNPhoton->at(jetCand[0])+jetNChargedHad->at(jetCand[0])+jetNNeutralHad->at(jetCand[0]),event_weight);
     h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
     h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates,event_weight);
     h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates,event_weight);
