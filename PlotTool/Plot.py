@@ -143,8 +143,12 @@ class datamc(object):
 
     def GetVariableName(self,variable):
         for title in samplenames:
-            if title+"_" in variable:
-                self.name = samplenames[title]
+            if title in variable:
+                self.name = title;
+            key = variable.split("_")[-2]
+            if key == title:
+                self.name = title;
+                break
                     
     def GetVariable(self,variable):
         self.histo = {}
@@ -174,6 +178,7 @@ class datamc(object):
             self.histo[sample]=[]
             self.total[sample]=[]
             for fn in self.MC_FileNames[sample]:
+                if not path.isfile(self.fileDir+fn[:-1]+".root"): continue
                 rfile=TFile.Open(self.fileDir+fn[:-1]+".root")
                 keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                 if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
@@ -209,12 +214,13 @@ class datamc(object):
                     # print self.MC_FileNames[sample][i],self.total[sample][i],self.MC_Xsec[sample][i]
                     scale=(1./self.total[sample][i])*self.lumi*self.MC_Xsec[sample][i]
                     self.histo[sample][i].Scale(scale)
-                for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
-                self.histo[sample]=self.histo[sample][0]
-                self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
-                integral=(self.histo[sample].Integral())
-                self.MC_Integral[sample]=integral
-                self.BkgIntegral += integral
+                if (len(self.histo[sample]) > 0):
+                    for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
+                    self.histo[sample]=self.histo[sample][0]
+                    self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
+                    integral=(self.histo[sample].Integral())
+                    self.MC_Integral[sample]=integral
+                    self.BkgIntegral += integral
 
         if self.show == 1:
             bkgInt = {}

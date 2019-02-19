@@ -1,17 +1,40 @@
-#!/usr/bin/python
+#!/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_1_6/external/slc6_amd64_gcc630/bin/python
 
 from ROOT import *
-from sys import argv
-from sys import path
+from sys import argv, path
+from optparse import OptionParser
 import Plot as plot
-from os import system,getcwd
+import os
+
+parser = OptionParser()
+parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+(options, args) = parser.parse_args()
+
+if (options.reset):
+    for fn in os.listdir("./"):
+        if 'post' in fn and '.root' in fn:
+            os.remove(fn)
 
 gROOT.SetBatch(1)
 
 samples=plot.datamc(argv)
-for variable in argv[1:]:
-    samples.initiate(variable)
-
+for variable in args:
+    if (options.thn):
+        axis = variable[-1]
+        samples.initiate(variable[:-1])
+        if (axis in ('x','y','z')):
+            samples.name = samples.name[axis]
+        for hs in samples.histo:
+            if axis == "x":
+                samples.histo[hs] = samples.histo[hs].ProjectionX()
+            if axis == "y":
+                samples.histo[hs] = samples.histo[hs].ProjectionY()
+            if axis == "z":
+                samples.histo[hs] = samples.histo[hs].ProjectionZ()
+    else:
+        samples.initiate(variable)
+    print "Plotting",samples.name
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -95,7 +118,7 @@ for variable in argv[1:]:
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2017)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2018)");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -198,10 +221,14 @@ for variable in argv[1:]:
     yaxis.SetTitleSize(0.12);
     yaxis.SetTitleOffset(0.35);
     yaxis.Draw("SAME");
-    
-    dir = getcwd().split("/")[-1]
-    c.SaveAs((str(variable)+str(".pdf")));
-    c.SaveAs((str(variable)+str(".png")));
-    system((str("mv ")+str(variable)+str(".pdf ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".pdf")));
-    system((str("mv ")+str(variable)+str(".png ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".png")));
+
+    dir = os.getcwd().split("/")[-1]
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2018/"+dir+"Plots_EWK/"
+    #print file_path
+    directory=os.path.join(os.path.dirname(file_path),"")
+    if not os.path.exists(directory):
+        os.mkdir(directory,0755)
+        print directory
+    c.SaveAs(directory+"/datamc_"+variable+".pdf")
+    c.SaveAs(directory+"/datamc_"+variable+".png")
   
