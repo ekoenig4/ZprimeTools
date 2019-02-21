@@ -35,31 +35,17 @@ echo "Do the MC samples"
 
 # ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT200-300/0002/ postQCD200to300_2.root -1 10000 QCD200_2 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT300-500/0000/ postQCD300to500_0.root -1 10000 QCD300_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT300-500/ postQCD300to500_0.root -1 10000 QCD300_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT300-500/0001/ postQCD300to500_1.root -1 10000 QCD300_1 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT500-700/ postQCD500to700_0.root -1 10000 QCD500_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT300-500/0002/ postQCD300to500_2.root -1 10000 QCD300_2 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT700-1000/ postQCD700to1000_0.root -1 10000 QCD700_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT300-500/0003/ postQCD300to500_3.root -1 10000 QCD300_3 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT1000-1500/ postQCD1000to1500_0.root -1 10000 QCD1000_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT500-700/0000/ postQCD500to700_0.root -1 10000 QCD500_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT1500-2000/ postQCD1500to2000_0.root -1 10000 QCD1500_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT500-700/0001/ postQCD500to700_1.root -1 10000 QCD500_1 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT500-700/0002/ postQCD500to700_2.root -1 10000 QCD500_2 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT700-1000/0000/ postQCD700to1000_0.root -1 10000 QCD700_0 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT700-1000/0001/ postQCD700to1000_1.root -1 10000 QCD700_1 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT700-1000/0002/ postQCD700to1000_2.root -1 10000 QCD700_2 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT1000-1500/ postQCD1000to1500_0.root -1 10000 QCD1000_0 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT1500-2000/ postQCD1500to2000_0.root -1 10000 QCD1500_0 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT2000-Inf/ postQCD2000toInf_0.root -1 10000 QCD2000_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/QCD/QCD_HT2000-Inf/ postQCD2000toInf_0.root -1 10000 QCD2000_0 split_-1
 
 # #TTJets
 
@@ -93,27 +79,23 @@ echo "Do the MC samples"
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/GJets/GJets_HT600-Inf/ postGJets600toInf.root -1 10000 GJets600_0 split_-1
 
 # #Diboson
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WW/ postWW.root -1 10000 WW_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WW/ postWW.root -1 10000 WW_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu/ postWWto2L2Nu.root -1 10000 WWto2L2Nu_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu/ postWWto2L2Nu.root -1 10000 WWto2L2Nu_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo4Q/ postWWto4Q.root -1 10000 WWto4Q_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu_PSweights/ postWWto2L2NuPS.root -1 10000 WWto2L2NuPS_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWToLNuQQ/ postWWtoLNuQQ.root -1 10000 WWtoLNuQQ_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo4Q/ postWWto4Q.root -1 10000 WWto4Q_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WZ/ postWZ.root -1 10000 WZ_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWToLNuQQ/ postWWtoLNuQQ.root -1 10000 WWtoLNuQQ_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/ZZ/ postZZ.root -1 10000 ZZ_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WZ/ postWZ.root -1 10000 WZ_0 split_-1
+
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/ZZ/ postZZ.root -1 10000 ZZ_0 split_-1
 
 # #WJets
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJetsToLNu_Incl/v1/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJetsToLNu_Incl/v2/0000/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJetsToLNu_Incl/v2/0001/ postWJets_MLM_2.root -1 10000 WMLM_2 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJetsToLNu_Incl/v2/0002/ postWJets_MLM_3.root -1 10000 WMLM_3 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJetsToLNu_Incl/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
 
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/WJets/WJetsToLNu_HT100-200/ postW100to200_0.root -1 10000 W100_0 split_-1
 
@@ -133,7 +115,7 @@ echo "Do the MC samples"
 
 # #DYJets
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/DYJets/DYJetsToLL_FXFX/v1/ postDY_MLM_0.root -1 10000 DYMLM_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/DYJets/DYJetsToLL_Incl/ postDY_MLM_0.root -1 10000 DYMLM_0 split_-1
 
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/DYJets/DYJetsToLL_HT70To100/ postDY70to100_0.root -1 10000 DY70_0 split_-1
 

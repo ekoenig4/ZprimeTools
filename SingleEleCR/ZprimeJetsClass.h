@@ -46,8 +46,8 @@ public :
     int PID;
     DataMC(){}
     DataMC(string filename) {
-      string sampleID[] = {"SingleEle","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
-      string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_FXFX"};
+      string sampleID[] = {"Data","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
+      string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
       for (int i = 0; i < Total; i++)
 	if (filename.find(sampleID[i]) != string::npos) {
 	  type = static_cast<Type>(i);
@@ -134,9 +134,6 @@ public :
   Int_t           nGoodVtx;
   Float_t         rho;
   Float_t         rhoCentral;
-  Double_t        prefiringweight;
-  Double_t        prefiringweightup;
-  Double_t        prefiringweightdown;
   ULong64_t       HLTEleMuX;
   ULong64_t       HLTEleMuXIsPrescaled;
   ULong64_t       HLTEleMuXRejectedByPS;
@@ -160,6 +157,13 @@ public :
   vector<float>   *phoEt;
   vector<float>   *phoEta;
   vector<float>   *phoPhi;
+  vector<float>   *phoUnCalibE;
+  vector<float>   *phoUnCalibESigma;
+  vector<float>   *phoCalibE;
+  vector<float>   *phoCalibESigma;
+  vector<float>   *phoCalibEt;
+  vector<float>   *phoEnergyScale;
+  vector<float>   *phoEnergySigma;
   vector<float>   *phoSCE;
   vector<float>   *phoSCRawE;
   vector<float>   *phoSCEta;
@@ -184,6 +188,20 @@ public :
   vector<unsigned short> *phoMVAIDbit;
   vector<float>   *phoSeedTime;
   vector<float>   *phoSeedEnergy;
+  vector<float>   *phoScale_up;
+  vector<float>   *phoScale_dn;
+  vector<float>   *phoScale_stat_up;
+  vector<float>   *phoScale_stat_dn;
+  vector<float>   *phoScale_syst_up;
+  vector<float>   *phoScale_syst_dn;
+  vector<float>   *phoScale_gain_up;
+  vector<float>   *phoScale_gain_dn;
+  vector<float>   *phoResol_up;
+  vector<float>   *phoResol_dn;
+  vector<float>   *phoResol_rho_up;
+  vector<float>   *phoResol_rho_dn;
+  vector<float>   *phoResol_phi_up;
+  vector<float>   *phoResol_phi_dn;
   Int_t           nJet;
   vector<float>   *jetPt;
   vector<float>   *jetPx;
@@ -274,6 +292,15 @@ public :
   vector<float>   *eleD0;
   vector<float>   *eleDz;
   vector<float>   *eleSIP;
+  vector<float>   *eleUnCalibE;
+  vector<float>   *eleUnCalibESigma;
+  vector<float>   *eleCalibEecalonly;
+  vector<float>   *eleCalibE;
+  vector<float>   *eleCalibESigma;
+  vector<float>   *eleCalibEt;
+  vector<float>   *eleCalibEtSigma;
+  vector<float>   *eleEnergyScale;
+  vector<float>   *eleEnergySigma;
   vector<float>   *eleSCRawEn;
   vector<float>   *eleSCEn;
   vector<float>   *eleSCEta;
@@ -309,6 +336,20 @@ public :
   vector<float>   *eleKFHits;
   vector<float>   *eleKFChi2;
   vector<float>   *eleGSFChi2;
+  vector<float>   *eleScale_up;
+  vector<float>   *eleScale_dn;
+  vector<float>   *eleScale_stat_up;
+  vector<float>   *eleScale_stat_dn;
+  vector<float>   *eleScale_syst_up;
+  vector<float>   *eleScale_syst_dn;
+  vector<float>   *eleScale_gain_up;
+  vector<float>   *eleScale_gain_dn;
+  vector<float>   *eleResol_up;
+  vector<float>   *eleResol_dn;
+  vector<float>   *eleResol_rho_up;
+  vector<float>   *eleResol_rho_dn;
+  vector<float>   *eleResol_phi_up;
+  vector<float>   *eleResol_phi_dn;
   Int_t           nMu;
   vector<float>   *muPt;
   vector<float>   *muEn;
@@ -399,9 +440,9 @@ public :
   vector<bool>    *tau_byTightIsolationMVArun2017v2DBoldDMwLT2017;
   vector<bool>    *tau_byVTightIsolationMVArun2017v2DBoldDMwLT2017;
   vector<bool>    *tau_byVVTightIsolationMVArun2017v2DBoldDMwLT2017;
-  UShort_t        metFilters;
   Float_t         genMET;
   Float_t         genMETPhi;
+  UShort_t        metFilters;
   Float_t         caloMET;
   Float_t         caloMETPhi;
   Float_t         caloMETsumEt;
@@ -420,7 +461,6 @@ public :
   Float_t         pfMETPhi_T1JESDo;
   Float_t         pfMETPhi_T1UESUp;
   Float_t         pfMETPhi_T1UESDo;
-
   vector<float>   *pdf;
   Float_t         pthat;
   Float_t         processID;
@@ -464,9 +504,6 @@ public :
   TBranch        *b_nGoodVtx;   //!
   TBranch        *b_rho;   //!
   TBranch        *b_rhoCentral;   //!
-  TBranch        *b_prefiringweight;   //!
-  TBranch        *b_prefiringweightup;   //!
-  TBranch        *b_prefiringweightdown;   //!
   TBranch        *b_HLTEleMuX;   //!
   TBranch        *b_HLTEleMuXIsPrescaled;   //!
   TBranch        *b_HLTEleMuXRejectedByPS;   //!
@@ -490,6 +527,13 @@ public :
   TBranch        *b_phoEt;   //!
   TBranch        *b_phoEta;   //!
   TBranch        *b_phoPhi;   //!
+  TBranch        *b_phoUnCalibE;   //!
+  TBranch        *b_phoUnCalibESigma;   //!
+  TBranch        *b_phoCalibE;   //!
+  TBranch        *b_phoCalibESigma;   //!
+  TBranch        *b_phoCalibEt;   //!
+  TBranch        *b_phoEnergyScale;   //!
+  TBranch        *b_phoEnergySigma;   //!
   TBranch        *b_phoSCE;   //!
   TBranch        *b_phoSCRawE;   //!
   TBranch        *b_phoSCEta;   //!
@@ -514,6 +558,20 @@ public :
   TBranch        *b_phoMVAIDbit;   //!
   TBranch        *b_phoSeedTime;   //!
   TBranch        *b_phoSeedEnergy;   //!
+  TBranch        *b_phoScale_up;   //!
+  TBranch        *b_phoScale_dn;   //!
+  TBranch        *b_phoScale_stat_up;   //!
+  TBranch        *b_phoScale_stat_dn;   //!
+  TBranch        *b_phoScale_syst_up;   //!
+  TBranch        *b_phoScale_syst_dn;   //!
+  TBranch        *b_phoScale_gain_up;   //!
+  TBranch        *b_phoScale_gain_dn;   //!
+  TBranch        *b_phoResol_up;   //!
+  TBranch        *b_phoResol_dn;   //!
+  TBranch        *b_phoResol_rho_up;   //!
+  TBranch        *b_phoResol_rho_dn;   //!
+  TBranch        *b_phoResol_phi_up;   //!
+  TBranch        *b_phoResol_phi_dn;   //!
   TBranch        *b_nJet;   //!
   TBranch        *b_jetPt;   //!
   TBranch        *b_jetPx;   //!
@@ -604,6 +662,15 @@ public :
   TBranch        *b_eleD0;   //!
   TBranch        *b_eleDz;   //!
   TBranch        *b_eleSIP;   //!
+  TBranch        *b_eleUnCalibE;   //!
+  TBranch        *b_eleUnCalibESigma;   //!
+  TBranch        *b_eleCalibEecalonly;   //!
+  TBranch        *b_eleCalibE;   //!
+  TBranch        *b_eleCalibESigma;   //!
+  TBranch        *b_eleCalibEt;   //!
+  TBranch        *b_eleCalibEtSigma;   //!
+  TBranch        *b_eleEnergyScale;   //!
+  TBranch        *b_eleEnergySigma;   //!
   TBranch        *b_eleSCRawEn;   //!
   TBranch        *b_eleSCEn;   //!
   TBranch        *b_eleSCEta;   //!
@@ -639,6 +706,20 @@ public :
   TBranch        *b_eleKFHits;   //!
   TBranch        *b_eleKFChi2;   //!
   TBranch        *b_eleGSFChi2;   //!
+  TBranch        *b_eleScale_up;   //!
+  TBranch        *b_eleScale_dn;   //!
+  TBranch        *b_eleScale_stat_up;   //!
+  TBranch        *b_eleScale_stat_dn;   //!
+  TBranch        *b_eleScale_syst_up;   //!
+  TBranch        *b_eleScale_syst_dn;   //!
+  TBranch        *b_eleScale_gain_up;   //!
+  TBranch        *b_eleScale_gain_dn;   //!
+  TBranch        *b_eleResol_up;   //!
+  TBranch        *b_eleResol_dn;   //!
+  TBranch        *b_eleResol_rho_up;   //!
+  TBranch        *b_eleResol_rho_dn;   //!
+  TBranch        *b_eleResol_phi_up;   //!
+  TBranch        *b_eleResol_phi_dn;   //!
   TBranch        *b_nMu;   //!
   TBranch        *b_muPt;   //!
   TBranch        *b_muEn;   //!
@@ -729,9 +810,9 @@ public :
   TBranch        *b_tau_byTightIsolationMVArun2017v2DBoldDMwLT2017;   //!
   TBranch        *b_tau_byVTightIsolationMVArun2017v2DBoldDMwLT2017;   //!
   TBranch        *b_tau_byVVTightIsolationMVArun2017v2DBoldDMwLT2017;   //!
-  TBranch        *b_metFilters;   //!
   TBranch        *b_genMET;   //!
   TBranch        *b_genMETPhi;   //!
+  TBranch        *b_metFilters;   //!
   TBranch        *b_caloMET;   //!
   TBranch        *b_caloMETPhi;   //!
   TBranch        *b_caloMETsumEt;   //!
@@ -750,7 +831,6 @@ public :
   TBranch        *b_pfMETPhi_T1JESDo;   //!
   TBranch        *b_pfMETPhi_T1UESUp;   //!
   TBranch        *b_pfMETPhi_T1UESDo;   //!
-  
   TBranch        *b_pdf;   //!
   TBranch        *b_pthat;   //!
   TBranch        *b_processID;   //!
