@@ -24,26 +24,31 @@ rootFiles.sort(key=int)
 #Setting Command Line arguments
 #Assure executable file is in .output/
 executable = argv[1]
-if path.isfile(executable): rename(executable,".output/"+executable)
+system("cp "+executable+" .output/"+executable)
 
 directory = argv[2]
-
-#Remove hadd file so that PlotTool.C does not get confused
 output = argv[3]
 maxEvents = argv[4]
 reportEvery = argv[5]
 label = argv[6]
-#Remove any old condor files
-# system("rm .status/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/*"+label+"* >/dev/null 2>&1" )
-# system("rm .output/"+output.replace(".root","")+"* >/dev/null 2>&1")
 
-if (len(argv) == 8):nBatches=int(argv[7].replace("split_",""))
-else:nBatches = 1
+#Remove any old condor files
+# statusFn = [remove(".status/"+fn) for fn in listdir(".status/") if label in fn]
+# outputFn = [remove(".output/"+fn) for fn in listdir(".output/") if (label in fn or output.replace(".root","_") in fn)]
+
+nBatches = 1
+Batch = len(rootFiles)
+if (len(argv) == 8):
+    nBatches=int(argv[7].replace("split_",""))
+elif (len(argv) == 9):
+    nBatches=int(argv[7].replace("split_",""))
+    start = int(argv[8].split("-")[0]); end = int(argv[8].split("-")[1])
+    Batch = end - start + 1
+    
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 60
+    nfile_per_batch = 30
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
@@ -53,7 +58,7 @@ if nBatches == -1:
 with open(".output/Job_"+label+".sh","w") as jobfile:
     jobfile.write("#!/bin/sh\n"
                 + "source /cvmfs/cms.cern.ch/cmsset_default.sh\n"
-                + "cd /cms/uhussain/CMSSW_8_0_26_patch1/src\n"
+                + "cd /cms/ekoenig4/MonoZprimeJet/CMSSW_10_2_10/src\n"
                 + "cmsenv\n"
                 + "cd ${_CONDOR_SCRATCH_DIR}\n"
                 + "./"+argv[1]+" ${1} ${2} ${3} ${4} ${5} ${6} ${7} ${8}\n")
@@ -87,21 +92,23 @@ with open(".output/condor_"+label,"w") as condor:
                 + " Log                  = ../.status/\\$(Process)_"+label+".log\n")
 
     #Get how many files are in each batch
-    binsize = len(rootFiles)/nBatches
+    binsize = Batch/nBatches
     print binsize
     for i in range(nBatches):
         if nBatches == 1: fileRange = "-1"
         else:
             #0-100/200-250/300-300
             fileRange = rootFiles[0]
-            if len(rootFiles)/binsize == 1:
-                binsize = len(rootFiles)
+            if Batch/binsize == 1:
+                binsize = Batch
             for j in range(1,binsize):
                 if (int(rootFiles[j]) - int(rootFiles[j-1]) != 1):
                     fileRange += "-"+rootFiles[j-1]+"/"+rootFiles[j]
 
             fileRange += "-"+rootFiles[binsize - 1]
-            for j in range(binsize - 1, -1, -1):rootFiles.pop(j) #Remove files already accounted for
+            for j in range(binsize - 1, -1, -1):
+                rootFiles.pop(j) #Remove files already accounted for
+                Batch-=1
 
         print "Running",i+1,fileRange,label
 
