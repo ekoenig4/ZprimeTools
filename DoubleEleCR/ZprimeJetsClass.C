@@ -528,7 +528,8 @@ void ZprimeJetsClass::getPt123Frac() {
 void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
-  PFCandidates = getPFCandidates();
+    
+  Pt123Fraction=Pt123=0.0;
   //We are using these conditions so we only calculate the following quantities for the signal we are interested in
   //This will also make it faster to process the events
   if(jetCand.size()>0) {
