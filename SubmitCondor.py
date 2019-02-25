@@ -24,11 +24,9 @@ rootFiles.sort(key=int)
 #Setting Command Line arguments
 #Assure executable file is in .output/
 executable = argv[1]
-if path.isfile(executable): rename(executable,".output/"+executable)
+system("cp "+executable+" .output/"+executable)
 
 directory = argv[2]
-
-#Remove hadd file so that PlotTool.C does not get confused
 output = argv[3]
 maxEvents = argv[4]
 reportEvery = argv[5]
@@ -60,7 +58,7 @@ if nBatches == -1:
 with open(".output/Job_"+label+".sh","w") as jobfile:
     jobfile.write("#!/bin/sh\n"
                 + "source /cvmfs/cms.cern.ch/cmsset_default.sh\n"
-                + "cd /cms/uhussain/CMSSW_9_4_9_cand2/src\n"
+                + "cd /cms/ekoenig4/MonoZprimeJet/CMSSW_10_2_10/src\n"
                 + "cmsenv\n"
                 + "cd ${_CONDOR_SCRATCH_DIR}\n"
                 + "./"+argv[1]+" ${1} ${2} ${3} ${4} ${5} ${6} ${7} ${8}\n")
@@ -89,9 +87,9 @@ with open(".output/condor_"+label,"w") as condor:
                 + " request_memory       = 1992\n"
                 + " request_disk         = 2048000\n"
                 + " Transfer_Input_Files = "+files_to_transfer+"\n"
-                + " output               = ../.status/\\$(Process)_"+label+".out\n"
-                + " error                = ../.status/\\$(Process)_"+label+".err\n"
-                + " Log                  = ../.status/\\$(Process)_"+label+".log\n")
+                + " output               = ../.status/\$(Process)_"+label+".out\n"
+                + " error                = ../.status/\$(Process)_"+label+".err\n"
+                + " Log                  = ../.status/\$(Process)_"+label+".log\n")
 
     #Get how many files are in each batch
     binsize = Batch/nBatches
