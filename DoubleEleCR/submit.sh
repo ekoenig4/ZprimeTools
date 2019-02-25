@@ -40,23 +40,11 @@ echo "Do the MC samples"
 
 # #TTJets
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0000/ postTTJets_MLM_0.root -1 10000 TTJets_MLM_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/TTJets/ postTTJets_MLM_0.root -1 10000 TTJets_MLM_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0001/ postTTJets_MLM_1.root -1 10000 TTJets_MLM_1 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/TTJets_DiLept/ postTTJetsDiLept_0.root -1 10000 TTJetsDiLept_0 split_-1
 
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0002/ postTTJets_MLM_2.root -1 10000 TTJets_MLM_2 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0003/ postTTJets_MLM_3.root -1 10000 TTJets_MLM_3 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0004/ postTTJets_MLM_4.root -1 10000 TTJets_MLM_4 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0005/ postTTJets_MLM_5.root -1 10000 TTJets_MLM_5 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0006/ postTTJets_MLM_6.root -1 10000 TTJets_MLM_6 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/0007/ postTTJets_MLM_7.root -1 10000 TTJets_MLM_7 split_-1
-
-# ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets_DiLept/ postTTJetsDiLept_0.root -1 10000 TTJetsDiLept_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/TTJets/TTJets_SingleLeptFromT/ postTTJetsSingleLeptFromT_0.root -1 10000 TTJetsSingleLeptFromT_0 split_-1
 
 # #GJets
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/GJets/GJets_HT40-100/ postGJets40to100.root -1 10000 GJets40_0 split_-1
