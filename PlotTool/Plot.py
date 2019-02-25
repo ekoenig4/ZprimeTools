@@ -1,7 +1,7 @@
 from ROOT import *
 from os import path,system,getcwd,listdir
 from samplenames import samplenames
-
+from cross_section import xsec
 
 signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools2016/monoZprime_XS-2016-correctPDF.txt"
 # signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-defaultPDF.txt"
@@ -27,38 +27,30 @@ class datamc(object):
         self.signal=None
         
         #List of Region Data Files
-        SignalData_FileNames = ["postMETdata_"];
-        SingleEleData_FileNames = ["postSingleEle_"];
-        SingleMuData_FileNames = ["postSingleMu_"];
-        DoubleEleData_FileNames = ["postDoubleEle_"];
-        DoubleMuData_FileNames = ["postDoubleMu_"];
+        SignalData_FileNames = ["postMETdata"];
+        SingleEleData_FileNames = ["postSingleEle"];
+        SingleMuData_FileNames = ["postSingleMu"];
+        DoubleEleData_FileNames = ["postDoubleEle"];
+        DoubleMuData_FileNames = ["postDoubleMu"];
 
         self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
         
-        #List of Sample Files and Xsec
-        WJets_FileNames = ["postW100to200_","postW200to400_","postW400to600_","postW600to800_","postW800to1200_","postW1200to2500_","postW2500toInf_","postWJets_MLM_"]
-        WJets_Xsec =      [1343            ,359.7           ,48.91           ,12.05           ,5.501            ,1.329             ,0.03216          ,50690           ]
+        #List of Sample Files
+        WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
         
-        ZJets_FileNames = ["postZ100to200_","postZ200to400_","postZ400to600_","postZ600to800_","postZ800to1200_","postZ1200to2500_","postZ2500toInf_"];
-        ZJets_Xsec =      [280.5          ,77.67          ,10.73          ,2.559           ,1.1796          ,0.28633          ,0.0006945];
+        ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
         
-        GJets_FileNames = ["postGJets40to100_","postGJets100to200_","postGJets200to400_","postGJets400to600_","postGJets600toInf_"];
-        GJets_Xsec =      [17420             ,5391               ,1168               ,132.5              ,44.05];
+        GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
         
-        DYJets_FileNames = ["postDY100to200_","postDY200to400_","postDY400to600_","postDY600to800_","postDY800to1200_","postDY1200to2500_","postDY2500toInf_","postDY_MLM_"]
-        DYJets_Xsec =      [148              ,40.94            ,5.497            ,1.354            ,0.6250            ,0.1511             ,0.003647          ,4895        ]
+        DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDY_MLM"]
         
-        TTJets_FileNames = ["postTTJets_MLM_"]#,"postTTJetsDiLept_"];
-        TTJets_Xsec =      [831.76      ]#,831.76 ];
+        TTJets_FileNames = ["postTTJets_MLM"]#,"postTTJetsDiLept"];
         
-        DiBoson_FileNames = ["postWW_","postWWto2L2Nu_","postWWto4Q_","postWWtoLNuQQ_","postWZ_","postZZ_"];
-        DiBoson_Xsec =      [118.7   ,12.18          ,49.99       ,51.72          ,47.2    ,16.6];
+        DiBoson_FileNames = ["postWW","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ","postWWto2L2Nu"]#,"postWWto2L2NuPS"]
         
-        QCD_FileNames = ["postQCD100to200_","postQCD200to300_","postQCD300to500_","postQCD500to700_","postQCD700to1000_","postQCD1000to1500_","postQCD1500to2000_","postQCD2000toInf_"];
-        QCD_Xsec =      [27500000         ,1735000          ,367000           ,29370            ,6524              ,1064               ,121.5              ,25.42];
+        QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
         
         self.MC_FileNames = {"WJets":WJets_FileNames,"ZJets":ZJets_FileNames,"GJets":GJets_FileNames,"DYJets":DYJets_FileNames,"TTJets":TTJets_FileNames,"DiBoson":DiBoson_FileNames,"QCD":QCD_FileNames};
-        self.MC_Xsec =      {"WJets":WJets_Xsec     ,"ZJets":ZJets_Xsec     ,"GJets":GJets_Xsec     ,"DYJets":DYJets_Xsec     ,"TTJets":TTJets_Xsec     ,"DiBoson":DiBoson_Xsec     ,"QCD":QCD_Xsec};
         self.MC_Color =     {"WJets":kRed-10        ,"ZJets":kAzure+10      ,"GJets":kGray+2        ,"DYJets":kTeal-9         ,"TTJets":kOrange-2       ,"DiBoson":kCyan-10         ,"QCD":kGray};
         self.MC_Integral = {"WJets":0     ,"ZJets":0     ,"GJets":0    ,"DYJets":0    ,"TTJets":0     ,"DiBoson":0    ,"QCD":0};
         self.BkgIntegral = 0
@@ -130,10 +122,10 @@ class datamc(object):
         #Hadd files together
         for sample in AllFiles:
             for fn in AllFiles[sample]:
-                if not path.isfile(fn[:-1]+".root") and path:
-                    nfile = [f for f in listdir(".output/") if fn in f]
+                if not path.isfile(fn+".root") and path:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
                     if len(nfile) != 0:
-                        arg = "hadd -f "+self.fileDir+fn[:-1]+".root "
+                        arg = "hadd -f "+self.fileDir+fn+".root "
                         for f in nfile:arg+=".output/"+f+" "
                         system(arg)
                 
@@ -144,10 +136,10 @@ class datamc(object):
     def GetVariableName(self,variable):
         for title in samplenames:
             if title in variable:
-                self.name = title;
+                self.name = samplenames[title];
             key = variable.split("_")[-2]
             if key == title:
-                self.name = title;
+                self.name = samplenames[title];
                 break
                     
     def GetVariable(self,variable):
@@ -156,7 +148,7 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region][0][:-1]+".root")
+        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region][0]+".root")
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
         if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
         else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region][0]+".root, Exiting...";exit()
@@ -165,7 +157,7 @@ class datamc(object):
             for signal in self.signal:
                 mx = signal.split("_")[0].replace("Mx","")
                 mv = signal.split("_")[1].replace("Mv","")
-                rfile=TFile.Open(self.fileDir+self.Mx_Mv[mx][mv][:-1]+".root")
+                rfile=TFile.Open(self.fileDir+self.Mx_Mv[mx][mv]+".root")
                 keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                 if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
                 else:print "Could not find "+variable+" In "+self.Mx_Mv[mx][mv]+".root, Exiting...";exit()
@@ -178,8 +170,8 @@ class datamc(object):
             self.histo[sample]=[]
             self.total[sample]=[]
             for fn in self.MC_FileNames[sample]:
-                if not path.isfile(self.fileDir+fn[:-1]+".root"): continue
-                rfile=TFile.Open(self.fileDir+fn[:-1]+".root")
+                if not path.isfile(self.fileDir+fn+".root"): continue
+                rfile=TFile.Open(self.fileDir+fn+".root")
                 keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                 if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
                 else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
@@ -211,8 +203,8 @@ class datamc(object):
                     if self.MC_FileNames[sample] == "null":continue
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
                     rawevents += self.histo[sample][i].Integral()
-                    # print self.MC_FileNames[sample][i],self.total[sample][i],self.MC_Xsec[sample][i]
-                    scale=(1./self.total[sample][i])*self.lumi*self.MC_Xsec[sample][i]
+                    # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
+                    scale=(1./self.total[sample][i])*self.lumi*xsec[self.MC_FileNames[sample][i]]
                     self.histo[sample][i].Scale(scale)
                 if (len(self.histo[sample]) > 0):
                     for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
@@ -235,6 +227,28 @@ class datamc(object):
                 # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
                 print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
 
-    
+######################################################################    
 
             
+def GetRatio(hs_num,hs_den):
+    nbins = hs_num.GetNbinsX();  
+    Ratio = hs_num.Clone("Ratio");
+    last = hs_den.Clone("last");
+    for ibin in range(1,nbins+1):
+        stackcontent = last.GetBinContent(ibin);
+        stackerror = last.GetBinError(ibin);
+        datacontent = hs_num.GetBinContent(ibin);
+        dataerror = hs_num.GetBinError(ibin);
+        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
+        ratiocontent=0;
+        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+        error=0;
+        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+        else: error = 2.07
+        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
+        Ratio.SetBinContent(ibin,ratiocontent);
+        Ratio.SetBinError(ibin,error);
+        
+    Ratio.GetYaxis().SetRangeUser(0.0,2.2);
+    Ratio.SetStats(0);
+    return Ratio

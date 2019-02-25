@@ -133,27 +133,7 @@ for variable in args:
 
     ######################################
 
-    nbins = samples.histo['Data'].GetNbinsX();  
-    Ratio = samples.histo['Data'].Clone("Ratio");
-    last_hist = hs_datamc.GetStack().Last();
-    last = last_hist.Clone("last");
-    for ibin in range(1,nbins+1):
-        stackcontent = last.GetBinContent(ibin);
-        stackerror = last.GetBinError(ibin);
-        datacontent = samples.histo['Data'].GetBinContent(ibin);
-        dataerror = samples.histo['Data'].GetBinError(ibin);
-        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-        ratiocontent=0;
-        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-        error=0;
-        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-        else: error = 2.07
-        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-        Ratio.SetBinContent(ibin,ratiocontent);
-        Ratio.SetBinError(ibin,error);
-        
-    Ratio.GetYaxis().SetRangeUser(0.0,2.2);
-    Ratio.SetStats(0);
+    Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
     
     Ratio.GetYaxis().CenterTitle();
     Ratio.SetMarkerStyle(20);
