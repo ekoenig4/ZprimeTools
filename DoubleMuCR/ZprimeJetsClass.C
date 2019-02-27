@@ -92,7 +92,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
     TFile *weights = TFile::Open("PU_Central.root");
-    TH1D* PU = (TH1D*)weights->Get("pileup");
+    PU = (TH1D*)weights->Get("pileup");
 
     TFile *f_muSF_ISO = new TFile("RunBCDEF_SF_ISO.root");
     TFile *f_muSF_ID = new TFile("RunBCDEF_SF_ID.root");
