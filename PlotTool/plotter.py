@@ -2,25 +2,15 @@
 
 from ROOT import *
 from sys import argv, path
-from optparse import OptionParser
 import Plot as plot
 import os
 
-parser = OptionParser()
-parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
-parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
-(options, args) = parser.parse_args()
-
-if (options.reset):
-    for fn in os.listdir("./"):
-        if 'post' in fn and '.root' in fn:
-            os.remove(fn)
-
 gROOT.SetBatch(1)
 
-samples=plot.datamc(argv)
-for variable in args:
-    if (options.thn):
+samples = plot.datamc()
+    
+for variable in samples.args:
+    if (samples.options.thn):
         axis = variable[-1]
         samples.initiate(variable[:-1])
         if (axis in ('x','y','z')):
@@ -203,7 +193,7 @@ for variable in args:
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2018/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/"+dir+"Plots_EWK/"
     #print file_path
     directory=os.path.join(os.path.dirname(file_path),"")
     if not os.path.exists(directory):

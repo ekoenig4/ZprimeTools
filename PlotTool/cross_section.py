@@ -49,6 +49,7 @@ xsec = {
 'postWW': 75.8,
 'postWWtoLNuQQ': 45.99,
 'postWWto2L2Nu': 11.08,
+'postWWto2L2NuPS': 11.08,
 'postWWto4Q': 47.73,
 
 'postWZ': 27.6,

@@ -1,5 +1,6 @@
 from ROOT import *
 from os import path,system,getcwd,listdir
+from optparse import OptionParser
 from samplenames import samplenames
 from cross_section import xsec
 
@@ -8,11 +9,21 @@ signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/Zp
 
 class datamc(object):
 
-    def __init__(self,command="noCommand",show=1,lumi=41453,fileDir="./"):
+    def __init__(self,show=1,lumi=41453,fileDir="./"):
         self.version = "PlotTool 2017"
+        
+        parser = OptionParser()
+        parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+        parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+        parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
+        (options, args) = parser.parse_args()
+
+        self.options = options
+
+        self.args = args
 
         #Luminosity
-        self.lumi=lumi
+        self.lumi= (options.lumi if (options.lumi != None) else lumi)
 
         self.show = show
 
@@ -27,11 +38,11 @@ class datamc(object):
         self.signal=None
         
         #List of Region Data Files
-        SignalData_FileNames = ["postMETdata"];
-        SingleEleData_FileNames = ["postSingleEle"];
-        SingleMuData_FileNames = ["postSingleMu"];
-        DoubleEleData_FileNames = ["postDoubleEle"];
-        DoubleMuData_FileNames = ["postDoubleMu"];
+        SignalData_FileNames = "postMETdata";
+        SingleEleData_FileNames = "postSingleEle";
+        SingleMuData_FileNames = "postSingleMu";
+        DoubleEleData_FileNames = "postDoubleEle";
+        DoubleMuData_FileNames = "postDoubleMu";
 
         self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
         
@@ -61,27 +72,26 @@ class datamc(object):
         postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
-        if command != "noCommand":
-            self.region=""
-            for i in range(len(RegionName)):
-                if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
-            if self.region=="":print "No Region Data Files Found, Exiting...";exit()
+        self.region=None
+        for i in range(len(RegionName)):
+            if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
+        if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         
-            if self.region == "SignalRegion":
-                self.getSignalXsec(signal_Xsec_file)
-                if command[1] == "-1":
-                    command.pop(1)
-                    self.signal = []
-                    mxList = self.Mx_Mv.keys();mxList.sort(key=int);
-                    for mx in mxList:
-                        mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
-                        for mv in mvList:
-                            self.signal.append("Mx"+mx+"_Mv"+mv)
-                elif "Mx" in command[1] and "_Mv" in command[1]: self.signal = [command[1]]; command.pop(1);
-            if self.show == 1:
-                print "Running in "+self.region+":"
-                print "Plotting at",self.lumi,"pb^{-1}"
-            self.HaddFiles()
+        if self.region == "SignalRegion" and len(args) > 0:
+            self.getSignalXsec(signal_Xsec_file)
+            if args[1] == "-1":
+                args.pop(1)
+                self.signal = []
+                mxList = self.Mx_Mv.keys();mxList.sort(key=int);
+                for mx in mxList:
+                    mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
+                    for mv in mvList:
+                        self.signal.append("Mx"+mx+"_Mv"+mv)
+            elif "Mx" in args[1] and "_Mv" in args[1]: self.signal = [args[1]]; args.pop(1);
+        if self.show == 1:
+            print "Running in "+self.region+":"
+            print "Plotting at",self.lumi,"pb^{-1}"
+        self.HaddFiles()
         
     def initiate(self,variable):
         self.GetVariable(variable)
@@ -109,25 +119,24 @@ class datamc(object):
                     self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
         
     def HaddFiles(self):
-        AllFiles={}
-        for key, value in self.MC_FileNames.items():AllFiles[key]=value[:]
-        AllFiles['Data']=self.Data_FileNames[self.region]
+        AllFiles=[]
+        for mcSample in xsec: AllFiles.append(mcSample)
+        AllFiles.append(self.Data_FileNames[self.region])
         if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
             for mx in Mx_Value:
                 Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
                 for mv in Mv_Value:
-                    AllFiles["Mx"+mx+"_Mv"+mv]=[self.Mx_Mv[mx][mv]]
+                    AllFiles.append([self.Mx_Mv[mx][mv]])
                     
         #Hadd files together
-        for sample in AllFiles:
-            for fn in AllFiles[sample]:
-                if not path.isfile(fn+".root") and path:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                    if len(nfile) != 0:
-                        arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
-                        system(arg)
+        for fn in AllFiles:
+            if not path.isfile(fn+".root") and path or self.options.reset:
+                nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                if len(nfile) != 0:
+                    arg = "hadd -f "+self.fileDir+fn+".root "
+                    for f in nfile:arg+=".output/"+f+" "
+                    system(arg)
                 
         #Hadd data files together
         # nData=str(len(AllFiles['Data'])-1)
@@ -148,10 +157,10 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region][0]+".root")
+        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
         if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
-        else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region][0]+".root, Exiting...";exit()
+        else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
 
         if self.signal != None:
             for signal in self.signal:
