@@ -62,7 +62,7 @@ echo "Do the MC samples"
 
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu/ postWWto2L2Nu.root -1 10000 WWto2L2Nu_0 split_-1
 
-./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu_PSweights/ postWWto2L2Nu_PS.root -1 10000 WWto2L2Nu_PS_0 split_-1
+./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo2L2Nu_PSweights/ postWWto2L2NuPS.root -1 10000 WWto2L2NuPS_0 split_-1
 
 ./../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X/EWK/WWTo4Q/ postWWto4Q.root -1 10000 WWto4Q_0 split_-1
 
