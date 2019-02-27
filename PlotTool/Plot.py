@@ -9,7 +9,7 @@ signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/Zp
 
 class datamc(object):
 
-    def __init__(self,show=1,lumi=41453,fileDir="./"):
+    def __init__(self,command=None,show=1,lumi=41453,fileDir="./"):
         self.version = "PlotTool 2017"
         
         parser = OptionParser()
