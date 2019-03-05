@@ -6,8 +6,6 @@ from os import path, system, mkdir, listdir, rename, remove, chdir
 #Create Directories to put condor files in
 #Where executable and output files go
 if not path.isdir(".output/"): mkdir(".output/")
-#Where PlotTool.C puts number of each type of sample file
-if not path.isdir(".filelist/"): mkdir(".filelist/")
 #Where all condor output, log, and error files go
 if not path.isdir(".status/"): mkdir(".status/")
 
@@ -33,8 +31,13 @@ reportEvery = argv[5]
 label = argv[6]
 
 #Remove any old condor files
-# statusFn = [remove(".status/"+fn) for fn in listdir(".status/") if label in fn]
-# outputFn = [remove(".output/"+fn) for fn in listdir(".output/") if (label in fn or output.replace(".root","_") in fn)]
+filekey = output.replace(".root","_")
+for fn in listdir(".output/"):
+    if filekey in fn:
+        remove(".output/"+fn)
+for fn in listdir(".status/"):
+    if label in fn:
+        remove(".status/"+fn)
 
 nBatches = 1
 Batch = len(rootFiles)
