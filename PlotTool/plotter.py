@@ -9,22 +9,25 @@ gROOT.SetBatch(1)
 
 samples = plot.datamc()
     
-for variable in samples.args:
-    if (samples.options.thn):
-        axis = variable[-1]
-        samples.initiate(variable[:-1])
-        if (axis in ('x','y','z')):
-            samples.name = samples.name[axis]
-        for hs in samples.histo:
-            if axis == "x":
-                samples.histo[hs] = samples.histo[hs].ProjectionX()
-            if axis == "y":
-                samples.histo[hs] = samples.histo[hs].ProjectionY()
-            if axis == "z":
-                samples.histo[hs] = samples.histo[hs].ProjectionZ()
-    else:
-        samples.initiate(variable)
-    print "Plotting",samples.name
+for variable in samples.args:    
+    print "Plotting",variable
+    try:
+        if (samples.options.thn):
+            axis = variable[-1]
+            samples.initiate(variable[:-1])
+            if (axis in ('x','y','z')):
+                samples.name = samples.name[axis]
+            for hs in samples.histo:
+                if axis == "x":
+                    samples.histo[hs] = samples.histo[hs].ProjectionX()
+                if axis == "y":
+                    samples.histo[hs] = samples.histo[hs].ProjectionY()
+                if axis == "z":
+                    samples.histo[hs] = samples.histo[hs].ProjectionZ()
+        else:
+            samples.initiate(variable)
+    except:
+        continue
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -124,7 +127,10 @@ for variable in samples.args:
     ######################################
 
     Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
-    
+
+    rymin = 0.3; rymax = 1.7
+    Ratio.GetYaxis().SetRangeUser(rymin,rymax);
+    Ratio.SetStats(0);
     Ratio.GetYaxis().CenterTitle();
     Ratio.SetMarkerStyle(20);
     Ratio.SetMarkerSize(0.7);
@@ -163,7 +169,7 @@ for variable in samples.args:
     xwmin = xmin;
     xwmax = xmax;
     
-    xaxis = TGaxis(xmin,0,xmax,0,xwmin,xwmax,510);
+    xaxis = TGaxis(xmin,rymin,xmax,rymin,xwmin,xwmax,510);
     xaxis.SetTitle(samples.name);
     xaxis.SetLabelFont(42);
     xaxis.SetLabelSize(0.10);
@@ -183,7 +189,7 @@ for variable in samples.args:
 	    label[i-1].Draw("SAME");
       
 
-    yaxis = TGaxis(xmin,0,xmin,2.2,0,2.2,6,"");
+    yaxis = TGaxis(xmin,rymin,xmin,rymax,rymin,rymax,6,"");
     yaxis.SetTitle("Data/MC");
     yaxis.SetLabelFont(42);
     yaxis.SetLabelSize(0.10);
@@ -195,7 +201,9 @@ for variable in samples.args:
     dir = os.getcwd().split("/")[-1]
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/"+dir+"Plots_EWK/"
     #print file_path
-    directory=os.path.join(os.path.dirname(file_path),"")
+    sub = ""
+    if (samples.options.allHisto):sub = "all"
+    directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory

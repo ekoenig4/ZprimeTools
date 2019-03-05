@@ -1,10 +1,12 @@
 from ROOT import *
+import threading
+import sys
 from os import path,system,getcwd,listdir
 from optparse import OptionParser
 from samplenames import samplenames
 from cross_section import xsec
 
-signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools2016/monoZprime_XS-2016-correctPDF.txt"
+signal_Xsec_file="PlotTool/monoZprime_XS-2016-correctPDF.txt"
 # signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-defaultPDF.txt"
 
 class datamc(object):
@@ -14,8 +16,11 @@ class datamc(object):
         
         parser = OptionParser()
         parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+        parser.add_option("-n","--nohadd",help="does not try to hadd files together",action="store_true",default=False)
         parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
         parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
+        parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
+        parser.add_option("-s","--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
         (options, args) = parser.parse_args()
 
         self.options = options
@@ -79,19 +84,22 @@ class datamc(object):
         
         if self.region == "SignalRegion" and len(args) > 0:
             self.getSignalXsec(signal_Xsec_file)
-            if args[1] == "-1":
-                args.pop(1)
+            if args[0] == "-1":
+                args.pop(0)
                 self.signal = []
                 mxList = self.Mx_Mv.keys();mxList.sort(key=int);
                 for mx in mxList:
                     mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
                     for mv in mvList:
                         self.signal.append("Mx"+mx+"_Mv"+mv)
-            elif "Mx" in args[1] and "_Mv" in args[1]: self.signal = [args[1]]; args.pop(1);
+            elif "Mx" in args[0] and "_Mv" in args[0]: self.signal = [args[0]]; args.pop(0);
         if self.show == 1:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
+        exit()
+        if (self.options.allHisto):
+            self.GetAllHisto()
         
     def initiate(self,variable):
         self.GetVariable(variable)
@@ -128,21 +136,74 @@ class datamc(object):
                 Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
                 for mv in Mv_Value:
                     AllFiles.append([self.Mx_Mv[mx][mv]])
-                    
-        #Hadd files together
-        for fn in AllFiles:
-            if not path.isfile(fn+".root") and path or self.options.reset:
-                nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                if len(nfile) != 0:
-                    arg = "hadd -f "+self.fileDir+fn+".root "
-                    for f in nfile:arg+=".output/"+f+" "
+        ##################################
+        def singleThread(AllFiles):
+            #Hadd files together
+            for fn in AllFiles:
+                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                    if len(nfile) != 0:
+                        arg = "hadd -f "+self.fileDir+fn+".root "
+                        for f in nfile:arg+=".output/"+f+" "
+                        system(arg)
+        ###################################
+        def multiThread(AllFiles):
+            class haddThread (threading.Thread):
+                def __init__(self, threadID,name,arg):
+                    threading.Thread.__init__(self)
+                    self.threadID = threadID
+                    self.name = name
+                    self.arg = arg
+                def run(self):
                     system(arg)
-                
-        #Hadd data files together
-        # nData=str(len(AllFiles['Data'])-1)
-        # if not path.isfile(AllFiles['Data'][0].split("_")[0]+"_final.root"): system('hadd -f '+AllFiles['Data'][0].split("_")[0]+"_final.root "+AllFiles['Data'][0].split("_")[0]+"_{0.."+nData+"}.root")
+            #Hadd files together
+            threads = {}
+            for fn in AllFiles:
+                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                    if len(nfile) != 0:
+                        arg = "hadd -f "+self.fileDir+fn+".root "
+                        for f in nfile:arg+=".output/"+f+" "
+                        arg += " >/dev/null"
+                        ID = str(len(threads))
+                        threads[ID]=haddThread(ID,fn,arg)
+                        threads[ID].start()
+                        sys.stdout.write("\r"+str(len(threads))+" Started Threads")
+                        sys.stdout.flush()
+            print
+            nthreads = len(threads)
+            out = "\r"+str(nthreads)+" Threads Remaining"
+            while (len(threads) != 0):
+                IDlist = threads.keys(); IDlist.sort(key=int)
+                for ID in IDlist:
+                    if not threads[ID].isAlive():
+                        threads.pop(ID)
+                if len(threads) != nthreads:
+                    nthreads = len(threads)
+                    out = "\r"+str(nthreads)+" Threads Remaining"
+                if out != None and len(threads) != 0:
+                    sys.stdout.write(out)
+                    sys.stdout.flush()
+                    out = None
+            print "\nFiles Merged"
+        ###################################
+        print "Hadding Files"
+        if (self.options.single): singleThread(AllFiles)
+        else:multiThread(AllFiles)
+                        
+
+    def GetAllHisto(self):
+        if (self.region == "SignalRegion"): basic = "8"
+        else: basic = "10"
+        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
+        self.args = []
+        for key in gDirectory.GetListOfKeys():
+            nhisto = key.GetName().split("_")[-1]
+            if (type(rfile.Get(key.GetName())) == TH1F or type(rfile.Get(key.GetName())) == TH1D) and (not nhisto.isdigit() or nhisto == basic):
+                self.args.append(key.GetName())
 
     def GetVariableName(self,variable):
+        self.name = 'Xaxis Title'
         for title in samplenames:
             if title in variable:
                 self.name = samplenames[title];
@@ -161,6 +222,9 @@ class datamc(object):
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
         if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
         else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
+
+        if (self.name == 'Xaxis Title'):
+            self.name = self.histo['Data'].GetXaxis().GetTitle()
 
         if self.signal != None:
             for signal in self.signal:
@@ -257,7 +321,5 @@ def GetRatio(hs_num,hs_den):
         # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
         Ratio.SetBinContent(ibin,ratiocontent);
         Ratio.SetBinError(ibin,error);
-        
-    Ratio.GetYaxis().SetRangeUser(0.0,2.2);
-    Ratio.SetStats(0);
+     
     return Ratio
