@@ -37,6 +37,9 @@ public :
   TTree *tree;
 
   static const bool debug = true;
+  static const bool applyPU = true;
+  static const bool applySF = true;
+  static const bool applyKF = true;
   static const int nHisto = 16;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
   struct DataMC {
@@ -96,10 +99,6 @@ public :
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1NEF[nHisto],*h_j1GammaEnF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto];
   
   TH1F *h_PF123PtFraction[nHisto],*h_PtRawFraction[nHisto],*h_EnFraction[nHisto],*h_EnRawFraction[nHisto], *h_Pt123[nHisto], *h_En123[nHisto],*h_PFConsPt[nHisto],*h_Pt1[nHisto],*h_Pt2[nHisto],*h_Pt3[nHisto]; 
-
-  TH1F *h_j1Pt_PU25[nHisto],*h_j1Pt_PUInf[nHisto];
-  TH1F *h_Pt123_PU25[nHisto],*h_Pt123_PUInf[nHisto];
-  TH1F *h_PF123PtFraction_PU25[nHisto],*h_PF123PtFraction_PUInf[nHisto];
 
   TH1F *h_PtFracNH[nHisto],*h_PtFracCH[nHisto],*h_PtFracG[nHisto];
   TH1F *h_PtRawFracNH[nHisto],*h_PtRawFracCH[nHisto],*h_PtRawFracG[nHisto];
