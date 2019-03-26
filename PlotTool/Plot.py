@@ -1,18 +1,46 @@
 from ROOT import *
+import threading
+import sys
 from os import path,system,getcwd,listdir
+from optparse import OptionParser
+from samplenames import samplenames
 
-
-signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-correctPDF.txt"
+signal_Xsec_file="PlotTool/monoZprime_XS-2016-correctPDF.txt"
 # signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-defaultPDF.txt"
 
 class datamc(object):
 
-    def __init__(self,command="noCommand",show=1,lumi=35900):
+    def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
+
+        if fileDir != "./":
+            if path.isdir(fileDir+"PlotTool/"):
+                sys.path[0] = fileDir+"PlotTool/"
+        import mcinfo as mc
+        self.version = mc.version
+        self.xsec = mc.xsec
+        
+        parser = OptionParser()
+        parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+        parser.add_option("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
+        parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+        parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
+        parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
+        parser.add_option("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+        parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
+        parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
+        (options, args) = parser.parse_args()
+
+        self.options = options
+
+        self.args = args
 
         #Luminosity
-        self.lumi=lumi
+        self.lumi = (mc.lumi if (lumi == None) else lumi)
+        if (options.lumi != None): self.lumi = options.lumi
 
         self.show = show
+
+        self.fileDir = fileDir
 
         self.name = 'Xaxis Title'
         
@@ -20,75 +48,63 @@ class datamc(object):
 
         self.Mx_Mv = {}
         self.Mx_Mv_Xsec = {}
-        self.signal="null"
+        self.signal=None
         
         #List of Region Data Files
-        SignalData_FileNames = ["postMETdata_"];
-        SingleEleData_FileNames = ["postSingleEle_"];
-        SingleMuData_FileNames = ["postSingleMu_"];
-        DoubleEleData_FileNames = ["postDoubleEle_"];
-        DoubleMuData_FileNames = ["postDoubleMu_"];
+        SignalData_FileNames = "postMETdata";
+        SingleEleData_FileNames = "postSingleEle";
+        SingleMuData_FileNames = "postSingleMu";
+        DoubleEleData_FileNames = "postDoubleEle";
+        DoubleMuData_FileNames = "postDoubleMu";
 
         self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
         
-        #List of Sample Files and Xsec
-        WJets_FileNames = ["postW100to200_","postW200to400_","postW400to600_","postW600to800_","postW800to1200_","postW1200to2500_","postW2500toInf_"];#"postWJets_MLM",
-        WJets_Xsec =      [1343         ,359.7          ,48.91          ,12.05          ,5.501           ,1.329            ,0.03216];#50690            ,
+        #List of Sample Files
         
-        ZJets_FileNames = ["postZ100to200_","postZ200to400_","postZ400to600_","postZ600to800_","postZ800to1200_","postZ1200to2500_","postZ2500toInf_"];
-        ZJets_Xsec =      [280.5          ,77.67          ,10.73          ,2.559           ,1.1796          ,0.28633          ,0.0006945];
-        
-        GJets_FileNames = ["postGJets40to100_","postGJets100to200_","postGJets200to400_","postGJets400to600_","postGJets600toInf_"];
-        GJets_Xsec =      [17420             ,5391               ,1168               ,132.5              ,44.05];
-        
-        DYJets_FileNames = ["postDY100to200_","postDY200to400_","postDY400to600_","postDY600to800_","postDY800to1200_","postDY1200to2500_","postDY2500toInf_"];#"postDY_MLM",
-        DYJets_Xsec =      [148             ,40.94           ,5.497           ,1.354           ,0.6250           ,0.1511            ,0.003647];#4895        ,
-        
-        TTJets_FileNames = ["postTTJets_MLM_"]#,"postTTJetsDiLept"];
-        TTJets_Xsec =      [831.76      ]#,831.76 ];
-        
-        DiBoson_FileNames = ["postWW_","postWZ_","postZZ_"];
-        DiBoson_Xsec =      [118.7   ,47.2    ,16.6];
-        
-        QCD_FileNames = ["postQCD100to200_","postQCD200to300_","postQCD300to500_","postQCD500to700_","postQCD700to1000_","postQCD1000to1500_","postQCD1500to2000_","postQCD2000toInf_"];
-        QCD_Xsec =      [27500000         ,1735000          ,367000           ,29370            ,6524              ,1064               ,121.5              ,25.42];
-        
-        self.MC_FileNames = {"WJets":WJets_FileNames,"ZJets":ZJets_FileNames,"GJets":GJets_FileNames,"DYJets":DYJets_FileNames,"TTJets":TTJets_FileNames,"DiBoson":DiBoson_FileNames,"QCD":QCD_FileNames};
-        self.MC_Xsec =      {"WJets":WJets_Xsec     ,"ZJets":ZJets_Xsec     ,"GJets":GJets_Xsec     ,"DYJets":DYJets_Xsec     ,"TTJets":TTJets_Xsec     ,"DiBoson":DiBoson_Xsec     ,"QCD":QCD_Xsec};
+        self.MC_FileNames = {"WJets":mc.WJets_FileNames,"ZJets":mc.ZJets_FileNames,"GJets":mc.GJets_FileNames,"DYJets":mc.DYJets_FileNames,"TTJets":mc.TTJets_FileNames,"DiBoson":mc.DiBoson_FileNames,"QCD":mc.QCD_FileNames};
         self.MC_Color =     {"WJets":kRed-10        ,"ZJets":kAzure+10      ,"GJets":kGray+2        ,"DYJets":kTeal-9         ,"TTJets":kOrange-2       ,"DiBoson":kCyan-10         ,"QCD":kGray};
         self.MC_Integral = {"WJets":0     ,"ZJets":0     ,"GJets":0    ,"DYJets":0    ,"TTJets":0     ,"DiBoson":0    ,"QCD":0};
+        self.BkgIntegral = 0
 
         self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
-        preRegionData = [".output/postMETdata_0_1.root",".output/postSingleEle_0_1.root",".output/postSingleMu_0_1.root",".output/postDoubleEle_0_1.root",".output/postDoubleMu_0_1.root"]
+        preRegionData = [".output/postMETdata_0_0.root",".output/postSingleEle_0_0.root",".output/postSingleMu_0_0.root",".output/postDoubleEle_0_0.root",".output/postDoubleMu_0_0.root"]
         postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
-        if command != "noCommand":
-            self.region=""
-            for i in range(len(RegionName)):
-                if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
-            if self.region=="":print "No Region Data Files Found, Exiting...";exit()
+        self.region=None
+        for i in range(len(RegionName)):
+            if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
+        if self.region==None:print "No Region Data Files Found, Exiting...";exit()
+        if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
         
-            if self.region == "SignalRegion":
-                self.getSignalXsec(signal_Xsec_file)
-                if command[1] == "-1":
-                    command.pop(1)
-                    self.signal = []
-                    mxList = self.Mx_Mv.keys();mxList.sort(key=int);
-                    for mx in mxList:
-                        mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
-                        for mv in mvList:
-                            self.signal.append("Mx"+mx+"_Mv"+mv)
-                else: self.signal = [command[1]]; command.pop(1);
-            if self.show == 1:
-                print "Running in "+self.region+":"
-                print "Plotting at",self.lumi,"pb^{-1}"
-            self.HaddFiles()
+        if self.region == "SignalRegion" and self.options.signal != None:
+            self.getSignalXsec(signal_Xsec_file)
+            if self.options.signal == "-1":
+                self.signal = []
+                mxList = self.Mx_Mv.keys();mxList.sort(key=int);
+                for mx in mxList:
+                    mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
+                    for mv in mvList:
+                        self.signal.append("Mx"+mx+"_Mv"+mv)
+            elif "Mx" in self.options.signal and "_Mv" in self.options.signal: self.signal = [self.options.signal];
+        if self.show == 1:
+            print "Running in "+self.region+":"
+            print "Plotting at",self.lumi,"pb^{-1}"
+        self.HaddFiles()
+        if (self.options.allHisto):
+            self.GetAllHisto()
         
     def initiate(self,variable):
         self.GetVariable(variable)
         self.ScaleHistogram()
+
+    def getSumOfBkg(self):
+        sumOfBkg = self.histo["WJets"].Clone()
+        for mc in self.MC_Color:
+            if (mc != "WJets"):
+                sumOfBkg.Add(self.histo[mc])
+        return sumOfBkg
 
     def getSignalXsec(self,xsecFile=signal_Xsec_file,scale=1):
         with open(xsecFile) as f:
@@ -105,36 +121,89 @@ class datamc(object):
                     self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
         
     def HaddFiles(self):
-        AllFiles={}
-        for key, value in self.MC_FileNames.items():AllFiles[key]=value[:]
-        AllFiles['Data']=self.Data_FileNames[self.region]
-        if self.region=="SignalRegion":
+        AllFiles=[]
+        for mcSample in self.xsec: AllFiles.append(mcSample)
+        AllFiles.append(self.Data_FileNames[self.region])
+        if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
             for mx in Mx_Value:
                 Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
                 for mv in Mv_Value:
-                    AllFiles["Mx"+mx+"_Mv"+mv]=[self.Mx_Mv[mx][mv]]
-                    
-        #Hadd files together
-        for sample in AllFiles:
-            for fn in AllFiles[sample]:
-                if not path.isfile(fn[:-1]+".root") and path:
-                    nfile = [f for f in listdir(".output/") if fn in f]
+                    AllFiles.append(self.Mx_Mv[mx][mv])
+        ##################################
+        def singleThread(AllFiles):
+            #Hadd files together
+            for fn in AllFiles:
+                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
                     if len(nfile) != 0:
-                        arg = "hadd -f "+fn[:-1]+".root "
+                        arg = "hadd -f "+self.fileDir+fn+".root "
                         for f in nfile:arg+=".output/"+f+" "
                         system(arg)
-                
-        #Hadd data files together
-        # nData=str(len(AllFiles['Data'])-1)
-        # if not path.isfile(AllFiles['Data'][0].split("_")[0]+"_final.root"): system('hadd -f '+AllFiles['Data'][0].split("_")[0]+"_final.root "+AllFiles['Data'][0].split("_")[0]+"_{0.."+nData+"}.root")
+        ###################################
+        def multiThread(AllFiles):
+            class haddThread (threading.Thread):
+                def __init__(self, threadID,name,arg):
+                    threading.Thread.__init__(self)
+                    self.threadID = threadID
+                    self.name = name
+                    self.arg = arg
+                def run(self):
+                    system(arg)
+            #Hadd files together
+            threads = {}
+            for fn in AllFiles:
+                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                    if len(nfile) != 0:
+                        arg = "hadd -f "+self.fileDir+fn+".root "
+                        for f in nfile:arg+=".output/"+f+" "
+                        arg += " >/dev/null"
+                        ID = str(len(threads))
+                        threads[ID]=haddThread(ID,fn,arg)
+                        threads[ID].start()
+                        sys.stdout.write("\r"+str(len(threads))+" Started Threads")
+                        sys.stdout.flush()
+            print
+            nthreads = len(threads)
+            out = "\r"+str(nthreads)+" Threads Remaining"
+            while (len(threads) != 0):
+                IDlist = threads.keys(); IDlist.sort(key=int)
+                for ID in IDlist:
+                    if not threads[ID].isAlive():
+                        threads.pop(ID)
+                if len(threads) != nthreads:
+                    nthreads = len(threads)
+                    out = "\r"+str(nthreads)+" Threads Remaining"
+                if out != None and len(threads) != 0:
+                    sys.stdout.write(out)
+                    sys.stdout.flush()
+                    out = None
+            print "\nFiles Merged"
+        ###################################
+        if (self.options.single): singleThread(AllFiles)
+        else:multiThread(AllFiles)
+                        
+
+    def GetAllHisto(self):
+        if (self.region == "SignalRegion"): basic = "8"
+        else: basic = "10"
+        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
+        self.args = []
+        for key in gDirectory.GetListOfKeys():
+            nhisto = key.GetName().split("_")[-1]
+            if (type(rfile.Get(key.GetName())) == TH1F or type(rfile.Get(key.GetName())) == TH1D) and (not nhisto.isdigit() or nhisto == basic):
+                self.args.append(key.GetName())
 
     def GetVariableName(self,variable):
-
-        with open("PlotTool/samplenames.txt") as f:
-            text = f.readlines()
-            for l in range(len(text)):
-                if text[l].replace("\n","") in variable: self.name = text[l+1].replace("\n","");break
+        self.name = 'Xaxis Title'
+        for title in samplenames:
+            if title in variable:
+                self.name = samplenames[title];
+            key = variable.split("_")[-2]
+            if key == title:
+                self.name = samplenames[title];
+                break
                     
     def GetVariable(self,variable):
         self.histo = {}
@@ -142,16 +211,19 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        rfile=TFile.Open(self.Data_FileNames[self.region][0][:-1]+".root")
+        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
         if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
-        else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region][0]+".root, Exiting...";exit()
+        else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
 
-        if self.region == "SignalRegion":
+        if (self.name == 'Xaxis Title'):
+            self.name = self.histo['Data'].GetXaxis().GetTitle()
+
+        if self.signal != None:
             for signal in self.signal:
                 mx = signal.split("_")[0].replace("Mx","")
                 mv = signal.split("_")[1].replace("Mv","")
-                rfile=TFile.Open(self.Mx_Mv[mx][mv]+".root")
+                rfile=TFile.Open(self.fileDir+self.Mx_Mv[mx][mv]+".root")
                 keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                 if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
                 else:print "Could not find "+variable+" In "+self.Mx_Mv[mx][mv]+".root, Exiting...";exit()
@@ -164,7 +236,8 @@ class datamc(object):
             self.histo[sample]=[]
             self.total[sample]=[]
             for fn in self.MC_FileNames[sample]:
-                rfile=TFile.Open(fn[:-1]+".root")
+                if not path.isfile(self.fileDir+fn+".root"): continue
+                rfile=TFile.Open(self.fileDir+fn+".root")
                 keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                 if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
                 else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
@@ -174,7 +247,7 @@ class datamc(object):
                 self.total[sample].append(cutflow.GetBinContent(1))
 
     def ScaleHistogram(self):
-        print "Scaling Histograms to " + str(self.lumi) + " pb^{-1}"
+        self.BkgIntegral = 0
         for sample in self.SampleList:
             if sample == 'Data':
                 integral=(self.histo[sample].Integral())
@@ -196,17 +269,71 @@ class datamc(object):
                     if self.MC_FileNames[sample] == "null":continue
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
                     rawevents += self.histo[sample][i].Integral()
-                    # print self.MC_FileNames[sample][i],self.total[sample][i],self.MC_Xsec[sample][i]
-                    scale=(1./self.total[sample][i])*self.lumi*self.MC_Xsec[sample][i]
+                    # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
+                    if (self.total[sample][i] == 0): scale = 0
+                    else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_FileNames[sample][i]]
                     self.histo[sample][i].Scale(scale)
-                for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
-                self.histo[sample]=self.histo[sample][0]
-                self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
-                integral=(self.histo[sample].Integral())
-                self.MC_Integral[sample]=integral
-                space=" "*(15-len(sample))
-                if self.show == 1:
-                    # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
-                    print "integral of "+sample+space+" here:"+"%.6g" % integral
+                if (len(self.histo[sample]) > 0):
+                    for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
+                    self.histo[sample]=self.histo[sample][0]
+                    self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
+                    integral=(self.histo[sample].Integral())
+                    self.MC_Integral[sample]=integral
+                    self.BkgIntegral += integral
+
+        if self.show == 1:
+            bkgInt = {}
+            for sample in self.MC_Integral:bkgInt[str(self.MC_Integral[sample])]=sample
+            keylist = bkgInt.keys();keylist.sort(key=float)
+            for i in keylist[::-1]:
+                sample = bkgInt[i]
+                integral = self.MC_Integral[sample]
+                percentage = 100*integral/self.BkgIntegral
+                space1=" "*(15-len(sample))
+                space2=" "*(8-len("%.6g" % integral))
+                # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
+                print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
+
+######################################################################    
 
             
+def GetRatio(hs_num,hs_den):
+    nbins = hs_num.GetNbinsX();  
+    Ratio = hs_num.Clone("Ratio");
+    last = hs_den.Clone("last");
+    for ibin in range(1,nbins+1):
+        stackcontent = last.GetBinContent(ibin);
+        stackerror = last.GetBinError(ibin);
+        datacontent = hs_num.GetBinContent(ibin);
+        dataerror = hs_num.GetBinError(ibin);
+        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
+        ratiocontent=0;
+        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+        error=0;
+        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+        else: error = 2.07
+        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
+        Ratio.SetBinContent(ibin,ratiocontent);
+        Ratio.SetBinError(ibin,error);
+     
+    return Ratio
+
+def Get2DRatio(hs_num,hs_den):
+    xbins = hs_num.GetNbinsX()
+    ybins = hs_num.GetNbinsY()
+    Ratio = hs_num.Clone("Ratio")
+    last = hs_den.Clone("last")
+    for xbin in range(1,xbins+1):
+        for ybin in range(1,ybins+1):
+            stackcontent = last.GetBinContent(xbin,ybin)
+            stackerror = last.GetBinError(xbin,ybin)
+            datacontent = hs_num.GetBinContent(xbin,ybin)
+            dataerror = hs_num.GetBinError(xbin,ybin)
+            ratiocontent = 0
+            if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+            error=0;
+            if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+            else: error = 2.07
+            Ratio.SetBinContent(xbin,ybin,ratiocontent)
+            Ratio.SetBinError(xbin,ybin,error)
+    return Ratio

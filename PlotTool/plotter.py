@@ -1,17 +1,30 @@
 #!/usr/bin/python
 
 from ROOT import *
-from sys import argv
-from sys import path
+from sys import argv, path
 import Plot as plot
-from os import system,getcwd
+import os
 
 gROOT.SetBatch(1)
 
-samples=plot.datamc(argv)
-for variable in argv[1:]:
-    samples.initiate(variable)
-
+samples = plot.datamc()
+    
+for variable in samples.args:    
+    print "Plotting",variable
+    if (samples.options.thn):
+        axis = variable[-1]
+        samples.initiate(variable[:-1])
+        if (axis in ('x','y','z')):
+            samples.name = samples.name[axis]
+        for hs in samples.histo:
+            if axis == "x":
+                samples.histo[hs] = samples.histo[hs].ProjectionX()
+            if axis == "y":
+                samples.histo[hs] = samples.histo[hs].ProjectionY()
+            if axis == "z":
+                samples.histo[hs] = samples.histo[hs].ProjectionZ()
+    else:
+        samples.initiate(variable)
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -37,6 +50,7 @@ for variable in argv[1:]:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
+    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Color:
         samples.histo[mc].SetTitle("");
@@ -47,34 +61,40 @@ for variable in argv[1:]:
         samples.histo[mc].GetYaxis().SetTickLength(0);
         samples.histo[mc].GetYaxis().SetLabelOffset(999);
         samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+        if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
+        
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
 
     hs_order = {}
     if (samples.name == "Cutflow"):
+        if samples.region == "SignalRegion":lastBin = 9
+        else:lastBin = 11
         for key in samples.SampleList:
-            if key != "Data":hs_order[str(samples.histo[key].GetBinContent(11))] = key
+            if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
     else:
         for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
-    min=0.1;max=pow(10,2.5);
-    hs_datamc.SetMinimum(min);
+    min=pow(10,-10);max=pow(10,2.5);
+    hs_datamc.SetMinimum(hs_datamc.GetMaximum()*min if hs_datamc.GetMaximum()*min > 0.1 else 0.1);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("HIST")
 
     samples.histo['Data'].Draw('pex0same')
 
-    if samples.signal != 'null':samples.histo[samples.signal[0]].Draw("HIST SAME")
+    if samples.signal != None:
+        samples.histo[samples.signal[0]].Draw("HIST SAME")
+        samples.histo[samples.signal[0]].SetLineWidth(2)
 
     #################################################
 
     leg = TLegend(0.62,0.60,0.86,0.887173,"");
     leg.AddEntry(samples.histo['Data'],"Data","lp");
-    if (samples.signal != 'null'): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
+    if (samples.signal != None): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
     leg.AddEntry(samples.histo['WJets'],"W#rightarrowl#nu","f");
     leg.AddEntry(samples.histo['DYJets'],"Z#rightarrow ll","F"); 
     leg.AddEntry(samples.histo['DiBoson'],"WW/WZ/ZZ","F");
@@ -87,9 +107,9 @@ for variable in argv[1:]:
     leg.SetTextSize(0.025);
     leg.Draw();
 
-    lumi_label = '';
-    if (samples.lumi == 35900): lumi_label="35.9";
-    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
+    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
+    if (samples.options.normalize): lumi_label="Normalized"
+    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
@@ -109,28 +129,11 @@ for variable in argv[1:]:
 
     ######################################
 
-    nbins = samples.histo['Data'].GetNbinsX();  
-    Ratio = samples.histo['Data'].Clone("Ratio");
-    last_hist = hs_datamc.GetStack().Last();
-    last = last_hist.Clone("last");
-    for ibin in range(1,nbins+1):
-        stackcontent = last.GetBinContent(ibin);
-        stackerror = last.GetBinError(ibin);
-        datacontent = samples.histo['Data'].GetBinContent(ibin);
-        dataerror = samples.histo['Data'].GetBinError(ibin);
-        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-        ratiocontent=0;
-        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-        error=0;
-        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-        else: error = 2.07
-        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-        Ratio.SetBinContent(ibin,ratiocontent);
-        Ratio.SetBinError(ibin,error);
-        
-    Ratio.GetYaxis().SetRangeUser(0.0,2.2);
+    Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
+
+    rymin = 0.3; rymax = 1.7
+    Ratio.GetYaxis().SetRangeUser(rymin,rymax);
     Ratio.SetStats(0);
-    
     Ratio.GetYaxis().CenterTitle();
     Ratio.SetMarkerStyle(20);
     Ratio.SetMarkerSize(0.7);
@@ -169,7 +172,7 @@ for variable in argv[1:]:
     xwmin = xmin;
     xwmax = xmax;
     
-    xaxis = TGaxis(xmin,0,xmax,0,xwmin,xwmax,510);
+    xaxis = TGaxis(xmin,rymin,xmax,rymin,xwmin,xwmax,510);
     xaxis.SetTitle(samples.name);
     xaxis.SetLabelFont(42);
     xaxis.SetLabelSize(0.10);
@@ -183,13 +186,13 @@ for variable in argv[1:]:
         xaxis.SetTitle("");
         label = []
         for i in range(1,nbins+1):
-            label.append(TLatex(i-0.5,-0.3,hs_datamc.GetXaxis().GetBinLabel(i)));
+            label.append(TLatex(i-0.5,rymin-0.3,hs_datamc.GetXaxis().GetBinLabel(i)));
 	    label[i-1].SetTextSize(0.065);
 	    label[i-1].SetTextAngle(-30.);
 	    label[i-1].Draw("SAME");
       
 
-    yaxis = TGaxis(xmin,0,xmin,2.2,0,2.2,6,"");
+    yaxis = TGaxis(xmin,rymin,xmin,rymax,rymin,rymax,6,"");
     yaxis.SetTitle("Data/MC");
     yaxis.SetLabelFont(42);
     yaxis.SetLabelSize(0.10);
@@ -197,10 +200,16 @@ for variable in argv[1:]:
     yaxis.SetTitleSize(0.12);
     yaxis.SetTitleOffset(0.35);
     yaxis.Draw("SAME");
-    
-    dir = getcwd().split("/")[-1]
-    c.SaveAs((str(variable)+str(".pdf")));
-    c.SaveAs((str(variable)+str(".png")));
-    system((str("mv ")+str(variable)+str(".pdf ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2016/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".pdf")));
-    system((str("mv ")+str(variable)+str(".png ")+str("/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2016/")+dir+str("Plots_EWK/datamc_")+str(variable)+str(".png")));
+
+    dir = os.getcwd().split("/")[-1]
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2016/"+dir+"Plots_EWK/"
+    #print file_path
+    sub = ""
+    if (samples.options.allHisto):sub = "all"
+    directory=os.path.join(os.path.dirname(file_path),sub)
+    if not os.path.exists(directory):
+        os.mkdir(directory,0755)
+        print directory
+    c.SaveAs(directory+"/datamc_"+variable+".pdf")
+    c.SaveAs(directory+"/datamc_"+variable+".png")
   
