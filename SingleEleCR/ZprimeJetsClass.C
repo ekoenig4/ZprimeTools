@@ -332,7 +332,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
-    h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",50,0,3000); h_metFilters[i]->Sumw2();
+    h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",8,0.5,8.5); h_metFilters[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 10, 0, 10);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
@@ -349,6 +349,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidh; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2();
+    h_j1EtaPhi[i] = new TH2F(("j1EtaPhi"+histname).c_str(),"j1EtaPhi;Leading Jet #eta;Leading Jet #phi",50,-3.0,3.0,50,-3.1416,3.1416);
     
     h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2(); 
     h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",25,0,50);h_j1TotPFCands[i]->Sumw2();
@@ -382,9 +383,9 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
-    h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",30,0.,3.1416);h_LeptonPhi[i]->Sumw2();
+    h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",50,-3.1416,3.1416);h_LeptonPhi[i]->Sumw2();
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
-
+    h_LeptonEtaPhi[i] = new TH2F(("h_LeptonEtaPhi"+histname).c_str(),"h_LeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
 
     h_PtFracNH[i] = new TH1F(("PtFracNH"+histname).c_str(),"PtFracNH;P_{T} Fraction carried by 3 leading Neutral Hadron daughters of the Pencil Jet",50,0,1);h_PtFracNH[i]->Sumw2();
     h_PtRawFracNH[i]= new TH1F(("PtRawFracNH"+histname).c_str(), "PtRawFracNH;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PtRawFracNH[i]->Sumw2();
@@ -417,7 +418,9 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
   h_nVtx[histoNumber]->Fill(nVtx,event_weight);
-  h_metFilters[histoNumber]->Fill(metFilters,event_weight);
+  for (int bit = 0; bit < 8; bit++)
+    if (metFilters >> bit & 1 == 1)
+      h_metFilters[histoNumber]->Fill(bit + 1,event_weight);
   h_nJets[histoNumber]->Fill(nJet,event_weight);
   h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
   h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
@@ -433,6 +436,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]),event_weight);
     h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
     h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
+    h_j1EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),event_weight);
     
     h_j1nCons[histoNumber]->Fill(jetNPhoton->at(jetCand[0])+jetNChargedHad->at(jetCand[0])+jetNNeutralHad->at(jetCand[0]),event_weight);
     h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
@@ -488,6 +492,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_LeptonPt[histoNumber]->Fill(elePt->at(lepindex),event_weight);
     h_LeptonEta[histoNumber]->Fill(eleEta->at(lepindex),event_weight);
     h_LeptonPhi[histoNumber]->Fill(elePhi->at(lepindex),event_weight);
+    h_LeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex),elePhi->at(lepindex),event_weight);
   }
   if(lepton_pt > 0){
     h_recoil[histoNumber]->Fill(Recoil,event_weight);}

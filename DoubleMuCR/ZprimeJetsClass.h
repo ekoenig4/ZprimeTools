@@ -88,7 +88,7 @@ public :
 
   TH1F *h_genHT[nHisto], *h_eventWeight[nHisto], *h_puTrue[nHisto];
 
-  TH2F *h_nPFCons_jetPt[nHisto];
+  TH2F *h_nPFCons_jetPt[nHisto],*h_j1EtaPhi[nHisto],*h_leadingLeptonEtaPhi[nHisto],*h_subleadingLeptonEtaPhi[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123PFConsPt[nHisto];
   //CR histograms
   TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];

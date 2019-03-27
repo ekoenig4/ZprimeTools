@@ -380,7 +380,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename){
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
-    h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",50,0,3000); h_metFilters[i]->Sumw2();
+    h_metFilters[i] = new TH1F(("metFilters"+histname).c_str(),"metFilters",8,0.5,8.5); h_metFilters[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 16, 0, 16);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
@@ -391,6 +391,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename){
     h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidh; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
+    h_j1EtaPhi[i] = new TH2F(("j1EtaPhi"+histname).c_str(),"j1EtaPhi;Leading Jet #eta;Leading Jet #phi",50,-3.0,3.0,50,-3.1416,3.1416);
     h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
     h_PF123PtFraction[i]= new TH1F(("PF123PtFraction"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_PF123PtFraction[i]->Sumw2();
     h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",48,Pt123Bins);h_Pt123[i]->Sumw2();
@@ -413,10 +414,12 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename){
     //CR Histograms
     h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();
     h_leadingLeptonEta[i] = new TH1F(("h_leadingLeptonEta"+histname).c_str(),"h_leadingLeptonEta",30,-3.0,3.0);h_leadingLeptonEta[i]->Sumw2();
-    h_leadingLeptonPhi[i] = new TH1F(("h_leadingLeptonPhi"+histname).c_str(),"h_leadingLeptonPhi",10,0.,3.1416);h_leadingLeptonPhi[i]->Sumw2();
+    h_leadingLeptonPhi[i] = new TH1F(("h_leadingLeptonPhi"+histname).c_str(),"h_leadingLeptonPhi",20,-3.1416,3.1416);h_leadingLeptonPhi[i]->Sumw2();
+    h_leadingLeptonEtaPhi[i] = new TH2F(("h_leadingLeptonEtaPhi"+histname).c_str(),"h_leadingLeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
     h_subleadingLeptonPt[i] = new TH1F(("h_subleadingLeptonPt"+histname).c_str(),"h_subleadingLeptonPt",25,subLeadingLeptonPtBins);h_subleadingLeptonPt[i]->Sumw2();
     h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
-    h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",10,0.,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
+    h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",20,-3.1416,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
+    h_subleadingLeptonEtaPhi[i] = new TH2F(("h_subleadingLeptonEtaPhi"+histname).c_str(),"h_subleadingLeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
     h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
     h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
@@ -432,7 +435,9 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight){
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
   h_nVtx[histoNumber]->Fill(nVtx,event_weight);
-  h_metFilters[histoNumber]->Fill(metFilters,event_weight);
+  for (int bit = 0; bit < 8; bit++)
+    if (metFilters >> bit & 1 == 1)
+      h_metFilters[histoNumber]->Fill(bit + 1,event_weight);
   h_nJets[histoNumber]->Fill(nJet,event_weight);
   h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
   h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
@@ -442,6 +447,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight){
     h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
     h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]),event_weight);
     h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
+    h_j1EtaPhi[histoNumber]->Fill(jetEta->at(jetCand[0]),jetPhi->at(jetCand[0]),event_weight);
     h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
     h_Pt123[histoNumber]->Fill(Pt123,event_weight);
     h_PFConsPt[histoNumber]->Fill(PFConsPt,event_weight);
@@ -463,9 +469,11 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight){
     h_leadingLeptonPt[histoNumber]->Fill(elePt->at(lepindex_leading),event_weight);
     h_leadingLeptonEta[histoNumber]->Fill(eleEta->at(lepindex_leading),event_weight);
     h_leadingLeptonPhi[histoNumber]->Fill(elePhi->at(lepindex_leading),event_weight);
+    h_leadingLeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex_leading),elePhi->at(lepindex_leading),event_weight);
     h_subleadingLeptonPt[histoNumber]->Fill(elePt->at(lepindex_subleading),event_weight);
     h_subleadingLeptonEta[histoNumber]->Fill(eleEta->at(lepindex_subleading),event_weight);
     h_subleadingLeptonPhi[histoNumber]->Fill(elePhi->at(lepindex_subleading),event_weight);
+    h_subleadingLeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex_subleading),elePhi->at(lepindex_subleading),event_weight);
   }
   if(dilepton_pt >= 0 && dilepton_mass >= 0){
     h_recoil[histoNumber]->Fill(Recoil,event_weight);

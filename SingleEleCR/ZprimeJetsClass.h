@@ -105,7 +105,7 @@ public :
   TH1F *h_EnFracNH[nHisto],*h_EnFracCH[nHisto],*h_EnFracG[nHisto];
   TH1F *h_EnRawFracNH[nHisto],*h_EnRawFracCH[nHisto],*h_EnRawFracG[nHisto];
 
-  TH2F *h_nPFCons_jetPt[nHisto];
+  TH2F *h_nPFCons_jetPt[nHisto],*h_j1EtaPhi[nHisto],*h_LeptonEtaPhi[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123JetPt[nHisto], *h_ConsRatio[nHisto];
   TH1F *h_ConsSumRatio[nHisto];
   //CR histograms
