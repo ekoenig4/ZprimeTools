@@ -87,9 +87,9 @@ with open(".output/condor_"+label,"w") as condor:
                 + " request_memory       = 1992\n"
                 + " request_disk         = 2048000\n"
                 + " Transfer_Input_Files = "+files_to_transfer+"\n"
-                + " output               = ../.status/\\$(Process)_"+label+".out\n"
-                + " error                = ../.status/\\$(Process)_"+label+".err\n"
-                + " Log                  = ../.status/\\$(Process)_"+label+".log\n")
+                + " output               = ../.status/\$(Process)_"+label+".out\n"
+                + " error                = ../.status/\$(Process)_"+label+".err\n"
+                + " Log                  = ../.status/\$(Process)_"+label+".log\n")
 
     #Get how many files are in each batch
     binsize = Batch/nBatches

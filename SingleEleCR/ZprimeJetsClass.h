@@ -37,6 +37,9 @@ public :
   TTree *tree;
 
   static const bool debug = true;
+  static const bool applyPU = false;
+  static const bool applySF = true;
+  static const bool applyKF = true;
   static const int nHisto = 16;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
   struct DataMC {
@@ -47,7 +50,7 @@ public :
     DataMC(){}
     DataMC(string filename) {
       string sampleID[] = {"Data","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
-      string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_FXFX"};
+      string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
       for (int i = 0; i < Total; i++)
 	if (filename.find(sampleID[i]) != string::npos) {
 	  type = static_cast<Type>(i);
@@ -97,16 +100,12 @@ public :
   
   TH1F *h_PF123PtFraction[nHisto],*h_PtRawFraction[nHisto],*h_EnFraction[nHisto],*h_EnRawFraction[nHisto], *h_Pt123[nHisto], *h_En123[nHisto],*h_PFConsPt[nHisto],*h_Pt1[nHisto],*h_Pt2[nHisto],*h_Pt3[nHisto]; 
 
-  TH1F *h_j1Pt_PU25[nHisto],*h_j1Pt_PUInf[nHisto];
-  TH1F *h_Pt123_PU25[nHisto],*h_Pt123_PUInf[nHisto];
-  TH1F *h_PF123PtFraction_PU25[nHisto],*h_PF123PtFraction_PUInf[nHisto];
-
   TH1F *h_PtFracNH[nHisto],*h_PtFracCH[nHisto],*h_PtFracG[nHisto];
   TH1F *h_PtRawFracNH[nHisto],*h_PtRawFracCH[nHisto],*h_PtRawFracG[nHisto];
   TH1F *h_EnFracNH[nHisto],*h_EnFracCH[nHisto],*h_EnFracG[nHisto];
   TH1F *h_EnRawFracNH[nHisto],*h_EnRawFracCH[nHisto],*h_EnRawFracG[nHisto];
 
-  TH2F *h_nPFCons_jetPt[nHisto];
+  TH2F *h_nPFCons_jetPt[nHisto],*h_j1EtaPhi[nHisto],*h_LeptonEtaPhi[nHisto],*h_LeptonPhiJetPhi[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123JetPt[nHisto], *h_ConsRatio[nHisto];
   TH1F *h_ConsSumRatio[nHisto];
   //CR histograms

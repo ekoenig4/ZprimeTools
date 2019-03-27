@@ -1,6 +1,3 @@
-
-
-
 DATE=May2018
 DATE_2=29May
 DATE_DATA=19May
@@ -9,11 +6,9 @@ make || exit -1
 
 echo "Do the CR data samples"
 
-python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_102X/EGamma/EGamma2018A/ postDoubleEle_0.root -1 10000 Ele_0 split_-1
- 
-python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_102X/EGamma/EGamma2018B/ postDoubleEle_1.root -1 10000 Ele_1 split_-1
+python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_102X/MET/MET2018A/ postDoubleMu_0.root -1 10000 Mu_0 split_-1
 			                                                                                    
-python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_102X/EGamma/EGamma2018C/ postDoubleEle_2.root -1 10000 Ele_2 split_-1
+python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_102X/MET/MET2018C/ postDoubleMu_2.root -1 10000 Mu_2 split_-1
 
 echo "Do the MC samples"
 

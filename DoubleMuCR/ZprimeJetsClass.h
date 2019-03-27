@@ -32,7 +32,7 @@ public :
   TTree *tree;
 
   static const bool debug = true;
-  static const bool applyPU = true;
+  static const bool applyPU = false;
   static const bool applySF = true;
   static const bool applyKF = true;
   static const int nHisto = 16;
@@ -61,13 +61,10 @@ public :
     }
     bool isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
   } sample;
-  
-  TH1D* PU;
-  TH1D *ewkCorrection;
-  TH1D *NNLOCorrection;
-  TH2F *h_eleRecoSF_highpt;
-  TH2F *h_eleIDSF;
 
+  TH1D *PU,*ewkCorrection,*NNLOCorrection;
+  TH2F *h_tightMuSF_ISO,*h_tightMuSF_ID;
+  TH2F *h_looseMuSF_ISO,*h_looseMuSF_ID;
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
   vector<float>j1PFConsEt;
@@ -88,7 +85,8 @@ public :
   TH1F *h_nVtx[nHisto],*h_metcut, *h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto], *h_Pt123[nHisto], *h_PFConsPt[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_genHT[nHisto],*h_eventWeight[nHisto], *h_puTrue[nHisto];
+
+  TH1F *h_genHT[nHisto], *h_eventWeight[nHisto], *h_puTrue[nHisto];
 
   TH2F *h_nPFCons_jetPt[nHisto],*h_j1EtaPhi[nHisto],*h_leadingLeptonEtaPhi[nHisto],*h_subleadingLeptonEtaPhi[nHisto];
   TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123PFConsPt[nHisto];
@@ -763,8 +761,8 @@ public :
   virtual void     Show(Long64_t entry = -1);
   virtual void BookHistos(const char* outputFilename);
   virtual void fillHistos(int histoNumber,double event_weight);
-  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual float DeltaPhi(float phi1, float phi2);
+  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
   virtual vector<int> JetVetoDecision(int leading_ele_index, int subleading_ele_index);
   virtual bool btagVeto();
@@ -777,10 +775,9 @@ public :
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
   virtual void AllPFCand(vector<int> jetCand,vector<int> PFCandidates);
-  virtual double getSF(int lepindex_leading, int lepindex_subleading);
+  virtual double getSF(int lepindex_leading,int lepindex_subleading);
   virtual double getKfactor(double bosonPt);
   virtual bool inclusiveCut();
 };
 
 #endif
-
