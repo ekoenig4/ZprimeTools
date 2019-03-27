@@ -137,9 +137,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  if (pfMET > 250) {
 	    nMET200++;
 	    fillHistos(4,event_weight);
-	    metcut = (fabs(pfMET)/pfMET);
+	    metcut = (fabs(pfMET-caloMET)/pfMET);
 	    h_metcut->Fill(metcut);
-	    if (true) {
+	    if (metcut < 0.5) {
 	      nMETcut++;
 	      fillHistos(5,event_weight);
 	      if (electron_veto_looseID(jetCand[0],10.) && muon_veto_looseID(jetCand[0],10.)) {
