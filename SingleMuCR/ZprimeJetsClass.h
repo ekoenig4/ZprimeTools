@@ -57,7 +57,7 @@ public :
   static const bool applySF = true;
   static const bool applyKF = true;
   static const int nHisto = 16;
-  enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
+  enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
     bool isInclusive;
@@ -65,7 +65,7 @@ public :
     int PID;
     DataMC(){}
     DataMC(string filename) {
-      string sampleID[] = {"MET","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
+      string sampleID[] = {"MET","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
       string inclusiveID[] = {"WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8","DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"};
       for (int i = 0; i < Total; i++)
 	if (filename.find(sampleID[i]) != string::npos) {
