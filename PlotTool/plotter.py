@@ -2,25 +2,16 @@
 
 from ROOT import *
 from sys import argv, path
-from optparse import OptionParser
 import Plot as plot
 import os
 
-parser = OptionParser()
-parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
-parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
-(options, args) = parser.parse_args()
-
-if (options.reset):
-    for fn in os.listdir("./"):
-        if 'post' in fn and '.root' in fn:
-            os.remove(fn)
-
 gROOT.SetBatch(1)
 
-samples=plot.datamc(argv)
-for variable in args:
-    if (options.thn):
+samples = plot.datamc()
+    
+for variable in samples.args:    
+    print "Plotting",variable
+    if (samples.options.thn):
         axis = variable[-1]
         samples.initiate(variable[:-1])
         if (axis in ('x','y','z')):
@@ -34,7 +25,6 @@ for variable in args:
                 samples.histo[hs] = samples.histo[hs].ProjectionZ()
     else:
         samples.initiate(variable)
-    print "Plotting",samples.name
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -60,6 +50,7 @@ for variable in args:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
+    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Color:
         samples.histo[mc].SetTitle("");
@@ -70,6 +61,8 @@ for variable in args:
         samples.histo[mc].GetYaxis().SetTickLength(0);
         samples.histo[mc].GetYaxis().SetLabelOffset(999);
         samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+        if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
+        
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
 
@@ -85,8 +78,8 @@ for variable in args:
     keylist.sort(key=float)
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
-    min=0.1;max=pow(10,2.5);
-    hs_datamc.SetMinimum(min);
+    min=pow(10,-6);max=pow(10,2.5);
+    hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("HIST")
@@ -111,9 +104,10 @@ for variable in args:
     leg.SetFillStyle(0);
     leg.SetTextSize(0.025);
     leg.Draw();
-    
-    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.))
-    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
+
+    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
+    if (samples.options.normalize): lumi_label="Normalized"
+    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
@@ -133,28 +127,11 @@ for variable in args:
 
     ######################################
 
-    nbins = samples.histo['Data'].GetNbinsX();  
-    Ratio = samples.histo['Data'].Clone("Ratio");
-    last_hist = hs_datamc.GetStack().Last();
-    last = last_hist.Clone("last");
-    for ibin in range(1,nbins+1):
-        stackcontent = last.GetBinContent(ibin);
-        stackerror = last.GetBinError(ibin);
-        datacontent = samples.histo['Data'].GetBinContent(ibin);
-        dataerror = samples.histo['Data'].GetBinError(ibin);
-        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-        ratiocontent=0;
-        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-        error=0;
-        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-        else: error = 2.07
-        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-        Ratio.SetBinContent(ibin,ratiocontent);
-        Ratio.SetBinError(ibin,error);
-        
-    Ratio.GetYaxis().SetRangeUser(0.0,2.2);
+    Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
+
+    rymin = 0.3; rymax = 1.7
+    Ratio.GetYaxis().SetRangeUser(rymin,rymax);
     Ratio.SetStats(0);
-    
     Ratio.GetYaxis().CenterTitle();
     Ratio.SetMarkerStyle(20);
     Ratio.SetMarkerSize(0.7);
@@ -193,7 +170,7 @@ for variable in args:
     xwmin = xmin;
     xwmax = xmax;
     
-    xaxis = TGaxis(xmin,0,xmax,0,xwmin,xwmax,510);
+    xaxis = TGaxis(xmin,rymin,xmax,rymin,xwmin,xwmax,510);
     xaxis.SetTitle(samples.name);
     xaxis.SetLabelFont(42);
     xaxis.SetLabelSize(0.10);
@@ -207,13 +184,13 @@ for variable in args:
         xaxis.SetTitle("");
         label = []
         for i in range(1,nbins+1):
-            label.append(TLatex(i-0.5,-0.3,hs_datamc.GetXaxis().GetBinLabel(i)));
+            label.append(TLatex(i-0.5,rymin-0.2,hs_datamc.GetXaxis().GetBinLabel(i)));
 	    label[i-1].SetTextSize(0.065);
 	    label[i-1].SetTextAngle(-30.);
 	    label[i-1].Draw("SAME");
       
 
-    yaxis = TGaxis(xmin,0,xmin,2.2,0,2.2,6,"");
+    yaxis = TGaxis(xmin,rymin,xmin,rymax,rymin,rymax,6,"");
     yaxis.SetTitle("Data/MC");
     yaxis.SetLabelFont(42);
     yaxis.SetLabelSize(0.10);
@@ -225,7 +202,9 @@ for variable in args:
     dir = os.getcwd().split("/")[-1]
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2018/"+dir+"Plots_EWK/"
     #print file_path
-    directory=os.path.join(os.path.dirname(file_path),"")
+    sub = ""
+    if (samples.options.allHisto):sub = "all"
+    directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
