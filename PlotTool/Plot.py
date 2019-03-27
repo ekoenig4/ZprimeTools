@@ -4,23 +4,29 @@ import sys
 from os import path,system,getcwd,listdir
 from optparse import OptionParser
 from samplenames import samplenames
-from cross_section import xsec
 
 signal_Xsec_file="PlotTool/monoZprime_XS-2016-correctPDF.txt"
 # signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-defaultPDF.txt"
 
 class datamc(object):
 
-    def __init__(self,command=None,show=1,lumi=41453,fileDir="./"):
-        self.version = "PlotTool 2017"
+    def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
+
+        if fileDir != "./":
+            if path.isdir(fileDir+"PlotTool/"):
+                sys.path[0] = fileDir+"PlotTool/"
+        import mcinfo as mc
+        self.version = mc.version
+        self.xsec = mc.xsec
         
         parser = OptionParser()
         parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
-        parser.add_option("-n","--nohadd",help="does not try to hadd files together",action="store_true",default=False)
+        parser.add_option("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
         parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
         parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
         parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
         parser.add_option("-s","--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+        parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
         (options, args) = parser.parse_args()
 
         self.options = options
@@ -28,7 +34,8 @@ class datamc(object):
         self.args = args
 
         #Luminosity
-        self.lumi= (options.lumi if (options.lumi != None) else lumi)
+        self.lumi = (mc.lumi if (lumi == None) else lumi)
+        if (options.lumi != None): self.lumi = options.lumi
 
         self.show = show
 
@@ -52,21 +59,8 @@ class datamc(object):
         self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
         
         #List of Sample Files
-        WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
         
-        ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
-        
-        GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
-        
-        DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDY_MLM"]
-        
-        TTJets_FileNames = ["postTTJets_MLM"]#,"postTTJetsDiLept"];
-        
-        DiBoson_FileNames = ["postWW","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ","postWWto2L2Nu"]#,"postWWto2L2NuPS"]
-        
-        QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
-        
-        self.MC_FileNames = {"WJets":WJets_FileNames,"ZJets":ZJets_FileNames,"GJets":GJets_FileNames,"DYJets":DYJets_FileNames,"TTJets":TTJets_FileNames,"DiBoson":DiBoson_FileNames,"QCD":QCD_FileNames};
+        self.MC_FileNames = {"WJets":mc.WJets_FileNames,"ZJets":mc.ZJets_FileNames,"GJets":mc.GJets_FileNames,"DYJets":mc.DYJets_FileNames,"TTJets":mc.TTJets_FileNames,"DiBoson":mc.DiBoson_FileNames,"QCD":mc.QCD_FileNames};
         self.MC_Color =     {"WJets":kRed-10        ,"ZJets":kAzure+10      ,"GJets":kGray+2        ,"DYJets":kTeal-9         ,"TTJets":kOrange-2       ,"DiBoson":kCyan-10         ,"QCD":kGray};
         self.MC_Integral = {"WJets":0     ,"ZJets":0     ,"GJets":0    ,"DYJets":0    ,"TTJets":0     ,"DiBoson":0    ,"QCD":0};
         self.BkgIntegral = 0
@@ -81,6 +75,7 @@ class datamc(object):
         for i in range(len(RegionName)):
             if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
+        if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
         
         if self.region == "SignalRegion" and len(args) > 0:
             self.getSignalXsec(signal_Xsec_file)
@@ -97,7 +92,6 @@ class datamc(object):
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
-        exit()
         if (self.options.allHisto):
             self.GetAllHisto()
         
@@ -128,7 +122,7 @@ class datamc(object):
         
     def HaddFiles(self):
         AllFiles=[]
-        for mcSample in xsec: AllFiles.append(mcSample)
+        for mcSample in self.xsec: AllFiles.append(mcSample)
         AllFiles.append(self.Data_FileNames[self.region])
         if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
@@ -187,7 +181,6 @@ class datamc(object):
                     out = None
             print "\nFiles Merged"
         ###################################
-        print "Hadding Files"
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
                         
@@ -277,7 +270,8 @@ class datamc(object):
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
                     rawevents += self.histo[sample][i].Integral()
                     # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
-                    scale=(1./self.total[sample][i])*self.lumi*xsec[self.MC_FileNames[sample][i]]
+                    if (self.total[sample][i] == 0): scale = 0
+                    else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_FileNames[sample][i]]
                     self.histo[sample][i].Scale(scale)
                 if (len(self.histo[sample]) > 0):
                     for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
@@ -322,4 +316,24 @@ def GetRatio(hs_num,hs_den):
         Ratio.SetBinContent(ibin,ratiocontent);
         Ratio.SetBinError(ibin,error);
      
+    return Ratio
+
+def Get2DRatio(hs_num,hs_den):
+    xbins = hs_num.GetNbinsX()
+    ybins = hs_num.GetNbinsY()
+    Ratio = hs_num.Clone("Ratio")
+    last = hs_den.Clone("last")
+    for xbin in range(1,xbins+1):
+        for ybin in range(1,ybins+1):
+            stackcontent = last.GetBinContent(xbin,ybin)
+            stackerror = last.GetBinError(xbin,ybin)
+            datacontent = hs_num.GetBinContent(xbin,ybin)
+            dataerror = hs_num.GetBinError(xbin,ybin)
+            ratiocontent = 0
+            if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+            error=0;
+            if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+            else: error = 2.07
+            Ratio.SetBinContent(xbin,ybin,ratiocontent)
+            Ratio.SetBinError(xbin,ybin,error)
     return Ratio

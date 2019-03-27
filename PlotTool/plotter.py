@@ -11,23 +11,20 @@ samples = plot.datamc()
     
 for variable in samples.args:    
     print "Plotting",variable
-    try:
-        if (samples.options.thn):
-            axis = variable[-1]
-            samples.initiate(variable[:-1])
-            if (axis in ('x','y','z')):
-                samples.name = samples.name[axis]
-            for hs in samples.histo:
-                if axis == "x":
-                    samples.histo[hs] = samples.histo[hs].ProjectionX()
-                if axis == "y":
-                    samples.histo[hs] = samples.histo[hs].ProjectionY()
-                if axis == "z":
-                    samples.histo[hs] = samples.histo[hs].ProjectionZ()
-        else:
-            samples.initiate(variable)
-    except:
-        continue
+    if (samples.options.thn):
+        axis = variable[-1]
+        samples.initiate(variable[:-1])
+        if (axis in ('x','y','z')):
+            samples.name = samples.name[axis]
+        for hs in samples.histo:
+            if axis == "x":
+                samples.histo[hs] = samples.histo[hs].ProjectionX()
+            if axis == "y":
+                samples.histo[hs] = samples.histo[hs].ProjectionY()
+            if axis == "z":
+                samples.histo[hs] = samples.histo[hs].ProjectionZ()
+    else:
+        samples.initiate(variable)
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -53,6 +50,7 @@ for variable in samples.args:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
+    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Color:
         samples.histo[mc].SetTitle("");
@@ -63,6 +61,8 @@ for variable in samples.args:
         samples.histo[mc].GetYaxis().SetTickLength(0);
         samples.histo[mc].GetYaxis().SetLabelOffset(999);
         samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+        if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
+        
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
 
@@ -78,8 +78,8 @@ for variable in samples.args:
     keylist.sort(key=float)
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
-    min=0.1;max=pow(10,2.5);
-    hs_datamc.SetMinimum(min);
+    min=pow(10,-10);max=pow(10,2.5);
+    hs_datamc.SetMinimum(hs_datamc.GetMaximum()*min if hs_datamc.GetMaximum()*min > 0.1 else 0.1);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("HIST")
@@ -104,9 +104,10 @@ for variable in samples.args:
     leg.SetFillStyle(0);
     leg.SetTextSize(0.025);
     leg.Draw();
-    
-    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.))
-    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
+
+    lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
+    if (samples.options.normalize): lumi_label="Normalized"
+    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);

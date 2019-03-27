@@ -1,3 +1,25 @@
+version="2017"
+
+lumi = {"SingleEle":41453,
+        "DoubleEle":41453,
+        "SingleMu":15330,
+        "DoubleMu":15330,
+        "SignalRegion":1202}
+
+WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
+
+ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
+
+GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
+
+DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDY_MLM"]
+
+TTJets_FileNames = ["postTTJets_MLM"]#,"postTTJetsDiLept"];
+
+DiBoson_FileNames = ["postWW","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ","postWWto2L2Nu"]#,"postWWto2L2NuPS"]
+
+QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
+
 xsec = {
 'postZ100to200': 302.8,
 'postZ200to400': 92.59,
