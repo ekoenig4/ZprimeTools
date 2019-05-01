@@ -12,15 +12,30 @@ samples = plot.datamc()
 for variable in samples.args:    
     print "Plotting",variable
     if (samples.options.thn):
-        axis = variable[-1]
-        samples.initiate(variable[:-1])
-        if (axis in ('x','y','z')):
-            samples.name = samples.name[axis]
+        for i in range(len(variable)-1,-1,-1):
+            if variable[i] in ('x','y','z'):
+                axis = i
+                break
+        samples.initiate(variable[:i])
+        axis = variable[i]
+        samples.name = samples.name[axis]
         for hs in samples.histo:
             if axis == "x":
-                samples.histo[hs] = samples.histo[hs].ProjectionX()
+                if len(variable.split("x")) > 1:
+                    rnge = variable.split("x")[-1].split("-")
+                    for i in range(2): rnge[i] = samples.histo['Data'].GetYaxis().FindBin(float(rnge[i]))
+                    samples.histo[hs] = samples.histo[hs].ProjectionX("",rnge[0],rnge[1],"")
+                else:
+                    samples.histo[hs] = samples.histo[hs].ProjectionX()
             if axis == "y":
-                samples.histo[hs] = samples.histo[hs].ProjectionY()
+                if len(variable.split("y")) > 1:
+                    
+                    rnge = variable.split("y")[-1].split("-")
+                    for i in range(2): rnge[i] = samples.histo['Data'].GetXaxis().FindBin(float(rnge[i]))
+                    samples.histo[hs] = samples.histo[hs].ProjectionY("",rnge[0],rnge[1],"")
+                    samples.histo[hs].Draw()
+                else:
+                    samples.histo[hs] = samples.histo[hs].ProjectionY()
             if axis == "z":
                 samples.histo[hs] = samples.histo[hs].ProjectionZ()
     else:
@@ -76,10 +91,10 @@ for variable in samples.args:
         for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
-    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
+    for order in keylist: hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
-    min=pow(10,-10);max=pow(10,2.5);
-    hs_datamc.SetMinimum(hs_datamc.GetMaximum()*min if hs_datamc.GetMaximum()*min > 0.1 else 0.1);
+    min=pow(10,-6);max=pow(10,2.5);
+    hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("HIST")
@@ -184,7 +199,7 @@ for variable in samples.args:
         xaxis.SetTitle("");
         label = []
         for i in range(1,nbins+1):
-            label.append(TLatex(i-0.5,-0.3,hs_datamc.GetXaxis().GetBinLabel(i)));
+            label.append(TLatex(i-0.5,rymin-0.2,hs_datamc.GetXaxis().GetBinLabel(i)));
 	    label[i-1].SetTextSize(0.065);
 	    label[i-1].SetTextAngle(-30.);
 	    label[i-1].Draw("SAME");

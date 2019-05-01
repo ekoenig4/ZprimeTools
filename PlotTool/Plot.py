@@ -5,9 +5,6 @@ from os import path,system,getcwd,listdir
 from optparse import OptionParser
 from samplenames import samplenames
 
-signal_Xsec_file="PlotTool/monoZprime_XS-2016-correctPDF.txt"
-# signal_Xsec_file="/nfs_scratch/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src/ZprimeTools/monoZprime_XS-2016-defaultPDF.txt"
-
 class datamc(object):
 
     def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
@@ -25,8 +22,10 @@ class datamc(object):
         parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
         parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
         parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
-        parser.add_option("-s","--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+        parser.add_option("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
         parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
+        parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
+        parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
         (options, args) = parser.parse_args()
 
         self.options = options
@@ -44,7 +43,7 @@ class datamc(object):
         self.name = 'Xaxis Title'
         
         #List of Signal Files and Xsec
-
+        
         self.Mx_Mv = {}
         self.Mx_Mv_Xsec = {}
         self.signal=None
@@ -77,17 +76,16 @@ class datamc(object):
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
         
-        if self.region == "SignalRegion" and len(args) > 0:
-            self.getSignalXsec(signal_Xsec_file)
-            if args[0] == "-1":
-                args.pop(0)
+        if self.region == "SignalRegion" and self.options.signal != None:
+            self.getSignalXsec()
+            if self.options.signal == "-1":
                 self.signal = []
                 mxList = self.Mx_Mv.keys();mxList.sort(key=int);
                 for mx in mxList:
                     mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
                     for mv in mvList:
                         self.signal.append("Mx"+mx+"_Mv"+mv)
-            elif "Mx" in args[0] and "_Mv" in args[0]: self.signal = [args[0]]; args.pop(0);
+            elif "Mx" in self.options.signal and "_Mv" in self.options.signal: self.signal = [self.options.signal];
         if self.show == 1:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
@@ -106,19 +104,15 @@ class datamc(object):
                 sumOfBkg.Add(self.histo[mc])
         return sumOfBkg
 
-    def getSignalXsec(self,xsecFile=signal_Xsec_file,scale=1):
-        with open(xsecFile) as f:
-            text = f.readlines()
-            for line in text:
-                if "MonoZPrime_V_Mx" in line:
-                    line=line.replace("#","")
-                    data=line.replace("MonoZPrime_V_","").split()
-                    fn="post"+data[0]+"_"
-                    xsec=float(line.split(":")[1].split()[0])
-                    mx=data[0].split("_")[0].replace("Mx","")
-                    mv=data[0].split("_")[1].replace("Mv","")
-                    if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
-                    self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
+    def getSignalXsec(self,scale=1):
+        from monoZprime_XS import signalxsec
+        for data in signalxsec:
+            fn="post"+data
+            xsec=signalxsec[data]
+            mx=data.split("_")[0].replace("Mx","")
+            mv=data.split("_")[1].replace("Mv","")
+            if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
+            self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
         
     def HaddFiles(self):
         AllFiles=[]
@@ -129,7 +123,7 @@ class datamc(object):
             for mx in Mx_Value:
                 Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
                 for mv in Mv_Value:
-                    AllFiles.append([self.Mx_Mv[mx][mv]])
+                    AllFiles.append(self.Mx_Mv[mx][mv])
         ##################################
         def singleThread(AllFiles):
             #Hadd files together
@@ -164,7 +158,7 @@ class datamc(object):
                         threads[ID].start()
                         sys.stdout.write("\r"+str(len(threads))+" Started Threads")
                         sys.stdout.flush()
-            print
+            if len(threads) != 0: print
             nthreads = len(threads)
             out = "\r"+str(nthreads)+" Threads Remaining"
             while (len(threads) != 0):
@@ -179,7 +173,7 @@ class datamc(object):
                     sys.stdout.write(out)
                     sys.stdout.flush()
                     out = None
-            print "\nFiles Merged"
+            if len(threads) != 0: print "\nFiles Merged"
         ###################################
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
