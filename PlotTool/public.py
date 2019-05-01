@@ -202,7 +202,7 @@ for variable in samples.args:
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2016/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Thesis/2016/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
@@ -211,6 +211,6 @@ for variable in samples.args:
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
-    c.SaveAs(directory+"/datamc_"+variable+".pdf")
+    #c.SaveAs(directory+"/datamc_"+variable+".pdf")
     c.SaveAs(directory+"/datamc_"+variable+".png")
   
