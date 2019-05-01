@@ -80,40 +80,38 @@ public :
   vector<float>j1PFConsEta;
   vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
+  
+  double j1Mass;
+  
+  double Pt123Fraction,Pt123;
 
-  double Pt123Fraction,PtRawFraction,EnFraction,EnRawFraction,Pt123,En123,PFConsPt;
-  double PtFirst3[3];
-  double PtFracHadrons[3];
-  double PtRawFracHadrons[3];
-  double EnFracHadrons[3];
-  double EnRawFracHadrons[3];
-  //CR variables
-  int lepindex;
-  double lepton_pt,Recoil;
+  double hadronTotPtFrac[3];
+  double chargedPtFrac;
+  double ChNemPtFrac;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
-  TH1F *h_j1Pt[nHisto], *h_j1RawPt[nHisto],*h_j1En[nHisto],*h_j1RawEn[nHisto],*h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1NEF[nHisto],*h_j1GammaEnF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto];
-  
-  TH1F *h_PF123PtFraction[nHisto],*h_PtRawFraction[nHisto],*h_EnFraction[nHisto],*h_EnRawFraction[nHisto], *h_Pt123[nHisto], *h_En123[nHisto],*h_PFConsPt[nHisto],*h_Pt1[nHisto],*h_Pt2[nHisto],*h_Pt3[nHisto]; 
+  TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
+  TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
+  TH1F *h_j1Mass[nHisto];
 
-  TH1F *h_PtFracNH[nHisto],*h_PtFracCH[nHisto],*h_PtFracG[nHisto];
-  TH1F *h_PtRawFracNH[nHisto],*h_PtRawFracCH[nHisto],*h_PtRawFracG[nHisto];
-  TH1F *h_EnFracNH[nHisto],*h_EnFracCH[nHisto],*h_EnFracG[nHisto];
-  TH1F *h_EnRawFracNH[nHisto],*h_EnRawFracCH[nHisto],*h_EnRawFracG[nHisto];
+  TH1F *h_ChPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto];
 
-  TH2F *h_nPFCons_jetPt[nHisto],*h_j1EtaPhi[nHisto],*h_LeptonEtaPhi[nHisto];
-  TH3F *h_PtFrac_PtEta[nHisto],*h_PtFrac_PtPhi[nHisto],*h_PtFrac_EtaPhi[nHisto],*h_PtFrac_Pt123JetPt[nHisto], *h_ConsRatio[nHisto];
-  TH1F *h_ConsSumRatio[nHisto];
-  //CR histograms
-  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
+  TH1F *h_bj1Pt[nHisto],*h_bPt123Fraction[nHisto],*h_bChNemPtFrac[nHisto];
+  TH1F *h_ej1Pt[nHisto],*h_ePt123Fraction[nHisto],*h_eChNemPtFrac[nHisto];
 
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;
+
+  //CR variables
+  int lepindex;
+  double lepton_pt,Recoil;
+  //CR histograms
+  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
+
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types
@@ -868,7 +866,9 @@ public :
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
   virtual void BookHistos(const char* outputFilename);
+  virtual void BookRegion(int i,string histname);
   virtual void fillHistos(int histoNumber,double event_weight);
+  virtual void fillRegion(int histoNumber,double event_weight);
   virtual  float DeltaPhi(float phi1, float phi2);
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);

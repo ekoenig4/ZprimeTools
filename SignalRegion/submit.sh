@@ -6,7 +6,7 @@ make || exit -1
 
 echo "Do the CR data samples"
 
-python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_102X_11Feb2019/MET/MET2017B/ postMETdata_0.root -1 10000 MET_0 split_-1 1-92
+python ../SubmitCondor.py analyze /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_102X_11Feb2019/MET/MET2017B/ postMETdata_0.root -1 10000 MET_0 split_-1
 
 echo "Do the MC samples"
 
