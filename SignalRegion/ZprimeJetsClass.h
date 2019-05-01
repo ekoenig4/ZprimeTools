@@ -88,7 +88,13 @@ public :
   vector<double>j1PFConsPhi;
   vector<int>j1PFConsPID;
 
+  double j1Mass;
+
   double Pt123Fraction,Pt123;
+
+  double hadronTotPtFrac[3];
+  double chargedPtFrac;
+  double ChNemPtFrac;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
@@ -96,6 +102,9 @@ public :
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
+  TH1F *h_j1Mass[nHisto];
+
+  TH1F *h_ChPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto];
 
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
@@ -878,8 +887,10 @@ public :
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
   virtual void BookHistos(const char* file2);
+  virtual void BookRegion(int i,string histname);
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual void fillHistos(int histoNumber,double event_weight);
+  virtual void fillRegion(int histoNumber,double event_weight);
   virtual float DeltaPhi(float phi1, float phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
   virtual vector<int> JetVetoDecision();
