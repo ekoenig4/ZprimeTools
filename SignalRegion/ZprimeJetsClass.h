@@ -13,10 +13,7 @@
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
-#include <TH3.h>
 #include <TSystemDirectory.h>
-#include <TStyle.h>
-#include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
 
@@ -24,7 +21,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <stdio.h>
 
 using namespace std;
 
@@ -33,17 +29,11 @@ public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
 
-  string filename;
   TFile *output;
   TTree *tree;
 
   static const bool debug = true;
-  static const bool applyPU = true;
-  static const bool applySF = true;
-  static const bool applyKF = true;
-  static const bool applyInclusive = true;
-  vector<string> badevents;
-  static const int nHisto = 16;
+  static const int nHisto = 10;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
   struct DataMC {
     Type type;
@@ -65,17 +55,12 @@ public :
 	  if (filename.find(inclusiveID[i]) != string::npos)
 	    isInclusive = true;
       if (type == WJets) PID = 24;
-      if (type == ZJets || type == DYJets) PID = 23;
+      if (type == ZJets) PID = 23;
     }
-    bool isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
+    bool isW_or_ZJet() { return type == WJets || type == ZJets; }
   } sample;
-  
-  TH1D* PU;
-  TH1D *ewkCorrection;
-  TH1D *NNLOCorrection;
-  TH2F *h_eleRecoSF_highpt;
-  TH2F *h_eleIDSF;
 
+  TH1D *PU,*ewkCorrection,*NNLOCorrection;
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
   vector<float>j1PFConsEt;
@@ -83,7 +68,7 @@ public :
   vector<float>j1PFConsEta;
   vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
-  
+
   double Pt123Fraction,Pt123;
   double j1ChNemEtaWidth;
   
@@ -113,14 +98,7 @@ public :
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;
-
-  //CR variables
-  int lepindex;
-  double lepton_pt,Recoil;
-  //CR histograms
-  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
-  TH2F *h_LeptonEtaPhi[nHisto],*h_j1EtaPhi[nHisto];
-
+ 
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types
@@ -821,8 +799,8 @@ public :
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange);
   virtual ~ZprimeJetsClass();
-  virtual vector<string> split(string str,string delim);
-  virtual bool fileSelection(string filename,string fileRange);
+  virtual vector<string> split(string str, string delim);
+  virtual bool fileSelection(string filename, string fileRange);
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
   virtual Long64_t LoadTree(Long64_t entry);
@@ -834,25 +812,22 @@ public :
   virtual void BookRegion(int i,string histname);
   virtual void fillHistos(int histoNumber,double event_weight);
   virtual void fillRegion(int histoNumber,double event_weight);
-  virtual  float DeltaPhi(float phi1, float phi2);
+  virtual float DeltaPhi(float phi1, float phi2);
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
-  virtual vector<int> JetVetoDecision(int jet_index, int ele_index);
+  virtual vector<int> JetVetoDecision();
   virtual bool btagVeto();
   virtual bool dPhiJetMETcut(vector<int> jets);
   virtual float dPhiJetMETmin(vector<int> jets);
-  virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
-  virtual vector<int> electron_veto_looseID(int jet_index, int mu_index,float elePtCut);
-  virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
-  virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
+  virtual bool electron_veto_looseID(int jet_index, float elePtCut);
+  virtual bool muon_veto_looseID(int jet_index, float muPtCut);
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
   virtual void AllPFCand(vector<int> jetCand,vector<int> PFCandidates);
-  virtual double getSF(int ele_index);
   virtual double getKfactor(double bosonPt);
   virtual bool inclusiveCut();
   virtual bool getJetHEMVeto(double jetPtCut);
-  virtual bool getEleHEMVeto(double elePtCut);
 };
 
 #endif
+
