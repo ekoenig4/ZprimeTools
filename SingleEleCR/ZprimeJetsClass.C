@@ -1,5 +1,6 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
+#include "fstream"
 
 using namespace std;
 
@@ -19,6 +20,14 @@ int main(int argc, const char* argv[]) {
   ZprimeJetsClass t(argv[1],argv[2],argv[5]);
   t.Loop(maxEvents,reportEvery);
   return 0;
+}
+
+void WriteBadEvent(vector<string> badevents,string fname) {
+  ofstream file;
+  file.open(fname);
+  for (string s : badevents)
+    file << s;
+  file.close();
 }
 
 double EletriggerSF(float pt, float eta){
@@ -91,22 +100,6 @@ double ZprimeJetsClass::getSF(int ele_index) {
   return eleRecoSF_corr*eleEffSF_corr*eleTriggSF;
 }
 
-bool ZprimeJetsClass::inclusiveCut() {
-  if (!sample.isInclusive) return true;
-  return genHT < 100;
-}
-
-double ZprimeJetsClass::getKfactor(double bosonPt) {
-  double kfactor = 1.0;
-  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
-  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
-  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
-    kfactor = (EWK_corrected_weight/NNLO_weight);
-  else
-    kfactor= sample.type == WJets ? 1.21 : 1.23;
-  return kfactor;
-}
-
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
@@ -114,7 +107,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   cout<<"Coming in:"<<endl;
   cout<<"nentries:"<<nentries<<endl;
   Long64_t nentriesToCheck = nentries;
-
+  
+  badevents.clear();
+  
   int nTotal = 0;
   double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
   nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = pfMET50 = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
@@ -189,6 +184,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     lepindex = -1;
     nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
+    for (int bit = 0; bit < 8; bit++)
+      if (metFilters >> bit & 1 == 1)
+	h_metFilters->Fill(bit + 1,event_weight);
     if (metFilters == 0 && inclusiveCut()) {
       nFilters+=event_weight;
       fillHistos(1,event_weight);
@@ -209,7 +207,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.);
 	    jetveto = JetVetoDecision(jetCand[0],lepindex);
 	    TLorentzVector lep_4vec;
-	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleEn->at(lepindex));
+	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleE->at(lepindex));
 	    lepton_pt = lep_4vec.Pt();
 	    TLorentzVector met_4vec;
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
@@ -231,7 +229,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  pfMET50+=event_weight;
 		  fillHistos(7,event_weight);
 		  h_metcut->Fill(metcut);
-		  if (true) {
+		  if (metcut < 0.5) {
 		    nMETcut+=event_weight;
 		    fillHistos(8,event_weight);
 		    if (btagVeto()) {
@@ -251,8 +249,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			fillHistos(10,event_weight);
 			if (Pt123Fraction > 0.6)
 			  fillHistos(11,event_weight);
-			if (Pt123Fraction > 0.7)
+			if (Pt123Fraction > 0.7) {
+			  ostringstream stringStream;
+			  stringStream << "PtFrac: " << Pt123Fraction << " | Run: " << run << " | Lumi: " << lumis << " | Event: " << event << "\n";
+			  badevents.push_back(stringStream.str());
 			  fillHistos(12,event_weight);
+			}
 			if (Pt123Fraction > 0.8)
 			  fillHistos(13,event_weight);
 			if (Pt123Fraction > 0.85)
@@ -284,6 +286,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(9,nMETcut);
   h_cutflow->SetBinContent(10,nbtagVeto);
   h_cutflow->SetBinContent(11,nDphiJetMET);
+  WriteBadEvent(badevents,filename+".txt");
 }
 
 void ZprimeJetsClass::BookRegion(int i,string histname) {

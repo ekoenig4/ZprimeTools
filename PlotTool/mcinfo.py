@@ -1,9 +1,9 @@
 version="2017"
 
-lumi = {"SingleEle":41453,
-        "DoubleEle":41453,
-        "SingleMu":15330,
-        "DoubleMu":15330,
+lumi = {"SingleEle":41526,
+        "DoubleEle":41526,
+        "SingleMu":18674,
+        "DoubleMu":18674,
         "SignalRegion":1198}
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
@@ -14,7 +14,7 @@ GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","p
 
 DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDY_MLM"]
 
-TTJets_FileNames = ["postTTJets_MLM"]#,"postTTJetsDiLept"];
+TTJets_FileNames = ["postTTJetsDiLept"];#"postTTJets_MLM
 
 DiBoson_FileNames = ["postWW","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ","postWWto2L2Nu"]#,"postWWto2L2NuPS"]
 

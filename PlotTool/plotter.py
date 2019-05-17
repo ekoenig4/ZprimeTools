@@ -214,6 +214,7 @@ for variable in samples.args:
     yaxis.SetTitleOffset(0.35);
     yaxis.Draw("SAME");
 
+    if (samples.options.noOutput): continue
     dir = os.getcwd().split("/")[-1]
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/"+dir+"Plots_EWK/"
     #print file_path
@@ -223,6 +224,7 @@ for variable in samples.args:
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
+    if (samples.options.local): directory = "."
     c.SaveAs(directory+"/datamc_"+variable+".pdf")
     c.SaveAs(directory+"/datamc_"+variable+".png")
   
