@@ -6,8 +6,6 @@ from os import path, system, mkdir, listdir, rename, remove, chdir
 #Create Directories to put condor files in
 #Where executable and output files go
 if not path.isdir(".output/"): mkdir(".output/")
-#Where PlotTool.C puts number of each type of sample file
-if not path.isdir(".filelist/"): mkdir(".filelist/")
 #Where all condor output, log, and error files go
 if not path.isdir(".status/"): mkdir(".status/")
 
@@ -33,8 +31,13 @@ reportEvery = argv[5]
 label = argv[6]
 
 #Remove any old condor files
-# statusFn = [remove(".status/"+fn) for fn in listdir(".status/") if label in fn]
-# outputFn = [remove(".output/"+fn) for fn in listdir(".output/") if (label in fn or output.replace(".root","_") in fn)]
+filekey = output.replace(".root","_")
+for fn in listdir(".output/"):
+    if filekey in fn:
+        remove(".output/"+fn)
+
+if not path.isdir(".status/"+label): mkdir(".status/"+label)
+for fn in listdir(".status/"+label): remove(".status/"+label+"/"+fn)
 
 nBatches = 1
 Batch = len(rootFiles)
@@ -48,7 +51,7 @@ elif (len(argv) == 9):
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 30
+    nfile_per_batch = 20
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
@@ -87,9 +90,9 @@ with open(".output/condor_"+label,"w") as condor:
                 + " request_memory       = 1992\n"
                 + " request_disk         = 2048000\n"
                 + " Transfer_Input_Files = "+files_to_transfer+"\n"
-                + " output               = ../.status/\$(Process)_"+label+".out\n"
-                + " error                = ../.status/\$(Process)_"+label+".err\n"
-                + " Log                  = ../.status/\$(Process)_"+label+".log\n")
+                + " output               = ../.status/"+label+"/$(Process)_"+label+".out\n"
+                + " error                = ../.status/"+label+"/$(Process)_"+label+".err\n"
+                + " Log                  = ../.status/"+label+"/$(Process)_"+label+".log\n")
 
     #Get how many files are in each batch
     binsize = Batch/nBatches
