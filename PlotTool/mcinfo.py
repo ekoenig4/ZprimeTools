@@ -1,6 +1,10 @@
 version = "2018"
 
-lumi = 41453
+lumi = {"SingleEle":27603,
+        "DoubleEle":27603,
+        "SingleMu":20869,
+        "DoubleMu":20869,
+        "SignalRegion":3494}
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
 

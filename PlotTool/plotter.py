@@ -184,7 +184,8 @@ for variable in samples.args:
         xaxis.SetTitle("");
         label = []
         for i in range(1,nbins+1):
-            label.append(TLatex(i-0.5,rymin-0.2,hs_datamc.GetXaxis().GetBinLabel(i)));
+            binlabel = hs_datamc.GetXaxis().GetBinLabel(i)
+            label.append(TLatex(i-0.5,rymin-0.2,binlabel));
 	    label[i-1].SetTextSize(0.065);
 	    label[i-1].SetTextAngle(-30.);
 	    label[i-1].Draw("SAME");

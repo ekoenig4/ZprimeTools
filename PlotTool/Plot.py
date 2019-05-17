@@ -164,7 +164,7 @@ class datamc(object):
                         threads[ID].start()
                         sys.stdout.write("\r"+str(len(threads))+" Started Threads")
                         sys.stdout.flush()
-            print
+            if len(threads) != 0: print
             nthreads = len(threads)
             out = "\r"+str(nthreads)+" Threads Remaining"
             while (len(threads) != 0):
@@ -179,7 +179,8 @@ class datamc(object):
                     sys.stdout.write(out)
                     sys.stdout.flush()
                     out = None
-            print "\nFiles Merged"
+            if len(threads) != 0: print
+            if len(threads) != 0: print "Files Merged"
         ###################################
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
