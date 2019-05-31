@@ -2,8 +2,8 @@ version = "2018"
 
 lumi = {"SingleEle":27603,
         "DoubleEle":27603,
-        "SingleMu":20869,
-        "DoubleMu":20869,
+        "SingleMu":59699,
+        "DoubleMu":59699,
         "SignalRegion":3494}
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
@@ -14,7 +14,7 @@ GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","p
 
 DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY_MLM"]
 
-TTJets_FileNames = ["postTTJets_MLM"]#,"postTTJetsDiLept"];
+TTJets_FileNames = ["postTTJetsDiLept"];#"postTTJets_MLM"
 
 DiBoson_FileNames = ["postWW","postWZ","postZZ"]#,"postWWto2L2NuPS"]
 

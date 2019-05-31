@@ -50,7 +50,7 @@ for variable in samples.args:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
-    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
+    if (samples.options.normalize and samples.histo['Data'].Integral() != 0):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Color:
         samples.histo[mc].SetTitle("");
