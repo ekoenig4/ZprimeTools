@@ -47,11 +47,16 @@ double ZprimeJetsClass::getSF(int lepindex_leading,int lepindex_subleading) {
     subleadingMuPt = 119.99;
     subleadingMuEta = 2.39;
   }
+
+  double tightMuISO_PtBin = h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt); double tightMuISO_EtaBin = h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(leadingMuEta));
+  double tightMuID_PtBin  = h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt);  double tightMuID_EtaBin  = h_tightMuSF_ID->GetYaxis()->FindBin(fabs(leadingMuEta));
+  double looseMuISO_PtBin = h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt); double looseMuISO_EtaBin = h_looseMuSF_ISO->GetYaxis()->FindBin(fabs(subleadingMuEta));
+  double looseMuID_PtBin  = h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt);  double looseMuID_EtaBin = h_looseMuSF_ID->GetYaxis()->FindBin(fabs(subleadingMuEta));
   
-  double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt),h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(leadingMuEta)));
-  double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt),h_tightMuSF_ID->GetYaxis()->FindBin(fabs(leadingMuEta)));
-  double looseMuISO_SF_corr = h_looseMuSF_ISO->GetBinContent(h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt),h_looseMuSF_ISO->GetYaxis()->FindBin(subleadingMuEta));
-  double looseMuID_SF_corr = h_looseMuSF_ID->GetBinContent(h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt),h_looseMuSF_ID->GetYaxis()->FindBin(subleadingMuEta));
+  double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(tightMuISO_PtBin,tightMuISO_EtaBin);
+  double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(tightMuID_PtBin,tightMuID_EtaBin);
+  double looseMuISO_SF_corr = h_looseMuSF_ISO->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
+  double looseMuID_SF_corr = h_looseMuSF_ID->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
     
   return tightMuISO_SF_corr*tightMuID_SF_corr*looseMuISO_SF_corr*looseMuID_SF_corr;
 }

@@ -90,6 +90,9 @@ $RUN $MC/ZZ_TuneCP5_13TeV-pythia8/crab_job_ZZ/190515_214324/0000/ postZZ.root -1
 # WJets
 
 $RUN $MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_Incl/190516_073431/0000/ postWJets_MLM_0.root -1 10000 WMLM_0 split_-1
+$RUN $MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_Incl/190516_073431/0001/ postWJets_MLM_1.root -1 10000 WMLM_1 split_-1
+$RUN $MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_Incl/190516_073431/0002/ postWJets_MLM_2.root -1 10000 WMLM_2 split_-1
+$RUN $MC/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_Incl/190516_073431/0003/ postWJets_MLM_3.root -1 10000 WMLM_3 split_-1
 
 $RUN $MC/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_HT100-200/190512_155025/0000/ postW100to200_0.root -1 10000 W100_0 split_-1
 $RUN $MC/WJetsToLNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_HT100-200/190512_155025/0001/ postW100to200_1.root -1 10000 W100_1 split_-1

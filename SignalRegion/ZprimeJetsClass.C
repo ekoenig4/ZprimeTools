@@ -105,31 +105,31 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     jetveto = JetVetoDecision();
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
-    nTotalEvents++;
+    nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
     if (metFilters == 0 && inclusiveCut()) {
-      nFilters++;
+      nFilters+=event_weight;
       fillHistos(1,event_weight);
       if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
-	nHLT++;
+	nHLT+=event_weight;
 	fillHistos(2,event_weight);
 	if (jetCand.size() > 0) {
-	  nJetSelection++;
+	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
 	  if (pfMET > 250) {
-	    nMET200++;
+	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
 	    metcut = (fabs(pfMET-caloMET)/pfMET);
 	    h_metcut->Fill(metcut);
 	    if (metcut < 0.5) {
-	      nMETcut++;
+	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
 	      if (electron_veto_looseID(jetCand[0],10.) && muon_veto_looseID(jetCand[0],10.)) {
-		nLeptonIDs++;
+		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
 		if (btagVeto()) {
-		  nbtagVeto++;
+		  nbtagVeto+=event_weight;
 		  fillHistos(7,event_weight);
 		  double minDPhiJetMET_first4 = TMath::Pi();
 		  for (int i = 0; i < jetveto.size(); i++) {
@@ -141,7 +141,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  }
 		  h_dphimin->Fill(minDPhiJetMET_first4);
 		  if (dPhiJetMETcut(jetveto)) {
-		    nDphiJetMET++;
+		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
 		    if (Pt123Fraction > 0.6)
 		      fillHistos(9,event_weight);
