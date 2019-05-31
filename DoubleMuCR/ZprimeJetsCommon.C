@@ -26,6 +26,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
   h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
+  h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
@@ -344,6 +345,7 @@ double ZprimeJetsClass::getKfactor(double bosonPt) {
     kfactor = (EWK_corrected_weight/NNLO_weight);
   else
     kfactor= sample.type == WJets ? 1.21 : 1.23;
+  h_kfactor->Fill(kfactor);
   return kfactor;
 }
 

@@ -101,6 +101,7 @@ public :
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_eChNemPtFracFirst3[nHisto],*h_ePF123PtFraction[nHisto];  
   
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_kfactor;
   
   TH1D *h_cutflow;
   
@@ -111,6 +112,7 @@ public :
   TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
   TH2F *h_LeptonEtaPhi[nHisto],*h_j1EtaPhi[nHisto];
   
+  TH1F *h_tightMuISO,*h_tightMuID;
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types

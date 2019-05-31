@@ -41,6 +41,9 @@ double ZprimeJetsClass::getSF(int mu_index) {
     tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(119.99),h_tightMuSF_ISO->GetYaxis()->FindBin(2.39));
     tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(119.99),h_tightMuSF_ID->GetYaxis()->FindBin(2.39));
   }
+  
+  h_tightMuISO->Fill(tightMuISO_SF_corr);
+  h_tightMuID->Fill(tightMuID_SF_corr);
   return tightMuISO_SF_corr*tightMuID_SF_corr;
 }
 
@@ -252,6 +255,8 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
     h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
   
     h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
+    h_tightMuISO = new TH1F("h_tightMuISO","tightMuISO Scale Factor;tightMuISO Scale Factor",50,0.95,1.05); h_tightMuISO->Sumw2();
+    h_tightMuID = new TH1F("h_tightMuID","tightMuID Scale Factor;tightMuID Scale Factor",50,0.95,1.05); h_tightMuID->Sumw2();
   } else {
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();

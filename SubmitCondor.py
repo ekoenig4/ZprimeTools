@@ -61,8 +61,8 @@ if nBatches == -1:
 with open(".output/Job_"+label+".sh","w") as jobfile:
     jobfile.write("#!/bin/sh\n"
                 + "source /cvmfs/cms.cern.ch/cmsset_default.sh\n"
-                + "cd /cms/ekoenig4/MonoZprimeJet/CMSSW_10_2_10/src\n"
-                + "cmsenv\n"
+                + "#cd /cms/ekoenig4/MonoZprimeJet/CMSSW_10_2_10/src\n"
+                + "#cmsenv\n"
                 + "cd ${_CONDOR_SCRATCH_DIR}\n"
                 + "./"+argv[1]+" ${1} ${2} ${3} ${4} ${5} ${6} ${7} ${8}\n")
 

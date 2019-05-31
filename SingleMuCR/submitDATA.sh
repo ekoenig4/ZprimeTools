@@ -1,7 +1,7 @@
-$DATA1=/hdfs/store/user/varuns/Run2018_17Sep2018_May2019
-$DATA2=/hdfs/store/user/varuns/Run2018D_Prompt
-$MC=/hdfs/store/user/varuns/MC2018_Autumn18_May2019
-$RUN='python ../SubmitCondor.py analyze'
+DATA1=/hdfs/store/user/varuns/Run2018_17Sep2018_May2019
+DATA2=/hdfs/store/user/varuns/Run2018D_Prompt
+MC=/hdfs/store/user/varuns/MC2018_Autumn18_May2019
+RUN='python ../SubmitCondor.py analyze'
 
 make || exit -1
 
@@ -39,3 +39,14 @@ $RUN $DATA2/MET/crab_job_MET2018Dv2/190512_164040/0005/ postSingleMu_3_5.root -1
 $RUN $DATA2/MET/crab_job_MET2018Dv2/190512_164040/0006/ postSingleMu_3_6.root -1 10000 Mu_3_6 split_-1
 $RUN $DATA2/MET/crab_job_MET2018Dv2/190512_164040/0007/ postSingleMu_3_7.root -1 10000 Mu_3_7 split_-1
 $RUN $DATA2/MET/crab_job_MET2018Dv2/190512_164040/0008/ postSingleMu_3_8.root -1 10000 Mu_3_8 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0000/ postSingleMu_3_9.root -1 10000 Mu_3_9 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0001/ postSingleMu_3_10.root -1 10000 Mu_3_10 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0002/ postSingleMu_3_11.root -1 10000 Mu_3_11 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0003/ postSingleMu_3_12.root -1 10000 Mu_3_12 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0004/ postSingleMu_3_13.root -1 10000 Mu_3_13 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0005/ postSingleMu_3_14.root -1 10000 Mu_3_14 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0006/ postSingleMu_3_15.root -1 10000 Mu_3_15 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0007/ postSingleMu_3_16.root -1 10000 Mu_3_16 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0008/ postSingleMu_3_17.root -1 10000 Mu_3_17 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0009/ postSingleMu_3_18.root -1 10000 Mu_3_18 split_-1
+$RUN $DATA2/MET/crab_job_MET2018Dv2_3/190519_232032/0000/ postSingleMu_3_19.root -1 10000 Mu_3_19 split_-1

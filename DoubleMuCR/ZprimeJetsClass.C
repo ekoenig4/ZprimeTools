@@ -47,12 +47,25 @@ double ZprimeJetsClass::getSF(int lepindex_leading,int lepindex_subleading) {
     subleadingMuPt = 119.99;
     subleadingMuEta = 2.39;
   }
+
+  double tightMuISO_PtBin = h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt); double tightMuISO_EtaBin = h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(leadingMuEta));
+  double tightMuID_PtBin  = h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt);  double tightMuID_EtaBin  = h_tightMuSF_ID->GetYaxis()->FindBin(fabs(leadingMuEta));
+  double looseMuISO_PtBin = h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt); double looseMuISO_EtaBin = h_looseMuSF_ISO->GetYaxis()->FindBin(fabs(subleadingMuEta));
+  double looseMuID_PtBin  = h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt);  double looseMuID_EtaBin = h_looseMuSF_ID->GetYaxis()->FindBin(fabs(subleadingMuEta));
   
-  double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt),h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(leadingMuEta)));
-  double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt),h_tightMuSF_ID->GetYaxis()->FindBin(fabs(leadingMuEta)));
-  double looseMuISO_SF_corr = h_looseMuSF_ISO->GetBinContent(h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt),h_looseMuSF_ISO->GetYaxis()->FindBin(subleadingMuEta));
-  double looseMuID_SF_corr = h_looseMuSF_ID->GetBinContent(h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt),h_looseMuSF_ID->GetYaxis()->FindBin(subleadingMuEta));
-    
+  double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(tightMuISO_PtBin,tightMuISO_EtaBin);
+  double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(tightMuID_PtBin,tightMuID_EtaBin);
+  double looseMuISO_SF_corr = h_looseMuSF_ISO->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
+  double looseMuID_SF_corr = h_looseMuSF_ID->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
+
+  if (looseMuISO_SF_corr < 0.9)
+    cout << "LooseISO: " << looseMuISO_SF_corr << " Pt: " << subleadingMuPt << " Eta: " << subleadingMuEta << endl; 
+  
+  h_tightMuISO->Fill(tightMuISO_SF_corr);
+  h_tightMuID->Fill(tightMuID_SF_corr);
+  h_looseMuISO->Fill(looseMuISO_SF_corr);
+  h_looseMuID->Fill(looseMuID_SF_corr);
+  
   return tightMuISO_SF_corr*tightMuID_SF_corr*looseMuISO_SF_corr*looseMuID_SF_corr;
 }
 
@@ -117,7 +130,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     double event_weight = 1.;
     int bosonPID;
     double bosonPt;
-    bool WofZfound = false;
+    bool WorZfound = false;
     if (!sample.isData) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
@@ -131,7 +144,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	//check which mc particle is W boson
 	for(int i=0; i<nMC;i++){
 	  if((*mcPID)[i] == sample.PID){
-	    WofZfound=true;
+	    WorZfound=true;
 	    bosonPID = (*mcPID)[i];
 	    bosonPt = (*mcPt)[i];
 	  }
@@ -147,19 +160,19 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     lepindex_leading = -1;
     lepindex_subleading = -1;
     dilepton_pt = dilepton_mass = Recoil=-99;
-    nTotalEvents++;
+    nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
     for (int bit = 0; bit < 8; bit++)
     if (metFilters >> bit & 1 == 1)
       h_metFilters->Fill(bit + 1,event_weight);
     if (metFilters==0 && inclusiveCut()) { 
-      nFilters++;
+      nFilters+=event_weight;
       fillHistos(1,event_weight);
       if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData){
-	nHLT++;
+	nHLT+=event_weight;
 	fillHistos(2,event_weight);
 	if(jetCand.size()>0){
-	  nJetSelection++;
+	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  if (sample.isW_or_ZJet() && applyKF) event_weight *= getKfactor(bosonPt);
 	  //CR code
@@ -196,7 +209,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    }
 		    
 	    if(muPairSet && subleading_passes_looseIso){ 
-	      nCRSelection++;
+	      nCRSelection+=event_weight;
 	      fillHistos(4,event_weight);
 	      if (!sample.isData && applySF) event_weight *= getSF(lepindex_leading,lepindex_subleading);
 	      TLorentzVector ll = m1 + m2;
@@ -211,21 +224,21 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      Recoil = leptoMET;
 	      metcut = (fabs(pfMET - caloMET))/Recoil; //should be subtracted by caloMET
 	      if (leptoMET>250){
-		nMET200++;
+		nMET200+=event_weight;
 		fillHistos(5,event_weight);
 		//invariant mass of the two muons is betwen 60 and 120GeV
 		if(dilepton_mass > 60 && dilepton_mass < 120){
-		  ndilepton++;
+		  ndilepton+=event_weight;
 		  fillHistos(6,event_weight);
 		  if(elelist.size() == 0){
-		    nNoElectrons++;
+		    nNoElectrons+=event_weight;
 		    fillHistos(7,event_weight);
 		    h_metcut->Fill(metcut);
 		    if(metcut < 0.5){
-		      nMETcut++;
+		      nMETcut+=event_weight;
 		      fillHistos(8,event_weight);
 		      if(btagVeto()){
-			nbtagVeto++;
+			nbtagVeto+=event_weight;
 			fillHistos(9,event_weight);
 			double minDPhiJetMET_first4 = TMath::Pi();
 			for(int j = 0; j < jetveto.size(); j++){
@@ -236,7 +249,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			}
 			h_dphimin->Fill(minDPhiJetMET_first4);
 			if(dPhiJetMETcut(jetveto)){
-			  nDphiJetMET++;
+			  nDphiJetMET+=event_weight;
 			  fillHistos(10,event_weight);
 			  if (Pt123Fraction > 0.6)
 			    fillHistos(11,event_weight);
@@ -304,6 +317,11 @@ void ZprimeJetsClass::BookRegion(int i, string histname){
   h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
   h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
   h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+
+  h_tightMuISO = new TH1F("h_tightMuISO","tightMuISO Scale Factor;tightMuISO Scale Factor",50,0.95,1.05); h_tightMuISO->Sumw2();
+  h_tightMuID = new TH1F("h_tightMuID","tightMuID Scale Factor;tightMuID Scale Factor",50,0.95,1.05); h_tightMuID->Sumw2();
+  h_looseMuISO = new TH1F("h_looseMuISO","looseMuISO Scale Factor;looseMuISO Scale Factor",50,0.95,1.05); h_looseMuISO->Sumw2();
+  h_looseMuID = new TH1F("h_looseMuID","looseMuID Scale Factor;looseMuID Scale Factor",50,0.95,1.05); h_looseMuID->Sumw2();
   } else {
     //CR Histograms
     h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();

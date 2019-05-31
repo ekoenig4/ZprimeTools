@@ -102,6 +102,7 @@ public :
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_eChNemPtFracFirst3[nHisto],*h_ePF123PtFraction[nHisto];  
   
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_kfactor;
   
   TH1D *h_cutflow;
   
@@ -112,6 +113,8 @@ public :
   //CR histograms
   TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
   TH2F *h_j1EtaPhi[nHisto],*h_leadingLeptonEtaPhi[nHisto],*h_subleadingLeptonEtaPhi[nHisto];
+
+  TH1F *h_tightMuISO,*h_tightMuID,*h_looseMuISO,*h_looseMuID;
   
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
