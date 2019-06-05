@@ -199,7 +199,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
     lepindex = -1;
-    nTotalEvents++;
+    nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
     for (int bit = 0; bit < 8; bit++)
       if (metFilters >> bit & 1 == 1)
