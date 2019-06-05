@@ -122,6 +122,6 @@ with open(".output/condor_"+label,"w") as condor:
 
 #Move into .output/ and run newly made condor_submit file
 chdir(".output/")
-system("condor_submit condor_"+label)
+system("condor_submit condor_"+label+" >/dev/null &")
     
     
