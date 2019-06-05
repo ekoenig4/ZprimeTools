@@ -1,7 +1,7 @@
 version="2017"
 
-lumi = {"SingleEle":41526,
-        "DoubleEle":41526,
+lumi = {"SingleEle":23192,
+        "DoubleEle":23192,
         "SingleMu":41486,
         "DoubleMu":41486,
         "SignalRegion":1198}
