@@ -10,12 +10,13 @@ signal_Xsec_file="PlotTool/monoZprime_XS-2016-correctPDF.txt"
 
 class datamc(object):
 
-    def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
+    def __init__(self,command=None,show=1,lumi=None,fileDir="./", givenMC=None):
 
         if fileDir != "./":
             if path.isdir(fileDir+"PlotTool/"):
                 sys.path[0] = fileDir+"PlotTool/"
-        import mcinfo as mc
+        if givenMC == None: import mcinfo as mc
+        else:               import givenMC as mc
         self.version = mc.version
         self.xsec = mc.xsec
         
