@@ -96,23 +96,34 @@ public :
   vector<int>j1PFConsPID;
 
   double j1Mass;
-  
-  double Pt123Fraction,Pt123;
 
+  double Pt123Fraction,Pt123,PtRawFrac;
+  double j1ChNemEtaWidth;
+  
   double hadronTotPtFrac[3];
-  double chargedPtFrac;
+  double hadronFirst3Frac[3];
+
+  double ChPtFrac;
+  double ChTotPtFrac;
   double ChNemPtFrac;
+  double ChNemTotPtFrac;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters[nHisto],*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
+  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_j1Mass[nHisto];
+  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
 
-  TH1F *h_ChPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto];
+  TH1F *h_PtRawFrac[nHisto];
+  TH1F *h_ChPtFrac[nHisto],*h_ChTotPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_ChNemTotPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto],*h_j1ChNemEtaWidth[nHisto];
+  TH1F* h_PtFracChFirst3[nHisto],*h_PtFracNhFirst3[nHisto],*h_PtFracGammaFirst3[nHisto];
+  TH1F *h_ChPercCons[nHisto],*h_NhPercCons[nHisto],*h_GammaPercCons[nHisto];
 
+  TH1F *h_bChNemPtFrac[nHisto],*h_bChNemTotPtFrac[nHisto],*h_bPF123PtFraction[nHisto];
+  TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_ePF123PtFraction[nHisto];  
+  
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;

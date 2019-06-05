@@ -35,9 +35,9 @@ filekey = output.replace(".root","_")
 for fn in listdir(".output/"):
     if filekey in fn:
         remove(".output/"+fn)
-for fn in listdir(".status/"):
-    if label in fn:
-        remove(".status/"+fn)
+
+if not path.isdir(".status/"+label): mkdir(".status/"+label)
+for fn in listdir(".status/"+label): remove(".status/"+label+"/"+fn)
 
 nBatches = 1
 Batch = len(rootFiles)
@@ -51,7 +51,7 @@ elif (len(argv) == 9):
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 30
+    nfile_per_batch = 20
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
@@ -61,8 +61,8 @@ if nBatches == -1:
 with open(".output/Job_"+label+".sh","w") as jobfile:
     jobfile.write("#!/bin/sh\n"
                 + "source /cvmfs/cms.cern.ch/cmsset_default.sh\n"
-                + "cd /cms/ekoenig4/MonoZprimeJet/CMSSW_8_0_26_patch1/src\n"
-                + "cmsenv\n"
+                + "#cd /cms/ekoenig4/MonoZprimeJet/CMSSW_10_2_10/src\n"
+                + "#cmsenv\n"
                 + "cd ${_CONDOR_SCRATCH_DIR}\n"
                 + "./"+argv[1]+" ${1} ${2} ${3} ${4} ${5} ${6} ${7} ${8}\n")
 
@@ -90,9 +90,9 @@ with open(".output/condor_"+label,"w") as condor:
                 + " request_memory       = 1992\n"
                 + " request_disk         = 2048000\n"
                 + " Transfer_Input_Files = "+files_to_transfer+"\n"
-                + " output               = ../.status/\$(Process)_"+label+".out\n"
-                + " error                = ../.status/\$(Process)_"+label+".err\n"
-                + " Log                  = ../.status/\$(Process)_"+label+".log\n")
+                + " output               = ../.status/"+label+"/$(Process)_"+label+".out\n"
+                + " error                = ../.status/"+label+"/$(Process)_"+label+".err\n"
+                + " Log                  = ../.status/"+label+"/$(Process)_"+label+".log\n")
 
     #Get how many files are in each batch
     binsize = Batch/nBatches

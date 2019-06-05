@@ -146,6 +146,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     lepindex = -1;
     nTotalEvents++;
     fillHistos(0,event_weight);
+    for (int bit = 0; bit < 11; bit++)
+      if (metFilters >> bit & 1 == 1)
+	h_metFilters->Fill(bit + 1,event_weight);
     if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
       nFilters++;
       fillHistos(1,event_weight);
