@@ -171,7 +171,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
 	event_weight = PU->GetBinContent(bin);
 	//cout<<"event_weight: "<<event_weight<<endl;
-	fabs(genWeight) > 0.0 ? event_weight*=genWeight/fabs(genWeight) : event_weight =0.0;
+	genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
       }
       if(sample.isW_or_ZJet()) {
 	//check which mc particle is W boson
