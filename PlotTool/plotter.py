@@ -50,7 +50,7 @@ for variable in samples.args:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
-    if (samples.options.normalize and samples.histo['Data'].Integral() != 0):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
+    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Color:
         samples.histo[mc].SetTitle("");
@@ -86,7 +86,9 @@ for variable in samples.args:
 
     samples.histo['Data'].Draw('pex0same')
 
-    if samples.signal != None:samples.histo[samples.signal[0]].Draw("HIST SAME")
+    if samples.signal != None:
+        samples.histo[samples.signal[0]].SetLineWidth(2)
+        samples.histo[samples.signal[0]].Draw("HIST SAME")
 
     #################################################
 
@@ -112,7 +114,7 @@ for variable in samples.args:
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2018)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+")");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -184,8 +186,7 @@ for variable in samples.args:
         xaxis.SetTitle("");
         label = []
         for i in range(1,nbins+1):
-            binlabel = hs_datamc.GetXaxis().GetBinLabel(i)
-            label.append(TLatex(i-0.5,rymin-0.2,binlabel));
+            label.append(TLatex(i-0.5,rymin-0.2,hs_datamc.GetXaxis().GetBinLabel(i)));
 	    label[i-1].SetTextSize(0.065);
 	    label[i-1].SetTextAngle(-30.);
 	    label[i-1].Draw("SAME");
@@ -201,10 +202,11 @@ for variable in samples.args:
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2018/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
+    if (samples.options.sub != None): sub = samples.options.sub
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
