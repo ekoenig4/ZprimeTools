@@ -1,4 +1,4 @@
-#define ZprimeJetsClass_cxx
+f#define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
 using namespace std;
@@ -183,7 +183,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       if (applyPU) {
 	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
 	event_weight = PU->GetBinContent(bin);
-	fabs(genWeight) > 0.0 ? event_weight*=genWeight/fabs(genWeight) : event_weight =0.0;
+	genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
       }
       //cout<<"event_weight: "<<event_weight<<endl;
       if (sample.isW_or_ZJet())

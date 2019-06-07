@@ -57,9 +57,6 @@ double ZprimeJetsClass::getSF(int lepindex_leading,int lepindex_subleading) {
   double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(tightMuID_PtBin,tightMuID_EtaBin);
   double looseMuISO_SF_corr = h_looseMuSF_ISO->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
   double looseMuID_SF_corr = h_looseMuSF_ID->GetBinContent(looseMuISO_PtBin,looseMuISO_EtaBin);
-
-  if (looseMuISO_SF_corr < 0.9)
-    cout << "LooseISO: " << looseMuISO_SF_corr << " Pt: " << subleadingMuPt << " Eta: " << subleadingMuEta << endl; 
   
   h_tightMuISO->Fill(tightMuISO_SF_corr);
   h_tightMuID->Fill(tightMuID_SF_corr);
@@ -138,7 +135,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
       event_weight = PU->GetBinContent(bin);
       //cout<<"event_weight: "<<event_weight<<endl;
-      fabs(genWeight) > 0.0 ? event_weight*=genWeight/fabs(genWeight) : event_weight =0.0;
+      genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
       }
       if(sample.isW_or_ZJet()) {
 	//check which mc particle is W boson
