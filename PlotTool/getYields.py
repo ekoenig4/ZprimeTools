@@ -13,8 +13,6 @@ samples.initiate("h_cutflow")
 samples.SampleList.insert(0,"Bin")
 samples.histo['SumOfBkg'] = samples.getSumOfBkg()
 samples.SampleList.insert(2,'SumOfBkg')
-if 'Signal' in samples.SampleList:
-    samples.SampleList[-1] = samples.signal[0]
 
 for s in samples.SampleList:
     space = (15 - len(s))
@@ -23,9 +21,8 @@ for s in samples.SampleList:
     for ibin in samples.args:
         ibin = str(int(ibin)+1)
         if s == "Bin":
-            label = samples.histo['Data'].GetXaxis().GetBinLabel(int(ibin))
-            if (ibin == samples.args[0]): print label,
-            else:                         print 5*" ","\t",label,
+            if (ibin == samples.args[0]): print ibin,
+            else:                         print 5*" ","\t",ibin,
         else:
             out = ("%.6g" % samples.histo[s].GetBinContent(int(ibin)))
             if (ibin == samples.args[0]): print out,

@@ -114,7 +114,7 @@ for variable in samples.args:
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2016)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+")");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -202,7 +202,7 @@ for variable in samples.args:
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2016/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
