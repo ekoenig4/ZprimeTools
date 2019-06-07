@@ -26,8 +26,6 @@ class datamc(object):
         parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
         parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
         parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
-        parser.add_option("--local",help="Saves the plots to the local directory",action="store_true",default=False)
-        parser.add_option("--noOutput",help="Surpresses plot creation",action="store_true",default=False)
         (options, args) = parser.parse_args()
 
         self.options = options
@@ -68,7 +66,7 @@ class datamc(object):
 
         self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
-        preRegionData = [".output/postMETdata_0_0_0.root",".output/postSingleEle_0_0.root",".output/postSingleMu_0_0_0.root",".output/postDoubleEle_0_0.root",".output/postDoubleMu_0_0_0.root"]
+        preRegionData = [".output/postMETdata_0_0.root",".output/postSingleEle_0_0.root",".output/postSingleMu_0_0.root",".output/postDoubleEle_0_0.root",".output/postDoubleMu_0_0.root"]
         postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
@@ -276,9 +274,6 @@ class datamc(object):
                     integral=(self.histo[sample].Integral())
                     self.MC_Integral[sample]=integral
                     self.BkgIntegral += integral
-                else:
-                    axis = self.histo['Data'].GetXaxis()
-                    self.histo[sample] = TH1F("","",axis.GetNbins(),axis.GetXmin(),axis.GetXmax())
 
         if self.show == 1:
             bkgInt = {}
@@ -287,7 +282,7 @@ class datamc(object):
             for i in keylist[::-1]:
                 sample = bkgInt[i]
                 integral = self.MC_Integral[sample]
-                percentage = 100*integral/self.BkgIntegral if self.BkgIntegral != 0 else -1
+                percentage = 100*integral/self.BkgIntegral
                 space1=" "*(15-len(sample))
                 space2=" "*(8-len("%.6g" % integral))
                 # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents

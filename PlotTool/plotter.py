@@ -12,30 +12,15 @@ samples = plot.datamc()
 for variable in samples.args:    
     print "Plotting",variable
     if (samples.options.thn):
-        for i in range(len(variable)-1,-1,-1):
-            if variable[i] in ('x','y','z'):
-                axis = i
-                break
-        samples.initiate(variable[:i])
-        axis = variable[i]
-        samples.name = samples.name[axis]
+        axis = variable[-1]
+        samples.initiate(variable[:-1])
+        if (axis in ('x','y','z')):
+            samples.name = samples.name[axis]
         for hs in samples.histo:
             if axis == "x":
-                if len(variable.split("x")) > 1:
-                    rnge = variable.split("x")[-1].split("-")
-                    for i in range(2): rnge[i] = samples.histo['Data'].GetYaxis().FindBin(float(rnge[i]))
-                    samples.histo[hs] = samples.histo[hs].ProjectionX("",rnge[0],rnge[1],"")
-                else:
-                    samples.histo[hs] = samples.histo[hs].ProjectionX()
+                samples.histo[hs] = samples.histo[hs].ProjectionX()
             if axis == "y":
-                if len(variable.split("y")) > 1:
-                    
-                    rnge = variable.split("y")[-1].split("-")
-                    for i in range(2): rnge[i] = samples.histo['Data'].GetXaxis().FindBin(float(rnge[i]))
-                    samples.histo[hs] = samples.histo[hs].ProjectionY("",rnge[0],rnge[1],"")
-                    samples.histo[hs].Draw()
-                else:
-                    samples.histo[hs] = samples.histo[hs].ProjectionY()
+                samples.histo[hs] = samples.histo[hs].ProjectionY()
             if axis == "z":
                 samples.histo[hs] = samples.histo[hs].ProjectionZ()
     else:
@@ -91,7 +76,7 @@ for variable in samples.args:
         for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
-    for order in keylist: hs_datamc.Add(samples.histo[hs_order[order]])
+    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
     min=pow(10,-6);max=pow(10,2.5);
     hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
@@ -101,7 +86,9 @@ for variable in samples.args:
 
     samples.histo['Data'].Draw('pex0same')
 
-    if samples.signal != None:samples.histo[samples.signal[0]].Draw("HIST SAME")
+    if samples.signal != None:
+        samples.histo[samples.signal[0]].SetLineWidth(2)
+        samples.histo[samples.signal[0]].Draw("HIST SAME")
 
     #################################################
 
@@ -127,7 +114,7 @@ for variable in samples.args:
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2017)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+")");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -214,17 +201,16 @@ for variable in samples.args:
     yaxis.SetTitleOffset(0.35);
     yaxis.Draw("SAME");
 
-    if (samples.options.noOutput): continue
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2017/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
+    if (samples.options.sub != None): sub = samples.options.sub
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
-    if (samples.options.local): directory = "."
     c.SaveAs(directory+"/datamc_"+variable+".pdf")
     c.SaveAs(directory+"/datamc_"+variable+".png")
   

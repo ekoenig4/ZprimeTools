@@ -73,14 +73,14 @@ for variable in samples.args:
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2017)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2018)");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
     texS1.Draw();
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/APS/2017/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/APS/2018/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
