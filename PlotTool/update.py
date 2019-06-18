@@ -1,4 +1,5 @@
 import os
+from filecmp import cmp
 
 #Relevant project directories to keep track of
 projects = {
@@ -48,7 +49,7 @@ for year in projects:
             if not any(tmp): check(update[y],year,f)
             else:
                 g = tmp[0]
-                if f[id] == g[id]: continue
+                if cmp(projects[year][dir]+f[str],projects[y][dir]+g[str]): continue
                 elif f[id] > g[id]: check(update[y],year,f)
 
 #Map all files to their filenames
@@ -56,11 +57,14 @@ for year in update:
     for y in update[year]:
         update[year][y] = [f[str] for f in update[year][y]]
 
+if __name__ == "__main__": output=True
+else:                      output=False
+        
 #Update all projects as necessary
 for year in update:
-    print "Updating:",year
+    if output: print "Updating:",year
     for y in update[year]:
-        print "\tFrom:",y
+        if output: print "\tFrom:",y
         for file in update[year][y]:
-            print "\t\tFile:",file
+            if output: print "\t\tFile:",file
             os.system("cp "+projects[y][dir]+file+" "+projects[year][dir]+file)
