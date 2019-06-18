@@ -12,15 +12,70 @@ ZJets_FileNames = ["postZ100to200","postZ200to400","postZ600to800","postZ800to12
 
 GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
 
-DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY_MLM"]
+DYJets_FileNames = ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200"]
 
 TTJets_FileNames = ["postTTJetsDiLept"];#"postTTJets_MLM"
 
-DiBoson_FileNames = ["postWW","postWZ","postZZ"]#,"postWWto2L2NuPS"]
+DiBoson_FileNames = ["postWW","postWWto2L2Nu","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ"]#,"postWWto2L2NuPS"]
 
 QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
 
 xsec = {
+"postZ100to200":3.034e+02,
+"postZ200to400":9.171e+01,
+"postZ400to600":1.310e+01,
+"postZ600to800":3.243e+00,
+"postZ800to1200":1.496e+00,
+"postZ1200to2500":3.425e-01,
+"postZ2500toInf":5.263e-03,
+    
+"postWJets_MLM":5.276e+04,
+"postW100to200":1.392e+03,
+"postW200to400":4.103e+02,
+"postW400to600":5.785e+01,
+"postW600to800":1.295e+01,
+"postW800to1200":5.450e+00,
+"postW1200to2500":1.084e+00,
+"postW2500toInf":8.047e-03,
+    
+"postDY70to100":1.467e+02,
+"postDY100to200":1.608e+02,
+"postDY200to400":4.863e+01,
+"postDY400to600":6.978e+00,
+"postDY600to800":1.756e+00,
+"postDY800to1200":8.094e-01,
+"postDY1200to2500":1.931e-01,
+"postDY2500toInf":3.516e-03,
+    
+"postGJets40to100":1.857e+04,
+"postGJets100to200":8.64e+03,
+"postGJets200to400":2.194e+03,
+"postGJets400to600":2.578e+02,
+"postGJets600toInf":8.492e+01,
+    
+"postTTJetsDiLept":5.436e+01,
+"postTTJetsSingleLeptFromT":1.091e+02,
+"postTTJets_MLM":7.503e+02,
+    
+"postQCD100to200":2.366e+07,
+"postQCD200to300":1.549e+06,
+"postQCD300to500":3.230e+05,
+"postQCD500to700":2.996e+04,
+"postQCD700to1000":6.353e+03,
+"postQCD1000to1500":1.093e+03,
+"postQCD1500to2000":9.935e+01,
+"postQCD2000toInf":2.025e+01,
+    
+"postWW":7.592e+01,
+"postWWtoLNuQQ":4.599e+01,
+"postWWto2L2Nu":1.108e+01,
+"postWWto4Q":4.773e+01,
+    
+"postWZ":2.758e+01,
+"postZZ":1.214e+01,
+}
+
+old_xsec = {
 'postZ100to200': 302.8,
 'postZ200to400': 92.59,
 'postZ400to600': 13.18,
