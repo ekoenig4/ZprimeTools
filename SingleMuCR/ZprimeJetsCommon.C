@@ -48,7 +48,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
     h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",58,Pt123Bins);h_Pt123[i]->Sumw2();
     h_PF123PtFraction[i]= new TH1F(("PF123PtFraction"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1.1);h_PF123PtFraction[i]->Sumw2(); 
-    h_PtRawFrac[i]= new TH1F(("PtRawFrac"+histname).c_str(), "PtRawFrac;Raw P_{T}^{123} Fraction" ,50,0,1.1);h_PtRawFrac[i]->Sumw2(); 
+    h_PtRawFrac[i]= new TH1F(("PtRawFrac"+histname).c_str(), "PtRawFrac;Raw P_{T}^{123} Fraction" ,50,0,1.1);h_PtRawFrac[i]->Sumw2();
+    h_PFConsPt[i]  = new TH1F(("PFConsPt"+histname).c_str(), "PFConsPt;Leading Jet PF Constituent P_{T}(GeV)", 48,PtBins);h_PFConsPt[i]->Sumw2();
     h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",25,0,50);h_j1TotPFCands[i]->Sumw2();
     h_j1ChPFCands[i] = new TH1F(("j1ChPFCands"+histname).c_str(),"j1ChPFCands;# of PF charged hadrons in Leading Jet",25,0,50);h_j1ChPFCands[i]->Sumw2();
     h_j1NeutPFCands[i] = new TH1F(("j1NeutPFCands"+histname).c_str(),"j1NeutPFCands;# of PF neutral hadrons in Leading Jet",15,0,15);h_j1NeutPFCands[i]->Sumw2();
@@ -61,6 +62,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,200);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
+    h_j1RawPt[i]  = new TH1F(("j1RawPt"+histname).c_str(), "j1RawPt;Leading Jet Raw P_{T} (GeV)", 48,PtBins);h_j1RawPt[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
     h_ChTotPtFrac[i] = new TH1F(("ChTotPtFrac"+histname).c_str(),"ChTotPtFrac;Charged P_{T}^{123} Total Fraction",50,0,1.1);h_ChTotPtFrac[i]->Sumw2();
     h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
@@ -110,6 +112,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_Pt123[histoNumber]->Fill(Pt123,event_weight);
     h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
     h_PtRawFrac[histoNumber]->Fill(PtRawFrac,event_weight);
+    h_PFConsPt[histoNumber]->Fill(PFConsPt,event_weight);
     h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
     h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates,event_weight);
     h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates,event_weight);
@@ -124,6 +127,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_j1nCons[histoNumber]->Fill(jetNPhoton->at(jetCand[0])+jetNCharged->at(jetCand[0])+jetNNeutral->at(jetCand[0]),event_weight);
     h_j1Mass[histoNumber]->Fill(jetMass->at(jetCand[0]),event_weight);
     h_j1JEC[histoNumber]->Fill(jetJECUnc->at(jetCand[0]),event_weight);
+    h_j1RawPt[histoNumber]->Fill(jetRawPt->at(jetCand[0]),event_weight);
     h_j1ChNemEtaWidth[histoNumber]->Fill(j1ChNemEtaWidth,event_weight);
     h_ChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);
     h_ChNemTotPtFrac[histoNumber]->Fill(ChNemTotPtFrac,event_weight);
@@ -165,6 +169,7 @@ void ZprimeJetsClass::getPt123Frac() {
   int HadronIndex[3] = {0,0,0};
   
   for (int i = 0; i < j1PFConsPID.size(); i++) {
+    PFConsPt += j1PFConsPt.at(i);
     if (i < 3)
       Pt123 += j1PFConsPt.at(i);
     for (int j = 0; j < 3; j++)
@@ -204,7 +209,7 @@ void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
     
-  Pt123Fraction=Pt123=0.0;
+  Pt123Fraction=Pt123=PFConsPt=0.0;
   ChPtFrac=ChTotPtFrac=ChNemPtFrac=ChNemTotPtFrac=j1ChNemEtaWidth=0.0;
   //We are using these conditions so we only calculate the following quantities for the signal we are interested in
   //This will also make it faster to process the events

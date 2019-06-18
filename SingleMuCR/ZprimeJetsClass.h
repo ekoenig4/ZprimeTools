@@ -74,7 +74,7 @@ public :
   vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
 
-  double Pt123Fraction,Pt123,PtRawFrac;
+  double Pt123Fraction,Pt123,PtRawFrac,PFConsPt;
   double j1ChNemEtaWidth;
   
   double hadronTotPtFrac[3];
@@ -91,9 +91,9 @@ public :
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
+  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto],*h_j1RawPt[nHisto];
 
-  TH1F *h_PtRawFrac[nHisto];
+  TH1F *h_PtRawFrac[nHisto], *h_PFConsPt[nHisto];
   TH1F *h_ChPtFrac[nHisto],*h_ChTotPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_ChNemTotPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto],*h_j1ChNemEtaWidth[nHisto];
   TH1F* h_PtFracChFirst3[nHisto],*h_PtFracNhFirst3[nHisto],*h_PtFracGammaFirst3[nHisto];
   TH1F *h_ChPercCons[nHisto],*h_NhPercCons[nHisto],*h_GammaPercCons[nHisto];
