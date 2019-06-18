@@ -30,28 +30,22 @@ int main(int argc, const char* argv[]) {
 
 double ZprimeJetsClass::getSF(int lepindex_leading,int lepindex_subleading) {
   double leadingMuPt = muPt->at(lepindex_leading);
-  double leadingMuEta = muEta->at(lepindex_leading);
-  if (leadingMuPt <= 20) {
-    leadingMuPt = 20.01;
-    leadingMuEta = 0.01;
-  } else if (leadingMuPt >= 120) {
-    leadingMuPt = 119.99;
-    leadingMuEta = 2.39;
-  }
+  double leadingMuEta = fabs(muEta->at(lepindex_leading));
+  if (leadingMuPt >= 120) leadingMuPt = 119.9;
+  else if (leadingMuPt <= 15) leadingMuPt = 15.1;
+  if (leadingMuEta >= 2.4) leadingMuEta = 2.39;
+  
+  
   double subleadingMuPt = muPt->at(lepindex_subleading);
-  double subleadingMuEta = muEta->at(lepindex_subleading);
-  if (subleadingMuPt <= 20) {
-    subleadingMuPt = 20.01;
-    subleadingMuEta = 0.01;
-  } else if (subleadingMuPt >= 120) {
-    subleadingMuPt = 119.99;
-    subleadingMuEta = 2.39;
-  }
+  double subleadingMuEta = fabs(muEta->at(lepindex_subleading));
+  if (subleadingMuPt >= 120) subleadingMuPt = 119.9;
+  else if (subleadingMuPt <= 15) subleadingMuPt = 15.1;
+  if (subleadingMuEta >= 2.4) subleadingMuEta = 2.39;
 
-  double tightMuISO_PtBin = h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt); double tightMuISO_EtaBin = h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(leadingMuEta));
-  double tightMuID_PtBin  = h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt);  double tightMuID_EtaBin  = h_tightMuSF_ID->GetYaxis()->FindBin(fabs(leadingMuEta));
-  double looseMuISO_PtBin = h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt); double looseMuISO_EtaBin = h_looseMuSF_ISO->GetYaxis()->FindBin(fabs(subleadingMuEta));
-  double looseMuID_PtBin  = h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt);  double looseMuID_EtaBin = h_looseMuSF_ID->GetYaxis()->FindBin(fabs(subleadingMuEta));
+  double tightMuISO_PtBin = h_tightMuSF_ISO->GetXaxis()->FindBin(leadingMuPt); double tightMuISO_EtaBin = h_tightMuSF_ISO->GetYaxis()->FindBin(leadingMuEta);
+  double tightMuID_PtBin  = h_tightMuSF_ID->GetXaxis()->FindBin(leadingMuPt);  double tightMuID_EtaBin  = h_tightMuSF_ID->GetYaxis()->FindBin(leadingMuEta);
+  double looseMuISO_PtBin = h_looseMuSF_ISO->GetXaxis()->FindBin(subleadingMuPt); double looseMuISO_EtaBin = h_looseMuSF_ISO->GetYaxis()->FindBin(subleadingMuEta);
+  double looseMuID_PtBin  = h_looseMuSF_ID->GetXaxis()->FindBin(subleadingMuPt);  double looseMuID_EtaBin = h_looseMuSF_ID->GetYaxis()->FindBin(subleadingMuEta);
   
   double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(tightMuISO_PtBin,tightMuISO_EtaBin);
   double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(tightMuID_PtBin,tightMuID_EtaBin);
@@ -86,12 +80,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     TFile *weights = TFile::Open("PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
 
-    TFile *f_muSF_ISO = new TFile("RunBCDEF_SF_ISO.root");
-    TFile *f_muSF_ID = new TFile("RunBCDEF_SF_ID.root");
+    TFile *f_muSF_ISO = new TFile("RunABCD_SF_ISO.root");
+    TFile *f_muSF_ID = new TFile("RunABCD_SF_ID.root");
     h_tightMuSF_ISO = (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
     h_looseMuSF_ISO = (TH2F*)f_muSF_ISO->Get("NUM_LooseRelIso_DEN_LooseID_pt_abseta");
-    h_tightMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_genTracks_pt_abseta");
-    h_looseMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_LooseID_DEN_genTracks_pt_abseta");
+    h_tightMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_TrackerMuons_pt_abseta");
+    h_looseMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_LooseID_DEN_TrackerMuons_pt_abseta");
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
       TFile *file = new TFile("kfactors.root");

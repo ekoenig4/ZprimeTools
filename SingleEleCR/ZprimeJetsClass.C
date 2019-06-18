@@ -1,4 +1,4 @@
-f#define ZprimeJetsClass_cxx
+#define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
 using namespace std;
@@ -108,7 +108,7 @@ double EletriggerSF(float pt, float eta){
 }
 
 double ZprimeJetsClass::getSF(int ele_index) {
-  double eleEta_to_use = elePt->at(ele_index) < 500 ? eleEta->at(ele_index) : 2.49;
+  double eleEta_to_use = fabs(eleEta->at(ele_index)) < 2.5 ? eleEta->at(ele_index) : 2.49;
   double elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
   double eleRecoSF_corr=h_eleRecoSF_highpt->GetBinContent(h_eleRecoSF_highpt->GetXaxis()->FindBin(eleEta_to_use),h_eleRecoSF_highpt->GetYaxis()->FindBin(elePt_to_use));
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
@@ -149,8 +149,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
     }
 
-    TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root");
-    TFile *f_eleIDeffSF=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingTight94X.root");
+    TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_updatedAll.root");
+    TFile *f_eleIDeffSF=new TFile("2018_ElectronTight.root");
     h_eleRecoSF_highpt=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
     h_eleIDSF=(TH2F*) f_eleIDeffSF->Get("EGamma_SF2D");
   }

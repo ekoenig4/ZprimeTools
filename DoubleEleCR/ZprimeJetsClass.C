@@ -88,17 +88,17 @@ double EletriggerSF(float pt, float eta){
 
 double ZprimeJetsClass::getSF(int lepindex_leading, int lepindex_subleading) {
   double leadingElePt = elePt->at(lepindex_leading) < 500 ? elePt->at(lepindex_leading) : 499;
-  double leadingEleEta = elePt->at(lepindex_leading) < 500 ? eleEta->at(lepindex_leading) : 2.49;
+  double leadingEleEta = fabs(eleEta->at(lepindex_leading)) < 2.5 ? eleEta->at(lepindex_leading) : 2.49;
   double subleadingElePt = elePt->at(lepindex_subleading) < 500 ? elePt->at(lepindex_subleading) : 499;
-  double subleadingEleEta = elePt->at(lepindex_subleading) < 500 ? eleEta->at(lepindex_subleading) : 2.49;
+  double subleadingEleEta = fabs(eleEta->at(lepindex_subleading)) < 2.5 ? eleEta->at(lepindex_subleading) : 2.49;
   // cout<<"leadingElePt = " << elePt->at(lepindex_leading) <<" leadingEleEta = " << eleEta->at(lepindex_leading) << endl;
   // cout<<"subleadingElePt = " << elePt->at(lepindex_subleading) <<" leadingEleEta = " << eleEta->at(lepindex_subleading) << endl;
   double leadingEleRecoSF_corr=h_eleRecoSF_highpt->GetBinContent(h_eleRecoSF_highpt->GetXaxis()->FindBin(leadingEleEta),h_eleRecoSF_highpt->GetYaxis()->FindBin(leadingElePt));
-  double leadingEleEffSF_corr=h_eleIDSF->GetBinContent(h_eleIDSF->GetXaxis()->FindBin(leadingEleEta),h_eleIDSF->GetYaxis()->FindBin(leadingElePt));
+  double leadingEleEffSF_corr=h_eleIDSF_tight->GetBinContent(h_eleIDSF_tight->GetXaxis()->FindBin(leadingEleEta),h_eleIDSF_tight->GetYaxis()->FindBin(leadingElePt));
   double leadingEleTriggSF = EletriggerSF(elePt->at(lepindex_leading),eleEta->at(lepindex_leading));
   
   double subleadingEleRecoSF_corr=h_eleRecoSF_highpt->GetBinContent(h_eleRecoSF_highpt->GetXaxis()->FindBin(subleadingEleEta),h_eleRecoSF_highpt->GetYaxis()->FindBin(subleadingElePt));
-  double subleadingEleEffSF_corr=h_eleIDSF->GetBinContent(h_eleIDSF->GetXaxis()->FindBin(subleadingEleEta),h_eleIDSF->GetYaxis()->FindBin(subleadingElePt));
+  double subleadingEleEffSF_corr=h_eleIDSF_loose->GetBinContent(h_eleIDSF_loose->GetXaxis()->FindBin(subleadingEleEta),h_eleIDSF_loose->GetYaxis()->FindBin(subleadingElePt));
   double subleadingEleTriggSF = EletriggerSF(elePt->at(lepindex_subleading),eleEta->at(lepindex_subleading));
   // cout<<"leadingEleTriggSF = " << leadingEleTriggSF << endl;
   // cout<<"subleadingEleTriggSF = " << subleadingEleTriggSF << endl;
@@ -125,10 +125,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     TFile *weights = TFile::Open("PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
     
-    TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root");
-    TFile *f_eleIDeffSF=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingTight94X.root");
+    TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_updatedAll.root");
+    TFile *f_eleIDeffSF_loose=new TFile("2018_ElectronLoose.root");
+    TFile *f_eleIDeffSF_tight=new TFile("2018_ElectronTight.root");
     h_eleRecoSF_highpt=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
-    h_eleIDSF=(TH2F*) f_eleIDeffSF->Get("EGamma_SF2D");
+    h_eleIDSF_loose=(TH2F*) f_eleIDeffSF_loose->Get("EGamma_SF2D");
+    h_eleIDSF_tight=(TH2F*) f_eleIDeffSF_tight->Get("EGamma_SF2D");
 
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
