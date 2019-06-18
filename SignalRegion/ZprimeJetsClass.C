@@ -142,12 +142,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
     float metcut = 0.0;
     
-    fillHistos(0,event_weight);
     jetveto = JetVetoDecision();
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
     nTotalEvents+=event_weight;
-    
+    fillHistos(0,event_weight);
     for (int bit = 0; bit < 11; bit++)
       if (metFilters >> bit & 1 == 1)
 	h_metFilters->Fill(bit + 1,event_weight);
@@ -185,7 +184,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  }
 		  h_dphimin->Fill(minDPhiJetMET_first4);
 		  if(dPhiJetMETcut(jetveto)) {
-		    cout << j1Mass <<endl;
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
 		    if (Pt123Fraction > 0.6)

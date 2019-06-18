@@ -100,14 +100,17 @@ public :
   double ChTotPtFrac;
   double ChNemPtFrac;
   double ChNemTotPtFrac;
+  double LepPtFrac;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
+  int LeptonPFCandidates;
    
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
+  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto],*h_j1PID[nHisto],*h_j1Lepton[nHisto];
+  TH1F *h_LepPtFrac[nHisto];
 
   TH1F *h_PtRawFrac[nHisto];
   TH1F *h_ChPtFrac[nHisto],*h_ChTotPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_ChNemTotPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto],*h_j1ChNemEtaWidth[nHisto];

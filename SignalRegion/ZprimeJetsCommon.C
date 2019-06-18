@@ -59,6 +59,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,3000);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
+    h_j1PID[i] = new TH1F(("j1PID"+histname).c_str(),"j1PID;Leading Jet Particle ID",50,0,400); h_j1PID[i]->Sumw2();
+    h_j1Lepton[i] = new TH1F(("j1Lepton"+histname).c_str(),"j1Lepton;Leading Jet Lepton",11,0,10); h_j1Lepton[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
     h_ChTotPtFrac[i] = new TH1F(("ChTotPtFrac"+histname).c_str(),"ChTotPtFrac;Charged P_{T}^{123} Total Fraction",50,0,1.1);h_ChTotPtFrac[i]->Sumw2();
     h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
@@ -72,6 +74,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_ChPercCons[i] = new TH1F(("ChPercCons"+histname).c_str(),"ChPercCons;Charged Hadron Constituent Percent",50,0,1.1);h_ChPercCons[i]->Sumw2();
     h_NhPercCons[i] = new TH1F(("NhPercCons"+histname).c_str(),"NhPercCons;Neutral Hadron Constituent Percent",50,0,1.1);h_NhPercCons[i]->Sumw2();
     h_GammaPercCons[i] = new TH1F(("GammaPercCons"+histname).c_str(),"GammaPercCons;Photon Constituent Percent",50,0,1.1);h_GammaPercCons[i]->Sumw2();
+
+    h_LepPtFrac[i] = new TH1F(("LepPtFrac"+histname).c_str(),"LepPtFrac; Lepton P_{T}^{123} Total Fraction",50,0,1.1);h_LepPtFrac[i]->Sumw2();
 
     //Region Specific Histograms
     BookRegion(i,histname);
@@ -114,6 +118,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_j1Mass[histoNumber]->Fill(j1Mass,event_weight);
     h_j1JEC[histoNumber]->Fill(jetJECUnc->at(jetCand[0]),event_weight);
     h_j1ChNemEtaWidth[histoNumber]->Fill(j1ChNemEtaWidth,event_weight);
+    for (int ID : j1PFConsPID) h_j1PID[histoNumber]->Fill(abs(ID),event_weight);
+    h_j1Lepton[histoNumber]->Fill(LeptonPFCandidates,event_weight);
     h_ChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);
     h_ChNemTotPtFrac[histoNumber]->Fill(ChNemTotPtFrac,event_weight);
     h_ChPtFrac[histoNumber]->Fill(ChPtFrac,event_weight);
@@ -127,6 +133,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_ChPercCons[histoNumber]->Fill(ChargedPFCandidates/(float)TotalPFCandidates,event_weight);
     h_NhPercCons[histoNumber]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
     h_GammaPercCons[histoNumber]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
+
+    h_LepPtFrac[histoNumber]->Fill(LepPtFrac,event_weight);
   }
 
   fillRegion(histoNumber,event_weight);
@@ -143,6 +151,11 @@ void ZprimeJetsClass::getPt123Frac() {
   int HadronIndex[3] = {0,0,0};
   
   for (int i = 0; i < j1PFConsPID.size(); i++) {
+    int ID = abs(j1PFConsPID[i]);
+    if (ID == 11 || ID == 13) {
+      LeptonPFCandidates++;
+      LepPtFrac += j1PFConsPt[i];
+    }
     if (i < 3)
       Pt123 += j1PFConsPt.at(i);
     for (int j = 0; j < 3; j++)
@@ -167,6 +180,7 @@ void ZprimeJetsClass::getPt123Frac() {
   ChTotPtFrac = HadronPtFirst3[1]/jetPt->at(jetCand[0]);
   ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(HadronPt[1]+HadronPt[2]);
   ChNemTotPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/jetPt->at(jetCand[0]);
+  LepPtFrac /= jetPt->at(jetCand[0]);
   
   for (int i = 0; i < 3; i++){
     hadronTotPtFrac[i] = HadronPtFirst3[i]/jetPt->at(jetCand[0]);
@@ -181,6 +195,7 @@ void ZprimeJetsClass::getPt123Frac() {
 void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
+  LeptonPFCandidates=0;
     
   Pt123Fraction=Pt123=0.0;
   ChPtFrac=ChTotPtFrac=ChNemPtFrac=ChNemTotPtFrac=j1ChNemEtaWidth=0.0;
