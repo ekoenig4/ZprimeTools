@@ -66,15 +66,13 @@ class datamc(object):
 
         self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
-        preRegionData = [".output/postMETdata_0_0.root",".output/postSingleEle_0_0.root",".output/postSingleMu_0_0.root",".output/postDoubleEle_0_0.root",".output/postDoubleMu_0_0.root"]
-        postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"]
-        RegionDir=["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
+        preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
+        postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
         self.region=None
         for i in range(len(RegionName)):
-            if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
-            elif RegionDir[i] in getcwd().split("/")[-1]: self.region=RegionName[i]
+            if any(f for f in listdir('.output') if preRegionData[i] in f) or path.isfile(postRegionData[i]): self.region=RegionName[i]
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
         
