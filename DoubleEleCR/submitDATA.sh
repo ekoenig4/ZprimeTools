@@ -1,3 +1,4 @@
+
 MC=/hdfs/store/user/varuns/MC2017_12Apr2018_May2019
 DATA=/hdfs/store/user/varuns/Run2017_31Mar2018_May2019
 RUN='python ../SubmitCondor.py analyze'
@@ -46,3 +47,14 @@ $RUN $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0003/ postDoub
 $RUN $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0004/ postDoubleEle_3_11.root -1 10000 Ele_3_11 split_-1
 $RUN $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0005/ postDoubleEle_3_12.root -1 10000 Ele_3_12 split_-1
 $RUN $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0006/ postDoubleEle_3_13.root -1 10000 Ele_3_13 split_-1
+
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0000/ postDoubleEle_4_0.root -1 10000 Ele_4_0 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0001/ postDoubleEle_4_1.root -1 10000 Ele_4_1 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0002/ postDoubleEle_4_2.root -1 10000 Ele_4_2 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0003/ postDoubleEle_4_3.root -1 10000 Ele_4_3 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0004/ postDoubleEle_4_4.root -1 10000 Ele_4_4 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0005/ postDoubleEle_4_5.root -1 10000 Ele_4_5 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0006/ postDoubleEle_4_6.root -1 10000 Ele_4_6 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0007/ postDoubleEle_4_7.root -1 10000 Ele_4_7 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0008/ postDoubleEle_4_8.root -1 10000 Ele_4_8 split_-1
+$RUN $DATA/SingleElectron/crab_job_SingleEle2017F/190605_135235/0009/ postDoubleEle_4_9.root -1 10000 Ele_4_9 split_-1
