@@ -42,7 +42,6 @@ public :
   static const bool applySF = true;
   static const bool applyKF = true;
   static const bool applyInclusive = false;
-  vector<string> badevents;
   static const int nHisto = 16;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
   struct DataMC {

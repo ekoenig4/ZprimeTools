@@ -68,7 +68,7 @@ public :
   TH1D *ewkCorrection;
   TH1D *NNLOCorrection;
   TH2F *h_eleRecoSF_highpt;
-  TH2F *h_eleIDSF;
+  TH2F *h_eleIDSF_loose,*h_eleIDSF_tight;
 
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;

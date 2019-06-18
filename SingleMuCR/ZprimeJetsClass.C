@@ -29,18 +29,15 @@ int main(int argc, const char* argv[]) {
 }
 
 double ZprimeJetsClass::getSF(int mu_index) {
-  double tightMuISO_SF_corr = 1;
-  double tightMuID_SF_corr = 1;
-  if (20 < muPt->at(mu_index) && muPt->at(mu_index) < 120) {
-    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(muPt->at(mu_index)),h_tightMuSF_ISO->GetYaxis()->FindBin(fabs(muEta->at(mu_index))));
-    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(muPt->at(mu_index)),h_tightMuSF_ID->GetYaxis()->FindBin(fabs(muEta->at(mu_index))));
-  } else if (muPt->at(mu_index) <= 20) {
-    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(20.01),h_tightMuSF_ISO->GetYaxis()->FindBin(0.01));
-    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(20.01),h_tightMuSF_ID->GetYaxis()->FindBin(0.01));
-  } else if (muPt->at(mu_index) >= 120) {
-    tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(119.99),h_tightMuSF_ISO->GetYaxis()->FindBin(2.39));
-    tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(119.99),h_tightMuSF_ID->GetYaxis()->FindBin(2.39));
-  }
+  double muEta_to_use = fabs(muEta->at(mu_index));
+  double muPt_to_use = muPt->at(mu_index);
+  if      (muPt_to_use >= 120)  muPt_to_use = 119.9;
+  else if (muPt_to_use <= 15 )  muPt_to_use = 15.1;
+  if      (muEta_to_use >= 2.4) muEta_to_use = 2.39;
+  
+  double tightMuISO_SF_corr = h_tightMuSF_ISO->GetBinContent(h_tightMuSF_ISO->GetXaxis()->FindBin(muPt_to_use),h_tightMuSF_ISO->GetYaxis()->FindBin(muEta_to_use));
+  double tightMuID_SF_corr = h_tightMuSF_ID->GetBinContent(h_tightMuSF_ID->GetXaxis()->FindBin(muPt_to_use),h_tightMuSF_ID->GetYaxis()->FindBin(muEta_to_use));
+  
   return tightMuISO_SF_corr*tightMuID_SF_corr;
 }
 

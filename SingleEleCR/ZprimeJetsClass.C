@@ -22,14 +22,6 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
-void WriteBadEvent(vector<string> badevents,string fname) {
-  ofstream file;
-  file.open(fname);
-  for (string s : badevents)
-    file << s;
-  file.close();
-}
-
 double EletriggerSF(float pt, float eta){
   double sf = 1.0;
   if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
@@ -89,7 +81,7 @@ double EletriggerSF(float pt, float eta){
 }
 
 double ZprimeJetsClass::getSF(int ele_index) {
-  double eleEta_to_use = elePt->at(ele_index) < 500 ? eleEta->at(ele_index) : 2.49;
+  double eleEta_to_use = fabs(eleEta->at(ele_index)) < 2.5 ? eleEta->at(ele_index) : 2.49;
   double elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
   double eleRecoSF_corr=h_eleRecoSF_highpt->GetBinContent(h_eleRecoSF_highpt->GetXaxis()->FindBin(eleEta_to_use),h_eleRecoSF_highpt->GetYaxis()->FindBin(elePt_to_use));
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
@@ -107,8 +99,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   cout<<"Coming in:"<<endl;
   cout<<"nentries:"<<nentries<<endl;
   Long64_t nentriesToCheck = nentries;
-  
-  badevents.clear();
   
   int nTotal = 0;
   double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
@@ -133,7 +123,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
 
     TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root");
-    TFile *f_eleIDeffSF=new TFile("egammaEffi.txt_EGM2D_runBCDEF_passingTight94X.root");
+    TFile *f_eleIDeffSF=new TFile("2017_ElectronTight.root");
     h_eleRecoSF_highpt=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
     h_eleIDSF=(TH2F*) f_eleIDeffSF->Get("EGamma_SF2D");
   }
@@ -249,12 +239,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			fillHistos(10,event_weight);
 			if (Pt123Fraction > 0.6)
 			  fillHistos(11,event_weight);
-			if (Pt123Fraction > 0.7) {
-			  ostringstream stringStream;
-			  stringStream << "PtFrac: " << Pt123Fraction << " | Run: " << run << " | Lumi: " << lumis << " | Event: " << event << "\n";
-			  badevents.push_back(stringStream.str());
+			if (Pt123Fraction > 0.7)
 			  fillHistos(12,event_weight);
-			}
 			if (Pt123Fraction > 0.8)
 			  fillHistos(13,event_weight);
 			if (Pt123Fraction > 0.85)
@@ -286,7 +272,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(9,nMETcut);
   h_cutflow->SetBinContent(10,nbtagVeto);
   h_cutflow->SetBinContent(11,nDphiJetMET);
-  WriteBadEvent(badevents,filename+".txt");
 }
 
 void ZprimeJetsClass::BookRegion(int i,string histname) {
