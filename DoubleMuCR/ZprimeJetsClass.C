@@ -119,6 +119,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    int nPS = 45;
+    double ps_event_weight[nPS];
+    for (int i = 0; i < nPS; i++) ps_event_weight[i] = 1.;
     int bosonPID;
     double bosonPt;
     bool WorZfound = false;
@@ -130,6 +133,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       event_weight = PU->GetBinContent(bin);
       //cout<<"event_weight: "<<event_weight<<endl;
       genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
+	for (int i = 0; i < nPS; i++) {
+	  ps_event_weight[i] *= psWeight->at(i);
+	}
       }
       if(sample.isW_or_ZJet()) {
 	//check which mc particle is W boson
@@ -165,7 +171,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	if(jetCand.size()>0){
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  if (sample.isW_or_ZJet() && applyKF) event_weight *= getKfactor(bosonPt);
+	  if (sample.isW_or_ZJet() && applyKF) {
+	    double kfactor = getKfactor(bosonPt);
+	    event_weight *= kfactor;
+	    for (int i = 0; i < nPS; i++) ps_event_weight[i] *= kfactor;
+	  }
 	  //CR code
 	  //At least one of the two muons passes the tight selection
 	  vector<int> mulist = muon_veto_looseID(jetCand[0],0,0,10.0);
@@ -202,7 +212,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    if(muPairSet && subleading_passes_looseIso){ 
 	      nCRSelection+=event_weight;
 	      fillHistos(4,event_weight);
-	      if (!sample.isData && applySF) event_weight *= getSF(lepindex_leading,lepindex_subleading);
+	      if (!sample.isData && applySF) {
+		double sf = getSF(lepindex_leading,lepindex_subleading);
+		event_weight *= sf;
+		for (int i = 0; i < nPS; i++) ps_event_weight[i] *= sf;
+	      }
 	      TLorentzVector ll = m1 + m2;
 	      dilepton_mass = ll.M();
 	      dilepton_pt = ll.Pt();
@@ -242,16 +256,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			if(dPhiJetMETcut(jetveto)){
 			  nDphiJetMET+=event_weight;
 			  fillHistos(10,event_weight);
-			  if (Pt123Fraction > 0.6)
-			    fillHistos(11,event_weight);
-			  if (Pt123Fraction > 0.7)
-			    fillHistos(12,event_weight);
-			  if (Pt123Fraction > 0.8)
-			    fillHistos(13,event_weight);
-			  if (Pt123Fraction > 0.85)
-			    fillHistos(14,event_weight);
-			  if (Pt123Fraction > 0.9)
-			    fillHistos(15,event_weight);
+			  for (int i = 0; i < nPS; i++) {
+			    fillHistos(11+i,ps_event_weight[i]);
+			  }
 			}
 		      }   
 		    }	

@@ -66,13 +66,13 @@ class datamc(object):
 
         self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
-        preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
+        preRegionData = [".output/postMETdata_0_0.root",".output/postSingleEle_0_0.root",".output/postSingleMu_0_0.root",".output/postDoubleEle_0_0.root",".output/postDoubleMu_0_0_0.root"]
         postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
         self.region=None
         for i in range(len(RegionName)):
-            if any(f for f in listdir('.output') if preRegionData[i] in f) or path.isfile(postRegionData[i]): self.region=RegionName[i]
+            if path.isfile(preRegionData[i]) or path.isfile(postRegionData[i]): self.region=RegionName[i]
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
         
@@ -92,18 +92,18 @@ class datamc(object):
         self.HaddFiles()
         if (self.options.allHisto):
             self.GetAllHisto()
-        
-    def initiate(self,variable):
-        self.GetVariable(variable)
+    ########################################################################
+    def initiate(self,variable,up=None,dn=None):
+        self.GetVariable(variable,up,dn)
         self.ScaleHistogram()
-
+    ######################################################################
     def getSumOfBkg(self):
         sumOfBkg = self.histo["WJets"].Clone()
         for mc in self.MC_Color:
             if (mc != "WJets"):
                 sumOfBkg.Add(self.histo[mc])
         return sumOfBkg
-
+    #######################################################################
     def getSignalXsec(self,scale=1):
         from monoZprime_XS import signalxsec
         for data in signalxsec:
@@ -113,7 +113,7 @@ class datamc(object):
             mv=data.split("_")[1].replace("Mv","")
             if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
             self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
-        
+    #########################################################################
     def HaddFiles(self):
         AllFiles=[]
         for mcSample in self.xsec: AllFiles.append(mcSample)
@@ -177,8 +177,7 @@ class datamc(object):
         ###################################
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
-                        
-
+    ###########################################################################################################
     def GetAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
@@ -188,7 +187,7 @@ class datamc(object):
             nhisto = key.GetName().split("_")[-1]
             if (type(rfile.Get(key.GetName())) == TH1F or type(rfile.Get(key.GetName())) == TH1D) and (not nhisto.isdigit() or nhisto == basic):
                 self.args.append(key.GetName())
-
+    ###############################################################################################################
     def GetVariableName(self,variable):
         self.name = 'Xaxis Title'
         for title in samplenames:
@@ -198,8 +197,8 @@ class datamc(object):
             if key == title:
                 self.name = samplenames[title];
                 break
-                    
-    def GetVariable(self,variable):
+    ################################################################################################################
+    def GetVariable(self,variable,up,dn):
         self.histo = {}
         self.total = {}
 
@@ -239,9 +238,11 @@ class datamc(object):
                 self.histo[sample].append(hs)
                 cutflow=rfile.Get("h_cutflow")
                 self.total[sample].append(cutflow.GetBinContent(1))
-
+        self.setUnc(up,dn)
+    #########################################################################################################
     def ScaleHistogram(self):
         self.BkgIntegral = 0
+        self.tmp_hs = {}
         for sample in self.SampleList:
             if sample == 'Data':
                 integral=(self.histo[sample].Integral())
@@ -259,6 +260,7 @@ class datamc(object):
                     if self.show == 1:print "integral of "+signal+space+" here:"+"%.6g" % integral
             else:
                 rawevents = 0
+                self.tmp_hs[sample] = [hs.Clone() for hs in self.histo[sample]]
                 for i in range(len(self.histo[sample])):
                     if self.MC_FileNames[sample] == "null":continue
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
@@ -267,13 +269,14 @@ class datamc(object):
                     if (self.total[sample][i] == 0): scale = 0
                     else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_FileNames[sample][i]]
                     self.histo[sample][i].Scale(scale)
-                if (len(self.histo[sample]) > 0):
+                if any(self.histo[sample]):
                     for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
                     self.histo[sample]=self.histo[sample][0]
                     self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
                     integral=(self.histo[sample].Integral())
                     self.MC_Integral[sample]=integral
                     self.BkgIntegral += integral
+                        
 
         if self.show == 1:
             bkgInt = {}
@@ -287,8 +290,51 @@ class datamc(object):
                 space2=" "*(8-len("%.6g" % integral))
                 # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
                 print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
+    ########################################################################################################################################
+    def setUnc(self,up,dn):
+        self.unc = {}
+        for sample in self.MC_FileNames:
+            self.unc[sample]={'up':None,'dn':None}
+            unc_key = ['up','dn']
+            for i,variable in enumerate((up,dn)):
+                if variable == None: continue
+                self.unc[sample][unc_key[i]] = []
+                for j,fn in enumerate(self.MC_FileNames[sample]):
+                    if not path.isfile(self.fileDir+fn+".root"): continue
+                    rfile=TFile.Open(self.fileDir+fn+".root")
+                    keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
+                    if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
+                    else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
+                    hs.SetName(variable+"_"+fn)
+                    self.unc[sample][unc_key[i]].append(hs)
 
-######################################################################    
+                for j,hs in enumerate(self.unc[sample][unc_key[i]]):
+                    if self.MC_FileNames[sample] == "null":continue
+                    #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
+                    # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
+                    if (self.total[sample][j] == 0): scale = 0
+                    else:                            scale=(1./self.total[sample][j])*self.lumi*self.xsec[self.MC_FileNames[sample][j]]
+                    hs.Scale(scale)
+                if any(self.unc[sample][unc_key[i]]):
+                    for j in range(1,len(self.unc[sample][unc_key[i]])): self.unc[sample][unc_key[i]][0].Add(self.unc[sample][unc_key[i]][j])
+                    self.unc[sample][unc_key[i]]=self.unc[sample][unc_key[i]][0]
+                    self.unc[sample][unc_key[i]].SetName(self.unc[sample][unc_key[i]].GetName().replace(self.MC_FileNames[sample][0],sample))
+                if self.MC_Integral[sample] != 0:
+                    print unc_key[i],sample,'\t|',
+                    print (self.unc[sample][unc_key[i]].Integral()/self.MC_Integral[sample])
+    ########################################################################################################################################
+    def getUnc(self):
+        unc_sum = {'up':None,'dn':None}
+        for u in ('up','dn'):
+            sumOfBkg = self.unc['WJets'][u].Clone()
+            for ibin in range(1,sumOfBkg.GetNbinsX()+1):
+                content = 0
+                for sample in self.MC_Color: content += self.unc[sample][u].GetBinContent(ibin)**2
+                content = content**0.5
+                sumOfBkg.SetBinContent(ibin,content)
+            unc_sum[u] = sumOfBkg
+        return unc_sum['up'],unc_sum['dn']
+##########################################################################################################################################  
 
             
 def GetRatio(hs_num,hs_den):

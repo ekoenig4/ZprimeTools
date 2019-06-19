@@ -63,6 +63,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,200);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
+    h_j1PID[i] = new TH1F(("j1PID"+histname).c_str(),"j1PID;Leading Jet Particle Constituent ID",10,-400,600); h_j1PID[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
     h_ChTotPtFrac[i] = new TH1F(("ChTotPtFrac"+histname).c_str(),"ChTotPtFrac;Charged P_{T}^{123} Total Fraction",50,0,1.1);h_ChTotPtFrac[i]->Sumw2();
     h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
@@ -135,6 +136,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_ChPercCons[histoNumber]->Fill(ChargedPFCandidates/(float)TotalPFCandidates,event_weight);
     h_NhPercCons[histoNumber]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
     h_GammaPercCons[histoNumber]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
+
+    for (int PID : j1PFConsPID) h_j1PID[histoNumber]->Fill(PID,event_weight);
 
     if (fabs(jetEta->at(jetCand[0])) <= 1.479) {
       h_bChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);
