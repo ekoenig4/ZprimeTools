@@ -42,9 +42,8 @@ public :
   static const bool applySF = true;
   static const bool applyKF = true;
   static const bool applyInclusive = true;
-  vector<string> badevents;
   static const int nHisto = 16;
-  enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
+  enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
     bool isInclusive;
@@ -52,7 +51,7 @@ public :
     int PID;
     DataMC(){}
     DataMC(string filename) {
-      string sampleID[] = {"Run2018","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
+      string sampleID[] = {"Run2018","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
       string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
       for (int i = 0; i < Total; i++)
 	if (filename.find(sampleID[i]) != string::npos) {
@@ -76,6 +75,8 @@ public :
   TH2F *h_eleRecoSF_highpt;
   TH2F *h_eleIDSF;
 
+  double noweight;
+  
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
   vector<float>j1PFConsEt;
@@ -111,7 +112,7 @@ public :
   TH1F *h_bChNemPtFrac[nHisto],*h_bChNemTotPtFrac[nHisto],*h_bPF123PtFraction[nHisto];
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_ePF123PtFraction[nHisto];  
   
-  TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genHT[nHisto],*h_puTrueReWeight[nHisto],*h_puTrueNoWeight[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;
 

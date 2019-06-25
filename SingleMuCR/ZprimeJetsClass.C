@@ -99,6 +99,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    noweight = 1;
     int bosonPID;
     double bosonPt;
     bool WorZfound = false;
@@ -109,7 +110,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
 	event_weight = PU->GetBinContent(bin);
 	//cout<<"event_weight: "<<event_weight<<endl;
-	genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
+	double gen_weight = genWeight > 0 ? genWeight : 0;
+	event_weight *= gen_weight;
+	noweight *= gen_weight;
       }
       if (sample.isW_or_ZJet()) {
 	for (int i = 0; i < nMC; i++)
@@ -139,13 +142,21 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	if (jetCand.size() > 0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  if (sample.isW_or_ZJet() && applyKF) event_weight *= getKfactor(bosonPt);
+	  if (sample.isW_or_ZJet() && applyKF) {
+	    double kfactor = getKfactor(bosonPt);
+	    event_weight *= kfactor;
+	    noweight *= kfactor;
+	  }
 	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
 	  vector<int> looseMu = muon_veto_looseID(jetCand[0],0,10.);
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    nCRSelection+=event_weight;
 	    fillHistos(4,event_weight);
-	    if (!sample.isData && applySF) event_weight *= getSF(mulist[0]);
+	    if (!sample.isData && applySF) {
+	      double sf = getSF(mulist[0]);
+	      event_weight *= sf;
+	      noweight *= sf;
+	    }
 	    lepindex = mulist[0];
 	    vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
 	    jetveto = JetVetoDecision(jetCand[0],lepindex);
@@ -190,15 +201,21 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      if (dPhiJetMETcut(jetveto)) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
-			if (Pt123Fraction > 0.6)
+			if (getEleHEMVeto(40))
 			  fillHistos(11,event_weight);
-			if (Pt123Fraction > 0.7)
+			if (getJetHEMVeto(30))
 			  fillHistos(12,event_weight);
-			if (Pt123Fraction > 0.8)
+			if (muPt->at(lepindex) > 200) {
+			  if (muIDbit->at(lepindex)>>5&1 == 1)
+			    fillHistos(13,event_weight);
+			  else
+			    cout << "MuPt:" << muPt->at(lepindex) << " HighPtIDTrk:" <<(muIDbit->at(lepindex)>>5&1)<<endl;
+			}
+			else
 			  fillHistos(13,event_weight);
-			if (Pt123Fraction > 0.85)
+			if (Pt123Fraction > 0.6)
 			  fillHistos(14,event_weight);
-			if (Pt123Fraction > 0.9)
+			if (Pt123Fraction > 0.8)
 			  fillHistos(15,event_weight);
 		      }
 		    }

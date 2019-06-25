@@ -21,34 +21,6 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
-bool ZprimeJetsClass::getJetHEMVeto(double jetPtCut){
-
-  bool pass = true;
-  for(int p=0;p<nJet;p++)
-    {
-      bool kinematic = (*jetPt)[p] > jetPtCut && (*jetEta)[p] < -1.4 && (*jetEta)[p] > -3.0 && (*jetPhi)[p] > -1.57 && (*jetPhi)[p] < -0.87 ;
-      bool tightJetID = false;
-      if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
-      if(kinematic) // not chekcing ID here.                                                                                                                                         
-        pass = false;
-    }
-
-  return pass;
-}
-
-bool ZprimeJetsClass::getEleHEMVeto(double elePtCut){
-
-  bool pass = true;
-  for(int p=0;p<nEle;p++)
-    {
-      bool kinematic = (*elePt)[p] > elePtCut && (*eleEta)[p] < -1.4 && (*eleEta)[p] > -3.0 && (*elePhi)[p] > -1.57 && (*elePhi)[p] < -0.87 ;
-      if(kinematic) // not chekcing ID here.                                                                                                                                         
-        pass = false;
-    }
-
-  return pass;
-}
-
 double EletriggerSF(float pt, float eta){
   double sf = 1.0;
   if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
@@ -174,6 +146,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    noweight = 1;
     int bosonPID;
     double bosonPt;
     bool found = false;
@@ -183,7 +156,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       if (applyPU) {
 	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
 	event_weight = PU->GetBinContent(bin);
-	genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
+	double gen_weight = genWeight > 0 ? genWeight : 0;
+	event_weight *= gen_weight;
+	noweight *= gen_weight;
       }
       //cout<<"event_weight: "<<event_weight<<endl;
       if (sample.isW_or_ZJet())
@@ -213,14 +188,22 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	if (jetCand.size() > 0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  if (sample.isW_or_ZJet() && applyKF) event_weight *= getKfactor(bosonPt);
+	  if (sample.isW_or_ZJet() && applyKF) {
+	    double kfactor = getKfactor(bosonPt);
+	    event_weight *= kfactor;
+	    noweight *= kfactor;
+	  }
 	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.);
 	  vector<int> looseEle = electron_veto_looseID(jetCand[0],0,10.);
 	  if (elelist.size() ==1 && looseEle.size() == 1) {
 	    nCRSelection+=event_weight;
 	    fillHistos(4,event_weight);
 	    lepindex = elelist[0];
-	    if (!sample.isData && applySF) event_weight *= getSF(elelist[0]);
+	    if (!sample.isData && applySF) {
+	      double sf = getSF(elelist[0]);
+	      event_weight *= sf;
+	      noweight *= sf;
+	    }
 	    vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.);
 	    jetveto = JetVetoDecision(jetCand[0],lepindex);
 	    TLorentzVector lep_4vec;

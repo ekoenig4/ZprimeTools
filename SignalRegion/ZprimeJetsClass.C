@@ -28,21 +28,6 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
-bool ZprimeJetsClass::getJetHEMVeto(double jetPtCut){
-
-  bool pass = true;
-  for(int p=0;p<nJet;p++)
-    {
-      bool kinematic = (*jetPt)[p] > jetPtCut && (*jetEta)[p] < -1.4 && (*jetEta)[p] > -3.0 && (*jetPhi)[p] > -1.57 && (*jetPhi)[p] < -0.87 ;
-      bool tightJetID = false;
-      if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
-      if(kinematic) // not chekcing ID here.                                                                                                                                         
-        pass = false;
-    }
-
-  return pass;
-}
-
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
@@ -96,6 +81,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    noweight = 1;
     int bosonPID;
     double bosonPt;
     bool WorZfound = false;
@@ -105,7 +91,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
       event_weight = PU->GetBinContent(bin);
       //cout<<"event_weight: "<<event_weight<<endl;
-      genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
+      double gen_weight = genWeight > 0 ? genWeight : 0;
+      event_weight *= gen_weight;
+      noweight *= gen_weight;
+      
       if (sample.isW_or_ZJet()) {
 	for (int i = 0; i < nMC; i++)
 	  if ((*mcPID)[i] == sample.PID) {
@@ -134,7 +123,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	if (jetCand.size() > 0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
+	  if (sample.isW_or_ZJet()) {
+	    double kfactor = getKfactor(bosonPt);
+	    event_weight *= kfactor;
+	    noweight *= kfactor;
+	  }
 	  if (pfMET > 250) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
@@ -161,12 +154,18 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  if (dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
-		    if (getJetHEMVeto(200)) {
-		      nHEM+=event_weight;
+		    if (getEleHEMVeto(40)) {
 		      fillHistos(9,event_weight);
 		    }
-		    if (Pt123Fraction > 0.6)
+		    if (getJetHEMVeto(30)) {
 		      fillHistos(10,event_weight);
+		    }
+		    if (Pt123Fraction > 0.6)
+		      fillHistos(11,event_weight);
+		    if (Pt123Fraction > 0.8)
+		      fillHistos(12,event_weight);
+		    if (Pt123Fraction > 0.85)
+		      fillHistos(13,event_weight);
 		  }
 		}
 	      }

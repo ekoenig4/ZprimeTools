@@ -33,7 +33,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
+    h_puTrueNoWeight[i] = new TH1F(("puTrueNoWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueNoWeight[i]->Sumw2();
+    h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -92,7 +93,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
-    h_puTrue[histoNumber]->Fill(puTrue->at(0),event_weight);
+    h_puTrueNoWeight[histoNumber]->Fill(puTrue->at(0),noweight);
+    h_puTrueReWeight[histoNumber]->Fill(puTrue->at(0),event_weight);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
@@ -349,4 +351,32 @@ bool ZprimeJetsClass::inclusiveCut() {
   if (sample.isInclusive)
     return genHT < 100;
   return true;
+}
+
+bool ZprimeJetsClass::getJetHEMVeto(double jetPtCut){
+
+  bool pass = true;
+  for(int p=0;p<nJet;p++)
+    {
+      bool kinematic = (*jetPt)[p] > jetPtCut && (*jetEta)[p] < -1.4 && (*jetEta)[p] > -3.0 && (*jetPhi)[p] > -1.57 && (*jetPhi)[p] < -0.87 ;
+      bool tightJetID = false;
+      if ((*jetID)[p]>>0&1 == 1) tightJetID = true;
+      if(kinematic) // not chekcing ID here.                                                                                                                                         
+        pass = false;
+    }
+
+  return pass;
+}
+
+bool ZprimeJetsClass::getEleHEMVeto(double elePtCut){
+
+  bool pass = true;
+  for(int p=0;p<nEle;p++)
+    {
+      bool kinematic = (*elePt)[p] > elePtCut && (*eleEta)[p] < -1.4 && (*eleEta)[p] > -3.0 && (*elePhi)[p] > -1.57 && (*elePhi)[p] < -0.87 ;
+      if(kinematic) // not chekcing ID here.                                                                                                                                         
+        pass = false;
+    }
+
+  return pass;
 }
