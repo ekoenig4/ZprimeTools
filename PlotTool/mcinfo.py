@@ -4,7 +4,7 @@ lumi = {"SingleEle":13955,
         "DoubleEle":13955,
         "SingleMu":59699,
         "DoubleMu":59699,
-        "SignalRegion":3494}
+        "SignalRegion":3506}
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
 
