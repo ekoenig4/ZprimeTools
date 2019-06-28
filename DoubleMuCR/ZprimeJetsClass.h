@@ -105,6 +105,8 @@ public :
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;
+
+  TH1F *h_psWeight[46];
   
   //CR variables
   int lepindex_leading, lepindex_subleading;

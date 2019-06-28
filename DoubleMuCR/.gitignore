@@ -1,8 +1,0 @@
-post*.root
-test.root
-.output/
-.status/
-analyze
-*~
-PlotTool
-nohup.out

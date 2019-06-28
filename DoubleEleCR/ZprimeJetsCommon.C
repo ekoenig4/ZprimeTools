@@ -27,11 +27,39 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
   h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
+
+  string UncertaintyBands[46]= {"nominal","baseline",
+				"isrRedHi","fsrRedHi","isrRedLo","fsrRedLo",
+				"isrDefHi","fsrDefHi", "isrDefLo","fsrDefLo",
+				"isrConHi","fsrConHi", "isrConLo","fsrConLo",
+				"fsr_G2GG_muR_dn","fsr_G2GG_muR_up","fsr_G2QQ_muR_dn","fsr_G2QQ_muR_up",
+				"fsr_Q2QG_muR_dn","fsr_Q2QG_muR_up","fsr_X2XG_muR_dn","fsr_X2XG_muR_up",
+				"fsr_G2GG_cNS_dn","fsr_G2GG_cNS_up","fsr_G2QQ_cNS_dn","fsr_G2QQ_cNS_up",
+				"fsr_Q2QG_cNS_dn","fsr_Q2QG_cNS_up","fsr_X2XG_cNS_dn","fsr_X2XG_cNS_up",
+				"isr_G2GG_muR_dn","isr_G2GG_muR_up","isr_G2QQ_muR_dn","isr_G2QQ_muR_up",
+				"isr_Q2QG_muR_dn","isr_Q2QG_muR_up","isr_X2XG_muR_dn","isr_X2XG_muR_up",
+				"isr_G2GG_cNS_dn","isr_G2GG_cNS_up","isr_G2QQ_cNS_dn","isr_G2QQ_cNS_up",
+				"isr_Q2QG_cNS_dn","isr_Q2QG_cNS_up","isr_X2XG_cNS_dn","isr_X2XG_cNS_up"};
+  
+  for (int i = 0; i < 46; i++) {
+    h_psWeight[i] = new TH1F(("psWeight"+to_string(i)).c_str(),("psWeight;"+UncertaintyBands[i]).c_str(),50,0,2);h_psWeight[i]->Sumw2();
+  }
+  
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    
+    h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",15,0,1000);h_Pt123[i]->Sumw2();
+    h_PF123PtFraction[i]= new TH1F(("PF123PtFraction"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,15,0,1.1);h_PF123PtFraction[i]->Sumw2();
+    h_j1PID[i] = new TH1F(("j1PID"+histname).c_str(),"j1PID;Leading Jet Particle Constituent ID",10,-400,600); h_j1PID[i]->Sumw2();
+    h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",20,0,90);h_j1TotPFCands[i]->Sumw2();
+    h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 15,200,1000);h_j1Pt[i]->Sumw2();
+    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 20, -3.0, 3.0);h_j1Eta[i]->Sumw2();
+    h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 20, -3.0, 3.0);h_j1Phi[i]->Sumw2();
+    h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",15,0,1.1);h_ChNemPtFrac[i]->Sumw2();
+    
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
@@ -40,18 +68,14 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
-    h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
-    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
-    h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
+    
     h_j1EtaPhi[i] = new TH2F(("j1EtaPhi"+histname).c_str(),"j1EtaPhi;Leading Jet #eta;Leading Jet #phi",50,-3.0,3.0,50,-3.1416,3.1416);
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
     h_j1ChNemEtaWidth[i] = new TH1F(("j1ChNemEtaWidth"+histname).c_str(),"j1ChNemEtaWidth;Ch+NEM #eta width of Leading Jet", 50,0,0.25);h_j1ChNemEtaWidth[i] ->Sumw2();
     h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
-    h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",58,Pt123Bins);h_Pt123[i]->Sumw2();
-    h_PF123PtFraction[i]= new TH1F(("PF123PtFraction"+histname).c_str(), "PF123PtFraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1.1);h_PF123PtFraction[i]->Sumw2(); 
+    
     h_PtRawFrac[i]= new TH1F(("PtRawFrac"+histname).c_str(), "PtRawFrac;Raw P_{T}^{123} Fraction" ,50,0,1.1);h_PtRawFrac[i]->Sumw2(); 
-    h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",25,0,50);h_j1TotPFCands[i]->Sumw2();
     h_j1ChPFCands[i] = new TH1F(("j1ChPFCands"+histname).c_str(),"j1ChPFCands;# of PF charged hadrons in Leading Jet",25,0,50);h_j1ChPFCands[i]->Sumw2();
     h_j1NeutPFCands[i] = new TH1F(("j1NeutPFCands"+histname).c_str(),"j1NeutPFCands;# of PF neutral hadrons in Leading Jet",15,0,15);h_j1NeutPFCands[i]->Sumw2();
     h_j1GammaPFCands[i] = new TH1F(("j1GammaPFCands"+histname).c_str(),"j1GammaPFCands;# of PF gammas in Leading Jet",20,0,40);h_j1GammaPFCands[i]->Sumw2();
@@ -65,7 +89,6 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
     h_ChTotPtFrac[i] = new TH1F(("ChTotPtFrac"+histname).c_str(),"ChTotPtFrac;Charged P_{T}^{123} Total Fraction",50,0,1.1);h_ChTotPtFrac[i]->Sumw2();
-    h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
     h_ChNemTotPtFrac[i] = new TH1F(("ChNemTotPtFrac"+histname).c_str(),"ChNemTotPtFrac;Ch + NEM P_{T}^{123} Total Fraction",50,0,1.1);h_ChNemTotPtFrac[i]->Sumw2();
     h_PtFracCH[i] = new TH1F(("PtFracCH"+histname).c_str(),"PtFracCH; Charged Hadron P_{T}^{123} Total Fraction",50,0,1.1);h_PtFracCH[i]->Sumw2();
     h_PtFracNH[i] = new TH1F(("PtFracNH"+histname).c_str(),"PtFracNH; Neutral Hadron P_{T}^{123} Total Fraction",50,0,1.1);h_PtFracNH[i]->Sumw2();
@@ -135,6 +158,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_ChPercCons[histoNumber]->Fill(ChargedPFCandidates/(float)TotalPFCandidates,event_weight);
     h_NhPercCons[histoNumber]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
     h_GammaPercCons[histoNumber]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
+
+    for (int PID : j1PFConsPID) h_j1PID[histoNumber]->Fill(PID,event_weight);
 
     if (fabs(jetEta->at(jetCand[0])) <= 1.479) {
       h_bChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);

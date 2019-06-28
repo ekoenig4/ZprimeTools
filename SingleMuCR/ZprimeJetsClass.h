@@ -37,7 +37,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 16;
+  static const int nHisto = 57;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,DiBoson,Total };
   struct DataMC {
     Type type;
@@ -91,7 +91,7 @@ public :
   TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
-  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
+  TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto],*h_j1PID[nHisto];
 
   TH1F *h_PtRawFrac[nHisto];
   TH1F *h_ChPtFrac[nHisto],*h_ChTotPtFrac[nHisto],*h_ChNemPtFrac[nHisto],*h_ChNemTotPtFrac[nHisto],*h_PtFracCH[nHisto],*h_PtFracNH[nHisto],*h_PtFracG[nHisto],*h_j1ChNemEtaWidth[nHisto];
@@ -104,7 +104,8 @@ public :
   TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
   
   TH1D *h_cutflow;
-  
+
+  TH1F *h_psWeight[46];
   //CR variables
   int lepindex;
   double lepton_pt,Recoil;
@@ -444,6 +445,7 @@ public :
   Float_t         genHT;
   Float_t         pdfWeight;
   vector<float>   *pdfSystWeight;
+  vector<double>  *psWeight;
   Int_t           nPUInfo;
   vector<int>     *nPU;
   vector<int>     *puBX;
@@ -792,6 +794,7 @@ public :
   TBranch        *b_genHT;   //!
   TBranch        *b_pdfWeight;   //!
   TBranch        *b_pdfSystWeight;   //!
+  TBranch        *b_psWeight;   //!
   TBranch        *b_nPUInfo;   //!
   TBranch        *b_nPU;   //!
   TBranch        *b_puBX;   //!

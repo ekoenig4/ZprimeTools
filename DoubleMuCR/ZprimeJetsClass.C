@@ -119,7 +119,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
-    int nPS = 45;
+    int nPS = 46;
     double ps_event_weight[nPS];
     for (int i = 0; i < nPS; i++) ps_event_weight[i] = 1.;
     int bosonPID;
@@ -130,11 +130,13 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       //binContent as event_weight
       if (applyPU) {
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
-      event_weight = PU->GetBinContent(bin);
+      double pileup = PU->GetBinContent(bin);
+      event_weight = pileup;
       //cout<<"event_weight: "<<event_weight<<endl;
       genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
 	for (int i = 0; i < nPS; i++) {
-	  ps_event_weight[i] *= psWeight->at(i);
+	  ps_event_weight[i] *= pileup*psWeight->at(i);
+	  h_psWeight[i]->Fill(psWeight->at(i));
 	}
       }
       if(sample.isW_or_ZJet()) {
@@ -148,6 +150,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	}
       }
     }
+    
     float metcut= 0.0;
     //metcut = (fabs(pfMET-caloMET))/pfMET;
     

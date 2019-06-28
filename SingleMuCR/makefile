@@ -1,6 +1,6 @@
 .PHONY = test
 
-testDir=/hdfs/store/user/varuns/MC2018_Autumn18_May2019/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_HT400-600/190515_202530/0000/
+testDir=/hdfs/store/user/ekoenig4/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/0000/
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 

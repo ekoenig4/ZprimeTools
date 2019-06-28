@@ -393,6 +393,7 @@ void ZprimeJetsClass::Init(TTree *tree)
   tau_byIsolationMVArun2017v2DBoldDMwLTraw2017 = 0;
   pdf = 0;
   pdfSystWeight = 0;
+  psWeight = 0;
   nPU = 0;
   puBX = 0;
   puTrue = 0;
@@ -745,6 +746,7 @@ void ZprimeJetsClass::Init(TTree *tree)
     fChain->SetBranchAddress("genHT", &genHT, &b_genHT);
     fChain->SetBranchAddress("pdfWeight", &pdfWeight, &b_pdfWeight);
     fChain->SetBranchAddress("pdfSystWeight", &pdfSystWeight, &b_pdfSystWeight);
+    fChain->SetBranchAddress("psWeight", &psWeight, &b_psWeight);
     fChain->SetBranchAddress("nPUInfo", &nPUInfo, &b_nPUInfo);
     fChain->SetBranchAddress("nPU", &nPU, &b_nPU);
     fChain->SetBranchAddress("puBX", &puBX, &b_puBX);
