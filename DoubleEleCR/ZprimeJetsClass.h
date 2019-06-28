@@ -98,6 +98,8 @@ public :
   vector<double>j1PFConsPhi;
   vector<int>j1PFConsPID;
 
+  double j1Mass;
+
   double Pt123Fraction,Pt123,PtRawFrac;
   double j1ChNemEtaWidth;
   

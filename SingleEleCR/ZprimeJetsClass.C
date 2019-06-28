@@ -144,19 +144,19 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     AllPFCand(jetCand,PFCandidates);
     //CR Variables
     lepindex = -1;
-    nTotalEvents++;
+    nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
     for (int bit = 0; bit < 11; bit++)
       if (metFilters >> bit & 1 == 1)
 	h_metFilters->Fill(bit + 1,event_weight);
     if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
-      nFilters++;
+      nFilters+=event_weight;
       fillHistos(1,event_weight);
       if ((HLTEleMuX>>4&1 == 1) || (HLTEleMuX>>38&1 == 1) || (HLTPho>>7&1 ==1) || !sample.isData) {
-	nHLT++;
+	nHLT+=event_weight;
 	fillHistos(2,event_weight);
 	if(jetCand.size()>0) {
-	  nJetSelection++;
+	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
 	  //CR code
@@ -179,28 +179,28 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    TLorentzVector leptoMET_4vec = lep_4vec+met_4vec;
 	    Double_t leptoMET = fabs(leptoMET_4vec.Pt());
 	    Double_t leptoMET_phi = leptoMET_4vec.Phi();
-	    nCRSelection++;
+	    nCRSelection+=event_weight;
 	    Recoil = leptoMET;
 	    metcut = (fabs(pfMET-caloMET))/Recoil;
 	    fillHistos(4,event_weight);
 	    if (leptoMET>250) {
-	      nMET200++;
+	      nMET200+=event_weight;
 	      fillHistos(5,event_weight);
 	      if(mulist.size() == 0) {
-		nNoMuons++;
+		nNoMuons+=event_weight;
 		fillHistos(6,event_weight);
 		Float_t dPhi_lepMET = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
 		h_lepMET_MT->Fill(lepMET_MT);
 		if(pfMET > 50) {
-		  pfMET50++;
+		  pfMET50+=event_weight;
 		  fillHistos(7,event_weight);
 		  h_metcut->Fill(metcut);
 		  if(metcut<0.5) {
-		    nMETcut++;
+		    nMETcut+=event_weight;
 		    fillHistos(8,event_weight);
 		    if(btagVeto()) {
-		      nbtagVeto++;
+		      nbtagVeto+=event_weight;
 		      fillHistos(9,event_weight);
 		      double minDPhiJetMET_first4 = TMath::Pi();
 		      for (int i = 0; i < jetveto.size(); i++) {
@@ -212,7 +212,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      }
 		      h_dphimin->Fill(minDPhiJetMET_first4);
 		      if(dPhiJetMETcut(jetveto)) {
-			nDphiJetMET++;
+			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
 			if (Pt123Fraction > 0.6)
 			  fillHistos(11,event_weight);
