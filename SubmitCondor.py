@@ -72,7 +72,7 @@ files_to_transfer=argv[1]+",../kfactors.root,../PU_Central.root"
 
 #If NLO EWK files in directory, transfer them
 if path.isfile("WJets_NLO_EWK.root"): files_to_transfer += ",../WJets_NLO_EWK.root,../ZJets_NLO_EWK.root"
-if path.isfile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root"): files_to_transfer += ",../egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root,../2017_ElectronTight.root,../2017_ElectronTight.root"
+if path.isfile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root"): files_to_transfer += ",../egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root,../2017_ElectronTight.root,../2017_ElectronLoose.root"
 if path.isfile("RunBCDEF_SF_ISO.root"): files_to_transfer += ",../RunBCDEF_SF_ISO.root,../RunBCDEF_SF_ID.root"
 
 #Beginning to write condor_submit file
@@ -122,6 +122,6 @@ with open(".output/condor_"+label,"w") as condor:
 
 #Move into .output/ and run newly made condor_submit file
 chdir(".output/")
-system("condor_submit condor_"+label+" >/dev/null &")
+system("condor_submit condor_"+label)
     
     
