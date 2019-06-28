@@ -7,10 +7,10 @@ make || exit -1
 echo "Do the Data samples"
 
 $RUN $DATA/MET/crab_job_MET2017B/190511_093051/0000/ postSingleMu_0_0.root -1 10000 Mu_0_0 split_-1
-$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0001/ postSingleMu_0_4.root -1 10000 Mu_0_1 split_-1
-$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0002/ postSingleMu_0_3.root -1 10000 Mu_0_2 split_-1
-$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0003/ postSingleMu_0_2.root -1 10000 Mu_0_3 split_-1
-$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0004/ postSingleMu_0_1.root -1 10000 Mu_0_4 split_-1
+$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0001/ postSingleMu_0_1.root -1 10000 Mu_0_1 split_-1
+$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0002/ postSingleMu_0_2.root -1 10000 Mu_0_2 split_-1
+$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0003/ postSingleMu_0_3.root -1 10000 Mu_0_3 split_-1
+$RUN $DATA/MET/crab_job_MET2017B/190511_093051/0004/ postSingleMu_0_4.root -1 10000 Mu_0_4 split_-1
 $RUN $DATA/MET/crab_job_MET2017Bv2/190515_211629/0000/ postSingleMu_0_5.root -1 10000 Mu_0_5 split_-1
 
 $RUN $DATA/MET/crab_job_MET2017C/190515_215954/0000/ postSingleMu_1_0.root -1 10000 Mu_1_0 split_-1

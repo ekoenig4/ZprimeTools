@@ -63,7 +63,7 @@ ZprimeJetsClass::ZprimeJetsClass(const char* inputFilename,const char* outputFil
       TString dataset = ".root";
       TString  FullPathInputFile = (path+filename->GetName());
       TString name = filename->GetName();
-      if (sample.type < 0)
+      if (sample.type < -1)
 	sample = DataMC(string(name));
       if (name.Contains(dataset))
 	{
@@ -80,7 +80,7 @@ ZprimeJetsClass::ZprimeJetsClass(const char* inputFilename,const char* outputFil
 	}
       fileNumber++;
     }
-  string sampleID[Total] = {"Data","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
+  string sampleID[Total] = {"Data","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   cout<<"Sample type: "<<sampleID[sample.type]<< (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;

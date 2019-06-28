@@ -32,7 +32,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
+    h_puTrueNoWeight[i] = new TH1F(("puTrueNoWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueNoWeight[i]->Sumw2();
+    h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -93,7 +94,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
-    h_puTrue[histoNumber]->Fill(puTrue->at(0),event_weight);
+    h_puTrueNoWeight[histoNumber]->Fill(puTrue->at(0),noweight);
+    h_puTrueReWeight[histoNumber]->Fill(puTrue->at(0),event_weight);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
