@@ -10,7 +10,8 @@ projects = {
 
 #Files to be ignored in all projects
 independents = [
-    "mcinfo.py"
+    "mcinfo.py",
+    "dataPileup.root"
 ]
 
 #Get the relevant files from each year
@@ -28,7 +29,6 @@ update = { year:{} for year in projects }
 #Checks through all files being considered for update and chooses the most up to date one
 def check(update,year,f):
     for y in update:
-        if y == year: continue
         tmp = [g for g in update[y] if g[str] == f[str]]
         if not any(tmp): update[year].append(f)
         else:
@@ -41,9 +41,9 @@ def check(update,year,f):
 
 #Loop through all the projects and get the files that need to be updated
 for year in projects:
-    for f in projects[year][file]:
-        for y in projects:
-            if y == year: continue
+    for y in projects:
+        if y == year: continue
+        for f in projects[year][file]:
             if year not in update[y]: update[y][year] = []
             tmp = [g for g in projects[y][file] if g[str] == f[str]]
             if not any(tmp): check(update[y],year,f)

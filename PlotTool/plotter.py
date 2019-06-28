@@ -173,7 +173,7 @@ for variable in samples.args:
     xwmax = xmax;
     
     xaxis = TGaxis(xmin,rymin,xmax,rymin,xwmin,xwmax,510);
-    xaxis.SetTitle(samples.name);
+    if type(samples.name) == str: xaxis.SetTitle(samples.name);
     xaxis.SetLabelFont(42);
     xaxis.SetLabelSize(0.10);
     xaxis.SetTitleFont(42);
@@ -202,7 +202,7 @@ for variable in samples.args:
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/PS_Weights/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.options.allHisto):sub = "all"
