@@ -206,16 +206,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      if (dPhiJetMETcut(jetveto)) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
-			if (Pt123Fraction > 0.6)
-			  fillHistos(11,event_weight);
-			if (Pt123Fraction > 0.7)
-			  fillHistos(12,event_weight);
-			if (Pt123Fraction > 0.8)
-			  fillHistos(13,event_weight);
-			if (Pt123Fraction > 0.85)
-			  fillHistos(14,event_weight);
-			if (Pt123Fraction > 0.9)
-			  fillHistos(15,event_weight);
+			for (int i = 0; i < nPS; i++) {
+			  fillHistos(11+i,ps_event_weight[i]);
+			}
 		      }
 		    }
 		  }
