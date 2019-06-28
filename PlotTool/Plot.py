@@ -208,10 +208,8 @@ class datamc(object):
         rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
         if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
-        else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
-
-        if (self.name == 'Xaxis Title'):
-            self.name = self.histo['Data'].GetXaxis().GetTitle()
+        else: print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root";self.histo['Data'] = None
+        # else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
 
         if self.signal != None:
             for signal in self.signal:
@@ -239,10 +237,16 @@ class datamc(object):
                 self.histo[sample].append(hs)
                 cutflow=rfile.Get("h_cutflow")
                 self.total[sample].append(cutflow.GetBinContent(1))
+        
+        if (self.name == 'Xaxis Title'):
+            for sample in self.histo:
+                if type(self.histo[sample]) == TH1:
+                    self.name = self.histo[sample].GetXaxis().GetTitle()
 
     def ScaleHistogram(self):
         self.BkgIntegral = 0
         for sample in self.SampleList:
+            if self.histo[sample] == None: continue
             if sample == 'Data':
                 integral=(self.histo[sample].Integral())
                 space=" "*(15-len(sample))
