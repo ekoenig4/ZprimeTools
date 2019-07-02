@@ -205,17 +205,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			  fillHistos(11,event_weight);
 			if (getJetHEMVeto(30))
 			  fillHistos(12,event_weight);
-			if (muPt->at(lepindex) > 200) {
-			  if (muIDbit->at(lepindex)>>5&1 == 1)
-			    fillHistos(13,event_weight);
-			  else
-			    cout << "MuPt:" << muPt->at(lepindex) << " HighPtIDTrk:" <<(muIDbit->at(lepindex)>>5&1)<<endl;
-			}
-			else
-			  fillHistos(13,event_weight);
 			if (Pt123Fraction > 0.6)
-			  fillHistos(14,event_weight);
+			  fillHistos(13,event_weight);
 			if (Pt123Fraction > 0.8)
+			  fillHistos(14,event_weight);
+			if (Pt123Fraction > 0.85)
 			  fillHistos(15,event_weight);
 		      }
 		    }
@@ -325,13 +319,18 @@ vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut
   return ele_cands;
 }
 
+bool muonTightID(double muPt,unsigned short muIDbit) {
+  if (muPt < 200) return muIDbit>>3&1 == 1;
+  else            return muIDbit>>5&1 == 1;
+}
+
 vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut) {
   // bool veto_passed = true; //pass veto if no good muon found
   vector<int> mu_cands;
   mu_cands.clear();
 
   for(int i = 0; i < nMu; i++) {
-    if(muIDbit->at(i)>>3&1 == 1 && muIDbit->at(i)>>9&1 == 1) {
+    if(muonTightID(muPt->at(i),muIDbit->at(i)) && muIDbit->at(i)>>9&1 == 1) {
       //Muon passes eta cut
       if (fabs(muEta->at(i)) < 2.4) {
 	//Muon passes pt cut
