@@ -102,6 +102,14 @@ double ZprimeJetsClass::getSF(int lepindex_leading, int lepindex_subleading) {
   double subleadingEleTriggSF = EletriggerSF(elePt->at(lepindex_subleading),eleEta->at(lepindex_subleading));
   // cout<<"leadingEleTriggSF = " << leadingEleTriggSF << endl;
   // cout<<"subleadingEleTriggSF = " << subleadingEleTriggSF << endl;
+
+  h_tightEleRecoSF_corr->Fill(leadingEleRecoSF_corr);
+  h_tightEleEffSF_corr->Fill(leadingEleEffSF_corr);
+  h_tightEleTriggSF->Fill(leadingEleTriggSF);
+  h_looseEleRecoSF_corr->Fill(subleadingEleRecoSF_corr);
+  h_looseEleEffSF_corr->Fill(subleadingEleEffSF_corr);
+  h_looseEleTriggSF->Fill(subleadingEleTriggSF);
+  
   return leadingEleRecoSF_corr*leadingEleEffSF_corr*leadingEleTriggSF*subleadingEleRecoSF_corr*subleadingEleEffSF_corr*subleadingEleTriggSF;
 }
 
@@ -114,8 +122,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, ndilepton, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = ndilepton = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, ndilepton, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = ndilepton = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = eleHEMVeto = 0;
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
@@ -200,8 +208,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     nTotalEvents+=event_weight;
     fillHistos(0,event_weight);
     for (int bit = 0; bit < 8; bit++)
-    if (metFilters >> bit & 1 == 1)
-      h_metFilters->Fill(bit + 1,event_weight);
+      if (metFilters >> bit & 1 == 1)
+	h_metFilters->Fill(bit + 1,event_weight);
     if (metFilters==0 && inclusiveCut()){ 
       nFilters+=event_weight;
       fillHistos(1,event_weight);
@@ -273,7 +281,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  if(mulist.size() == 0){
 		    nNoMuons+=event_weight;
 		    fillHistos(7,event_weight);
-		    h_metcut->Fill(metcut);
+		    h_metcut->Fill(metcut,event_weight);
 		    if(metcut < 0.5){
 		      nMETcut+=event_weight;
 		      fillHistos(8,event_weight);
@@ -288,22 +296,23 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			      minDPhiJetMET_first4 = dPhiJetMet;
 			  }
 			}
-			h_dphimin->Fill(minDPhiJetMET_first4);
+			h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 			if(dPhiJetMETcut(jetveto)){
 			  nDphiJetMET+=event_weight;
 			  fillHistos(10,event_weight);
 			  if (getEleHEMVeto(40)) {
-			  fillHistos(11,event_weight);
-			}
-			if (getJetHEMVeto(30)) {
-			  fillHistos(12,event_weight);
-			}
-			if (Pt123Fraction > 0.6)
-			  fillHistos(13,event_weight);
-			if (Pt123Fraction > 0.8)
-			  fillHistos(14,event_weight);
-			if (Pt123Fraction > 0.85)
-			  fillHistos(15,event_weight);
+			    eleHEMVeto+=event_weight;
+			    fillHistos(11,event_weight);
+			  }
+			  if (getJetHEMVeto(30)) {
+			    fillHistos(12,event_weight);
+			  }
+			  if (Pt123Fraction > 0.6)
+			    fillHistos(13,event_weight);
+			  if (Pt123Fraction > 0.8)
+			    fillHistos(14,event_weight);
+			  if (Pt123Fraction > 0.85)
+			    fillHistos(15,event_weight);
 			}
 		      }   
 		    }	
@@ -333,6 +342,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(9,nMETcut);
   h_cutflow->SetBinContent(10,nbtagVeto);
   h_cutflow->SetBinContent(11,nDphiJetMET);
+  h_cutflow->SetBinContent(12,eleHEMVeto);
    
 }//Closing the Loop function
 
@@ -346,18 +356,26 @@ void ZprimeJetsClass::BookRegion(int i, string histname){
   float subLeadingLeptonPtBins[26] = {10.,20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
   if (i == -1) {
-  h_cutflow = new TH1D("h_cutflow","h_cutflow",11,0,11);h_cutflow->Sumw2();
-  h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
-  h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
-  h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
-  h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
-  h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
-  h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
-  h_cutflow->GetXaxis()->SetBinLabel(7,"dileptonMassCut");
-  h_cutflow->GetXaxis()->SetBinLabel(8,"NoMuons");
-  h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
-  h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
-  h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+    h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
+    h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
+    h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
+    h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
+    h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
+    h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
+    h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
+    h_cutflow->GetXaxis()->SetBinLabel(7,"dileptonMassCut");
+    h_cutflow->GetXaxis()->SetBinLabel(8,"NoMuons");
+    h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
+    h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
+    h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+    h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEMVeto");
+
+    h_tightEleRecoSF_corr = new TH1F("h_tightEleRecoSF","h_tightEleRecoSF;Leading EleRecoSF",50,0,2); h_tightEleRecoSF_corr->Sumw2(); 
+    h_tightEleEffSF_corr = new TH1F("h_tightEleEffSF","h_tightEleEffSF;Leading EleEffSF",50,0,2); h_tightEleEffSF_corr->Sumw2(); 
+    h_tightEleTriggSF = new TH1F("h_tightEleTriggSF","h_tightEleTriggSF;Leading EleTriggSF",50,0,2); h_tightEleTriggSF->Sumw2();
+    h_looseEleRecoSF_corr = new TH1F("h_looseEleRecoSF","h_looseEleRecoSF;Subleading EleRecoSF",50,0,2); h_looseEleRecoSF_corr->Sumw2(); 
+    h_looseEleEffSF_corr = new TH1F("h_looseEleEffSF","h_looseEleEffSF;Subleading EleEffSF",50,0,2); h_looseEleEffSF_corr->Sumw2(); 
+    h_looseEleTriggSF = new TH1F("h_looseEleTriggSF","h_looseEleTriggSF;Subleading EleTriggSF",50,0,2); h_looseEleTriggSF->Sumw2(); 
   } else {
     //CR Histograms
     h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();

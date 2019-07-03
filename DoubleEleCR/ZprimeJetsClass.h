@@ -119,6 +119,8 @@ public :
   //CR histograms
   TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
   TH2F *h_j1EtaPhi[nHisto],*h_leadingLeptonEtaPhi[nHisto],*h_subleadingLeptonEtaPhi[nHisto];
+
+  TH1F *h_tightEleRecoSF_corr,*h_tightEleEffSF_corr,*h_tightEleTriggSF,*h_looseEleRecoSF_corr,*h_looseEleEffSF_corr,*h_looseEleTriggSF;
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types

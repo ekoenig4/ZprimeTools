@@ -123,6 +123,8 @@ public :
   TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
   TH2F *h_LeptonEtaPhi[nHisto],*h_j1EtaPhi[nHisto];
 
+  TH1F *h_eleRecoSF_corr,*h_eleEffSF_corr,*h_eleTriggSF;
+
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types

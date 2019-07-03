@@ -37,8 +37,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,nHEM;
-  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = nHEM = 0;
+  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
+  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = eleHEMVeto = 0;
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
@@ -132,7 +132,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
 	    metcut = (fabs(pfMET-caloMET)/pfMET);
-	    h_metcut->Fill(metcut);
+	    h_metcut->Fill(metcut,event_weight);
 	    if (metcut < 0.5) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
@@ -150,11 +150,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			minDPhiJetMET_first4 = dPhiJetMet;
 		    }
 		  }
-		  h_dphimin->Fill(minDPhiJetMET_first4);
+		  h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		  if (dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
 		    if (getEleHEMVeto(40)) {
+		      eleHEMVeto+=event_weight;
 		      fillHistos(9,event_weight);
 		    }
 		    if (getJetHEMVeto(30)) {
@@ -187,7 +188,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(7,nLeptonIDs);
   h_cutflow->SetBinContent(8,nbtagVeto);
   h_cutflow->SetBinContent(9,nDphiJetMET);
-  h_cutflow->SetBinContent(10,nHEM);
+  h_cutflow->SetBinContent(10,eleHEMVeto);
 }
 
 void ZprimeJetsClass::BookRegion(int i, string histname) {
@@ -204,7 +205,7 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
   h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
   h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
   h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
-  h_cutflow->GetXaxis()->SetBinLabel(10,"HEM Veto");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"EleHEMVeto");
   } else {
 
   }

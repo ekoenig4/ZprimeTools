@@ -52,8 +52,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, lepMET_MT160, nNoElectrons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = lepMET_MT160 = nNoElectrons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, lepMET_MT160, nNoElectrons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = lepMET_MT160 = nNoElectrons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = eleHEMVeto = 0;
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
@@ -182,7 +182,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		if (lepMET_MT < 160) {
 		  lepMET_MT160+=event_weight;
 		  fillHistos(7,event_weight);
-		  h_metcut->Fill(metcut);
+		  h_metcut->Fill(metcut,event_weight);
 		  if (metcut < 0.5) {
 		    nMETcut+=event_weight;
 		    fillHistos(8,event_weight);
@@ -197,12 +197,14 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			    minDPhiJetMET_first4 = dPhiJetMet;
 			}
 		      }
-		      h_dphimin->Fill(minDPhiJetMET_first4);
+		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		      if (dPhiJetMETcut(jetveto)) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
-			if (getEleHEMVeto(40))
+			if (getEleHEMVeto(40)) {
+			  eleHEMVeto+=event_weight;
 			  fillHistos(11,event_weight);
+			}
 			if (getJetHEMVeto(30))
 			  fillHistos(12,event_weight);
 			if (Pt123Fraction > 0.6)
@@ -236,6 +238,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(9,nMETcut);
   h_cutflow->SetBinContent(10,nbtagVeto);
   h_cutflow->SetBinContent(11,nDphiJetMET);
+  h_cutflow->SetBinContent(12,eleHEMVeto);
 }
 
 void ZprimeJetsClass::BookRegion(int i, string histname) {
@@ -248,7 +251,7 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
   float LeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
   if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",11,0,11);h_cutflow->Sumw2();
+    h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
     h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
     h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
     h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
@@ -260,6 +263,7 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
     h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
     h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
     h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+    h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEMVeto");
   
     h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
     h_tightMuISO = new TH1F("h_tightMuISO","tightMuISO Scale Factor;tightMuISO Scale Factor",50,0.95,1.05); h_tightMuISO->Sumw2();
@@ -319,18 +323,13 @@ vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut
   return ele_cands;
 }
 
-bool muonTightID(double muPt,unsigned short muIDbit) {
-  if (muPt < 200) return muIDbit>>3&1 == 1;
-  else            return muIDbit>>5&1 == 1;
-}
-
 vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut) {
   // bool veto_passed = true; //pass veto if no good muon found
   vector<int> mu_cands;
   mu_cands.clear();
 
   for(int i = 0; i < nMu; i++) {
-    if(muonTightID(muPt->at(i),muIDbit->at(i)) && muIDbit->at(i)>>9&1 == 1) {
+    if(muIDbit->at(i)>>3&1 == 1 && muIDbit->at(i)>>9&1 == 1) {
       //Muon passes eta cut
       if (fabs(muEta->at(i)) < 2.4) {
 	//Muon passes pt cut

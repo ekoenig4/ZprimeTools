@@ -88,6 +88,11 @@ double ZprimeJetsClass::getSF(int ele_index) {
   // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
   double eleTriggSF = EletriggerSF(elePt_to_use,eleEta_to_use);
   // cout<<"eleTriggSF = " << eleTriggSF << endl;
+
+  h_eleRecoSF_corr->Fill(eleRecoSF_corr);
+  h_eleEffSF_corr->Fill(eleEffSF_corr);
+  h_eleTriggSF->Fill(eleTriggSF);
+  
   return eleRecoSF_corr*eleEffSF_corr*eleTriggSF;
 }
 
@@ -224,11 +229,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		fillHistos(6,event_weight);
 		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
-		h_lepMET_MT->Fill(lepMET_MT);
+		h_lepMET_MT->Fill(lepMET_MT,event_weight);
 		if (pfMET > 50) {
 		  pfMET50+=event_weight;
 		  fillHistos(7,event_weight);
-		  h_metcut->Fill(metcut);
+		  h_metcut->Fill(metcut,event_weight);
 		  if (metcut < 0.5) {
 		    nMETcut+=event_weight;
 		    fillHistos(8,event_weight);
@@ -243,7 +248,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			    minDPhiJetMET_first4 = dPhiJetMet;
 			}
 		      }
-		      h_dphimin->Fill(minDPhiJetMET_first4);
+		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		      if (dPhiJetMETcut(jetveto)) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
@@ -287,7 +292,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(10,nbtagVeto);
   h_cutflow->SetBinContent(11,nDphiJetMET);
   h_cutflow->SetBinContent(12,nEleHEM);
-  h_cutflow->SetBinContent(13,nJetHEM);
 }
 
 void ZprimeJetsClass::BookRegion(int i, string histname) {
@@ -299,7 +303,7 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
   float LeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
   if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",13,0,13);h_cutflow->Sumw2();
+    h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
     h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
     h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
     h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
@@ -312,9 +316,11 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
     h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
     h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
     h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEM Veto");
-    h_cutflow->GetXaxis()->SetBinLabel(13,"JetHEM Veto");
 
     h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
+    h_eleRecoSF_corr = new TH1F("h_eleRecoSF_corr","h_eleRecoSF_corr;EleRecoSF",50,0,2);h_eleRecoSF_corr->Sumw2();
+    h_eleEffSF_corr = new TH1F("h_eleEffSF_corr","h_eleEffSF_corr;EleEffSF",50,0,2);h_eleEffSF_corr->Sumw2();
+    h_eleTriggSF = new TH1F("h_eleTriggSF","h_eleTriggSF;EleTriggSF",50,0,2);h_eleTriggSF->Sumw2();
   } else {
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
