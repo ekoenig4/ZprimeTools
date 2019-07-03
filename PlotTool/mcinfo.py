@@ -6,6 +6,12 @@ lumi = {"SingleEle":13955,
         "DoubleMu":59699,
         "SignalRegion":3506}
 
+lumi_by_era = {"SingleEle":{"A":14024,"B":7061,"C":6895,"D":31720},
+               "DoubleEle":{"A":14024,"B":7061,"C":6895,"D":31720},
+               "SingleMu":{"A":14024,"B":7061,"C":6895,"D":31720},
+               "DoubleMu":{"A":14024,"B":7061,"C":6895,"D":31720},
+               "SignalRegion":{"A":3506}}
+
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
