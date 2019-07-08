@@ -3,7 +3,7 @@ from filecmp import cmp
 
 #Relevant project directories to keep track of
 projects = {
-    "2016":{dir:"/nfs_scratch/ekoenig4/MonoZprimeJet/ZprimeTools2016/CMSSW_8_0_26_patch1/src/ZprimeTools2016/PlotTool/"},
+    "2016":{dir:"/nfs_scratch/ekoenig4/MonoZprimeJet/ZprimeTools2016/CMSSW_10_2_10/src/ZprimeTools2016/PlotTool/"},
     "2017":{dir:"/nfs_scratch/ekoenig4/MonoZprimeJet/ZprimeTools2017/CMSSW_10_2_10/src/ZprimeTools2017/PlotTool/"},
     "2018":{dir:"/nfs_scratch/ekoenig4/MonoZprimeJet/ZprimeTools2018/CMSSW_10_2_10/src/ZprimeTools2018/PlotTool/"}
 }
