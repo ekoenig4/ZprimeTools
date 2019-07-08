@@ -237,6 +237,11 @@ class datamc(object):
                 self.histo[sample].append(hs)
                 cutflow=rfile.Get("h_cutflow")
                 self.total[sample].append(cutflow.GetBinContent(1))
+        
+        if (self.name == 'Xaxis Title'):
+            for sample in self.histo:
+                if type(self.histo[sample]) == TH1:
+                    self.name = self.histo[sample].GetXaxis().GetTitle()
 
     def ScaleHistogram(self):
         self.BkgIntegral = 0
@@ -286,13 +291,6 @@ class datamc(object):
                 space2=" "*(8-len("%.6g" % integral))
                 # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
                 print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
-
-        
-        
-        if (self.name == 'Xaxis Title'):
-            for sample in self.histo:
-                if type(self.histo[sample]) == TH1:
-                    self.name = self.histo[sample].GetXaxis().GetTitle()
 
 ######################################################################    
 
