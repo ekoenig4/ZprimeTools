@@ -90,13 +90,13 @@ def check(dir):
                 incomplete += 1
                 complete = False
                 finished = False
+        status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
         if incomplete != 0:
             condor_q = subprocess.Popen(['condor_q',cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
             stdout, stderr = condor_q.communicate()
             stdout = stdout.split('\n')[-2]
             tmp = stdout.split()
             if cluster != "-1": status = {'jobs':int(tmp[0]),'completed':int(tmp[2]),'removed':int(tmp[4]),'idle':int(tmp[6]),'running':int(tmp[8]),'held':int(tmp[10]),'suspended':int(tmp[12])}
-            else: status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
             for type in status: total[type] += status[type]
             printOutput(file,status,incomplete,len(arglist),space=space)
         elif options.verbose:
