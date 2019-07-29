@@ -37,7 +37,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 16;
+  static const int nHisto = 12;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -70,6 +70,8 @@ public :
   TH2F *h_eleRecoSF_highpt;
   TH2F *h_eleIDSF_loose,*h_eleIDSF_tight;
 
+  double noweight;
+
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
   vector<float>j1PFConsEt;
@@ -92,7 +94,7 @@ public :
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
+  TH1F *h_nVtx[nHisto],*h_nVtx2[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pileup,*h_EWKcorr,*h_QCDcorr,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
   TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
@@ -105,7 +107,8 @@ public :
   TH1F *h_bChNemPtFrac[nHisto],*h_bChNemTotPtFrac[nHisto],*h_bChNemPtFracFirst3[nHisto],*h_bPF123PtFraction[nHisto];
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_eChNemPtFracFirst3[nHisto],*h_ePF123PtFraction[nHisto];  
   
-  TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genHT[nHisto],*h_puTrueReWeight[nHisto],*h_puTrueNoWeight[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genZPt,*h_genZPtwK,*h_genWPt,*h_genWPtwK;
   
   TH1D *h_cutflow;
 
@@ -115,6 +118,8 @@ public :
   float leptoMET_phi_to_use;
   //CR histograms
   TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
+
+  TH1F *h_tightEleRecoSF_corr,*h_tightEleEffSF_corr,*h_tightEleTriggSF,*h_looseEleRecoSF_corr,*h_looseEleEffSF_corr,*h_looseEleTriggSF;
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
   // Declaration of leaf types
