@@ -20,6 +20,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
   float PtFracBins[51] = {0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.32, 0.34, 0.36, 0.38, 0.4, 0.42, 0.44, 0.46, 0.48, 0.5,
 			  0.52, 0.54, 0.56, 0.58, 0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.92, 0.94, 0.96, 0.98, 1.0};
+  
+  float BosonPtBins[25] = {150,170,200,230,260,290,320,350,390,430,470,510,550,590,640,690,740,790,840,900,960,1020,1090,1160,1250};
 
   BookRegion(-1,"");
   
@@ -27,6 +29,11 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
   h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
+  h_pileup = new TH1F("h_pileup","h_pileup;Pileup Weight",50,0,2); h_pileup->Sumw2();
+  h_genZPt = new TH1F("h_genZPt","genZPt;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPt->Sumw2();
+  h_genZPtwK = new TH1F("h_genZPtwK","genZPtwK;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPtwK->Sumw2();
+  h_genWPt = new TH1F("h_genWPt","genWPt;Gen W Boson P_{T}",24,BosonPtBins); h_genWPt->Sumw2();
+  h_genWPtwK = new TH1F("h_genWPtwK","genWPtwK;Gen W Boson P_{T}",24,BosonPtBins); h_genWPtwK->Sumw2();
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
@@ -62,6 +69,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2(); 
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
+    h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,200);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
@@ -99,6 +107,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
   h_nVtx[histoNumber]->Fill(nVtx,event_weight);
+  h_nVtx2[histoNumber]->Fill(nVtx,event_weight);
   h_nJets[histoNumber]->Fill(nJet,event_weight);
   h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
   h_pfMET200[histoNumber]->Fill(pfMET,event_weight);

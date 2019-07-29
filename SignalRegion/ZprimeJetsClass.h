@@ -33,7 +33,8 @@ public :
   TTree *tree;
 
   static const bool debug = true;
-  static const int nHisto = 14;
+  static const bool applyPU = true;
+  static const int nHisto = 11;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -86,7 +87,7 @@ public :
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
+  TH1F *h_nVtx[nHisto],*h_nVtx2[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pileup,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
   TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
@@ -100,6 +101,7 @@ public :
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_ePF123PtFraction[nHisto];  
   
   TH1F *h_genHT[nHisto],*h_puTrueReWeight[nHisto],*h_puTrueNoWeight[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genZPt,*h_genZPtwK,*h_genWPt,*h_genWPtwK;
   TH2F *h_j1EtaPhi[nHisto];
   
   TH1D *h_cutflow;
