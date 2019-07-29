@@ -21,16 +21,25 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   float Pt123Bins[59]={0.,20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,
 		       600.,620.,640.,660.,680.,700.,720.,740.,760.,780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1050.,1100.,1200.,1300.,1400.,1500.,2000.,2500.};
   
+  float BosonPtBins[25] = {150,170,200,230,260,290,320,350,390,430,470,510,550,590,640,690,740,790,840,900,960,1020,1090,1160,1250};
+  
   h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
   h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   h_metFilters = new TH1F("h_metFilters","metFilters",11,0.5,11.5); h_metFilters->Sumw2();
+  h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
+  h_pileup = new TH1F("h_pileup","h_pileup;Pileup Weight",50,0,2); h_pileup->Sumw2();
+  h_genZPt = new TH1F("h_genZPt","genZPt;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPt->Sumw2();
+  h_genZPtwK = new TH1F("h_genZPtwK","genZPtwK;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPtwK->Sumw2();
+  h_genWPt = new TH1F("h_genWPt","genWPt;Gen W Boson P_{T}",24,BosonPtBins); h_genWPt->Sumw2();
+  h_genWPtwK = new TH1F("h_genWPtwK","genWPtwK;Gen W Boson P_{T}",24,BosonPtBins); h_genWPtwK->Sumw2();
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
+    h_puTrueNoWeight[i] = new TH1F(("puTrueNoWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueNoWeight[i]->Sumw2();
+    h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -57,10 +66,9 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2(); 
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
+    h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx2[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,3000);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
-    h_j1PID[i] = new TH1F(("j1PID"+histname).c_str(),"j1PID;Leading Jet Particle ID",50,0,400); h_j1PID[i]->Sumw2();
-    h_j1Lepton[i] = new TH1F(("j1Lepton"+histname).c_str(),"j1Lepton;Leading Jet Lepton",11,0,10); h_j1Lepton[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
     h_ChTotPtFrac[i] = new TH1F(("ChTotPtFrac"+histname).c_str(),"ChTotPtFrac;Charged P_{T}^{123} Total Fraction",50,0,1.1);h_ChTotPtFrac[i]->Sumw2();
     h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
@@ -75,8 +83,14 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_NhPercCons[i] = new TH1F(("NhPercCons"+histname).c_str(),"NhPercCons;Neutral Hadron Constituent Percent",50,0,1.1);h_NhPercCons[i]->Sumw2();
     h_GammaPercCons[i] = new TH1F(("GammaPercCons"+histname).c_str(),"GammaPercCons;Photon Constituent Percent",50,0,1.1);h_GammaPercCons[i]->Sumw2();
 
-    h_LepPtFrac[i] = new TH1F(("LepPtFrac"+histname).c_str(),"LepPtFrac; Lepton P_{T}^{123} Total Fraction",50,0,1.1);h_LepPtFrac[i]->Sumw2();
+    h_ChargedPt[i] = new TH1F(("ChargedPt"+histname).c_str(),"ChargedPt;Charged Constituent P_{T}",58,Pt123Bins);h_ChargedPt[i]->Sumw2();
+    h_NeutralPt[i] = new TH1F(("NeutralPt"+histname).c_str(),"NeutralPt;Neutral Constituent P_{T}",58,Pt123Bins);h_NeutralPt[i]->Sumw2();
+    h_PhotonPt[i] = new TH1F(("PhotonPt"+histname).c_str(),"PhotonPt;Photon Constituent P_{T}",58,Pt123Bins);h_PhotonPt[i]->Sumw2();
 
+    h_ChPercPt[i] = new TH1F(("ChPercPt"+histname).c_str(), "ChPercPt; Charged Constituent P_{T} Percentage" ,50,0,1.1);h_ChPercPt[i]->Sumw2();
+    h_NhPercPt[i] = new TH1F(("NhPercPt"+histname).c_str(), "NhPercPt; Nharged Constituent P_{T} Percentage" ,50,0,1.1);h_NhPercPt[i]->Sumw2();
+    h_GammaPercPt[i] = new TH1F(("GammaPercPt"+histname).c_str(), "GammaPercPt; Gammaarged Constituent P_{T} Percentage" ,50,0,1.1);h_GammaPercPt[i]->Sumw2();
+    
     //Region Specific Histograms
     BookRegion(i,histname);
   }
@@ -86,7 +100,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
-    h_puTrue[histoNumber]->Fill(puTrue->at(0),event_weight);
+    h_puTrueNoWeight[histoNumber]->Fill(puTrue->at(0),noweight);
+    h_puTrueReWeight[histoNumber]->Fill(puTrue->at(0),event_weight);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
@@ -118,8 +133,6 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_j1Mass[histoNumber]->Fill(j1Mass,event_weight);
     h_j1JEC[histoNumber]->Fill(jetJECUnc->at(jetCand[0]),event_weight);
     h_j1ChNemEtaWidth[histoNumber]->Fill(j1ChNemEtaWidth,event_weight);
-    for (int ID : j1PFConsPID) h_j1PID[histoNumber]->Fill(abs(ID),event_weight);
-    h_j1Lepton[histoNumber]->Fill(LeptonPFCandidates,event_weight);
     h_ChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);
     h_ChNemTotPtFrac[histoNumber]->Fill(ChNemTotPtFrac,event_weight);
     h_ChPtFrac[histoNumber]->Fill(ChPtFrac,event_weight);
@@ -134,7 +147,14 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_NhPercCons[histoNumber]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
     h_GammaPercCons[histoNumber]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
 
-    h_LepPtFrac[histoNumber]->Fill(LepPtFrac,event_weight);
+    
+    h_NeutralPt[histoNumber]->Fill(hadronPt[0],event_weight);
+    h_ChargedPt[histoNumber]->Fill(hadronPt[1],event_weight);
+    h_PhotonPt[histoNumber]->Fill(hadronPt[2],event_weight);
+      
+    h_NhPercPt[histoNumber]->Fill( hadronPt[0]/jetPt->at(jetCand[0]) ,event_weight);
+    h_ChPercPt[histoNumber]->Fill( hadronPt[1]/jetPt->at(jetCand[0]) ,event_weight);
+    h_GammaPercPt[histoNumber]->Fill( hadronPt[2]/jetPt->at(jetCand[0]) ,event_weight);
   }
 
   fillRegion(histoNumber,event_weight);
@@ -144,25 +164,19 @@ void ZprimeJetsClass::getPt123Frac() {
   // Neutral, Charged, Photon
   int HadronID[3] = {130,211,22};
   double HadronPtFirst3[3] = {0,0,0};
-  double HadronPt[3] = {0,0,0};
   double HadronEt[3] = {0,0,0};
   double HadronEta[3] = {0,0,0};
   double HadronEtaSq[3] = {0,0,0};
   int HadronIndex[3] = {0,0,0};
   
   for (int i = 0; i < j1PFConsPID.size(); i++) {
-    int ID = abs(j1PFConsPID[i]);
-    if (ID == 11 || ID == 13) {
-      LeptonPFCandidates++;
-      LepPtFrac += j1PFConsPt[i];
-    }
     if (i < 3)
       Pt123 += j1PFConsPt.at(i);
     for (int j = 0; j < 3; j++)
       if (abs(j1PFConsPID.at(i)) == HadronID[j]) {
 	if (i < 3)
 	  HadronPtFirst3[j] += j1PFConsPt.at(i);
-	HadronPt[j] += j1PFConsPt.at(i);
+	hadronPt[j] += j1PFConsPt.at(i);
 	HadronEt[j] += j1PFConsEt.at(i);
 	HadronEta[j] += j1PFConsEta.at(i)*j1PFConsEt.at(i);
 	HadronEtaSq[j] += j1PFConsEta.at(i)*j1PFConsEta.at(i)*j1PFConsEt.at(i);
@@ -176,11 +190,10 @@ void ZprimeJetsClass::getPt123Frac() {
   }
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
   PtRawFrac = Pt123/jetRawPt->at(jetCand[0]);
-  ChPtFrac = HadronPtFirst3[1]/HadronPt[1];
+  ChPtFrac = HadronPtFirst3[1]/hadronPt[1];
   ChTotPtFrac = HadronPtFirst3[1]/jetPt->at(jetCand[0]);
-  ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(HadronPt[1]+HadronPt[2]);
+  ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(hadronPt[1]+hadronPt[2]);
   ChNemTotPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/jetPt->at(jetCand[0]);
-  LepPtFrac /= jetPt->at(jetCand[0]);
   
   for (int i = 0; i < 3; i++){
     hadronTotPtFrac[i] = HadronPtFirst3[i]/jetPt->at(jetCand[0]);
@@ -195,13 +208,13 @@ void ZprimeJetsClass::getPt123Frac() {
 void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
-  LeptonPFCandidates=0;
     
   Pt123Fraction=Pt123=0.0;
   ChPtFrac=ChTotPtFrac=ChNemPtFrac=ChNemTotPtFrac=j1ChNemEtaWidth=0.0;
   for (int i = 0; i < 3; i++){
     hadronTotPtFrac[i] = 0.;
     hadronFirst3Frac[i] = 0.;
+    hadronPt[i] = 0.;
   }
   //We are using these conditions so we only calculate the following quantities for the signal we are interested in
   //This will also make it faster to process the events
@@ -343,4 +356,24 @@ bool ZprimeJetsClass::dPhiJetMETcut(vector<int> jets) {
 
   return passes;
   
+}
+
+
+
+double ZprimeJetsClass::getKfactor(double bosonPt) {
+  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
+  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
+  double kfactor = 1;
+  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
+    kfactor = (EWK_corrected_weight/NNLO_weight);
+  else
+    kfactor= sample.type == WJets ? 1.21 : 1.23;
+  h_kfactor->Fill(kfactor);
+  return kfactor;
+}
+
+bool ZprimeJetsClass::inclusiveCut() {
+  if (sample.isInclusive)
+    return genHT < 100;
+  return true;
 }

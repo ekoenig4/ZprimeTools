@@ -45,9 +45,6 @@
 #include "vector"
 using namespace std;
 class ZprimeJetsClass {
-private:
-  int DataOrMC = -1;
-  
 public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
@@ -59,7 +56,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 16;
+  static const int nHisto = 11;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -68,7 +65,7 @@ public :
     int PID;
     DataMC(){}
     DataMC(string filename) {
-      string sampleID[] = {"MET","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+      string sampleID[] = {"SingleElectron","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
       string inclusiveID[] = {"WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8","DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"};
       for (int i = 0; i < Total; i++)
 	if (filename.find(sampleID[i]) != string::npos) {
@@ -90,6 +87,8 @@ public :
   TH1D *ewkCorrection;
   TH1D *NNLOCorrection;
 
+  double noweight;
+  
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
   vector<double>j1PFConsEt;
@@ -114,7 +113,7 @@ public :
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
+  TH1F *h_nVtx[nHisto],*h_nVtx2[nHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pileup,*h_pfMETall[nHisto],*h_pfMET200[nHisto],*h_nJets[nHisto],*h_pfMET[nHisto],*h_pfMETPhi[nHisto];
   TH1F *h_j1Pt[nHisto], *h_j1Eta[nHisto], *h_j1Phi[nHisto], *h_j1etaWidth[nHisto], *h_j1phiWidth[nHisto],*h_j1nCons[nHisto], *h_PF123PtFraction[nHisto],*h_Pt123[nHisto]; 
   TH1F *h_j1TotPFCands[nHisto], *h_j1ChPFCands[nHisto], *h_j1NeutPFCands[nHisto], *h_j1GammaPFCands[nHisto], *h_j1CHF[nHisto], *h_j1NHF[nHisto], *h_j1ChMultiplicity[nHisto], *h_j1NeutMultiplicity[nHisto],*h_j1Mt[nHisto];
   TH1F *h_j1Mass[nHisto],*h_j1JEC[nHisto];
@@ -127,7 +126,8 @@ public :
   TH1F *h_bChNemPtFrac[nHisto],*h_bChNemTotPtFrac[nHisto],*h_bPF123PtFraction[nHisto];
   TH1F *h_eChNemPtFrac[nHisto],*h_eChNemTotPtFrac[nHisto],*h_ePF123PtFraction[nHisto];  
   
-  TH1F *h_genHT[nHisto],*h_puTrue[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genHT[nHisto],*h_puTrueReWeight[nHisto],*h_puTrueNoWeight[nHisto],*h_eventWeight[nHisto];
+  TH1F *h_genZPt,*h_genZPtwK,*h_genWPt,*h_genWPtwK;
   
   TH1D *h_cutflow;
   

@@ -49,23 +49,6 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
-double ZprimeJetsClass::getKfactor(double bosonPt) {
-  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
-  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
-  double kfactor = 1;
-  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
-    kfactor = (EWK_corrected_weight/NNLO_weight);
-  else
-    kfactor= sample.type == WJets ? 1.21 : 1.23;
-  return kfactor;
-}
-
-bool ZprimeJetsClass::inclusiveCut() {
-  if (sample.isInclusive)
-    return genHT < 100;
-  return true;
-}
-
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 
@@ -75,8 +58,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,nTotalEvents_wPU;
+  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = nTotalEvents_wPU = 0;
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
@@ -121,31 +104,72 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     j1PFConsPID .clear();
 
     double event_weight = 1.;
+    double gen_weight = 1;
+    noweight = 1;
     int bosonPID;
     double bosonPt;
     bool WorZfound = false;
+    int genHadrons[4] = {0,0,0,0};
     if (!sample.isData) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
-      event_weight = PU->GetBinContent(bin);
-      //cout<<"event_weight: "<<event_weight<<endl;
-      genWeight > 0.0 ? event_weight*=genWeight : event_weight =0.0;
+      double pileup = PU->GetBinContent(bin);
+      h_pileup->Fill(pileup);
+      event_weight = pileup;
+      gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
+      event_weight *= gen_weight;
+      noweight *= gen_weight;
+
       if (sample.isW_or_ZJet()) {
-	for (int i = 0; i < nMC; i++)
-	  if ((*mcPID)[i] == sample.PID) {
-	    WorZfound = true;
+	for (int i = 0; i < nMC; i++) {
+	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
+	    WorZfound=true;
 	    bosonPID = (*mcPID)[i];
 	    bosonPt = (*mcPt)[i];
+	    double kfactor = getKfactor(bosonPt);
+	    if ( sample.PID == 23 ) {
+	      h_genZPt->Fill(bosonPt,gen_weight);
+	      h_genZPtwK->Fill(bosonPt,gen_weight*kfactor);
+	    }
+	    if ( sample.PID == 24 ) {
+	      h_genWPt->Fill(bosonPt,gen_weight);
+	      h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
+	    }
 	  }
+	}
+      }
+      int hadronPID[3] = {130,211,22};
+      for (int i = 0; i < nMC; i++) {
+	// if ( !(abs(mcGMomPID->at(i)) == 600001 || abs(mcMomPID->at(i)) == 600001) ) continue;
+	// cout << mcGMomPID->at(i) << "->" << mcMomPID->at(i) << "->" << mcPID->at(i) << endl;
+	bool inCategory = false;
+	for (int id = 0; id < 3; id++)
+	  if ( abs(mcPID->at(i)) == hadronPID[id] ) {
+	    genHadrons[id]++;
+	    inCategory = true;
+	  }
+	if ( !inCategory )
+	  genHadrons[3]++;
       }
     }
+    int genTotal = 0;
+    for (int ncon : genHadrons ) genTotal += ncon;
+    h_genNhPercCons->Fill(genHadrons[0]/(float)genTotal,event_weight);
+    h_genChPercCons->Fill(genHadrons[1]/(float)genTotal,event_weight);
+    h_genGammaPercCons->Fill(genHadrons[2]/(float)genTotal,event_weight);
+    h_genMiscPercCons->Fill(genHadrons[3]/(float)genTotal,event_weight);
+    
     float metcut = 0.0;
     
     jetveto = JetVetoDecision();
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
-    nTotalEvents+=event_weight;
+
+    h_genMCCons->Fill(TotalPFCandidates/(float)nMC,event_weight);
+    
+    nTotalEvents+=gen_weight;
+    nTotalEvents_wPU += event_weight;
     fillHistos(0,event_weight);
     for (int bit = 0; bit < 11; bit++)
       if (metFilters >> bit & 1 == 1)
@@ -186,18 +210,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  if(dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
-		    if (Pt123Fraction > 0.6)
-		      fillHistos(9,event_weight);
-		    if (Pt123Fraction > 0.7)
-		      fillHistos(10,event_weight);
-		    if (Pt123Fraction > 0.75)
-		      fillHistos(11,event_weight);
-		    if (Pt123Fraction > 0.8)
-		      fillHistos(12,event_weight);
-		    if (Pt123Fraction > 0.85)
-		      fillHistos(13,event_weight);
-		    if (Pt123Fraction > 0.9)
-		      fillHistos(14,event_weight);
 		  }
 		}   
 	      }	
@@ -222,6 +234,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(7,nLeptonIDs);
   h_cutflow->SetBinContent(8,nbtagVeto);
   h_cutflow->SetBinContent(9,nDphiJetMET);
+  h_cutflow->SetBinContent(10,nTotalEvents_wPU);
    
 }//Closing the Loop function
 
@@ -229,7 +242,7 @@ void ZprimeJetsClass::BookRegion(int i,string histname) {
   fileName->cd();
 
   if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",9,0,9);h_cutflow->Sumw2();
+    h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
     h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
     h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
     h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
@@ -239,7 +252,14 @@ void ZprimeJetsClass::BookRegion(int i,string histname) {
     h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
     h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
     h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
+    h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
 
+    h_genNhPercCons = new TH1F("genNhPercCons","genNhPercCons;Gen Neutral Constituent Percentage",50,0,1.1);h_genNhPercCons->Sumw2();
+    h_genChPercCons = new TH1F("genChPercCons","genChPercCons;Gen Charged Constituent Percentage",50,0,1.1);h_genChPercCons->Sumw2();
+    h_genGammaPercCons = new TH1F("genGammaPercCons","genGammaPercCons;Gen Photon Constituent Percentage",50,0,1.1);h_genGammaPercCons->Sumw2();
+    h_genMiscPercCons = new TH1F("genMiscPercCons","genMiscPercCons;Gen Miscellaneous Constituent Percentage",50,0,1.1);h_genMiscPercCons->Sumw2();
+    h_genMCCons = new TH1F("genMCCons","genMCCons;gen Number of MC",50,0,1.5);h_genMCCons->Sumw2();
+		
   } else {
 
   }

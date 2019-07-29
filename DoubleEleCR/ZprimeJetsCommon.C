@@ -21,16 +21,25 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   float Pt123Bins[59]={0.,20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,
 		       600.,620.,640.,660.,680.,700.,720.,740.,760.,780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1050.,1100.,1200.,1300.,1400.,1500.,2000.,2500.};
   
+  float BosonPtBins[25] = {150,170,200,230,260,290,320,350,390,430,470,510,550,590,640,690,740,790,840,900,960,1020,1090,1160,1250};
+  
   h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
   h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
   h_metFilters = new TH1F("h_metFilters","metFilters",11,0.5,11.5); h_metFilters->Sumw2();
+  h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
+  h_pileup = new TH1F("h_pileup","h_pileup;Pileup Weight",50,0,2); h_pileup->Sumw2();
+  h_genZPt = new TH1F("h_genZPt","genZPt;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPt->Sumw2();
+  h_genZPtwK = new TH1F("h_genZPtwK","genZPtwK;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPtwK->Sumw2();
+  h_genWPt = new TH1F("h_genWPt","genWPt;Gen W Boson P_{T}",24,BosonPtBins); h_genWPt->Sumw2();
+  h_genWPtwK = new TH1F("h_genWPtwK","genWPtwK;Gen W Boson P_{T}",24,BosonPtBins); h_genWPtwK->Sumw2();
   for(int i=0; i<nHisto; i++){
 
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_puTrue[i] = new TH1F(("puTrue"+histname).c_str(),"puTrue;puTrue",100,0,100);h_puTrue[i]->Sumw2();
+    h_puTrueNoWeight[i] = new TH1F(("puTrueNoWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueNoWeight[i]->Sumw2();
+    h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -57,6 +66,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_j1NeutMultiplicity[i] = new TH1F(("j1NeutMultiplicity"+histname).c_str(),"j1NeutMultiplicity;Neutral Multiplicity of Leading Jet",25,0,50);h_j1NeutMultiplicity[i]->Sumw2(); 
     h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2();
+    h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx[i]->Sumw2();
     h_j1Mass[i] = new TH1F(("j1Mass"+histname).c_str(),"j1Mass;Leading Jet Mass (GeV)",50,0,3000);h_j1Mass[i]->Sumw2();
     h_j1JEC[i] = new TH1F(("j1JEC"+histname).c_str(),"j1JEC;Leading Jet JEC Uncertainty",50,0,0.1); h_j1JEC[i]->Sumw2();
     h_ChPtFrac[i] = new TH1F(("ChPtFrac"+histname).c_str(),"ChPtFrac;Charged P_{T}^{123} Fraction",50,0,1.1);h_ChPtFrac[i]->Sumw2();
@@ -82,7 +92,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
-    h_puTrue[histoNumber]->Fill(puTrue->at(0),event_weight);
+    h_puTrueNoWeight[histoNumber]->Fill(puTrue->at(0),noweight);
+    h_puTrueReWeight[histoNumber]->Fill(puTrue->at(0),event_weight);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
@@ -328,4 +339,24 @@ bool ZprimeJetsClass::dPhiJetMETcut(vector<int> jets) {
 
   return passes;
   
+}
+
+
+
+double ZprimeJetsClass::getKfactor(double bosonPt) {
+  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
+  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
+  double kfactor = 1;
+  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
+    kfactor = (EWK_corrected_weight/NNLO_weight);
+  else
+    kfactor= sample.type == WJets ? 1.21 : 1.23;
+  h_kfactor->Fill(kfactor);
+  return kfactor;
+}
+
+bool ZprimeJetsClass::inclusiveCut() {
+  if (sample.isInclusive)
+    return genHT < 100;
+  return true;
 }
