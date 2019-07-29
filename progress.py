@@ -24,6 +24,7 @@ def printOutput(condor,status,incomplete,nfiles,space=3):
         print "FAIL"+"    ",
         print "FILES"
         state += 1
+        printOutput(condor,status,incomplete,nfiles,space=space)
     elif state == 1:
         print condor+" "*(space+4-len(condor)),
         #STATUS
