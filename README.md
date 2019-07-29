@@ -33,6 +33,20 @@ make
 #use -1 to run over all events and for running over the entire directory
 ````
 
+The postAnalyzer is broken into 4 different purposes
+
+    ZprimeJetsClass.h:
+	Holds information about the variables, methods, and histograms that are used and filled in the analysis
+
+    ZprimeJetsInit.C:
+	Holds the methods for initiating all the variables and files that are being used
+
+    ZprimeJetsCommon.C:
+	Holds the methods that are shared across all the different regions (Signal and Control Regions)
+
+    ZprimeJetsClass.C:
+	Holds the methods that are unique to that particular region
+
 Signal Region:
 To run the signal samples use the signalsubmit.sh file
 
