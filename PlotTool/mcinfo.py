@@ -6,6 +6,12 @@ lumi = {"SingleEle":23192,
         "DoubleMu":41486,
         "SignalRegion":1198}
 
+lumi_by_era = {"SingleEle":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
+               "DoubleEle":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
+               "SingleMu":{"B":4793,"C":9633,"D":4248,"E":9314,"F":13498},
+               "DoubleMu":{"B":4793,"C":9633,"D":4248,"E":9314,"F":13498},
+               "SignalRegion":{"B":1198}}
+
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
@@ -73,4 +79,60 @@ xsec = {
     
 "postWZ":2.757e+01,
 "postZZ":1.214e+01
+}
+
+usama_xsec = {
+'postZ100to200': 280.5,
+'postZ200to400': 77.67,
+'postZ400to600': 10.73,
+'postZ600to800': 2.559,
+'postZ800to1200': 1.1796,
+'postZ1200to2500': 0.28633,
+'postZ2500toInf': 0.0006945,
+
+'postWJets_MLM': 50690,
+'postW100to200': 1343,
+'postW200to400': 359.7,
+'postW400to600': 48.91,
+'postW600to800': 12.05,
+'postW800to1200': 5.501,
+'postW1200to2500': 1.329,
+'postW2500toInf': 0.03216,
+
+'postDY70to100':147.1,
+'postDY100to200': 148,
+'postDY200to400': 40.94,
+'postDY400to600': 5.497,
+'postDY600to800': 1.354,
+'postDY800to1200': 0.6250,
+'postDY1200to2500': 0.1511,
+'postDY2500toInf': 0.003647,
+
+'postGJets40to100': 17420,
+'postGJets100to200': 5391,
+'postGJets200to400': 1168,
+'postGJets400to600':132.5,
+'postGJets600toInf': 44.05,
+
+"postTTJetsDiLept":5.424e+01,
+"postTTJetsSingleLeptFromT":1.092e+02,
+'postTTJets_MLM': 831.76,
+
+'postQCD100to200': 27500000,
+'postQCD200to300': 1735000,
+'postQCD300to500': 367000,
+'postQCD500to700': 29370,
+'postQCD700to1000': 6524,
+'postQCD1000to1500': 1064,
+'postQCD1500to2000': 121.5,
+'postQCD2000toInf': 25.42,
+
+
+'postWW': 118.7,
+"postWWtoLNuQQ":4.599e+01,
+"postWWto2L2Nu":1.108e+01,
+"postWWto4Q":4.773e+01,
+    
+'postWZ': 47.2,
+'postZZ': 16.6
 }
