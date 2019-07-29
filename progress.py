@@ -10,15 +10,65 @@ parser.add_option("-v","--verbose",help="print all files being checked",action="
 (options,args) = parser.parse_args()
 cwd = os.getcwd()
 
+state = 0
+
+def printOutput(condor,status,incomplete,nfiles,space=3):
+    global state
+    if state == 0:
+        print "NAME"+" "*(space),
+        print "STATUS"+"   ",
+        print "RUN"+"    ",
+        print "IDLE"+"    ",
+        print "HELD"+"    ",
+        print "TOTAL"+"    ",
+        print "FAIL"+"    ",
+        print "FILES"
+        state += 1
+        printOutput(condor,status,incomplete,nfiles,space=space)
+    elif state == 1:
+        print condor+" "*(space+4-len(condor)),
+        #STATUS
+        if incomplete == 0: print "DONE  "+"   ",
+        elif status['jobs'] == 0: print "FAIL  "+"   ",
+        else: print "RUN   "+"   ",
+        #RUN
+        if incomplete == 0: print "-  "+"    ",
+        elif status['jobs'] == 0: print "-  "+"    ",
+        else: print str(status['running'])+" "*(7 - len(str(status['running']))),
+        #IDLE
+        if incomplete == 0: print "-  "+"     ",
+        elif status['jobs'] == 0: print "-  "+"     ",
+        else: print str(status['idle'])+" "*(8 - len(str(status['idle']))),
+        #HELD
+        if incomplete == 0: print "-  "+"     ",
+        elif status['jobs'] == 0: print "-  "+"     ",
+        else: print str(status['held'])+" "*(8 - len(str(status['held']))),
+        #TOTAL
+        if incomplete == 0: print "-  "+"      ",
+        elif status['jobs'] == 0: print "-  "+"      ",
+        else: print str(status['jobs'])+" "*(9 - len(str(status['jobs']))),
+        #FAIL
+        if incomplete == 0: print str(incomplete)+" "*(8 - len(str(incomplete))),
+        elif status['jobs'] == 0: print str(incomplete)+" "*(8 - len(str(incomplete))),
+        else: print "-  "+"     ",
+        #FILES
+        if incomplete == 0: print str(nfiles)+" "*(8 - len(str(nfiles)))
+        elif status['jobs'] == 0: print str(nfiles)+" "*(8 - len(str(nfiles)))
+        else: print "-  "+"     "
+    elif state == 2:
+        print "Total:",status['jobs'],"jobs;",status['completed'],"completed,",status['removed'],"removed,",
+        print status['idle'],"idle,",status['running'],"running,",status['held'],"held,",status['suspended'],"suspended"
+
 def check(dir):
+    global state
     print dir
     os.chdir(dir+'/.output/')
     condor = [file for file in os.listdir('.') if 'condor_' in file]
+    space = len(max(condor,key=len))
     condor.sort()
     finished = True
     total = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
     for i,file in enumerate(condor):
-        if options.verbose: print "Checking",file,"\t|",i,"of",len(condor)
         with open(file,'r') as f:
             arglist = []
             for line in f.readlines():
@@ -41,29 +91,24 @@ def check(dir):
                 incomplete += 1
                 complete = False
                 finished = False
+        status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
         if incomplete != 0:
-            if not options.verbose: print "Checking",file,"\t|",i,"of",len(condor)
             condor_q = subprocess.Popen(['condor_q',cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
             stdout, stderr = condor_q.communicate()
             stdout = stdout.split('\n')[-2]
             tmp = stdout.split()
             if cluster != "-1": status = {'jobs':int(tmp[0]),'completed':int(tmp[2]),'removed':int(tmp[4]),'idle':int(tmp[6]),'running':int(tmp[8]),'held':int(tmp[10]),'suspended':int(tmp[12])}
-            else: status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
             for type in status: total[type] += status[type]
-            if status['jobs'] == 0:
-                print "\t",incomplete,"of",len(arglist),"File(s) Not Found"
-                if status['held'] != 0 or status['removed'] != 0:
-                    complete=False
-            else:
-                print "\t",stdout
-                complete=True
+            printOutput(file,status,incomplete,len(arglist),space=space)
+        elif options.verbose:
+            printOutput(file,status,incomplete,len(arglist),space=space)
         if not complete and options.resubmit:
             for f in os.listdir(logdir): os.remove(logdir+'/'+f)
             os.system('condor_submit '+file)
     if finished: print "Finished."
     else:
-        print "Total:",total['jobs'],"jobs;",total['completed'],"completed,",total['removed'],"removed,",
-        print total['idle'],"idle,",total['running'],"running,",total['held'],"held,",total['suspended'],"suspended"
+        state += 1
+        printOutput(None,total,None,None)
     os.chdir(cwd)
     print
 ###################################################################################################################
