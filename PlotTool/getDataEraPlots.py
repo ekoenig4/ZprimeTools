@@ -17,7 +17,7 @@ def compareEra(variable,samples,eraLumi):
     c.SetLogy();
     c.cd();
 
-    colors = [kRed,kBlue,kGreen,kOrange+7]
+    colors = [kRed,kBlue,kGreen,kOrange+7,kMagenta,kTeal,kYellow-3]
     eraHisto = []
     for i,era in enumerate(eraLumi.keys()):
         eraFile = TFile.Open("DataEra/"+samples.Data_FileNames[samples.region]+"_"+era+".root")
@@ -53,7 +53,7 @@ def compareEra(variable,samples,eraLumi):
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} (2017)");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+ ")");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);

@@ -1,13 +1,13 @@
 from ROOT import *
 import threading
 import sys
-from os import path,system,getcwd,listdir
+from os import path,system,getcwd,listdir,mkdir,remove
 from optparse import OptionParser
 from samplenames import samplenames
 
 class datamc(object):
 
-    def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
+    def __init__(self,command=None,show=True,lumi=None,fileDir="./"):
 
         if fileDir != "./":
             if path.isdir(fileDir+"PlotTool/"):
@@ -33,6 +33,7 @@ class datamc(object):
         self.args = args
 
         #Luminosity
+        self.lumi_by_era = mc.lumi_by_era
         self.lumi = (mc.lumi if (lumi == None) else lumi)
         if (options.lumi != None): self.lumi = options.lumi
 
@@ -71,10 +72,15 @@ class datamc(object):
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
         self.region=None
-        for i in range(len(RegionName)):
-            if any(f for f in listdir('.output') if preRegionData[i] in f) or path.isfile(postRegionData[i]): self.region=RegionName[i]
+        for i,region in enumerate(RegionName):
+            if path.isfile(self.fileDir+postRegionData[i]): self.region=region; break;
+        if self.region == None:
+            for i in enumerate(RegionName):
+                if any(f for f in listdir(self.fileDir+'.output') if preRegionData[i] in f): self.region=region; break
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
-        if (type(self.lumi) == dict): self.lumi = self.lumi[self.region]
+        if (type(self.lumi) == dict):
+            self.lumi = self.lumi[self.region]
+            self.lumi_by_era = self.lumi_by_era[self.region]
         
         if self.region == "SignalRegion" and self.options.signal != None:
             self.getSignalXsec()
@@ -86,23 +92,26 @@ class datamc(object):
                     for mv in mvList:
                         self.signal.append("Mx"+mx+"_Mv"+mv)
             elif "Mx" in self.options.signal and "_Mv" in self.options.signal: self.signal = [self.options.signal];
-        if self.show == 1:
+        if self.show:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
         if (self.options.allHisto):
             self.GetAllHisto()
-        
+    ###############################################################################################################
+            
     def initiate(self,variable):
         self.GetVariable(variable)
         self.ScaleHistogram()
-
+    ###############################################################################################################
+        
     def getSumOfBkg(self):
         sumOfBkg = self.histo["WJets"].Clone()
         for mc in self.MC_Color:
             if (mc != "WJets"):
                 sumOfBkg.Add(self.histo[mc])
         return sumOfBkg
+    ###############################################################################################################
 
     def getSignalXsec(self,scale=1):
         from monoZprime_XS import signalxsec
@@ -113,11 +122,19 @@ class datamc(object):
             mv=data.split("_")[1].replace("Mv","")
             if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
             self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
+    ###############################################################################################################
         
     def HaddFiles(self):
         AllFiles=[]
         for mcSample in self.xsec: AllFiles.append(mcSample)
-        AllFiles.append(self.Data_FileNames[self.region])
+        # if self.region != 'SignalRegion':
+        #     dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
+        #                   for i,e in enumerate(sorted(self.lumi_by_era.keys()))
+        #                   if not path.isfile(self.fileDir+"DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
+        #                   and any(self.fileDir+self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(self.fileDir+".output"))]
+        # else: dataFiles = ['postMETdata']
+        dataFiles = [self.Data_FileNames[self.region]]
+        AllFiles.extend(dataFiles)
         if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
             for mx in Mx_Value:
@@ -128,11 +145,11 @@ class datamc(object):
         def singleThread(AllFiles):
             #Hadd files together
             for fn in AllFiles:
-                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
                     if len(nfile) != 0:
                         arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
+                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
                         system(arg)
         ###################################
         def multiThread(AllFiles):
@@ -147,11 +164,11 @@ class datamc(object):
             #Hadd files together
             threads = {}
             for fn in AllFiles:
-                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                if (not path.isfile(self.fileDir+fn+".root") or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
                     if len(nfile) != 0:
                         arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
+                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
                         arg += " >/dev/null"
                         ID = str(len(threads))
                         threads[ID]=haddThread(ID,fn,arg)
@@ -160,6 +177,7 @@ class datamc(object):
                         sys.stdout.flush()
             if len(threads) != 0: print
             nthreads = len(threads)
+            merging = True if nthreads != 0 else False
             out = "\r"+str(nthreads)+" Threads Remaining"
             while (len(threads) != 0):
                 IDlist = threads.keys(); IDlist.sort(key=int)
@@ -173,11 +191,25 @@ class datamc(object):
                     sys.stdout.write(out)
                     sys.stdout.flush()
                     out = None
-            if len(threads) != 0: print "\nFiles Merged"
+            if merging: print "\nFiles Merged"
+        ###################################
+        def mergeData(dataFiles):
+            arg = "hadd "+self.Data_FileNames[self.region]+".root "
+            if not path.isdir("DataEra/"): mkdir("DataEra/")
+            for i,e in enumerate(sorted(self.lumi_by_era.keys())):
+                if self.Data_FileNames[self.region]+"_"+str(i)+".root" in listdir("."):
+                    system("mv "+self.Data_FileNames[self.region]+"_"+str(i)+".root DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
+                if self.Data_FileNames[self.region]+"_"+e+".root" in listdir("DataEra"):
+                    arg += "DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root "
+            arg += " >/dev/null"
+            if path.isfile(self.Data_FileNames[self.region]+".root"): return
+            if self.show: print "Merging Data"
+            system(arg)
         ###################################
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
-                        
+        mergeData(dataFiles)
+    ###############################################################################################################
 
     def GetAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
@@ -188,6 +220,7 @@ class datamc(object):
             nhisto = key.GetName().split("_")[-1]
             if (type(rfile.Get(key.GetName())) == TH1F or type(rfile.Get(key.GetName())) == TH1D) and (not nhisto.isdigit() or nhisto == basic):
                 self.args.append(key.GetName())
+    ###############################################################################################################
 
     def GetVariableName(self,variable):
         self.name = 'Xaxis Title'
@@ -198,61 +231,64 @@ class datamc(object):
             if key == title:
                 self.name = samplenames[title];
                 break
-                    
+    ###############################################################################################################
+
+    def GetHisto(self,fname,variable):
+        rfile=TFile.Open(self.fileDir+fname)
+        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
+        if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
+        else:               hs=None
+        cutflow=rfile.Get("h_cutflow").Clone();cutflow.SetDirectory(0)
+        return hs,cutflow
+    ###############################################################################################################
+                      
     def GetVariable(self,variable):
         self.histo = {}
         self.total = {}
 
         self.GetVariableName(variable)
 
-        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
-        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-        if variable in keys:self.histo['Data']=rfile.Get(variable).Clone();self.histo['Data'].SetDirectory(0)
-        else: print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root";self.histo['Data'] = None
-        # else:print "Could not find "+variable+" In "+self.Data_FileNames[self.region]+".root, Exiting...";exit()
+        hs,cutflow = self.GetHisto(self.Data_FileNames[self.region]+".root",variable)
+        self.histo['Data'] = hs
 
         if self.signal != None:
             for signal in self.signal:
                 mx = signal.split("_")[0].replace("Mx","")
                 mv = signal.split("_")[1].replace("Mv","")
-                rfile=TFile.Open(self.fileDir+self.Mx_Mv[mx][mv]+".root")
-                keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-                if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
-                else:print "Could not find "+variable+" In "+self.Mx_Mv[mx][mv]+".root, Exiting...";exit()
+                hs,cutflow = self.GetHisto(self.Mx_Mv[mx][mv]+".root",variable)
                 self.histo[signal]=hs
-                cutflow=rfile.Get("h_cutflow")
                 self.total[signal] = cutflow.GetBinContent(1)
             if not 'Signal' in self.SampleList:self.SampleList.append('Signal')
 
         for sample in self.MC_FileNames:
+            # print sample
             self.histo[sample]=[]
             self.total[sample]=[]
             for fn in self.MC_FileNames[sample]:
+                # print '\t',fn
                 if not path.isfile(self.fileDir+fn+".root"): continue
-                rfile=TFile.Open(self.fileDir+fn+".root")
-                keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-                if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
-                else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
+                hs,cutflow = self.GetHisto(fn+".root",variable)
                 hs.SetName(variable+"_"+fn)
                 self.histo[sample].append(hs)
-                cutflow=rfile.Get("h_cutflow")
                 self.total[sample].append(cutflow.GetBinContent(1))
         
         if (self.name == 'Xaxis Title'):
             for sample in self.histo:
                 if type(self.histo[sample]) == TH1:
                     self.name = self.histo[sample].GetXaxis().GetTitle()
+    ###############################################################################################################
 
     def ScaleHistogram(self):
         self.BkgIntegral = 0
         for sample in self.SampleList:
-            if self.histo[sample] == None: continue
             if sample == 'Data':
+                if self.histo[sample] == None: continue
                 integral=(self.histo[sample].Integral())
                 space=" "*(15-len(sample))
-                if self.show == 1:print "integral of "+sample+space+" here:"+"%.6g" % integral
+                if self.show:print "integral of "+sample+space+" here:"+"%.6g" % integral
             elif sample == 'Signal':
                 for signal in self.signal:
+                    if self.histo[signal] == None: continue
                     mx = signal.split("_")[0].replace("Mx","")
                     mv = signal.split("_")[1].replace("Mv","")
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
@@ -260,8 +296,10 @@ class datamc(object):
                     self.histo[signal].Scale(scale)
                     integral=(self.histo[signal].Integral())
                     space=" "*(15-len(signal))
-                    if self.show == 1:print "integral of "+signal+space+" here:"+"%.6g" % integral
+                    if self.show:print "integral of "+signal+space+" here:"+"%.6g" % integral
             else:
+                # print sample,'raw','total','xsec','lumi','scaled'
+                if self.histo[sample] == None: continue
                 rawevents = 0
                 for i in range(len(self.histo[sample])):
                     if self.MC_FileNames[sample] == "null":continue
@@ -276,10 +314,11 @@ class datamc(object):
                     self.histo[sample]=self.histo[sample][0]
                     self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
                     integral=(self.histo[sample].Integral())
+                    # print 'summed',integral
                     self.MC_Integral[sample]=integral
                     self.BkgIntegral += integral
 
-        if self.show == 1:
+        if self.show:
             bkgInt = {}
             for sample in self.MC_Integral:bkgInt[str(self.MC_Integral[sample])]=sample
             keylist = bkgInt.keys();keylist.sort(key=float)
