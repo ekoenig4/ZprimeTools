@@ -51,7 +51,6 @@ int main(int argc, const char* argv[]) {
 
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
-
   Long64_t nentries = fChain->GetEntries();
   cout<<"Coming in:"<<endl;
   cout<<"nentries:"<<nentries<<endl;
@@ -63,7 +62,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
-
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
     TFile *weights = TFile::Open("PU_Central.root");
@@ -139,34 +137,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  }
 	}
       }
-      int hadronPID[3] = {130,211,22};
-      for (int i = 0; i < nMC; i++) {
-	// if ( !(abs(mcGMomPID->at(i)) == 600001 || abs(mcMomPID->at(i)) == 600001) ) continue;
-	// cout << mcGMomPID->at(i) << "->" << mcMomPID->at(i) << "->" << mcPID->at(i) << endl;
-	bool inCategory = false;
-	for (int id = 0; id < 3; id++)
-	  if ( abs(mcPID->at(i)) == hadronPID[id] ) {
-	    genHadrons[id]++;
-	    inCategory = true;
-	  }
-	if ( !inCategory )
-	  genHadrons[3]++;
-      }
     }
-    int genTotal = 0;
-    for (int ncon : genHadrons ) genTotal += ncon;
-    h_genNhPercCons->Fill(genHadrons[0]/(float)genTotal,event_weight);
-    h_genChPercCons->Fill(genHadrons[1]/(float)genTotal,event_weight);
-    h_genGammaPercCons->Fill(genHadrons[2]/(float)genTotal,event_weight);
-    h_genMiscPercCons->Fill(genHadrons[3]/(float)genTotal,event_weight);
-    
     float metcut = 0.0;
     
     jetveto = JetVetoDecision();
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
-
-    h_genMCCons->Fill(TotalPFCandidates/(float)nMC,event_weight);
     
     nTotalEvents+=gen_weight;
     nTotalEvents_wPU += event_weight;
@@ -238,34 +214,35 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
    
 }//Closing the Loop function
 
-void ZprimeJetsClass::BookRegion(int i,string histname) {
+void ZprimeJetsClass::BookHistos(const char* outputFilename) {
+  
+  fileName = new TFile(outputFilename, "RECREATE");
+  tree = new TTree("ZprimeJet","ZprimeJet");
   fileName->cd();
 
-  if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
-    h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
-    h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
-    h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
-    h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
-    h_cutflow->GetXaxis()->SetBinLabel(5,"MetCut");
-    h_cutflow->GetXaxis()->SetBinLabel(6,"caloMET cut");
-    h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
-    h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
-    h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
-    h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
+  h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
+  h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
+  h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
+  h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
+  h_cutflow->GetXaxis()->SetBinLabel(5,"MetCut");
+  h_cutflow->GetXaxis()->SetBinLabel(6,"caloMET cut");
+  h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
+  h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
+  h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
 
-    h_genNhPercCons = new TH1F("genNhPercCons","genNhPercCons;Gen Neutral Constituent Percentage",50,0,1.1);h_genNhPercCons->Sumw2();
-    h_genChPercCons = new TH1F("genChPercCons","genChPercCons;Gen Charged Constituent Percentage",50,0,1.1);h_genChPercCons->Sumw2();
-    h_genGammaPercCons = new TH1F("genGammaPercCons","genGammaPercCons;Gen Photon Constituent Percentage",50,0,1.1);h_genGammaPercCons->Sumw2();
-    h_genMiscPercCons = new TH1F("genMiscPercCons","genMiscPercCons;Gen Miscellaneous Constituent Percentage",50,0,1.1);h_genMiscPercCons->Sumw2();
-    h_genMCCons = new TH1F("genMCCons","genMCCons;gen Number of MC",50,0,1.5);h_genMCCons->Sumw2();
-		
-  } else {
-
+  BookCommon(-1,"");
+  for(int i = 0; i<nHisto; i++){
+    char ptbins[100];
+    sprintf(ptbins, "_%d", i);
+    string histname(ptbins);
+    //Common Histograms
+    BookCommon(i,histname);
   }
 }
 
-void ZprimeJetsClass::fillRegion(int histoNumber,double event_weight) {
+void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   
 }
 

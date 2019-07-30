@@ -1,10 +1,10 @@
-#define ZprimeJetsClass_cxx
-#include "ZprimeJetsClass.h"
+#define ZprimeJetsCommon_cxx
+#include "ZprimeJetsCommon.h"
 
 using namespace std;
 
-#ifdef ZprimeJetsClass_cxx
-vector<string> ZprimeJetsClass::split(string str,string delim) {
+#ifdef ZprimeJetsCommon_cxx
+vector<string> ZprimeJetsCommon::split(string str,string delim) {
   vector<string> splitString;
   char strChar[str.size() + 1];
   strcpy(strChar,str.c_str());
@@ -16,7 +16,7 @@ vector<string> ZprimeJetsClass::split(string str,string delim) {
   return splitString;
 }
 
-bool ZprimeJetsClass::fileSelection(string filename,string fileRange)
+bool ZprimeJetsCommon::fileSelection(string filename,string fileRange)
 {
   if (fileRange == "-1") return true;
   int numPos;
@@ -39,7 +39,7 @@ bool ZprimeJetsClass::fileSelection(string filename,string fileRange)
   return false;
 }
 
-ZprimeJetsClass::ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange) 
+ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,const char* fileRange) 
 {
   TChain *chain = new TChain("ggNtuplizer/EventTree");
   TString path = inputFilename;
@@ -83,10 +83,9 @@ ZprimeJetsClass::ZprimeJetsClass(const char* inputFilename,const char* outputFil
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;
   Init(chain);
-  BookHistos(outputFilename);
 }
 
-ZprimeJetsClass::~ZprimeJetsClass()
+ZprimeJetsCommon::~ZprimeJetsCommon()
 {
   if (!fChain) return;
   delete fChain->GetCurrentFile();
@@ -96,13 +95,13 @@ ZprimeJetsClass::~ZprimeJetsClass()
   fileName->Close();
 }
 
-Int_t ZprimeJetsClass::GetEntry(Long64_t entry)
+Int_t ZprimeJetsCommon::GetEntry(Long64_t entry)
 {
   // Read contents of entry.
   if (!fChain) return 0;
   return fChain->GetEntry(entry);
 }
-Long64_t ZprimeJetsClass::LoadTree(Long64_t entry)
+Long64_t ZprimeJetsCommon::LoadTree(Long64_t entry)
 {
   // Set the environment to read one entry
   if (!fChain) return -5;
@@ -115,7 +114,7 @@ Long64_t ZprimeJetsClass::LoadTree(Long64_t entry)
   return centry;
 }
 
-void ZprimeJetsClass::Init(TTree *tree)
+void ZprimeJetsCommon::Init(TTree *tree)
 {
   // The Init() function is called when the selector needs to initialize
   // a new tree or chain. Typically here the branch addresses and branch
@@ -844,7 +843,7 @@ void ZprimeJetsClass::Init(TTree *tree)
   Notify();
 }
 
-Bool_t ZprimeJetsClass::Notify()
+Bool_t ZprimeJetsCommon::Notify()
 {
   // The Notify() function is called when a new file is opened. This
   // can be either for a new TTree in a TChain or when when a new TTree
@@ -855,18 +854,18 @@ Bool_t ZprimeJetsClass::Notify()
   return kTRUE;
 }
 
-void ZprimeJetsClass::Show(Long64_t entry)
+void ZprimeJetsCommon::Show(Long64_t entry)
 {
   // Print contents of entry.
   // If entry is not specified, print current entry
   if (!fChain) return;
   fChain->Show(entry);
 }
-Int_t ZprimeJetsClass::Cut(Long64_t entry)
+Int_t ZprimeJetsCommon::Cut(Long64_t entry)
 {
   // This function may be called from Loop.
   // returns  1 if entry is accepted.
   // returns -1 otherwise.
   return 1;
 }
-#endif // #ifdef ZprimeJetsClass_cxx
+#endif // #ifdef ZprimeJetsCommon_cxx
