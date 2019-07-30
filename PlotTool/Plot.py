@@ -7,7 +7,7 @@ from samplenames import samplenames
 
 class datamc(object):
 
-    def __init__(self,command=None,show=1,lumi=None,fileDir="./"):
+    def __init__(self,command=None,show=True,lumi=None,fileDir="./"):
 
         if fileDir != "./":
             if path.isdir(fileDir+"PlotTool/"):
@@ -72,8 +72,11 @@ class datamc(object):
         RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
 
         self.region=None
-        for i in range(len(RegionName)):
-            if any(f for f in listdir('.output') if preRegionData[i] in f) or path.isfile(postRegionData[i]): self.region=RegionName[i]
+        for i,region in enumerate(RegionName):
+            if path.isfile(self.fileDir+postRegionData[i]): self.region=region; break;
+        if self.region == None:
+            for i,region in enumerate(RegionName):
+                if any(f for f in listdir(self.fileDir+'.output') if preRegionData[i] in f): self.region=region; break
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict):
             self.lumi = self.lumi[self.region]
@@ -89,7 +92,7 @@ class datamc(object):
                     for mv in mvList:
                         self.signal.append("Mx"+mx+"_Mv"+mv)
             elif "Mx" in self.options.signal and "_Mv" in self.options.signal: self.signal = [self.options.signal];
-        if self.show == 1:
+        if self.show:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
@@ -124,10 +127,13 @@ class datamc(object):
     def HaddFiles(self):
         AllFiles=[]
         for mcSample in self.xsec: AllFiles.append(mcSample)
-        dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
-                      for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                      if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                      and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
+        # if self.region != 'SignalRegion':
+        #     dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
+        #                   for i,e in enumerate(sorted(self.lumi_by_era.keys()))
+        #                   if not path.isfile(self.fileDir+"DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
+        #                   and any(self.fileDir+self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(self.fileDir+".output"))]
+        # else: dataFiles = ['postMETdata']
+        dataFiles = [self.Data_FileNames[self.region]]
         AllFiles.extend(dataFiles)
         if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
@@ -139,11 +145,11 @@ class datamc(object):
         def singleThread(AllFiles):
             #Hadd files together
             for fn in AllFiles:
-                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
                     if len(nfile) != 0:
                         arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
+                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
                         system(arg)
         ###################################
         def multiThread(AllFiles):
@@ -158,11 +164,11 @@ class datamc(object):
             #Hadd files together
             threads = {}
             for fn in AllFiles:
-                if (not path.isfile(fn+".root") and path or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
+                if (not path.isfile(self.fileDir+fn+".root") or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
                     if len(nfile) != 0:
                         arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
+                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
                         arg += " >/dev/null"
                         ID = str(len(threads))
                         threads[ID]=haddThread(ID,fn,arg)
@@ -197,7 +203,7 @@ class datamc(object):
                     arg += "DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root "
             arg += " >/dev/null"
             if path.isfile(self.Data_FileNames[self.region]+".root"): return
-            print "Merging Data"
+            if self.show: print "Merging Data"
             system(arg)
         ###################################
         if (self.options.single): singleThread(AllFiles)
@@ -279,7 +285,7 @@ class datamc(object):
                 if self.histo[sample] == None: continue
                 integral=(self.histo[sample].Integral())
                 space=" "*(15-len(sample))
-                if self.show == 1:print "integral of "+sample+space+" here:"+"%.6g" % integral
+                if self.show:print "integral of "+sample+space+" here:"+"%.6g" % integral
             elif sample == 'Signal':
                 for signal in self.signal:
                     if self.histo[signal] == None: continue
@@ -290,7 +296,7 @@ class datamc(object):
                     self.histo[signal].Scale(scale)
                     integral=(self.histo[signal].Integral())
                     space=" "*(15-len(signal))
-                    if self.show == 1:print "integral of "+signal+space+" here:"+"%.6g" % integral
+                    if self.show:print "integral of "+signal+space+" here:"+"%.6g" % integral
             else:
                 # print sample,'raw','total','xsec','lumi','scaled'
                 if self.histo[sample] == None: continue
@@ -312,7 +318,7 @@ class datamc(object):
                     self.MC_Integral[sample]=integral
                     self.BkgIntegral += integral
 
-        if self.show == 1:
+        if self.show:
             bkgInt = {}
             for sample in self.MC_Integral:bkgInt[str(self.MC_Integral[sample])]=sample
             keylist = bkgInt.keys();keylist.sort(key=float)

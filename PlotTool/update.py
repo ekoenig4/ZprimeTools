@@ -11,7 +11,8 @@ projects = {
 #Files to be ignored in all projects
 independents = [
     "mcinfo.py",
-    "dataPileup.root"
+    "dataPileup.root",
+    "cfg_saveplot.py"
 ]
 
 #Get the relevant files from each year
