@@ -1,16 +1,47 @@
 config = {
-    'jes': {
-        dir:'JetEnergyScale',
-        'region':
-    },
-    'nlo': {
-        dir:'NLO_EWK_Uncertainty'
-    },
-    'pfu': {
-        dir:'PFUncertainty'
-    },
-    'pdf': {
-        dir:'PDFShapeUncertainty'
+    'year':2018,
+    'regions':{'SignalRegion/':'9','DoubleEleCR/':'11','DoubleMuCR/':'11','SingleEleCR/':'11','SingleMuCR/':'11'},
+    'Uncertainty' : {
+        'psw': {
+            dir:'PS_Weights/',
+            'region':['DoubleEleCR/'],
+            'unc': {
+                'isrRedUp':{id:'13', 'info':'muRfac=0.707'},'fsrRedUp':{id:'14', 'info':'muRfac=0.707'}, 'isrRedDown':{id:'15', 'info':'muRfac=1.414'},'fsrRedDown':{id:'16', 'info':'muRfac=1.414' },
+                'isrDefUp':{id:'17', 'info':'muRfac=0.5'  },'fsrDefUp':{id:'18', 'info':'muRfac=0.5'  }, 'isrDefDown':{id:'19', 'info':'muRfac=2.0'  },'fsrDefDown':{id:'20', 'info':'muRfac=2.0'   },
+                'isrConUp':{id:'21', 'info':'muRfac=0.25' },'fsrConUp':{id:'22', 'info':'muRfac=0.25' }, 'isrConDown':{id:'23','info':'muRfac=4.0'  },'fsrConDown':{id:'24','info':'uRfac=4.0'  },
+                # 'fsr_G2GG_muRDown':{id:'25','info':'G2GG:muRfac=0.5'},
+                # 'fsr_G2GG_muRUp':  {id:'26','info':'G2GG:muRfac=2.0'},
+                # 'fsr_G2QQ_muRDown':{id:'27','info':'G2QQ:muRfac=0.5'},
+                # 'fsr_G2QQ_muRUp':  {id:'28','info':'G2QQ:muRfac=2.0'},
+                # 'fsr_Q2QG_muRDown':{id:'29','info':'Q2QG:muRfac=0.5'},
+                # 'fsr_Q2QG_muRUp':  {id:'30','info':'Q2QG:muRfac=2.0'},
+                # 'fsr_X2XG_muRDown':{id:'31','info':'X2XG:muRfac=0.5'},
+                # 'fsr_X2XG_muRUp':  {id:'32','info':'X2XG:muRfac=2.0'},
+                # 'fsr_G2GG_cNSDown':{id:'33','info':'G2GG:cNS=-2.0'  },
+                # 'fsr_G2GG_cNSUp':  {id:'34','info':'G2GG:cNS=2.0'   },
+                # 'fsr_G2QQ_cNSDown':{id:'35','info':'G2QQ:cNS=-2.0'  },
+                # 'fsr_G2QQ_cNSUp':  {id:'36','info':'G2QQ:cNS=2.0'   },
+                # 'fsr_Q2QG_cNSDown':{id:'37','info':'Q2QG:cNS=-2.0'  },
+                # 'fsr_Q2QG_cNSUp':  {id:'38','info':'Q2QG:cNS=2.0'   },
+                # 'fsr_X2XG_cNSDown':{id:'39','info':'X2XG:cNS=-2.0'  },
+                # 'fsr_X2XG_cNSUp':  {id:'40','info':'X2XG:cNS=2.0'   },
+                # 'isr_G2GG_muRDown':{id:'41','info':'G2GG:muRfac=0.5'},
+                # 'isr_G2GG_muRUp':  {id:'42','info':'G2GG:muRfac=2.0'},
+                # 'isr_G2QQ_muRDown':{id:'43','info':'G2QQ:muRfac=0.5'},
+                # 'isr_G2QQ_muRUp':  {id:'44','info':'G2QQ:muRfac=2.0'},
+                # 'isr_Q2QG_muRDown':{id:'45','info':'Q2QG:muRfac=0.5'},
+                # 'isr_Q2QG_muRUp':  {id:'46','info':'Q2QG:muRfac=2.0'},
+                # 'isr_X2XG_muRDown':{id:'47','info':'X2XG:muRfac=0.5'},
+                # 'isr_X2XG_muRUp':  {id:'48','info':'X2XG:muRfac=2.0'},
+                # 'isr_G2GG_cNSDown':{id:'49','info':'G2GG:cNS=-2.0'  },
+                # 'isr_G2GG_cNSUp':  {id:'50','info':'G2GG:cNS=2.0'   },
+                # 'isr_G2QQ_cNSDown':{id:'51','info':'G2QQ:cNS=-2.0'  },
+                # 'isr_G2QQ_cNSUp':  {id:'52','info':'G2QQ:cNS=2.0'   },
+                # 'isr_Q2QG_cNSDown':{id:'53','info':'Q2QG:cNS=-2.0'  },
+                # 'isr_Q2QG_cNSUp':  {id:'54','info':'Q2QG:cNS=2.0'   },
+                # 'isr_X2XG_cNSDown':{id:'55','info':'X2XG:cNS=-2.0'  },
+                # 'isr_X2XG_cNSUp':  {id:'56','info':'X2XG:cNS=2.0'   }
+            }
+        },
     }
-    
 }
