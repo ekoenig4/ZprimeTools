@@ -243,7 +243,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 }
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
-  
+  fillCommon(histoNumber,event_weight);
 }
 
 
