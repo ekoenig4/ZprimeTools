@@ -82,7 +82,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     double event_weight = 1.;
     double gen_weight = 1;
-    double nokfactor = 1;
     noweight = 1;
     int bosonPID;
     double bosonPt;
@@ -94,10 +93,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	double pileup = PU->GetBinContent(bin);
 	h_pileup->Fill(pileup);
 	event_weight = pileup;
-	nokfactor = pileup;
 	gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
 	event_weight *= gen_weight;
-	nokfactor *= gen_weight;
 	noweight *= gen_weight;
 	
 	if (sample.isW_or_ZJet()) {
@@ -166,7 +163,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  if (dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
-		    fillHistos(9,nokfactor);
 		  }
 		}
 	      }
@@ -191,28 +187,36 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(10,nTotalEvents_wPU);
 }
 
-void ZprimeJetsClass::BookRegion(int i,string histname) {
+void ZprimeJetsClass::BookHistos(const char* outputFilename) {
+  
+  output = new TFile(outputFilename, "RECREATE");
+  tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
 
-  if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
-    h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
-    h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
-    h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
-    h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
-    h_cutflow->GetXaxis()->SetBinLabel(5,"MetCut");
-    h_cutflow->GetXaxis()->SetBinLabel(6,"caloMET cut");
-    h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
-    h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
-    h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
-    h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
-  } else {
-    
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
+  h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
+  h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
+  h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
+  h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
+  h_cutflow->GetXaxis()->SetBinLabel(5,"MetCut");
+  h_cutflow->GetXaxis()->SetBinLabel(6,"caloMET cut");
+  h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
+  h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
+  h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
+
+  BookCommon(-1,"");
+  for(int i = 0; i<nHisto; i++){
+    char ptbins[100];
+    sprintf(ptbins, "_%d", i);
+    string histname(ptbins);
+    //Common Histograms
+    BookCommon(i,histname);
   }
 }
 
-void ZprimeJetsClass::fillRegion(int histoNumber,double event_weight) {
-  
+void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
+  fillCommon(histoNumber,event_weight);
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision() {
