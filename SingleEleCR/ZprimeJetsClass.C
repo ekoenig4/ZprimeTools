@@ -305,7 +305,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(13,nTotalEvents_wPU);
 }
 
-void ZprimeJetsClass::BookRegion(int i, string histname) {
+void ZprimeJetsClass::BookHistos(const char* outputFilename) {
+  
+  output = new TFile(outputFilename, "RECREATE");
+  tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
   
   float MetBins[45]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
@@ -313,27 +316,33 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
 
   float LeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
-  if (i == -1) {
-    h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
-    h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
-    h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
-    h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
-    h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
-    h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
-    h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
-    h_cutflow->GetXaxis()->SetBinLabel(7,"NoMuons");
-    h_cutflow->GetXaxis()->SetBinLabel(8,"pfMET50");
-    h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
-    h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
-    h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
-    h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEM Veto");
-    h_cutflow->GetXaxis()->SetBinLabel(13,"Total Events w PU");
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
+  h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
+  h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
+  h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
+  h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
+  h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
+  h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
+  h_cutflow->GetXaxis()->SetBinLabel(7,"NoMuons");
+  h_cutflow->GetXaxis()->SetBinLabel(8,"pfMET50");
+  h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
+  h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+  h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEM Veto");
+  h_cutflow->GetXaxis()->SetBinLabel(13,"Total Events w PU");
 
-    h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
-    h_eleRecoSF_corr = new TH1F("h_eleRecoSF_corr","h_eleRecoSF_corr;EleRecoSF",50,0,2);h_eleRecoSF_corr->Sumw2();
-    h_eleEffSF_corr = new TH1F("h_eleEffSF_corr","h_eleEffSF_corr;EleEffSF",50,0,2);h_eleEffSF_corr->Sumw2();
-    h_eleTriggSF = new TH1F("h_eleTriggSF","h_eleTriggSF;EleTriggSF",50,0,2);h_eleTriggSF->Sumw2();
-  } else {
+  h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
+  h_eleRecoSF_corr = new TH1F("h_eleRecoSF_corr","h_eleRecoSF_corr;EleRecoSF",50,0,2);h_eleRecoSF_corr->Sumw2();
+  h_eleEffSF_corr = new TH1F("h_eleEffSF_corr","h_eleEffSF_corr;EleEffSF",50,0,2);h_eleEffSF_corr->Sumw2();
+  h_eleTriggSF = new TH1F("h_eleTriggSF","h_eleTriggSF;EleTriggSF",50,0,2);h_eleTriggSF->Sumw2();
+    
+  BookCommon(-1,"");
+  for(int i = 0; i<nHisto; i++){
+    char ptbins[100];
+    sprintf(ptbins, "_%d", i);
+    string histname(ptbins);
+    //Common Histograms
+    BookCommon(i,histname);
     //CR Histograms
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
@@ -343,7 +352,8 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
   }
 }
 
-void ZprimeJetsClass::fillRegion(int histoNumber,double event_weight) {
+void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
+  fillCommon(histoNumber,event_weight);
   //CR Histograms
   if(lepindex >= 0){ 
     h_LeptonPt[histoNumber]->Fill(elePt->at(lepindex),event_weight);

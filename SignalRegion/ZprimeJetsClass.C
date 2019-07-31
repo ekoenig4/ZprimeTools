@@ -198,10 +198,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(11,nTotalEvents_wPU);
 }
 
-void ZprimeJetsClass::BookRegion(int i, string histname) {
+void ZprimeJetsClass::BookHistos(const char* outputFilename) {
+  
+  output = new TFile(outputFilename, "RECREATE");
+  tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
 
-  if (i == -1) {
   h_cutflow = new TH1D("h_cutflow","h_cutflow",11,0,11);h_cutflow->Sumw2();
   h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
   h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
@@ -214,13 +216,19 @@ void ZprimeJetsClass::BookRegion(int i, string histname) {
   h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
   h_cutflow->GetXaxis()->SetBinLabel(10,"EleHEMVeto");
   h_cutflow->GetXaxis()->SetBinLabel(11,"Total Events w PU");
-  } else {
-
+  
+  BookCommon(-1,"");
+  for(int i = 0; i<nHisto; i++){
+    char ptbins[100];
+    sprintf(ptbins, "_%d", i);
+    string histname(ptbins);
+    //Common Histograms
+    BookCommon(i,histname);
   }
 }
 
-void ZprimeJetsClass::fillRegion(int histoNumber,double event_weight) {
-  
+void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
+  fillCommon(histoNumber,event_weight);
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision() {
