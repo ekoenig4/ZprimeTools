@@ -75,7 +75,7 @@ class datamc(object):
         for i,region in enumerate(RegionName):
             if path.isfile(self.fileDir+postRegionData[i]): self.region=region; break;
         if self.region == None:
-            for i in enumerate(RegionName):
+            for i,region in enumerate(RegionName):
                 if any(f for f in listdir(self.fileDir+'.output') if preRegionData[i] in f): self.region=region; break
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict):
