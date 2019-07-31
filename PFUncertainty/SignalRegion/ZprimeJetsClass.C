@@ -94,7 +94,21 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-    double start_weight = 1.;
+    jetCand     .clear();
+    jetveto     .clear();
+    PFCandidates.clear();
+    j1PFConsEt  .clear();
+    j1PFConsPt  .clear();
+    j1PFConsEta .clear();
+    j1PFConsPhi .clear();
+    j1PFConsPID .clear();
+    j1PFConsPtUnc.clear();
+
+    TrackerCand.clear();
+    EcalCand   .clear();
+    HcalCand   .clear();
+
+    double event_weight = 1.;
     double gen_weight = 1;
     noweight = 1;
     int bosonPID;
@@ -106,9 +120,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
       double pileup = PU->GetBinContent(bin);
       h_pileup->Fill(pileup);
-      start_weight = pileup;
+      event_weight = pileup;
       gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
-      start_weight *= gen_weight;
+      event_weight *= gen_weight;
       noweight *= gen_weight;
 
       if (sample.isW_or_ZJet()) {
@@ -124,87 +138,71 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     float metcut = 0.0;
     
     nTotalEvents+=gen_weight;
-    
-    int unclist[3] = {0,1,-1};
-    for (int unc : unclist) {
-      jetCand     .clear();
-      jetveto     .clear();
-      PFCandidates.clear();
-      j1PFConsEt  .clear();
-      j1PFConsPt  .clear();
-      j1PFConsEta .clear();
-      j1PFConsPhi .clear();
-      j1PFConsPID .clear();
-
-      double event_weight = start_weight;
-
-      for (int i = 0; i < nJet; i++)
-	jetPt->at(i) = jetPt->at(i)*(1+unc*jetJECUnc->at(i));
-      if (unc == 1) {
-	pfMET = pfMET_T1JESUp;
-	pfMETPhi = pfMETPhi_T1JESUp;
-      }
-      if (unc == -1) {
-	pfMET = pfMET_T1JESDo;
-	pfMETPhi = pfMETPhi_T1JESDo;
-      }
+    jetveto = JetVetoDecision();
+    jetCand = getJetCand(200,2.5,0.8,0.1);
+    AllPFCand(jetCand,PFCandidates);
+    fillHistos(0,event_weight);
       
-      jetveto = JetVetoDecision(unc);
-      jetCand = getJetCand(200,2.5,0.8,0.1,unc);
-      AllPFCand(jetCand,PFCandidates);
-      if (unc == 0) fillHistos(0,event_weight);
-      
-      if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) {    
-	if (unc == 0) nFilters+=event_weight;
-	if (unc == 0) fillHistos(1,event_weight);
+    if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) {    
+      nFilters+=event_weight;
+      fillHistos(1,event_weight);
 	
-	if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
-	  if (unc == 0) nHLT+=event_weight;
-	  if (unc == 0) fillHistos(2,event_weight);
+      if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
+	nHLT+=event_weight;
+	fillHistos(2,event_weight);
 	  
-	  if(jetCand.size()>0) {
-	    if (unc == 0) nJetSelection+=event_weight;
-	    if (unc == 0) fillHistos(3,event_weight);
-	    if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
+	if(jetCand.size()>0) {
+	  nJetSelection+=event_weight;
+	  fillHistos(3,event_weight);
+	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
 	    
-	    if (pfMET>250) {
-	      if (unc == 0) nMET200+=event_weight;
-	      if (unc == 0) fillHistos(4,event_weight);
-	      metcut = (fabs(pfMET-caloMET))/pfMET;
-	      if (unc == 0) h_metcut->Fill(metcut);
+	  if (pfMET>250) {
+	    nMET200+=event_weight;
+	    fillHistos(4,event_weight);
+	    metcut = (fabs(pfMET-caloMET))/pfMET;
+	    h_metcut->Fill(metcut);
 	      
-	      if(metcut<0.5) {
-		if (unc == 0) nMETcut+=event_weight;
-		if (unc == 0) fillHistos(5,event_weight);
+	    if(metcut<0.5) {
+	      nMETcut+=event_weight;
+	      fillHistos(5,event_weight);
 		
-		if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
-		  if (unc == 0) nLeptonIDs+=event_weight;
-		  if (unc == 0) fillHistos(6,event_weight);
-		  if(btagVeto(unc)) {
-		    if (unc == 0) nbtagVeto+=event_weight;
-		    if (unc == 0) fillHistos(7,event_weight);
-		    double minDPhiJetMET_first4 = TMath::Pi();
-		    for (int i = 0; i < jetveto.size(); i++) {
-		      double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
-		      if (dPhiJetMet < minDPhiJetMET_first4) {
-			if (i < 4)
-			  minDPhiJetMET_first4 = dPhiJetMet;
-		      }
+	      if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
+		nLeptonIDs+=event_weight;
+		fillHistos(6,event_weight);
+		if(btagVeto()) {
+		  nbtagVeto+=event_weight;
+		  fillHistos(7,event_weight);
+		  double minDPhiJetMET_first4 = TMath::Pi();
+		  for (int i = 0; i < jetveto.size(); i++) {
+		    double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
+		    if (dPhiJetMet < minDPhiJetMET_first4) {
+		      if (i < 4)
+			minDPhiJetMET_first4 = dPhiJetMet;
 		    }
-		    if (unc == 0) h_dphimin->Fill(minDPhiJetMET_first4);
+		  }
+		  h_dphimin->Fill(minDPhiJetMET_first4);
 		    
-		    if(dPhiJetMETcut(jetveto)) {
-		      if (unc == 0) nDphiJetMET+=event_weight;
-		      if (unc == 0)  fillHistos(8,event_weight); //norm
-		      if (unc == 1)  fillHistos(9,event_weight); //up
-		      if (unc == -1) fillHistos(10,event_weight);//down
+		  if(dPhiJetMETcut(jetveto)) {
+		    nDphiJetMET+=event_weight;
+		    fillHistos(10,event_weight); //norm
+		    //   Trk ECAL HCAL
+		    //up  11  12   13
+		    //dn  14  15   16
+		    int UncType[2] = {1,-1};
+		    for (int i = 0; i < 2; i++) {
+		      getPt123Frac(Tracker,UncType[i]);
+		      fillHistos(11+3*i,event_weight);
+		      getPt123Frac(ECAL,UncType[i]);
+		      fillHistos(12+3*i,event_weight);
+		      getPt123Frac(HCAL,UncType[i]);
+		      fillHistos(13+3*i,event_weight);
 		    }
-		  }   
-		}	
-	      }
+		  }
+		}   
+	      }	
 	    }
-	  }	    
-	}
+	  }
+	}	    
       }
     }
     
@@ -250,16 +248,130 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     string histname(ptbins);
     //Common Histograms
     BookCommon(i,histname);
+    
+    h_EcalPtUnc[i]=new TH2F(("EcalPtUnc"+histname).c_str(),"ECAL P_{T} Uncertainty;Photon P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    h_TrackerPtUnc[i]=new TH2F(("TrackerPtUnc"+histname).c_str(),"Tracker P_{T} Uncertainty;Charged Hadrons P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    h_HcalPtUnc[i]=new TH2F(("HcalPtUnc"+histname).c_str(),"HCAL P_{T} Uncertainty;Neutral Hadron P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
   }
 }
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   fillCommon(histoNumber,event_weight);
+  for (int ID : TrackerCand)
+    if (j1PFConsPt[ID] > 1)
+      h_TrackerPtUnc[histoNumber]->Fill(j1PFConsPt[ID],j1PFConsPtUnc[ID]);
+  for (int ID : EcalCand)
+    if (j1PFConsPt[ID] > 1)
+      h_EcalPtUnc[histoNumber]->Fill(j1PFConsPt[ID],j1PFConsPtUnc[ID]);
+  for (int ID : HcalCand)
+    if (j1PFConsPt[ID] > 1)
+      h_HcalPtUnc[histoNumber]->Fill(j1PFConsPt[ID],j1PFConsPtUnc[ID]);
 }
 
 
+void ZprimeJetsClass::getPt123Frac(PFCons cons,int UncType) {
+  Pt123Fraction=jetPtAll=Pt123=ChNemPt=ChNemPt123=ChNemPtFrac=0;
+  for (int i = 0; i < 3; i++){
+    hadronPt[i] = 0.;
+  }
+  // Neutral, Charged, Photon
+  int HadronID[3] = {130,211,22};
+  double HadronPtFirst3[3] = {0.,0.,0.};
+  for (int i = 0; i < j1PFConsPID.size(); i++) {
+    bool applyUnc = ( ( cons == Tracker && ( abs(j1PFConsPID[i]) == 221 || abs(j1PFConsPID[i]) == 13 ) ) ||
+		      ( cons == ECAL && ( abs(j1PFConsPID[i]) == 22 || abs(j1PFConsPID[i]) == 11 ) ) ||
+		      ( cons == HCAL && ( abs(j1PFConsPID[i]) == 130 ) )
+		      ) ;
+    double consPt = applyUnc ? j1PFConsPt[i]+UncType*j1PFConsPtUnc[i] : j1PFConsPt[i];
+    jetPtAll += consPt;
+    if (i < 3) Pt123 += consPt;
+    for (int j = 0; j < 3; j++)
+      if ( abs(j1PFConsPID[i]) == HadronID[j] ) {
+	if (i < 3) HadronPtFirst3[j] += consPt;
+	hadronPt[j] += consPt;
+      }
+  }
+  Pt123Fraction = Pt123/jetPtAll;
+  PtRawFrac = Pt123/jetRawPt->at(jetCand[0]);
+  ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(hadronPt[1]+hadronPt[2]);
+  ChNemPt123 = HadronPtFirst3[1]+HadronPtFirst3[2];
+  ChNemPt = hadronPt[1]+hadronPt[2];
+}
 
-vector<int> ZprimeJetsClass::JetVetoDecision(int UncType) {
+void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
+  //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
+  TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
+  
+  //We are using these conditions so we only calculate the following quantities for the signal we are interested in
+  //This will also make it faster to process the events
+  if(jetCand.size()>0) {
+    j1PFConsEt=JetsPFConsEt->at(jetCand[0]);
+    j1PFConsPt=JetsPFConsPt->at(jetCand[0]);
+    j1PFConsEta=JetsPFConsEta->at(jetCand[0]);
+    j1PFConsPhi=JetsPFConsPhi->at(jetCand[0]);
+    j1PFConsPID=JetsPFConsPID->at(jetCand[0]);
+
+    for(int i=0;i<j1PFConsPID.size();i++) {
+      if (abs(j1PFConsPID.at(i)) == 211 || abs(j1PFConsPID.at(i)) == 13) {
+	//Tracker Uncertainty
+	//deltaPt=(1/100)*sqrt((0.015*Pt)^2+(0.5)^2)
+	j1PFConsPtUnc.push_back((1/100.)*sqrt(pow(0.015*j1PFConsPt.at(i),2)+pow(0.5,2)));
+	TrackerCand.push_back(i);
+	//cout<<"T"<<TrackerCand[TrackerCand.size()-1]<<":"<<j1PFConsPtUnc[TrackerCand[TrackerCand.size()-1]]<<" ";
+      }
+      else if (abs(j1PFConsPID.at(i)) == 22 || abs(j1PFConsPID.at(i)) == 11) {
+	//ECAL Uncertainty
+	//deltaPt=(1/100)*sqrt((2.8)^2/Pt+(12.8/Pt)^2+(0.3)^2)
+	j1PFConsPtUnc.push_back((1/100.)*sqrt(pow(2.8,2)/j1PFConsPt.at(i)+pow(12.8/j1PFConsPt.at(i),2)+pow(0.3,2)));
+	EcalCand.push_back(i);
+	//cout<<"E"<<EcalCand[EcalCand.size()-1]<<":"<<j1PFConsPtUnc[EcalCand[EcalCand.size()-1]]<<" ";
+      }
+      else if (abs(j1PFConsPID.at(i)) == 130) {
+	//HCAL Uncertainty
+	//deltaPt=(1/100)*sqrt((115)^2/Pt+(5.5)^2)
+	j1PFConsPtUnc.push_back((1/100.)*sqrt(pow(115,2)/j1PFConsPt.at(i)+pow(5.5,2)));
+	HcalCand.push_back(i);
+	//cout<<"H"<<HcalCand[HcalCand.size()-1]<<":"<<j1PFConsPtUnc[HcalCand[HcalCand.size()-1]]<<" ";
+      }
+      else {
+	j1PFConsPtUnc.push_back(0);
+	//cout<<"N"<<i<<":"<<j1PFConsPtUnc[i]<<" ";
+      }
+    }
+
+    
+    PFCandidates = getPFCandidates();
+
+    TLorentzVector pfCons;
+    for (int i = 0; i < j1PFConsPID.size(); i++) {
+      TLorentzVector cons; cons.SetPtEtaPhiE(j1PFConsPt[i],j1PFConsEta[i],j1PFConsPhi[i],j1PFConsEt[i]);
+      pfCons += cons;
+    }
+    j1Mass = pow(pfCons.M2(),0.5);
+    
+    //cout<<"Vector of Pairs should have size 4: "<<PFCandidates.size()<<endl;
+    if(PFCandidates.size()>0) {
+      TotalPFCandidates=PFCandidates.at(0);
+      // cout<<"TotalPFCandidates: "<<TotalPFCandidates<<endl;
+    }
+    
+    if(PFCandidates.size()>1)
+      ChargedPFCandidates=PFCandidates.at(1);
+    //cout<<"TotalChargedPFCandidates: "<<ChargedPFCandidates<<endl;}
+    
+    if(PFCandidates.size()>2)
+      GammaPFCandidates=PFCandidates.at(2);
+    //cout<<"TotalGammaPFCandidates: "<<GammaPFCandidates<<endl;}
+    
+    if(PFCandidates.size()>3)
+      NeutralPFCandidates=PFCandidates.at(3);
+    //cout<<"TotalNeutralPFCandidates: "<<NeutralPFCandidates<<endl;}
+    
+    getPt123Frac(None,0);
+  }
+}
+
+vector<int> ZprimeJetsClass::JetVetoDecision() {
 
   vector<int> jetindex;
   for(int i = 0; i < nJet; i++) {
@@ -320,27 +432,3 @@ bool ZprimeJetsClass::muon_veto_looseID(int jet_index, float muPtCut) {
   return veto_passed;
 }
 
-vector<int> ZprimeJetsClass::getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut, int UncType){
-
-  vector<int> tmpCand;
-  tmpCand.clear();
-
-  for(int p=0;p<nJet;p++) {
-    bool kinematic = jetPt->at(p) > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
-
-    if((*jetPFLooseId)[p]==1 && kinematic)
-      tmpCand.push_back(p);
-  }
-
-  return tmpCand;
-}
-
-bool ZprimeJetsClass::btagVeto(int UncType) {
-
-  bool btagVeto = true;
-  for(int i = 0; i < nJet; i++) {
-    if(jetPt->at(i) > 30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8484)
-      btagVeto = false;
-  }
-  return btagVeto;
-}

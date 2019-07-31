@@ -44,6 +44,7 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
   //const char* file2 = argv[2];
+
   ZprimeJetsClass t(argv[1],argv[2],argv[5]);
   t.Loop(maxEvents,reportEvery);
   return 0;
@@ -58,8 +59,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  double nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection,nTotalEvents_wPU;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = pfMET50 = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = nTotalEvents_wPU = 0;
   vector<int> jetveto;
   vector<int> PFCandidates;
   float dphimin = -99;
@@ -81,15 +82,13 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
   }
-  
+
   if (maxEvents != -1LL && nentries > maxEvents)
     nentriesToCheck = maxEvents;
   nTotal = nentriesToCheck;
   Long64_t nbytes = 0, nb = 0;
-  cout<<"Running over "<<nTotal<<" events."<<endl;
-  for (Long64_t jentry=0; jentry<nentriesToCheck;) {
-    if (sample.isData) jentry+=4;
-    else               jentry++;
+  cout<<"Running over "<<nTotal<<" events."<<endl;   
+  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -124,130 +123,187 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
       event_weight *= gen_weight;
       noweight *= gen_weight;
-
+      
       if (sample.isW_or_ZJet()) {
-	for (int i = 0; i < nMC; i++) {
+	for (int i = 0; i < nMC; i++)
 	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
 	    WorZfound=true;
 	    bosonPID = (*mcPID)[i];
 	    bosonPt = (*mcPt)[i];
+	    if ( !inclusiveCut() ) continue;
+	    double kfactor = getKfactor(bosonPt);
+	    if ( sample.PID == 23 ) {
+	      h_genZPt->Fill(bosonPt,gen_weight);
+	      h_genZPtwK->Fill(bosonPt,gen_weight*kfactor);
+	    }
+	    if ( sample.PID == 24 ) {
+	      h_genWPt->Fill(bosonPt,gen_weight);
+	      h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
+	    }
 	  }
-	}
       }
     }
     float metcut = 0.0;
     
-    nTotalEvents+=gen_weight;
-    jetveto = JetVetoDecision();
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand   = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand,PFCandidates);
+    //CR Variables
+    lepindex = -1;
+    nTotalEvents+=gen_weight;
     fillHistos(0,event_weight);
-      
-    if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) {    
+    
+    if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
       nFilters+=event_weight;
       fillHistos(1,event_weight);
-	
-      if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
+      
+      if ((HLTEleMuX>>4&1 == 1) || (HLTEleMuX>>38&1 == 1) || (HLTPho>>7&1 ==1) || !sample.isData) {
 	nHLT+=event_weight;
 	fillHistos(2,event_weight);
-	  
+	
 	if(jetCand.size()>0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
-	    
-	  if (pfMET>250) {
-	    nMET200+=event_weight;
+	  //CR code
+	  //At least one of the one electrons passes the tight selection
+	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.0);
+	  vector<int> looseEles = electron_veto_looseID(jetCand[0],0,10.0);
+	  vector<int> mulist;
+	  mulist.clear();
+	  
+	  if(elelist.size() == 1 && looseEles.size() == 1) {
+	    lepindex = elelist[0];
+	    mulist = muon_veto_looseID(jetCand[0],elelist[0],10.0);
+	    jetveto = JetVetoDecision(jetCand[0],elelist[0]);
+                    
+	    TLorentzVector lep_4vec;
+	    lep_4vec.SetPtEtaPhiE(elePt->at(elelist[0]),eleEta->at(elelist[0]),elePhi->at(elelist[0]),eleEn->at(elelist[0]));
+
+	    lepton_pt = lep_4vec.Pt();
+	    TLorentzVector met_4vec;
+	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
+	    TLorentzVector leptoMET_4vec = lep_4vec+met_4vec;
+	    Double_t leptoMET = fabs(leptoMET_4vec.Pt());
+	    Double_t leptoMET_phi = leptoMET_4vec.Phi();
+	    nCRSelection+=event_weight;
+	    Recoil = leptoMET;
+	    metcut = (fabs(pfMET-caloMET))/Recoil;
 	    fillHistos(4,event_weight);
-	    metcut = (fabs(pfMET-caloMET))/pfMET;
-	    h_metcut->Fill(metcut);
-	      
-	    if(metcut<0.5) {
-	      nMETcut+=event_weight;
+	    
+	    if (leptoMET>250) {
+	      nMET200+=event_weight;
 	      fillHistos(5,event_weight);
-		
-	      if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
-		nLeptonIDs+=event_weight;
+	      
+	      if(mulist.size() == 0) {
+		nNoMuons+=event_weight;
 		fillHistos(6,event_weight);
-		if(btagVeto()) {
-		  nbtagVeto+=event_weight;
+		Float_t dPhi_lepMET = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
+		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
+		h_lepMET_MT->Fill(lepMET_MT);
+		
+		if(pfMET > 50) {
+		  pfMET50+=event_weight;
 		  fillHistos(7,event_weight);
-		  double minDPhiJetMET_first4 = TMath::Pi();
-		  for (int i = 0; i < jetveto.size(); i++) {
-		    double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
-		    if (dPhiJetMet < minDPhiJetMET_first4) {
-		      if (i < 4)
-			minDPhiJetMET_first4 = dPhiJetMet;
-		    }
-		  }
-		  h_dphimin->Fill(minDPhiJetMET_first4);
+		  h_metcut->Fill(metcut);
+		  
+		  if(metcut<0.5) {
+		    nMETcut+=event_weight;
+		    fillHistos(8,event_weight);
 		    
-		  if(dPhiJetMETcut(jetveto)) {
-		    nDphiJetMET+=event_weight;
-		    fillHistos(8,event_weight); //norm
-		    //   Trk ECAL HCAL
-		    //up  9   10   11
-		    //dn  12  13   14
-		    int UncType[2] = {1,-1};
-		    for (int i = 0; i < 2; i++) {
-		      getPt123Frac(Tracker,UncType[i]);
-		      fillHistos(9+3*i,event_weight);
-		      getPt123Frac(ECAL,UncType[i]);
-		      fillHistos(10+3*i,event_weight);
-		      getPt123Frac(HCAL,UncType[i]);
-		      fillHistos(11+3*i,event_weight);
-		    }
+		    if(btagVeto()) {
+		      nbtagVeto+=event_weight;
+		      fillHistos(9,event_weight);
+		      double minDPhiJetMET_first4 = TMath::Pi();
+		      for (int i = 0; i < jetveto.size(); i++) {
+			double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
+			if (dPhiJetMet < minDPhiJetMET_first4) {
+			  if (i < 4)
+			    minDPhiJetMET_first4 = dPhiJetMet;
+			}
+		      }
+		      h_dphimin->Fill(minDPhiJetMET_first4);
+		      
+		      if(dPhiJetMETcut(jetveto)) {
+			nDphiJetMET+=event_weight;
+			fillHistos(10,event_weight); //norm
+			//   Trk ECAL HCAL
+			//up  11  12   13
+			//dn  14  15   16
+			int UncType[2] = {1,-1};
+			for (int i = 0; i < 2; i++) {
+			  getPt123Frac(Tracker,UncType[i]);
+			  fillHistos(11+3*i,event_weight);
+			  getPt123Frac(ECAL,UncType[i]);
+			  fillHistos(12+3*i,event_weight);
+			  getPt123Frac(HCAL,UncType[i]);
+			  fillHistos(13+3*i,event_weight);
+			}
+		      }
+		    }   
 		  }
-		}   
-	      }	
+		}
+	      }
 	    }
 	  }
-	}	    
+	}
       }
     }
-    
     tree->Fill();
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
   }
-   
   h_cutflow->SetBinContent(1,nTotalEvents); 
   h_cutflow->SetBinContent(2,nFilters);
   h_cutflow->SetBinContent(3,nHLT);
   h_cutflow->SetBinContent(4,nJetSelection);
-  h_cutflow->SetBinContent(5,nMET200);
-  h_cutflow->SetBinContent(6,nMETcut);
-  h_cutflow->SetBinContent(7,nLeptonIDs);
-  h_cutflow->SetBinContent(8,nbtagVeto);
-  h_cutflow->SetBinContent(9,nDphiJetMET);
-   
+  h_cutflow->SetBinContent(5,nCRSelection);
+  h_cutflow->SetBinContent(6,nMET200);
+  h_cutflow->SetBinContent(7,nNoMuons);
+  h_cutflow->SetBinContent(8,pfMET50);
+  h_cutflow->SetBinContent(9,nMETcut);
+  h_cutflow->SetBinContent(10,nbtagVeto);
+  h_cutflow->SetBinContent(11,nDphiJetMET);
+  
 }//Closing the Loop function
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
-  
+
   fileName = new TFile(outputFilename, "RECREATE");
   tree = new TTree("ZprimeJet","ZprimeJet");
   fileName->cd();
+  
+  float MetBins[45]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
+		     780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1400.,1800.,2000.,2500.};
 
-  h_cutflow = new TH1D("h_cutflow","h_cutflow",9,0,9);h_cutflow->Sumw2();
+  float LeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
+
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",11,0,11);h_cutflow->Sumw2();
   h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
   h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
   h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
   h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
-  h_cutflow->GetXaxis()->SetBinLabel(5,"MetCut");
-  h_cutflow->GetXaxis()->SetBinLabel(6,"caloMET cut");
-  h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
-  h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
-  h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
+  h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
+  h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
+  h_cutflow->GetXaxis()->SetBinLabel(7,"NoMuons");
+  h_cutflow->GetXaxis()->SetBinLabel(8,"pfMET50");
+  h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
+  h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+  h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
 
   BookCommon(-1,"");
-  for(int i = 0; i<nHisto; i++){
+  for(int i = 0; i<nHisto; i++) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     //Common Histograms
     BookCommon(i,histname);
+    //CR Histograms
+    h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
+    h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
+    h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",30,0.,3.1416);h_LeptonPhi[i]->Sumw2();
+    h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
     
     h_EcalPtUnc[i]=new TH2F(("EcalPtUnc"+histname).c_str(),"ECAL P_{T} Uncertainty;Photon P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
     h_TrackerPtUnc[i]=new TH2F(("TrackerPtUnc"+histname).c_str(),"Tracker P_{T} Uncertainty;Charged Hadrons P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
@@ -257,6 +313,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   fillCommon(histoNumber,event_weight);
+  
   for (int ID : TrackerCand)
     if (j1PFConsPt[ID] > 1)
       h_TrackerPtUnc[histoNumber]->Fill(j1PFConsPt[ID],j1PFConsPtUnc[ID]);
@@ -266,8 +323,15 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   for (int ID : HcalCand)
     if (j1PFConsPt[ID] > 1)
       h_HcalPtUnc[histoNumber]->Fill(j1PFConsPt[ID],j1PFConsPtUnc[ID]);
+  //CR Histograms
+  if(lepindex >= 0){ 
+    h_LeptonPt[histoNumber]->Fill(elePt->at(lepindex),event_weight);
+    h_LeptonEta[histoNumber]->Fill(eleEta->at(lepindex),event_weight);
+    h_LeptonPhi[histoNumber]->Fill(elePhi->at(lepindex),event_weight);
+  }
+  if(lepton_pt > 0){
+    h_recoil[histoNumber]->Fill(Recoil,event_weight);}
 }
-
 
 void ZprimeJetsClass::getPt123Frac(PFCons cons,int UncType) {
   Pt123Fraction=jetPtAll=Pt123=ChNemPt=ChNemPt123=ChNemPtFrac=0;
@@ -371,64 +435,140 @@ void ZprimeJetsClass::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
   }
 }
 
-vector<int> ZprimeJetsClass::JetVetoDecision() {
+vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int ele_index) {
 
+  bool jetVeto=true;
   vector<int> jetindex;
-  for(int i = 0; i < nJet; i++) {
-    if (jetPt->at(i) < 30. && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
-      jetindex.push_back(i);
-  }
+
+  for(int i = 0; i < nJet; i++)
+    {
+      double deltar_ele = 0.0;
+      deltar_ele = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index));
+      if(deltar_ele>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
+        {
+          jetindex.push_back(i);
+        }
+    }
   return jetindex;
 }
 
-bool ZprimeJetsClass::electron_veto_looseID(int jet_index, float elePtCut) {
-  bool veto_passed = true; //pass veto if no good electron found
+vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut) {
+  vector<int> ele_cands;
+  ele_cands.clear();
 
   for(int i = 0; i < nEle; i++) {
-    if(eleIDbit->at(i)>>1&1 == 1) {
-      //Electron passes eat cut
+    //Electron passes Tight Electron ID cuts
+    if(eleIDbit->at(i)>>3&1 == 1) {
+      //Electron passes eta cut
       if (fabs(eleEta->at(i)) < 2.5) {
 	//Electron passes pt cut
 	if(elePt->at(i) > elePtCut) {
 	  //Electron does not overlap photon
-	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
+	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	    ele_cands.push_back(i);
 	}
       }
     }
   }
-  return veto_passed;
+  return ele_cands;
+}
+
+vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut)
+{
+  // bool veto_passed = true; //pass veto if no good muon found
+  vector<int> mu_cands;
+  mu_cands.clear();
+
+  bool pass_PFMuon = true;
+  bool pass_globalMuon = true;
+  // bool pass_trackerMuon = true;
+  bool pass_chi2ndf = false;
+  bool pass_chamberHit = false;
+  bool pass_matchedStations = false;
+  bool pass_dxy = false;
+  bool pass_dz = false;
+  bool pass_pixelHits = false;
+  bool pass_trackLayers = false;
+  bool pass_iso = false;
+  //Explicitly stating types to avoid a TMath::Max conversion issue
+  Float_t zero = 0.0;
+  Float_t muPhoPU = 999.9;
+  Float_t tightIso_combinedRelative = 999.9;
+  for(int i = 0; i < nMu; i++) {
+    // pass_globalMuon = muIsGlobalMuon->at(i);
+    // pass_PFMuon = muIsPFMuon->at(i);
+    // pass_trackerMuon = muIsTrackerMuon->at(i);
+    pass_chi2ndf = muChi2NDF->at(i) < 10.0;
+    pass_chamberHit = muMuonHits->at(i) > 0;
+    pass_matchedStations = muStations->at(i) > 1;
+    pass_dxy = fabs(muInnerD0->at(i)) < 0.2;
+    pass_dz = fabs(muInnerDz->at(i)) < 0.5;
+    pass_pixelHits = muPixelHits->at(i) > 0;
+    pass_trackLayers = muTrkLayers->at(i) > 5;
+
+    muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
+    tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
+    pass_iso = tightIso_combinedRelative < 0.15;
+    //Muon passes Tight Muon ID
+    // if(pass_iso && pass_globalMuon && pass_PFMuon && pass_chi2ndf && pass_chamberHit && pass_matchedStations && pass_dxy && pass_dz && pass_pixelHits && pass_trackLayers)
+    if(pass_iso && muIDbit->at(i)>>2&1==1) {
+      //Muon passes eta cut
+      if (fabs(muEta->at(i)) < 2.4) {
+	//Muon passes pt cut
+	if(muPt->at(i) > muPtCut) {
+	  //Muon does not overlap photon
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	    mu_cands.push_back(i);
+	}
+      }
+    }
+  }
+  return mu_cands;
+}
+
+vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int mu_index, float elePtCut) {
+  vector<int> ele_cands;
+  ele_cands.clear();
+
+  for(int i = 0; i < nEle; i++) {
+    //Electron passes Loose Electron ID cuts
+    if(eleIDbit->at(i)>>1&1 == 1) {
+      //Electron passes eta cut
+      if(fabs(eleEta->at(i)) < 2.5) {
+	//Electron passes pt cut
+	if(elePt->at(i) > elePtCut) {
+	  //Electron does not overlap photon
+	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	    ele_cands.push_back(i);
+	}
+      }
+    }
+  }
+  return ele_cands;
 }
 
 
 
 //Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5
-bool ZprimeJetsClass::muon_veto_looseID(int jet_index, float muPtCut) {
-  bool veto_passed = true; //pass veto if no good muon found
-  bool pass_iso = false;
-                                                                                                                                                    
-  Float_t zero = 0.0;
-  Float_t muPhoPU = 999.9;
-  Float_t tightIso_combinedRelative = 999.9;
-    
+vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int ele_index, float muPtCut) {
+  //cout << "Inside Muon Loose Veto" << endl;
+  vector<int> mu_cands;
+  mu_cands.clear();
+
   for(int i = 0; i < nMu; i++) {
-    muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
-    tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
-    pass_iso = tightIso_combinedRelative < 0.25;
-    if (fabs(muEta->at(i)) < 2.4) {
-      if(muPt->at(i) > muPtCut) {
-	if(pass_iso) {
-	  //Muon does not overlap jet  
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
+    if(muIDbit->at(i)>>0&1==1) {
+      //Muon passes eta cut
+      if(fabs(muEta->at(i)) < 2.4) {
+	//Muon passes pt cut
+	if(muPt->at(i) > muPtCut) {
+	  //cout <<"Passed Pt Cut" << endl;
+	  //Muon does not overlap photon
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index)) > 0.5)
+	    mu_cands.push_back(i);
 	}
       }
     }
   }
-  return veto_passed;
+  return mu_cands;
 }
 

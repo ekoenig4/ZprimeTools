@@ -23,6 +23,7 @@
 #include <TCanvas.h>
 #include <TSystem.h>
 #include <TPostScript.h>
+#include <TH3.h>
 #include <TH2.h>
 #include <TH1.h>
 #include <TF1.h>
@@ -46,30 +47,35 @@
 using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 15;
+  static const int nHisto = 13;
+  static const bool applyPU = true;
+  static const bool applySF = true;
+  static const bool applyKF = true;
 
+  vector<double> jetPtNorm;
   
-  enum PFCons {Tracker,ECAL,HCAL,None};
-  vector<int> TrackerCand,EcalCand,HcalCand;
-  vector<double> j1PFConsPtUnc;
-  double jetPtAll;
-
-  TH2F *h_TrackerPtUnc[nHisto],*h_EcalPtUnc[nHisto],*h_HcalPtUnc[nHisto];
+  //CR variables
+  int lepindex_leading, lepindex_subleading;
+  double dilepton_mass,dilepton_pt,Recoil;
+  float leptoMET_phi_to_use;
+  TLorentzVector m1,m2;
+  //CR histograms
+  TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
   
   ZprimeJetsClass(const char* file1,const char* file2,const char* fileRange) : ZprimeJetsCommon(file1,file2,fileRange)
   { BookHistos(file2); };
-  virtual void     Loop(Long64_t maxEvents, int reportEvery);
+  virtual void Loop(Long64_t maxEvents, int reportEvery);
   virtual void BookHistos(const char* file2);
   virtual void fillHistos(int histoNumber,double event_weight);
-  virtual vector<int> JetVetoDecision();
-  virtual bool electron_veto_looseID(int jet_index, float elePtCut);
-  virtual bool muon_veto_looseID(int jet_index, float muPtCut);
-  virtual void getPt123Frac(PFCons cons,int UncType);
-  virtual void AllPFCand(vector<int> jetCand,vector<int> PFCandidates);
+  virtual vector<int> JetVetoDecision(int leading_ele_index, int subleading_ele_index);
+  virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
+  virtual vector<int> electron_veto_looseID(int jet_index, int leading_mu_index, int subleading_mu_index, float elePtCut);
+  virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
+  virtual vector<int> muon_veto_looseID(int jet_index, int leading_ele_index, int subleading_ele_index, float muPtCut);
 };
 
 ZprimeJetsCommon::DataMC::DataMC(string filename) {
-  string sampleID[] = {"MET","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+  string sampleID[] = {"SingleElectron","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   string inclusiveID[] = {"WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8","DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"};
   for (int i = 0; i < Total; i++)
     if (filename.find(sampleID[i]) != string::npos) {
@@ -82,8 +88,8 @@ ZprimeJetsCommon::DataMC::DataMC(string filename) {
       if (filename.find(inclusiveID[i]) != string::npos)
 	isInclusive = true;
   if (type == WJets) PID = 24;
-  if (type == ZJets) PID = 23;
+  if (type == ZJets || type == DYJets) PID = 23;
 }
-bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets; }
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
 
 #endif
