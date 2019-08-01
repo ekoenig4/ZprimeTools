@@ -71,9 +71,6 @@ MET_F() {
     ${1} $DATA/MET/crab_job_MET2017Fv4/190522_094103/0002/ post${2}_4_26.root -1 10000 ${3}_4_26 split_-1
 }
 
-ELE_B() {
-
-}
 ELE_C() {
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017C/190519_232250/0000/ post${2}_1_0.root -1 10000 ${3}_1_0 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017C/190519_232250/0001/ post${2}_1_1.root -1 10000 ${3}_1_1 split_-1
@@ -117,7 +114,4 @@ ELE_E() {
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0004/ post${2}_3_11.root -1 10000 ${3}_3_11 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0005/ post${2}_3_12.root -1 10000 ${3}_3_12 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0006/ post${2}_3_13.root -1 10000 ${3}_3_13 split_-1
-}
-ELE_F() {
-
 }
