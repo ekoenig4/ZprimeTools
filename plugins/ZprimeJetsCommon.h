@@ -34,7 +34,7 @@ public :
 
   static const bool debug = true;
   static const bool applyPU = true;
-  static const int maxHisto = 50;
+  static const int maxHisto = 60;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -418,6 +418,7 @@ public :
   Float_t         genHT;
   Float_t         pdfWeight;
   vector<float>   *pdfSystWeight;
+  vector<double>  *psWeight;
   Int_t           nPUInfo;
   vector<int>     *nPU;
   vector<int>     *puBX;
@@ -766,6 +767,7 @@ public :
   TBranch        *b_genHT;   //!
   TBranch        *b_pdfWeight;   //!
   TBranch        *b_pdfSystWeight;   //!
+  TBranch        *b_psWeight;   //!
   TBranch        *b_nPUInfo;   //!
   TBranch        *b_nPU;   //!
   TBranch        *b_puBX;   //!
