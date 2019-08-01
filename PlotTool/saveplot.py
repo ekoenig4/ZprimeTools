@@ -16,13 +16,11 @@ samples = {}
 Uncertainty = config['Uncertainty']
 for region,nhisto in config['regions'].items():
     print region
-    store = {}
     directory = rfile.mkdir(region)
-    store[dir] = directory
+    # store[dir] = directory
     norm = plot.datamc(fileDir=region,show=False)
     norm.initiate(variable+'_'+nhisto)
     directory.cd()
-    store['norm'] = norm
     for sample in norm.SampleList:
         if sample == 'Data':
             sumOfBkg = norm.getSumOfBkg()
@@ -38,8 +36,8 @@ for region,nhisto in config['regions'].items():
     ##############################################
     sample_unc = { name:unc for name,unc in Uncertainty.items() if not any(unc['region']) or region in unc['region'] }
     for name,unc in sample_unc.items():
-        # if not any(unc['region']):
-        unc[dir] += region
+        if not any(unc['region']) or len(unc['region']) > 1:
+            unc[dir] += region
         norm = plot.datamc(fileDir=unc[dir],show=False)
         for var,info in unc['unc'].items():
             print '\t',var
