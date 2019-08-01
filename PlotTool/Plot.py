@@ -330,7 +330,78 @@ class datamc(object):
                 space2=" "*(8-len("%.6g" % integral))
                 # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
                 print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
+    ########################################################################################################################################
 
+    def setUnc(self,up,dn):
+        self.unc = {}
+        for sample in self.MC_FileNames:
+            self.unc[sample]={'up':{},'dn':{}}
+            unc_key = ['up','dn']
+            for i,varlist in enumerate((up,dn)):
+                if varlist == None: continue
+                for variable in varlist:
+                    self.unc[sample][unc_key[i]][variable] = []
+                    for j,fn in enumerate(self.MC_FileNames[sample]):
+                        if not path.isfile(self.fileDir+fn+".root"): continue
+                        rfile=TFile.Open(self.fileDir+fn+".root")
+                        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
+                        if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
+                        else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
+                        hs.SetName(variable+"_"+fn)
+                        self.unc[sample][unc_key[i]][variable].append(hs)
+
+                    for j,hs in enumerate(self.unc[sample][unc_key[i]][variable]):
+                        if self.MC_FileNames[sample] == "null":continue
+                        #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
+                        # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
+                        if (self.total[sample][j] == 0): scale = 0
+                        else:                            scale=(1./self.total[sample][j])*self.lumi*self.xsec[self.MC_FileNames[sample][j]]
+                        hs.Scale(scale)
+                    if any(self.unc[sample][unc_key[i]][variable]):
+                        for j in range(1,len(self.unc[sample][unc_key[i]][variable])): self.unc[sample][unc_key[i]][variable][0].Add(self.unc[sample][unc_key[i]][variable][j])
+                        self.unc[sample][unc_key[i]][variable]=self.unc[sample][unc_key[i]][variable][0]
+                        self.unc[sample][unc_key[i]][variable].SetName(self.unc[sample][unc_key[i]][variable].GetName().replace(self.MC_FileNames[sample][0],sample))
+                    # if self.MC_Integral[sample] != 0:
+                    #     print unc_key[i],sample,'\t|',
+                    #     print (self.unc[sample][unc_key[i]][variable].Integral()/self.MC_Integral[sample])
+    ########################################################################################################################################
+
+    def getUnc(self):
+        hs_bkg = self.getSumOfBkg()
+        xbins = hs_bkg.GetNbinsX()
+        hs_up = hs_bkg.Clone(); hs_dn = hs_bkg.Clone()
+        for ibin in range(1,xbins+1):
+            content_up = []; content_dn = [];
+            for sample in self.unc:
+                bin_bk = self.histo[sample].GetBinContent(ibin)
+                for u in self.unc[sample]:
+                    for variable in self.unc[sample][u]:
+                        bin_un = self.unc[sample][u][variable].GetBinContent(ibin)
+                        if bin_un > bin_bk: content_up.append(bin_un - bin_bk)
+                        else:               content_dn.append(bin_bk - bin_un)
+            bin_up = sum(bin**2 for bin in content_up)**0.5
+            bin_dn = sum(bin**2 for bin in content_dn)**0.5
+            bin_bk = hs_bkg.GetBinContent(ibin)
+            hs_up.SetBinContent(ibin,bin_bk + bin_up)
+            hs_dn.SetBinContent(ibin,bin_bk - bin_dn)
+        return hs_up,hs_dn
+    ########################################################################################################################################
+
+    def getStackUnc(self):
+        hs_up = []; hs_dn = []
+        for i in range(len(self.unc['WJets']['up'])):
+            var_up = self.unc['WJets']['up'].keys()[i]
+            var_dn = self.unc['WJets']['dn'].keys()[i]
+            hs_up.append(THStack())
+            hs_dn.append(THStack())
+            for sample in self.unc:
+                sample_up = self.unc[sample]['up'][var_up].Clone()
+                sample_up.SetLineColor(kBlue)
+                sample_dn = self.unc[sample]['dn'][var_dn].Clone()
+                sample_dn.SetLineColor(kRed)
+                hs_up[i].Add(sample_up)
+                hs_dn[i].Add(sample_dn)
+        return hs_up,hs_dn
 ######################################################################    
 
             
@@ -354,7 +425,7 @@ def GetRatio(hs_num,hs_den):
         Ratio.SetBinError(ibin,error);
      
     return Ratio
-
+#######################################
 def Get2DRatio(hs_num,hs_den):
     xbins = hs_num.GetNbinsX()
     ybins = hs_num.GetNbinsY()
@@ -374,3 +445,13 @@ def Get2DRatio(hs_num,hs_den):
             Ratio.SetBinContent(xbin,ybin,ratiocontent)
             Ratio.SetBinError(xbin,ybin,error)
     return Ratio
+########################################
+def GetUncBand(up,dn):
+    xbins = up.GetNbinsX()
+    x = []; y = []; ex = []; ey = []
+    for ibin in range(1,xbins+1):
+        x.append(up.GetBinCenter(ibin))
+        ex.append(up.GetBinWidth(ibin)/2)
+        y.append((up.GetBinContent(ibin)+dn.GetBinContent(ibin))/2)
+        ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
+    return TGraphErrors(xbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
