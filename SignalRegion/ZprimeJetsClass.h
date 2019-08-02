@@ -28,7 +28,7 @@ using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
   static const bool applyPU = true;
-  static const int nHisto = 11;
+  static const int nHisto = 62;
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
   { BookHistos(outputFilename); };
@@ -38,26 +38,11 @@ public :
   virtual vector<int> JetVetoDecision();
   virtual bool electron_veto_looseID(int jet_index, float elePtCut);
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
+
+  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void PFUncertainty(int nhist,double event_weight);
+  virtual void PSWeights(int nhist,double event_weight);
 };
-
-ZprimeJetsCommon::DataMC::DataMC(string filename) {
-  string sampleID[] = {"Run2018","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
-  string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
-  for (int i = 0; i < Total; i++)
-    if (filename.find(sampleID[i]) != string::npos) {
-      type = static_cast<Type>(i);
-    }
-  isData = (type == Data);
-  isInclusive = false;
-  if (type == WJets || type == DYJets)
-    for (int i = 0; i < 2; i++)
-      if (filename.find(inclusiveID[i]) != string::npos)
-	isInclusive = true;
-  if (type == WJets) PID = 24;
-  if (type == ZJets) PID = 23;
-}
-
-bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets; }
 
 #endif
 
