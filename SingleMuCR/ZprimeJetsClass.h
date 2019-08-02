@@ -31,7 +31,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 12;
+  static const int nHisto = 20;
   
   TH2F *h_tightMuSF_ISO,*h_tightMuSF_ID;
 
@@ -54,25 +54,9 @@ public :
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
   virtual double getSF(int mu_index);
+
+  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void PFUncertainty(int nhist,double event_weight);
 };
-
-ZprimeJetsCommon::DataMC::DataMC(string filename) {
-  string sampleID[] = {"Run2017","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
-  string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
-  for (int i = 0; i < Total; i++)
-    if (filename.find(sampleID[i]) != string::npos) {
-      type = static_cast<Type>(i);
-    }
-  isData = (type == Data);
-  isInclusive = false;
-  if (type == WJets || type == DYJets)
-    for (int i = 0; i < 2; i++)
-      if (filename.find(inclusiveID[i]) != string::npos)
-	isInclusive = true;
-  if (type == WJets) PID = 24;
-  if (type == ZJets || type == DYJets) PID = 23;
-}
-
-bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
 
 #endif

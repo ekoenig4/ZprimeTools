@@ -4,6 +4,7 @@ import sys
 from os import path,system,getcwd,listdir,mkdir,remove
 from optparse import OptionParser
 from samplenames import samplenames
+from array import array
 
 class datamc(object):
 

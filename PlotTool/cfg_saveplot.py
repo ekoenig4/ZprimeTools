@@ -1,22 +1,22 @@
 config = {
     'year':2016,
-    'regions':{'SignalRegion/':'8','DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
+    'regions':{'SignalRegion/':'8'},#'DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
     'Uncertainty':{
-        'jes': {
-            dir:'JetEnergyScale/',
-            'region':[],
-            'unc': {
-                'jesUp':{id:'11'},
-                'jesDown':{id:'12'}
-            }
-        },
         'pfu': {
             dir:'PFUncertainty/',
             'region':[],
-            'unc':{
-                'trackerUp'  :{id:'11'} ,'ecalUp'  :{id:'12'},'hcalUp'  :{id:'13'},
-                'trackerDown':{id:'14'},'ecalDown':{id:'15'},'hcalDown':{id:'16'}
+            'unc':{ # ID is relative to the regions basic histogram number
+                'trackerUp'  :{id:'2'},'ecalUp'  :{id:'3'},'hcalUp'  :{id:'4'},
+                'trackerDown':{id:'5'},'ecalDown':{id:'6'},'hcalDown':{id:'7'}
             }
-        }
+        },
+        'jes': {
+            dir:'JetEnergyScale/',
+            'region':[],
+            'unc': { # ID is relative to the regions basic histogram number
+                'jesUp':{id:'8'},
+                'jesDown':{id:'9'}
+            }
+        },
     }
 }

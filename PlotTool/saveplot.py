@@ -36,12 +36,9 @@ for region,nhisto in config['regions'].items():
     ##############################################
     sample_unc = { name:unc for name,unc in Uncertainty.items() if not any(unc['region']) or region in unc['region'] }
     for name,unc in sample_unc.items():
-        if not any(unc['region']) or len(unc['region']) > 1:
-            unc[dir] += region
-        norm = plot.datamc(fileDir=unc[dir],show=False)
         for var,info in unc['unc'].items():
             print '\t',var
-            norm.initiate(variable+'_'+info[id])
+            norm.initiate(variable+'_'+str( int(info[id]) + int(nhisto) ) )
             directory.cd()
             for sample in norm.SampleList:
                 if sample == 'Data': continue

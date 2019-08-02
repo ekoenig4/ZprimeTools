@@ -6,8 +6,8 @@ testDir=/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/DYJetsToLL_M-50_HT-600t
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 
-analyze: ZprimeJetsClass.* $(plugin)/ZprimeJets*
-	g++ -I $(plugin) -Wno-deprecated ZprimeJetsClass.C $(plugin)/*.C -o analyze $(rflags)
+analyze: ZprimeJets* $(plugin)/ZprimeJets*
+	g++ -I $(plugin) -Wno-deprecated ZprimeJets*.C $(plugin)/*.C -o analyze $(rflags)
 
 test:	analyze
 	./analyze $(testDir) test.root 5000 100 1-1
