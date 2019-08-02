@@ -32,6 +32,8 @@
 #include <set>
 using namespace std;
 using std::vector;
+
+
 int main(int argc, const char* argv[]) { 
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL) {
@@ -57,11 +59,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,nTotalEvents_wPU;
-  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = nTotalEvents_wPU = 0;
-  vector<int> jetveto;
-  vector<int> PFCandidates;
-  float dphimin = -99;
+  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection;
+  nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
     TFile *weights = TFile::Open("PU_Central.root");
@@ -93,8 +93,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     nb = fChain->GetEntry(jentry);   nbytes += nb;
 
     jetCand     .clear();
-    jetveto     .clear();
-    PFCandidates.clear();
     j1PFConsEt  .clear();
     j1PFConsPt  .clear();
     j1PFConsEta .clear();
@@ -104,27 +102,23 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     double event_weight = 1.;
     double gen_weight = 1;
     noweight = 1;
-    int bosonPID;
-    double bosonPt;
-    bool WorZfound = false;
-    int genHadrons[4] = {0,0,0,0};
     if (!sample.isData) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
       int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
       double pileup = PU->GetBinContent(bin);
       h_pileup->Fill(pileup);
-      event_weight = pileup;
       gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
-      event_weight *= gen_weight;
-      noweight *= gen_weight;
+
+      event_weight = pileup*gen_weight;
+      noweight = gen_weight;
 
       if (sample.isW_or_ZJet()) {
 	for (int i = 0; i < nMC; i++) {
 	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
-	    WorZfound=true;
-	    bosonPID = (*mcPID)[i];
-	    bosonPt = (*mcPt)[i];
+	    
+	    double bosonPID = (*mcPID)[i];
+	    double bosonPt = (*mcPt)[i];
 	    double kfactor = getKfactor(bosonPt);
 	    if ( sample.PID == 23 ) {
 	      h_genZPt->Fill(bosonPt,gen_weight);
@@ -134,46 +128,54 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      h_genWPt->Fill(bosonPt,gen_weight);
 	      h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
 	    }
+	    event_weight *= kfactor;
+	    noweight *= kfactor;
+	    break;
 	  }
 	}
       }
     }
-    float metcut = 0.0;
-    
-    jetveto = JetVetoDecision();
+
+    double weightNorm = event_weight;
     jetCand = getJetCand(200,2.5,0.8,0.1);
-    AllPFCand(jetCand,PFCandidates);
+    AllPFCand(jetCand);
     
     nTotalEvents+=gen_weight;
-    nTotalEvents_wPU += event_weight;
-    fillHistos(0,event_weight);
+    fillHistos(0,gen_weight);
     for (int bit = 0; bit < 11; bit++)
       if (metFilters >> bit & 1 == 1)
 	h_metFilters->Fill(bit + 1,event_weight);
+    
     if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) {    
       nFilters+=event_weight;
       fillHistos(1,event_weight);
+      
       if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
 	nHLT+=event_weight;
 	fillHistos(2,event_weight);
+	
 	if(jetCand.size()>0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  if (sample.isW_or_ZJet()) event_weight *= getKfactor(bosonPt);
+	  
 	  if (pfMET>250) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
-	    metcut = (fabs(pfMET-caloMET))/pfMET;
+	    double metcut = (fabs(pfMET-caloMET))/pfMET;
 	    h_metcut->Fill(metcut);
+	    
 	    if(metcut<0.5) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
+	      
 	      if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
 		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
+		
 		if(btagVeto()) {
 		  nbtagVeto+=event_weight;
 		  fillHistos(7,event_weight);
+		  vector<int> jetveto = JetVetoDecision();
 		  double minDPhiJetMET_first4 = TMath::Pi();
 		  for (int i = 0; i < jetveto.size(); i++) {
 		    double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
@@ -183,9 +185,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    }
 		  }
 		  h_dphimin->Fill(minDPhiJetMET_first4);
+		  
 		  if(dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
 		    fillHistos(8,event_weight);
+
+		    PFUncertainty(9,event_weight); // 6 Histograms
 		  }
 		}   
 	      }	
@@ -194,6 +199,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	}	    
       }
     }
+
+    JetEnergyScale(15,weightNorm); // 2 Histograms
     
     tree->Fill();
     
@@ -210,7 +217,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(7,nLeptonIDs);
   h_cutflow->SetBinContent(8,nbtagVeto);
   h_cutflow->SetBinContent(9,nDphiJetMET);
-  h_cutflow->SetBinContent(10,nTotalEvents_wPU);
    
 }//Closing the Loop function
 
@@ -220,7 +226,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   tree = new TTree("ZprimeJet","ZprimeJet");
   fileName->cd();
 
-  h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",9,0,9);h_cutflow->Sumw2();
   h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
   h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
   h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
@@ -230,8 +236,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   h_cutflow->GetXaxis()->SetBinLabel(7,"LeptonIDs");
   h_cutflow->GetXaxis()->SetBinLabel(8,"B-JetVeto");
   h_cutflow->GetXaxis()->SetBinLabel(9,"DeltaPhiCut");
-  h_cutflow->GetXaxis()->SetBinLabel(10,"Total Events w PU");
-
+  
   BookCommon(-1,"");
   for(int i = 0; i<nHisto; i++){
     char ptbins[100];

@@ -4,18 +4,18 @@ config = {
     'Uncertainty':{
         'jes': {
             dir:'JetEnergyScale/',
-            'region':['SignalRegion/'],
+            'region':[],
             'unc': {
-                'jesUp':{id:'9'},
-                'jesDown':{id:'10'}
+                'jesUp':{id:'11'},
+                'jesDown':{id:'12'}
             }
         },
         'pfu': {
             dir:'PFUncertainty/',
-            'region':['SignalRegion/'],
+            'region':[],
             'unc':{
-                'trackerUp'  :{id:'9'} ,'ecalUp'  :{id:'10'},'hcalUp'  :{id:'11'},
-                'trackerDown':{id:'12'},'ecalDown':{id:'13'},'hcalDown':{id:'14'}
+                'trackerUp'  :{id:'11'} ,'ecalUp'  :{id:'12'},'hcalUp'  :{id:'13'},
+                'trackerDown':{id:'14'},'ecalDown':{id:'15'},'hcalDown':{id:'16'}
             }
         }
     }

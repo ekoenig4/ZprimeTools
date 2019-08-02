@@ -30,6 +30,11 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
     h_genWPt = new TH1F("h_genWPt","genWPt;Gen W Boson P_{T}",24,BosonPtBins); h_genWPt->Sumw2();
     h_genWPtwK = new TH1F("h_genWPtwK","genWPtwK;Gen W Boson P_{T}",24,BosonPtBins); h_genWPtwK->Sumw2();
     
+    // Uncertainty Plots
+    h_EcalPtUnc=new TH2F("EcalPtUnc","ECAL P_{T} Uncertainty;Photon P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    h_TrackerPtUnc=new TH2F("TrackerPtUnc","Tracker P_{T} Uncertainty;Charged Hadrons P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    h_HcalPtUnc=new TH2F("HcalPtUnc","HCAL P_{T} Uncertainty;Neutral Hadron P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    
   } else {
     
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
@@ -42,6 +47,7 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",48,MetBins);h_pfMET[i] ->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
     h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
+    h_j1TotConsPt[i]  = new TH1F(("j1TotConsPt"+histname).c_str(), "j1pT;Leading Jet Total Constituent P_{T}", 48,PtBins);h_j1TotConsPt[i]->Sumw2();
     h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
     h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
@@ -97,6 +103,7 @@ void ZprimeJetsCommon::fillCommon(int histoNumber,double event_weight) {
   h_pfMET[histoNumber]->Fill(pfMET,event_weight);
   h_pfMETPhi[histoNumber]->Fill(pfMETPhi,event_weight);
   if(jetCand.size()>0){
+    h_j1TotConsPt[histoNumber]->Fill(j1TotConsPt,event_weight);
     h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
     h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]),event_weight);
     h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
@@ -136,6 +143,11 @@ void ZprimeJetsCommon::fillCommon(int histoNumber,double event_weight) {
 }
 
 void ZprimeJetsCommon::getPt123Frac() {
+  Pt123Fraction=Pt123=ChNemPtFrac=ChNemPt=ChNemPt123=j1TotConsPt=0.0;
+  for (int i = 0; i < 3; i++){
+    hadronPt[i] = 0.;
+  }
+  
   // Neutral, Charged, Photon
   int HadronID[3] = {130,211,22};
   double HadronPtFirst3[3] = {0,0,0};
@@ -143,6 +155,7 @@ void ZprimeJetsCommon::getPt123Frac() {
   for (int i = 0; i < j1PFConsPID.size(); i++) {
     if (i < 3)
       Pt123 += j1PFConsPt.at(i);
+    j1TotConsPt += j1PFConsPt.at(i);
     for (int j = 0; j < 3; j++)
       if (abs(j1PFConsPID.at(i)) == HadronID[j]) {
 	if (i < 3)
@@ -157,11 +170,11 @@ void ZprimeJetsCommon::getPt123Frac() {
   ChNemPt = hadronPt[1]+hadronPt[2];
 }
 
-void ZprimeJetsCommon::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
+void ZprimeJetsCommon::AllPFCand(vector<int> jetCand) {
   //getPFCandidatesMethod for the Pencil Jet -> jetCand[0]
   TotalPFCandidates=ChargedPFCandidates=NeutralPFCandidates=GammaPFCandidates=0;
     
-  Pt123Fraction=Pt123=ChNemPtFrac=ChNemPt=ChNemPt123=0.0;
+  Pt123Fraction=Pt123=ChNemPtFrac=ChNemPt=ChNemPt123=j1TotConsPt=0.0;
   for (int i = 0; i < 3; i++){
     hadronPt[i] = 0.;
   }
@@ -173,7 +186,7 @@ void ZprimeJetsCommon::AllPFCand(vector<int> jetCand,vector<int> PFCandidates) {
     j1PFConsEta=JetsPFConsEta->at(jetCand[0]);
     j1PFConsPhi=JetsPFConsPhi->at(jetCand[0]);
     j1PFConsPID=JetsPFConsPID->at(jetCand[0]);
-    PFCandidates = getPFCandidates();
+    vector<int> PFCandidates = getPFCandidates();
 
     TLorentzVector pfCons;
     for (int i = 0; i < j1PFConsPID.size(); i++) {
@@ -306,8 +319,6 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
   return passes;
   
 }
-
-
 
 double ZprimeJetsCommon::getKfactor(double bosonPt) {
   double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
