@@ -1,6 +1,6 @@
 config = {
     'year':2016,
-    'regions':{'SignalRegion/':'8'},#'DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
+    'regions':{'SignalRegion/':'8','DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
     'Uncertainty':{
         'pfu': {
             dir:'PFUncertainty/',
@@ -16,6 +16,14 @@ config = {
             'unc': { # ID is relative to the regions basic histogram number
                 'jesUp':{id:'7'},
                 'jesDown':{id:'8'}
+            }
+        },
+        'ewk': {
+            dir:'JetEnergyScale/',
+            'region':[],
+            'unc': { # ID is relative to the regions basic histogram number
+                'ewkUp':{id:'9'},
+                'ewkDown':{id:'10'}
             }
         },
     }
