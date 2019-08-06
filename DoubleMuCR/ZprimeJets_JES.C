@@ -1,6 +1,6 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
-void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight,function<bool()> cut) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
@@ -106,18 +106,12 @@ void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
 		      
 		      if(btagVeto()) {
 			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
-			double minDPhiJetMET_first4 = TMath::Pi();
-			for (int i = 0; i < jetveto.size(); i++) {
-			  double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
-			  if (dPhiJetMet < minDPhiJetMET_first4) {
-			    if (i < 4)
-			      minDPhiJetMET_first4 = dPhiJetMet;
-			  }
-			}
 			
 			if(dPhiJetMETcut(jetveto)) {
-			  if (unc == 1)  fillHistos(nhist,event_weight); // up
-			  if (unc == -1) fillHistos(nhist+1,event_weight);// down
+			  if ( cut() ) {
+			    if (unc == 1)  fillHistos(nhist,event_weight); // up
+			    if (unc == -1) fillHistos(nhist+1,event_weight);// down
+			  }
 			}
 		      }   
 		    }	

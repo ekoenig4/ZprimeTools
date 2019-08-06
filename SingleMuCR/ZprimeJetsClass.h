@@ -12,7 +12,7 @@
 using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon {
 public :
-  static const int nHisto = 19;
+  static const int nHisto = 32;
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
@@ -35,8 +35,7 @@ public :
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
   
-  virtual void JetEnergyScale(int nhist,double start_weight);
-  virtual void PFUncertainty(int nhist,double event_weight);
+  virtual void JetEnergyScale(int nhist,double start_weight,function<bool()> cut=[](){ return true; });
 };
 
 #endif

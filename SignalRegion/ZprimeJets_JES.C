@@ -1,7 +1,7 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
-void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight,function<bool()> cut) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
@@ -62,8 +62,10 @@ void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
 		  }
 		    
 		  if(dPhiJetMETcut(jetveto)) {
-		    if (unc == 1)  fillHistos(nhist,event_weight); //up
-		    if (unc == -1) fillHistos(nhist + 1,event_weight);//down
+		    if (cut()) {
+		      if (unc == 1)  fillHistos(nhist,event_weight); //up
+		      if (unc == -1) fillHistos(nhist + 1,event_weight);//down
+		    }
 		  }
 		}   
 	      }	

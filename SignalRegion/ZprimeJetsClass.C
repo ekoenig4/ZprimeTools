@@ -64,12 +64,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
-    TFile *weights = TFile::Open("PU_Central.root");
+    TFile *weights = TFile::Open("RootFiles/PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
     
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
-      TFile *file = new TFile("kfactors.root");
+      TFile *file = new TFile("RootFiles/kfactors.root");
       if (sample.type == WJets) {
 	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
 	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
@@ -102,6 +102,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     double event_weight = 1.;
     double gen_weight = 1;
     noweight = 1;
+    bosonPt = -99;
     if (!sample.isData) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
@@ -118,7 +119,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
 	    
 	    double bosonPID = (*mcPID)[i];
-	    double bosonPt = (*mcPt)[i];
+	    bosonPt = (*mcPt)[i];
 	    double kfactor = getKfactor(bosonPt);
 	    if ( sample.PID == 23 ) {
 	      h_genZPt->Fill(bosonPt,gen_weight);
@@ -191,6 +192,14 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    fillHistos(8,event_weight);
 
 		    PFUncertainty(9,event_weight); // 6 Histograms
+		    EWKUncertainty(17,event_weight); // 2 Histograms
+
+		    if (ChNemPtFrac > 0.6) {
+		      fillHistos(19,event_weight);
+
+		      PFUncertainty(20,event_weight); // 6 Histograms
+		      EWKUncertainty(28,event_weight); // 2 Histograms
+		    }
 		  }
 		}   
 	      }	
@@ -201,6 +210,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
 
     JetEnergyScale(15,weightNorm); // 2 Histograms
+    JetEnergyScale(26,weightNorm,[this](){ return ChNemPtFrac > 0.6; }); // 2 Histograms
     
     tree->Fill();
     

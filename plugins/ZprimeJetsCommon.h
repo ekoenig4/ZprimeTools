@@ -12,6 +12,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <iostream>
+#include <functional>
 #include <fstream>
 #include <iomanip>
 #include <cmath>
@@ -66,6 +67,8 @@ public :
   
   
   TH1D *PU,*ewkCorrection,*NNLOCorrection;
+  TH1F* nlo_ewk_hs;
+  double bosonPt;
 
   double noweight;
   
@@ -108,6 +111,7 @@ public :
   
   // Uncertainty Plots
   TH2F *h_TrackerPtUnc,*h_EcalPtUnc,*h_HcalPtUnc;
+  TH1F *h_nlo_ewk;
   
   // Fixed size dimensions of array or collections stored in the TTree if any.
   // Declaration of leaf types
@@ -884,8 +888,9 @@ public :
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
   virtual void BookCommon(int i,string histname);
-  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual void fillCommon(int histoNumber,double event_weight);
+  virtual void fillHistos(int histoNumber,double event_weight) { /*Should be overriden by region*/ };
+  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual float DeltaPhi(float phi1, float phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
   virtual bool btagVeto();
@@ -896,6 +901,10 @@ public :
   virtual void AllPFCand(vector<int> jetCand);
   virtual double getKfactor(double bosonPt);
   virtual bool inclusiveCut();
+
+  virtual void JetEnergyScale(int nhist, double start_weight, function<bool()> cut = [](){return true;}) { /*Should be overriden by region*/ };
+  virtual void PFUncertainty(int nhist, double event_weight);
+  virtual void EWKUncertainty(int nhist, double event_weight);
 };
 
 #endif

@@ -67,11 +67,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
-    TFile *weights = TFile::Open("PU_Central.root");
+    TFile *weights = TFile::Open("RootFiles/PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
-      TFile *file = new TFile("kfactors.root");
+      TFile *file = new TFile("RootFiles/kfactors.root");
       if (sample.type == WJets) {
 	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
 	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
@@ -218,6 +218,14 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			fillHistos(10,event_weight);
 
 			PFUncertainty(11,event_weight); // 6 Histograms
+			EWKUncertainty(19,event_weight); // 2 Histograms
+
+			if (ChNemPtFrac > 0.6) {
+			  fillHistos(21,event_weight);
+
+			  PFUncertainty(22,event_weight); // 6 Histograms
+			  EWKUncertainty(30,event_weight); // 2 Histograms
+			}
 		      }
 		    }   
 		  }	
@@ -229,7 +237,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
 
-    JetEnergyScale(17,event_weight);
+    JetEnergyScale(17,weightNorm); // 2 Histograms
+    JetEnergyScale(28,weightNorm,[this](){ return ChNemPtFrac > 0.6; }); // 2 Histograms
     
     tree->Fill();
     
