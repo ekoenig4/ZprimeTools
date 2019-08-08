@@ -87,6 +87,7 @@ void ZprimeJetsCommon::PFUncertainty(int nhist,double event_weight) {
   
   jetPt->at(jetCand[0]) = jetPtNorm;
   j1PFConsPt.clear();
-  for (int consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
+  for (double consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
   getPt123Frac();
+  // cout << "\tReset: " << ChNemPtFrac << endl;
 }//Closing the Loop function

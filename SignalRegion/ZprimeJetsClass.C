@@ -193,7 +193,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 		    PFUncertainty(9,event_weight); // 6 Histograms
 		    EWKUncertainty(17,event_weight); // 2 Histograms
-
 		    if (ChNemPtFrac > 0.6) {
 		      fillHistos(19,event_weight);
 
