@@ -6,6 +6,8 @@ from sys import path
 import Plot as plot
 from os import system,getcwd
 from cfg_saveplot import config
+from mcinfo import lumi as mc
+from optparse import OptionParser
 
 gROOT.SetBatch(1)
 
@@ -15,11 +17,12 @@ dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/
 variable = argv[-1]
 samples = {}
 Uncertainty = config['Uncertainty']
+lumi = max( lumi for region,lumi in mc.items() )
 for region,nhisto in config['regions'].items():
     print region
     directory = rfile.mkdir(dir[region])
     # store[dir] = directory
-    norm = plot.datamc(fileDir=region,show=False)
+    norm = plot.datamc(fileDir=region,lumi=lumi,show=False)
     norm.initiate(variable+'_'+nhisto)
     directory.cd()
     for sample in norm.SampleList:
@@ -55,4 +58,12 @@ for region,nhisto in config['regions'].items():
                     norm.histo[sample].Write()
     ###############################################################
 ###################################################################
-                        
+rfile.cd()
+lumi_hs = TH1F("lumi","lumi",1,0,1)
+lumi_hs.SetBinContent(1,norm.lumi)
+lumi_hs.Write()
+year_hs = TH1F("year","year",1,0,1)
+year_hs.SetBinContent(1,int(norm.version))
+year_hs.Write()
+var_hs = TH1F("variable",variable,1,0,1)
+var_hs.Write()
