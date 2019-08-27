@@ -1,7 +1,7 @@
-#define ZprimeJetsClass_cxx
-#include "ZprimeJetsClass.h"
+#define ZprimeJetsCommon_cxx
+#include "ZprimeJetsCommon.h"
 
-void ZprimeJetsClass::PSWeights(int nhist,double event_weight) {
+void ZprimeJetsCommon::PSWeights(int nhist,double event_weight) {
   /* 44 Histograms
                    up  dn
      isrRed        0   2
@@ -28,6 +28,9 @@ void ZprimeJetsClass::PSWeights(int nhist,double event_weight) {
      isr_X2XG_cNS  42 43
   */
   int nPS = 44;
-  for (int i = 0; i < nPS; i++)
-    fillHistos(nhist+i, event_weight*psWeight->at(i+2) );
+  for (int i = 0; i < nPS; i++) {
+    double ps_weight = event_weight;
+    if (!sample.isData) ps_weight *= psWeight->at(i+2);
+    fillHistos(nhist+i,ps_weight );
+  }
 }

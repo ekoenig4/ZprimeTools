@@ -110,10 +110,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
-    TFile *weights = TFile::Open("PU_Central.root");
+    TFile *weights = TFile::Open("RootFiles/PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
     //This is the root file with EWK Corrections
-    TFile *file = new TFile("kfactors.root");
+    TFile *file = new TFile("RootFiles/kfactors.root");
     if (sample.type == ZJets || sample.type == DYJets) {
       ewkCorrection = (TH1D*)file->Get("EWKcorr/Z");
       NNLOCorrection = (TH1D*)file->Get("ZJets_LO/inv_pt");
@@ -123,8 +123,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
     }
 
-    TFile *f_eleReconstrucSF_highpt=new TFile("egammaEffi.txt_EGM2D_updatedAll.root");
-    TFile *f_eleIDeffSF=new TFile("2018_ElectronTight.root");
+    TFile *f_eleReconstrucSF_highpt=new TFile("RootFiles/egammaEffi.txt_EGM2D_updatedAll.root");
+    TFile *f_eleIDeffSF=new TFile("RootFiles/2018_ElectronTight.root");
     h_eleRecoSF_highpt=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
     h_eleIDSF=(TH2F*) f_eleIDeffSF->Get("EGamma_SF2D");
   }
@@ -295,7 +295,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     JetEnergyScale(63,weightNorm);
     
-    tree->Fill();
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck - 1)<<endl;
   }
@@ -316,7 +315,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
   output = new TFile(outputFilename, "RECREATE");
-  tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
   
   float MetBins[45]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
@@ -348,6 +346,13 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
+    dir->cd();
+    if (i >= bHisto) {
+      trees[i] = new TTree("tree","tree");
+      trees[i]->Branch("weight",&weight);
+      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    }
     //Common Histograms
     BookCommon(i,histname);
     //CR Histograms
@@ -370,6 +375,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   }
   if(lepton_pt > 0){
     h_recoil[histoNumber]->Fill(Recoil,event_weight);}
+  weight = event_weight;
+  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int ele_index) {

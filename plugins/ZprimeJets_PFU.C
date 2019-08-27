@@ -1,7 +1,7 @@
-#define ZprimeJetsClass_cxx
-#include "ZprimeJetsClass.h"
+#define ZprimeJetsCommon_cxx
+#include "ZprimeJetsCommon.h"
 
-void ZprimeJetsClass::PFUncertainty(int nhist,double event_weight) {
+void ZprimeJetsCommon::PFUncertainty(int nhist,double event_weight) {
   // 6 Histograms
   //   Trk ECAL HCAL
   //up  0   1    2
@@ -87,6 +87,7 @@ void ZprimeJetsClass::PFUncertainty(int nhist,double event_weight) {
   
   jetPt->at(jetCand[0]) = jetPtNorm;
   j1PFConsPt.clear();
-  for (int consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
+  for (double consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
   getPt123Frac();
+  // cout << "\tReset: " << ChNemPtFrac << endl;
 }//Closing the Loop function

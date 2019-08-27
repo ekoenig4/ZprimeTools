@@ -32,6 +32,7 @@ public :
   static const bool applySF = true;
   static const bool applyKF = true;
   static const int nHisto = 65;
+  static const int bHisto = 10;
   
   TH2F *h_eleRecoSF_highpt;
   TH2F *h_eleIDSF_loose;
@@ -60,8 +61,6 @@ public :
   virtual double getSF(int lepindex_leading, int lepindex_subleading);
 
   virtual void JetEnergyScale(int nhist,double start_weight);
-  virtual void PFUncertainty(int nhist,double event_weight);
-  virtual void PSWeights(int nhist,double event_weight);
 };
 
 #endif

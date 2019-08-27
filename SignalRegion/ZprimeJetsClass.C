@@ -42,12 +42,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
-    TFile *weights = TFile::Open("PU_Central.root");
+    TFile *weights = TFile::Open("RootFiles/PU_Central.root");
     PU = (TH1D*)weights->Get("pileup");
     
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
-      TFile *file = new TFile("kfactors.root");
+      TFile *file = new TFile("RootFiles/kfactors.root");
       if (sample.type == WJets) {
 	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
 	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
@@ -186,7 +186,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     JetEnergyScale(60,weightNorm); // 2 Histograms
     
-    tree->Fill();
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck - 1)<<endl;
   }
@@ -205,7 +204,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
   output = new TFile(outputFilename, "RECREATE");
-  tree = new TTree("ZprimeJet","ZprimeJet");
   output->cd();
 
   h_cutflow = new TH1D("h_cutflow","h_cutflow",10,0,10);h_cutflow->Sumw2();
@@ -226,12 +224,21 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
     //Common Histograms
+    auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
+    dir->cd();
+    if (i >= bHisto) {
+      trees[i] = new TTree("tree","tree");
+      trees[i]->Branch("weight",&weight);
+      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    }
     BookCommon(i,histname);
   }
 }
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   fillCommon(histoNumber,event_weight);
+  weight = event_weight;
+  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision() {

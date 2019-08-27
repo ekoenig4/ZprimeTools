@@ -410,21 +410,21 @@ def GetRatio(hs_num,hs_den):
     nbins = hs_num.GetNbinsX();  
     Ratio = hs_num.Clone("Ratio");
     last = hs_den.Clone("last");
-    for ibin in range(1,nbins+1):
-        stackcontent = last.GetBinContent(ibin);
-        stackerror = last.GetBinError(ibin);
-        datacontent = hs_num.GetBinContent(ibin);
-        dataerror = hs_num.GetBinError(ibin);
-        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-        ratiocontent=0;
-        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-        error=0;
-        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-        else: error = 2.07
-        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-        Ratio.SetBinContent(ibin,ratiocontent);
-        Ratio.SetBinError(ibin,error);
-     
+    # for ibin in range(1,nbins+1):
+    #     stackcontent = last.GetBinContent(ibin);
+    #     stackerror = last.GetBinError(ibin);
+    #     datacontent = hs_num.GetBinContent(ibin);
+    #     dataerror = hs_num.GetBinError(ibin);
+    #     # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
+    #     ratiocontent=0;
+    #     if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+    #     error=0;
+    #     if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+    #     else: error = 2.07
+    #     # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
+    #     Ratio.SetBinContent(ibin,ratiocontent);
+    #     Ratio.SetBinError(ibin,error);
+    Ratio.Divide(last)
     return Ratio
 #######################################
 def Get2DRatio(hs_num,hs_den):
@@ -450,9 +450,12 @@ def Get2DRatio(hs_num,hs_den):
 def GetUncBand(up,dn):
     xbins = up.GetNbinsX()
     x = []; y = []; ex = []; ey = []
+    nbins = 0
     for ibin in range(1,xbins+1):
+        if up.GetBinContent(ibin) == 0 and dn.GetBinContent(ibin) == 0: continue
         x.append(up.GetBinCenter(ibin))
         ex.append(up.GetBinWidth(ibin)/2)
         y.append((up.GetBinContent(ibin)+dn.GetBinContent(ibin))/2)
         ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
-    return TGraphErrors(xbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
+        nbins += 1
+    return TGraphErrors(nbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
