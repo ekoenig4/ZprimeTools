@@ -27,7 +27,8 @@ using namespace std;
 
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 17;
+  static const int nHisto = 19;
+  static const int bHisto = 8;
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
   { BookHistos(outputFilename); };
@@ -39,7 +40,6 @@ public :
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
 
   virtual void JetEnergyScale(int nhist,double start_weight);
-  virtual void PFUncertainty(int nhist,double event_weight);
 };
 
 #endif

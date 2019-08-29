@@ -93,7 +93,6 @@ ZprimeJetsCommon::~ZprimeJetsCommon()
   delete fChain->GetCurrentFile();
   output->cd();
   output->Write();
-  tree->Write();
   output->Close();
 }
 

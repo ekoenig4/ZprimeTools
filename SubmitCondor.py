@@ -51,7 +51,7 @@ elif (len(argv) == 9):
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 20
+    nfile_per_batch = 30
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
@@ -68,12 +68,7 @@ with open(".output/Job_"+label+".sh","w") as jobfile:
 
 system("chmod 775 .output/Job_"+label+".sh")
 
-files_to_transfer=argv[1]+",../kfactors.root,../PU_Central.root"
-
-#If NLO EWK files in directory, transfer them
-if path.isfile("WJets_NLO_EWK.root"): files_to_transfer += ",../WJets_NLO_EWK.root,../ZJets_NLO_EWK.root"
-if path.isfile("egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root"): files_to_transfer += ",../egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root,../2017_ElectronTight.root,../2017_ElectronLoose.root"
-if path.isfile("RunBCDEF_SF_ISO.root"): files_to_transfer += ",../RunBCDEF_SF_ISO.root,../RunBCDEF_SF_ID.root"
+files_to_transfer=argv[1]+",../../RootFiles"
 
 #Beginning to write condor_submit file
 with open(".output/condor_"+label,"w") as condor:

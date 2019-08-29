@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -30,10 +31,10 @@ public :
   Int_t           fCurrent; //!current Tree number in a TChain
 
   TFile *output;
-  TTree *tree;
+  static const int maxHisto = 50;
+  TTree *trees[maxHisto];
 
   static const bool debug = true;
-  static const int maxHisto = 50;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -46,8 +47,11 @@ public :
   } sample;
 
   TH1D *PU,*ewkCorrection,*NNLOCorrection;
+  TH1F* nlo_ewk_hs;
+  float bosonPt;
 
-  double noweight;
+  float weight;
+  float noweight;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
@@ -56,13 +60,13 @@ public :
   vector<float>j1PFConsEta;
   vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
-  double j1TotConsPt;
+  float j1TotConsPt;
 
-  double Pt123Fraction,Pt123,PtRawFrac;
+  float Pt123Fraction,Pt123,PtRawFrac;
 
-  double hadronPt[3];
+  float hadronPt[3];
   
-  double ChNemPtFrac,ChNemPt,ChNemPt123;
+  float ChNemPtFrac,ChNemPt,ChNemPt123;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
@@ -88,6 +92,7 @@ public :
 
   // Uncertainty Plots
   TH2F *h_TrackerPtUnc,*h_EcalPtUnc,*h_HcalPtUnc;
+  TH1F *h_nlo_ewk;
  
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -805,6 +810,7 @@ public :
   virtual void     Show(Long64_t entry = -1);
   virtual void BookCommon(int i,string histname);
   virtual void fillCommon(int histoNumber,double event_weight);
+  virtual void fillHistos(int histoNumber,double event_weight) { /*Should be overriden by region*/ };
   virtual float DeltaPhi(float phi1, float phi2);
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
@@ -816,6 +822,10 @@ public :
   virtual void AllPFCand(vector<int> jetCand);
   virtual double getKfactor(double bosonPt);
   virtual bool inclusiveCut();
+
+  virtual void JetEnergyScale(int nhist, double start_weight, function<bool()> cut = [](){return true;}) { /*Should be overriden by region*/ };
+  virtual void PFUncertainty(int nhist, double event_weight);
+  virtual void EWKUncertainty(int nhist, double event_weight);
 };
 
 #endif

@@ -2,12 +2,23 @@
 
 plugin=${CMSSW_BASE}/src/ZprimeTools2017/plugins/
 
-testDir=/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/DYJetsToLL_M-50_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_DYJetsToLL_HT600-800/190509_152313/0000/
+testDir=/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_DYJetsToLL_HT400-600/190509_152151/0000/
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 
-analyze: ZprimeJets* $(plugin)/ZprimeJets*
+analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles
 	g++ -I $(plugin) -Wno-deprecated ZprimeJets*.C $(plugin)/*.C -o analyze $(rflags)
 
-test:	analyze
+RootFiles:
+	if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
+
+test: analyze
 	./analyze $(testDir) test.root 5000 100 1-1
+
+clean:
+	rm post*.root
+	rm -r DataEra
+
+condor_clean:
+	rm -r .output
+	rm -r .status

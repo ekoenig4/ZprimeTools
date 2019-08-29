@@ -36,6 +36,7 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
     h_EcalPtUnc=new TH2F("EcalPtUnc","ECAL P_{T} Uncertainty;Photon P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
     h_TrackerPtUnc=new TH2F("TrackerPtUnc","Tracker P_{T} Uncertainty;Charged Hadrons P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
     h_HcalPtUnc=new TH2F("HcalPtUnc","HCAL P_{T} Uncertainty;Neutral Hadron P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
+    h_nlo_ewk=new TH1F(("nloEWK"+histname).c_str(),"nloEWK",100,-0.6,0.1); h_nlo_ewk->Sumw2();
   
   } else {
 

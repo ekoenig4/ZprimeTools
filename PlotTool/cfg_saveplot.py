@@ -1,6 +1,6 @@
 config = {
-    'year':2016,
-    'regions':{'SignalRegion/':'8'},#'DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
+    'year':2017,
+    'regions':{'SignalRegion/':'8','DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'10','SingleMuCR/':'10'},
     'Uncertainty':{
         'pfu': {
             dir:'PFUncertainty/',
