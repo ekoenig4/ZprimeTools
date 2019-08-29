@@ -14,18 +14,18 @@ Instructions:
 
 
 ```bash
-cmsrel CMSSW_8_0_26_patch1
-cd $CMSSW_BASE/src
+cmsrel CMSSW_10_2_10
+cd CMSSW_10_2_10/src
 cmsenv
-export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
 voms-proxy-init --voms=cms --valid=192:00
-git clone https://github.com/ekoenig4/ZprimeTools.git
-cd ZprimeTools/SignalRegion/
-./submit.sh
+git clone -b 2016 https://github.com/ekoenig4/ZprimeTools.git ZprimeJets2016
+cd ZprimeJets2016
+make
 ```
-To run locally use 
+To run locally
 
 ```bash
+cd region # any of the 5 regions SignalRegion, SingleEleCR, SingleMuCR, DoubleEleCR, DoubleMuCR
 make
 ./analyze /path/to/Ntuple/Directory/ outputFilename.root numOfEvents reportEvery filerange
 #example
