@@ -1,19 +1,18 @@
-.PHONY = test
-
 plugin=${CMSSW_BASE}/src/ZprimeTools2017/plugins/
-
-testDir=/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/DYJetsToLL_M-50_HT-400to600_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_DYJetsToLL_HT400-600/190509_152151/0000/
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 
-analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles
+analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles PlotTool
 	g++ -I $(plugin) -Wno-deprecated ZprimeJets*.C $(plugin)/*.C -o analyze $(rflags)
 
 RootFiles:
 	if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
 
+PlotTool:
+	if [ ! -d PlotTool ]; then ln -s ../PlotTool/; fi
+
 test: analyze
-	./analyze $(testDir) test.root 5000 100 1-1
+	./analyze
 
 clean:
 	rm post*.root
@@ -22,3 +21,7 @@ clean:
 condor_clean:
 	rm -r .output
 	rm -r .status
+
+condor_submit:
+	./submitDATA.sh
+	./submitMC.sh

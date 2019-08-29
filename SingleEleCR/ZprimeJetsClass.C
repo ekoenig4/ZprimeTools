@@ -5,6 +5,14 @@
 using namespace std;
 
 int main(int argc, const char* argv[]) { 
+  if (argc == 1) {
+    printf("Running Test\n");
+    argv[1] = "/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/WJetsToLNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_WJetsToLNu_HT400-600/190512_160645/0000/";
+    argv[2] = "test.root";
+    argv[3] = "5000";
+    argv[4] = "100";
+    argv[5] = "1-1";
+  }
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL)
     {

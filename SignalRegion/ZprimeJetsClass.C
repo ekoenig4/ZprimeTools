@@ -10,7 +10,15 @@
 
 using namespace std;
 
-int main(int argc, const char* argv[]) { 
+int main(int argc, const char* argv[]) {
+  if (argc == 1) {
+    printf("Running Test\n");
+    argv[1] = "/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/ZJetsToNuNu_HT-400To600_13TeV-madgraph/crab_job_ZJetsToNuNu_HT400-600/190508_233318/0000/";
+    argv[2] = "test.root";
+    argv[3] = "5000";
+    argv[4] = "100";
+    argv[5] = "1-1";
+  }
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL)
     {
