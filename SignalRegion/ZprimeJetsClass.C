@@ -35,6 +35,14 @@ using std::vector;
 
 
 int main(int argc, const char* argv[]) { 
+  if (argc == 1) {
+    printf("Running Test\n");
+    argv[1] = "/hdfs/store/user/varuns/NTuples/monoZprime_2016_80X/MonoZprime_Mx10_Mv1000/";
+    argv[2] = "test.root";
+    argv[3] = "-1";
+    argv[4] = "100";
+    argv[5] = "-1";
+  }
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL) {
     cout<<"Please enter a valid value for maxEvents (parameter 3)."<<endl;
@@ -193,12 +201,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 		    PFUncertainty(9,event_weight); // 6 Histograms
 		    EWKUncertainty(17,event_weight); // 2 Histograms
-		    if (ChNemPtFrac > 0.6) {
-		      fillHistos(19,event_weight);
-
-		      PFUncertainty(20,event_weight); // 6 Histograms
-		      EWKUncertainty(28,event_weight); // 2 Histograms
-		    }
 		  }
 		}   
 	      }	
@@ -209,9 +211,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
 
     JetEnergyScale(15,weightNorm); // 2 Histograms
-    JetEnergyScale(26,weightNorm,[this](){ return ChNemPtFrac > 0.6; }); // 2 Histograms
-    
-    tree->Fill();
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -231,9 +230,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
-  fileName = new TFile(outputFilename, "RECREATE");
-  tree = new TTree("ZprimeJet","ZprimeJet");
-  fileName->cd();
+  output = new TFile(outputFilename, "RECREATE");
+  output->cd();
 
   h_cutflow = new TH1D("h_cutflow","h_cutflow",9,0,9);h_cutflow->Sumw2();
   h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
@@ -251,6 +249,13 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
+    dir->cd();
+    if (i >= bHisto) {
+      trees[i] = new TTree("tree","tree");
+      trees[i]->Branch("weight",&weight);
+      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    }
     //Common Histograms
     BookCommon(i,histname);
   }
@@ -258,6 +263,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   fillCommon(histoNumber,event_weight);
+  weight = event_weight;
+  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
 }
 
 

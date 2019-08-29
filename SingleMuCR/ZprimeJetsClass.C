@@ -32,17 +32,23 @@
 #include <set>
 using namespace std;
 using std::vector;
-int main(int argc, const char* argv[])
-{ 
+int main(int argc, const char* argv[]) { 
+  if (argc == 1) {
+    printf("Running Test\n");
+    argv[1] = "/hdfs/store/user/uhussain/Zprime_Ntuples_May2018/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_W3Jets/180528_145820/0000/";
+    argv[2] = "test.root";
+    argv[3] = "5000";
+    argv[4] = "100";
+    argv[5] = "1-1";
+  }
+
   Long64_t maxEvents = atof(argv[3]);
-  if (maxEvents < -1LL)
-    {
+  if (maxEvents < -1LL) {
       cout<<"Please enter a valid value for maxEvents (parameter 3)."<<endl;
       return 1;
     }
   int reportEvery = atof(argv[4]);
-  if (reportEvery < 1)
-    {
+  if (reportEvery < 1) {
       cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
       return 1;
     }
@@ -219,13 +225,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 			PFUncertainty(11,event_weight); // 6 Histograms
 			EWKUncertainty(19,event_weight); // 2 Histograms
-
-			if (ChNemPtFrac > 0.6) {
-			  fillHistos(21,event_weight);
-
-			  PFUncertainty(22,event_weight); // 6 Histograms
-			  EWKUncertainty(30,event_weight); // 2 Histograms
-			}
 		      }
 		    }   
 		  }	
@@ -238,9 +237,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
 
     JetEnergyScale(17,weightNorm); // 2 Histograms
-    JetEnergyScale(28,weightNorm,[this](){ return ChNemPtFrac > 0.6; }); // 2 Histograms
-    
-    tree->Fill();
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -261,9 +257,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 
-  fileName = new TFile(outputFilename, "RECREATE");
-  tree = new TTree("ZprimeJet","ZprimeJet");
-  fileName->cd();
+  output = new TFile(outputFilename, "RECREATE");
+  output->cd();
   
   float MetBins[45]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
 		     780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1400.,1800.,2000.,2500.};
@@ -290,6 +285,13 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
+    auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
+    dir->cd();
+    if (i >= bHisto) {
+      trees[i] = new TTree("tree","tree");
+      trees[i]->Branch("weight",&weight);
+      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    }
     //Common Histograms
     BookCommon(i,histname);
     //CR Histograms
@@ -310,6 +312,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   }
   if(lepton_pt > 0){
     h_recoil[histoNumber]->Fill(Recoil,event_weight);}
+  weight = event_weight;
+  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int mu_index) {

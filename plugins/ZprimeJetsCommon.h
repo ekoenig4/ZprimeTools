@@ -49,11 +49,11 @@ public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   Int_t           fCurrent; //!current Tree number in a TChain
 
-  TFile *fileName;
-  TTree *tree;
+  TFile *output;
+  static const int maxHisto = 50;
+  TTree *trees[maxHisto];
 
   static const bool debug = true;
-  static const int maxHisto = 50;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -68,9 +68,10 @@ public :
   
   TH1D *PU,*ewkCorrection,*NNLOCorrection;
   TH1F* nlo_ewk_hs;
-  double bosonPt;
+  float bosonPt;
 
-  double noweight;
+  float weight;
+  float noweight;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
@@ -79,15 +80,15 @@ public :
   vector<double>j1PFConsEta;
   vector<double>j1PFConsPhi;
   vector<int>j1PFConsPID;
-  double j1TotConsPt;
+  float j1TotConsPt;
 
-  double j1Mass;
+  float j1Mass;
 
-  double Pt123Fraction,Pt123,PtRawFrac;
+  float Pt123Fraction,Pt123,PtRawFrac;
 
-  double hadronPt[3];
+  float hadronPt[3];
   
-  double ChNemPtFrac,ChNemPt,ChNemPt123;
+  float ChNemPtFrac,ChNemPt,ChNemPt123;
    
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;

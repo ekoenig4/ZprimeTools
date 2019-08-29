@@ -12,10 +12,11 @@
 using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon {
 public :
-  static const int nHisto = 32;
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
+  static const int nHisto = 22;
+  static const int bHisto = 10;
   
   //CR variables
   int lepindex_leading, lepindex_subleading;

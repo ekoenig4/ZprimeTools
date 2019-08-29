@@ -89,10 +89,9 @@ ZprimeJetsCommon::~ZprimeJetsCommon()
 {
   if (!fChain) return;
   delete fChain->GetCurrentFile();
-  fileName->cd();
-  fileName->Write();
-  tree->Write();
-  fileName->Close();
+  output->cd();
+  output->Write();
+  output->Close();
 }
 
 Int_t ZprimeJetsCommon::GetEntry(Long64_t entry)
