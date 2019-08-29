@@ -234,13 +234,55 @@ class datamc(object):
                 break
     ###############################################################################################################
 
-    def GetHisto(self,fname,variable):
+    def GetPlot(self,fname,variable):
         rfile=TFile.Open(self.fileDir+fname)
-        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-        if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
-        else:               hs=None
-        cutflow=rfile.Get("h_cutflow").Clone();cutflow.SetDirectory(0)
+        cutflow = self.GetCutflow(fname,rfile=rfile)
+        if '<' in variable or '>' in variable:
+            if '>' in variable: cut = '>'+variable.split('>')[-1]
+            if '<' in variable: cut = '<'+variable.split('<')[-1]
+            variable = variable.replace(cut,'')
+            hs = self.GetBranch(fname,variable,rfile=rfile,cut=cut)
+        else:
+            hs = self.GetBranch(fname,variable,rfile=rfile)
         return hs,cutflow
+    ###############################################################################################################
+    
+    def GetCutflow(self,fname,rfile=None):
+        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        rfile.cd()
+        cutflow=rfile.Get("h_cutflow").Clone();cutflow.SetDirectory(0)
+        return cutflow
+    ###############################################################################################################
+
+    def GetHisto(self,fname,variable,rfile=None):
+        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        rfile.cd()
+        nhist = variable.split("_")[-1]
+        rdir = "ZprimeJet_"+nhist+"/"
+        rfile.cd(rdir)
+        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
+        if variable in keys:hs=rfile.Get(rdir+variable).Clone("temp");hs.SetDirectory(0)
+        else:               hs=None
+        return hs
+    ###############################################################################################################
+
+    def GetBranch(self,fname,variable,rfile=None,hs=None,cut=''):
+        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        if hs == None: hs = self.GetHisto(fname,variable,rfile=rfile)
+        rfile.cd()
+        nhist = variable.split("_")[-1]
+        rdir = "ZprimeJet_"+nhist+"/"
+        rfile.cd(rdir)
+        if not any( True for key in gDirectory.GetListOfKeys() if "tree" == key.GetName() ): return hs
+        tree = rfile.Get(rdir+"tree")
+        variable = variable.replace("_"+nhist,"")
+        if any( True for key in tree.GetListOfBranches() if variable == key.GetName() ):
+            hs.SetDirectory(gDirectory)
+            hs.Reset()
+            if cut == '': tree.Draw(variable+">>temp","weight","goff")
+            else:         tree.Draw(variable+">>temp","weight*(%s%s)" % (variable,cut),"goff")
+            hs.SetDirectory(0)
+        return hs 
     ###############################################################################################################
                       
     def GetVariable(self,variable):
@@ -249,14 +291,14 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        hs,cutflow = self.GetHisto(self.Data_FileNames[self.region]+".root",variable)
+        hs,cutflow = self.GetPlot(self.Data_FileNames[self.region]+".root",variable)
         self.histo['Data'] = hs
 
         if self.signal != None:
             for signal in self.signal:
                 mx = signal.split("_")[0].replace("Mx","")
                 mv = signal.split("_")[1].replace("Mv","")
-                hs,cutflow = self.GetHisto(self.Mx_Mv[mx][mv]+".root",variable)
+                hs,cutflow = self.GetPlot(self.Mx_Mv[mx][mv]+".root",variable)
                 self.histo[signal]=hs
                 self.total[signal] = cutflow.GetBinContent(1)
             if not 'Signal' in self.SampleList:self.SampleList.append('Signal')
@@ -268,7 +310,7 @@ class datamc(object):
             for fn in self.MC_FileNames[sample]:
                 # print '\t',fn
                 if not path.isfile(self.fileDir+fn+".root"): continue
-                hs,cutflow = self.GetHisto(fn+".root",variable)
+                hs,cutflow = self.GetPlot(fn+".root",variable)
                 hs.SetName(variable+"_"+fn)
                 self.histo[sample].append(hs)
                 self.total[sample].append(cutflow.GetBinContent(1))
@@ -410,21 +452,21 @@ def GetRatio(hs_num,hs_den):
     nbins = hs_num.GetNbinsX();  
     Ratio = hs_num.Clone("Ratio");
     last = hs_den.Clone("last");
-    for ibin in range(1,nbins+1):
-        stackcontent = last.GetBinContent(ibin);
-        stackerror = last.GetBinError(ibin);
-        datacontent = hs_num.GetBinContent(ibin);
-        dataerror = hs_num.GetBinError(ibin);
-        # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-        ratiocontent=0;
-        if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-        error=0;
-        if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-        else: error = 2.07
-        # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-        Ratio.SetBinContent(ibin,ratiocontent);
-        Ratio.SetBinError(ibin,error);
-     
+    # for ibin in range(1,nbins+1):
+    #     stackcontent = last.GetBinContent(ibin);
+    #     stackerror = last.GetBinError(ibin);
+    #     datacontent = hs_num.GetBinContent(ibin);
+    #     dataerror = hs_num.GetBinError(ibin);
+    #     # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
+    #     ratiocontent=0;
+    #     if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+    #     error=0;
+    #     if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+    #     else: error = 2.07
+    #     # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
+    #     Ratio.SetBinContent(ibin,ratiocontent);
+    #     Ratio.SetBinError(ibin,error);
+    Ratio.Divide(last)
     return Ratio
 #######################################
 def Get2DRatio(hs_num,hs_den):
@@ -450,9 +492,12 @@ def Get2DRatio(hs_num,hs_den):
 def GetUncBand(up,dn):
     xbins = up.GetNbinsX()
     x = []; y = []; ex = []; ey = []
+    nbins = 0
     for ibin in range(1,xbins+1):
+        if up.GetBinContent(ibin) == 0 and dn.GetBinContent(ibin) == 0: continue
         x.append(up.GetBinCenter(ibin))
         ex.append(up.GetBinWidth(ibin)/2)
         y.append((up.GetBinContent(ibin)+dn.GetBinContent(ibin))/2)
         ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
-    return TGraphErrors(xbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
+        nbins += 1
+    return TGraphErrors(nbins,array('d',x),array('d',y),array('d',ex),array('d',ey))

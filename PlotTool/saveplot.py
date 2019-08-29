@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from ROOT import *
 from sys import argv
@@ -11,9 +11,28 @@ from optparse import OptionParser
 
 gROOT.SetBatch(1)
 
+def greaterThan(hs,cut):
+    if hs == None: return '+'+str(cut)
+    xaxis = [ hs.GetBinLowEdge(i) for i,v in enumerate(hs) ]
+    for i,x in enumerate(xaxis):
+        if x < cut: hs.SetBinContent(i,0); hs.SetBinError(i,0)
+########################################################################################################
+def lessThan(hs,cut):
+    if hs == None: return '+'+str(cut)
+    xaxis = [ hs.GetBinLowEdge(i) for i,v in enumerate(hs) ]
+    for i,x in enumerate(xaxis):
+        if x > cut: hs.SetBinContent(i,0); hs.SetBinError(i,0)
+########################################################################################################
 rfile = TFile('Systematics_'+str(config['year'])+'.root','recreate')
 dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/":"e","SingleMuCR/":"m"}
 
+cut = None
+if '>' in argv[-1]:
+    cut = ( greaterThan,float(argv[-1].replace('>','')) )
+    argv.pop(-1)
+elif '<' in argv[-1]:
+    cut = ( lessThan,float(argv[-1].replace('<','')) )
+    argv.pop(-1)
 variable = argv[-1]
 samples = {}
 Uncertainty = config['Uncertainty']
@@ -25,16 +44,23 @@ for region,nhisto in config['regions'].items():
     norm = plot.datamc(fileDir=region,lumi=lumi,show=False)
     norm.initiate(variable+'_'+nhisto)
     directory.cd()
+    sumOfBkg = norm.getSumOfBkg()
+    if cut != None: cut[0](sumOfBkg,cut[1])
+    sumOfBkg.SetName('sumOfBkg')
+    sumOfBkg.Write()
     for sample in norm.SampleList:
         if sample == 'Data':
-            sumOfBkg = norm.getSumOfBkg()
-            sumOfBkg.SetName('data_obs')
-            sumOfBkg.Write()
+            data_obs = norm.getSumOfBkg()
+            if cut != None: cut[0](data_obs,cut[1])
+            data_obs.SetName('data_obs')
+            data_obs.Write()
         elif sample == "Signal":
             for signal in norm.signal:
+                if cut != None: cut[0](norm.histo[signal],cut[1])
                 norm.histo[signal].SetName(signal)
                 norm.histo[signal].Write()
         else:
+            if cut != None: cut[0](norm.histo[sample],cut[1])
             norm.histo[sample].SetName(sample)
             norm.histo[sample].Write()
     ##############################################
@@ -47,13 +73,19 @@ for region,nhisto in config['regions'].items():
             input = variable+'_'+str( int(info[id]) + int(nhisto) )
             norm.initiate( input )
             directory.cd()
+            sumOfBkg = norm.getSumOfBkg()
+            if cut != None: cut[0](sumOfBkg,cut[1])
+            sumOfBkg.SetName('sumOfBkg_'+var)
+            sumOfBkg.Write()
             for sample in norm.SampleList:
                 if sample == 'Data': continue
                 elif sample == "Signal":
                     for signal in norm.signal:
+                        if cut != None: cut[0](norm.histo[signal],cut[1])
                         norm.histo[signal].SetName(signal+'_'+var)
                         norm.histo[signal].Write()
                 else:
+                    if cut != None: cut[0](norm.histo[sample],cut[1])
                     norm.histo[sample].SetName(sample+'_'+var)
                     norm.histo[sample].Write()
     ###############################################################
@@ -65,5 +97,6 @@ lumi_hs.Write()
 year_hs = TH1F("year","year",1,0,1)
 year_hs.SetBinContent(1,int(norm.version))
 year_hs.Write()
-var_hs = TH1F("variable",variable,1,0,1)
+if cut != None: variable = variable+cut[0](None,cut[1])
+var_hs = TH1F("variable",variable+';'+norm.name,1,0,1)
 var_hs.Write()

@@ -1,4 +1,4 @@
-#!/cvmfs/cms.cern.ch/slc6_amd64_gcc630/cms/cmssw/CMSSW_10_1_6/external/slc6_amd64_gcc630/bin/python
+#!/usr/bin/env python
 
 from ROOT import *
 from sys import argv, path
