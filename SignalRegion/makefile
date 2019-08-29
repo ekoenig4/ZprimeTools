@@ -1,16 +1,27 @@
-.PHONY = test
-
 plugin=${CMSSW_BASE}/src/ZprimeTools2018/plugins/
-
-testDir=/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/ZJets/ZJetsToNuNu_HT-400To600_13TeV-madgraph/0000/
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 
-analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles
+analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles PlotTool
 	g++ -I $(plugin) -Wno-deprecated ZprimeJets*.C $(plugin)/*.C -o analyze $(rflags)
 
 RootFiles:
 	if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
 
-test:	analyze
-	./analyze $(testDir) test.root 5000 100 1-1
+PlotTool:
+	if [ ! -d PlotTool ]; then ln -s ../PlotTool/; fi
+
+test: analyze
+	./analyze
+
+clean:
+	rm post*.root
+	rm -r DataEra
+
+condor_clean:
+	rm -r .output
+	rm -r .status
+
+condor_submit:
+	./submitDATA.sh
+	./submitMC.sh
