@@ -6,16 +6,24 @@ config = {
             dir:'PFUncertainty/',
             'region':[],
             'unc':{ # ID is relative to the regions basic histogram number
-                'trackerUp'  :{id:'2'},'ecalUp'  :{id:'3'},'hcalUp'  :{id:'4'},
-                'trackerDown':{id:'5'},'ecalDown':{id:'6'},'hcalDown':{id:'7'}
+                'trackerUp'  :{id:'1'},'ecalUp'  :{id:'2'},'hcalUp'  :{id:'3'},
+                'trackerDown':{id:'4'},'ecalDown':{id:'5'},'hcalDown':{id:'6'}
             }
         },
         'jes': {
             dir:'JetEnergyScale/',
             'region':[],
             'unc': { # ID is relative to the regions basic histogram number
-                'jesUp':{id:'8'},
-                'jesDown':{id:'9'}
+                'jesUp':{id:'7'},
+                'jesDown':{id:'8'}
+            }
+        },
+        'ewk': {
+            dir:'JetEnergyScale/',
+            'region':[],
+            'unc': { # ID is relative to the regions basic histogram number
+                'ewkUp':{id:'9'},
+                'ewkDown':{id:'10'}
             }
         },
     }

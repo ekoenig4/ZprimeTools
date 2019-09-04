@@ -1,46 +1,46 @@
 from ROOT import *
 import threading
 import sys
-from os import path,system,getcwd,listdir,mkdir,remove
+from os import path,system,getcwd,listdir,mkdir,remove,chdir
 from optparse import OptionParser
 from samplenames import samplenames
 from array import array
+
+def getargs():
+    parser = OptionParser()
+    parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+    parser.add_option("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
+    parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+    parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
+    parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
+    parser.add_option("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+    parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
+    parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
+    parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
+    return parser.parse_args()
 
 class datamc(object):
 
     def __init__(self,command=None,show=True,lumi=None,fileDir="./"):
 
+        self.cwd = getcwd()
+        chdir(fileDir)
+        self.fileDir = getcwd()
         if fileDir != "./":
-            if path.isdir(fileDir+"PlotTool/"):
-                sys.path[0] = fileDir+"PlotTool/"
+            if path.isdir("PlotTool/"):
+                sys.path[0] = "PlotTool/"
         import mcinfo as mc
         self.version = mc.version
         self.xsec = mc.xsec
+
+        self.options,self.args = getargs()
         
-        parser = OptionParser()
-        parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
-        parser.add_option("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
-        parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
-        parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
-        parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
-        parser.add_option("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
-        parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
-        parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
-        parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
-        (options, args) = parser.parse_args()
-
-        self.options = options
-
-        self.args = args
-
         #Luminosity
         self.lumi_by_era = mc.lumi_by_era
         self.lumi = (mc.lumi if (lumi == None) else lumi)
-        if (options.lumi != None): self.lumi = options.lumi
+        if (self.options.lumi != None): self.lumi = self.options.lumi
 
         self.show = show
-
-        self.fileDir = fileDir
 
         self.name = 'Xaxis Title'
         
@@ -74,10 +74,10 @@ class datamc(object):
 
         self.region=None
         for i,region in enumerate(RegionName):
-            if path.isfile(self.fileDir+postRegionData[i]): self.region=region; break;
+            if path.isfile(postRegionData[i]): self.region=region; break;
         if self.region == None:
             for i,region in enumerate(RegionName):
-                if any(f for f in listdir(self.fileDir+'.output') if preRegionData[i] in f): self.region=region; break
+                if any(f for f in listdir('.output') if preRegionData[i] in f): self.region=region; break
         if self.region==None:print "No Region Data Files Found, Exiting...";exit()
         if (type(self.lumi) == dict):
             self.lumi = self.lumi[self.region]
@@ -99,6 +99,7 @@ class datamc(object):
         self.HaddFiles()
         if (self.options.allHisto):
             self.GetAllHisto()
+        if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
             
     def initiate(self,variable):
@@ -126,15 +127,16 @@ class datamc(object):
     ###############################################################################################################
         
     def HaddFiles(self):
+        if getcwd() != self.fileDir: chdir(self.fileDir)
         AllFiles=[]
         for mcSample in self.xsec: AllFiles.append(mcSample)
-        # if self.region != 'SignalRegion':
-        #     dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
-        #                   for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-        #                   if not path.isfile(self.fileDir+"DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-        #                   and any(self.fileDir+self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(self.fileDir+".output"))]
-        # else: dataFiles = ['postMETdata']
-        dataFiles = [self.Data_FileNames[self.region]]
+        if self.region != 'SignalRegion':
+            dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
+                          for i,e in enumerate(sorted(self.lumi_by_era.keys()))
+                          if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
+                          and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
+        else: dataFiles = ['postMETdata']
+        # dataFiles = [self.Data_FileNames[self.region]]
         AllFiles.extend(dataFiles)
         if self.signal != None:
             Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
@@ -147,10 +149,10 @@ class datamc(object):
             #Hadd files together
             for fn in AllFiles:
                 if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
                     if len(nfile) != 0:
-                        arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
+                        arg = "hadd -f "+fn+".root "
+                        for f in nfile:arg+=".output/"+f+" "
                         system(arg)
         ###################################
         def multiThread(AllFiles):
@@ -165,11 +167,11 @@ class datamc(object):
             #Hadd files together
             threads = {}
             for fn in AllFiles:
-                if (not path.isfile(self.fileDir+fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(self.fileDir+".output/") if fn+"_" in f]
+                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
+                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
                     if len(nfile) != 0:
-                        arg = "hadd -f "+self.fileDir+fn+".root "
-                        for f in nfile:arg+=self.fileDir+".output/"+f+" "
+                        arg = "hadd -f "+fn+".root "
+                        for f in nfile:arg+=".output/"+f+" "
                         arg += " >/dev/null"
                         ID = str(len(threads))
                         threads[ID]=haddThread(ID,fn,arg)
@@ -195,6 +197,7 @@ class datamc(object):
             if merging: print "\nFiles Merged"
         ###################################
         def mergeData(dataFiles):
+            if getcwd() != self.fileDir: chdir(self.fileDir)
             arg = "hadd "+self.Data_FileNames[self.region]+".root "
             if not path.isdir("DataEra/"): mkdir("DataEra/")
             for i,e in enumerate(sorted(self.lumi_by_era.keys())):
@@ -210,12 +213,13 @@ class datamc(object):
         if (self.options.single): singleThread(AllFiles)
         else:multiThread(AllFiles)
         mergeData(dataFiles)
+        if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
     def GetAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
-        rfile=TFile.Open(self.fileDir+self.Data_FileNames[self.region]+".root")
+        rfile=TFile.Open(self.Data_FileNames[self.region]+".root")
         self.args = []
         for key in gDirectory.GetListOfKeys():
             nhisto = key.GetName().split("_")[-1]
@@ -235,7 +239,7 @@ class datamc(object):
     ###############################################################################################################
 
     def GetPlot(self,fname,variable):
-        rfile=TFile.Open(self.fileDir+fname)
+        rfile=TFile.Open(fname)
         cutflow = self.GetCutflow(fname,rfile=rfile)
         if '<' in variable or '>' in variable:
             if '>' in variable: cut = '>'+variable.split('>')[-1]
@@ -248,14 +252,14 @@ class datamc(object):
     ###############################################################################################################
     
     def GetCutflow(self,fname,rfile=None):
-        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        if rfile == None: rfile=TFile.Open(fname)
         rfile.cd()
         cutflow=rfile.Get("h_cutflow").Clone();cutflow.SetDirectory(0)
         return cutflow
     ###############################################################################################################
 
     def GetHisto(self,fname,variable,rfile=None):
-        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        if rfile == None: rfile=TFile.Open(fname)
         rfile.cd()
         nhist = variable.split("_")[-1]
         rdir = "ZprimeJet_"+nhist+"/"
@@ -267,7 +271,7 @@ class datamc(object):
     ###############################################################################################################
 
     def GetBranch(self,fname,variable,rfile=None,hs=None,cut=''):
-        if rfile == None: rfile=TFile.Open(self.fileDir+fname)
+        if rfile == None: rfile=TFile.Open(fname)
         if hs == None: hs = self.GetHisto(fname,variable,rfile=rfile)
         rfile.cd()
         nhist = variable.split("_")[-1]
@@ -286,6 +290,7 @@ class datamc(object):
     ###############################################################################################################
                       
     def GetVariable(self,variable):
+        if getcwd() != self.fileDir: chdir(self.fileDir)
         self.histo = {}
         self.total = {}
 
@@ -309,7 +314,7 @@ class datamc(object):
             self.total[sample]=[]
             for fn in self.MC_FileNames[sample]:
                 # print '\t',fn
-                if not path.isfile(self.fileDir+fn+".root"): continue
+                if not path.isfile(fn+".root"): continue
                 hs,cutflow = self.GetPlot(fn+".root",variable)
                 hs.SetName(variable+"_"+fn)
                 self.histo[sample].append(hs)
@@ -319,6 +324,7 @@ class datamc(object):
             for sample in self.histo:
                 if type(self.histo[sample]) == TH1:
                     self.name = self.histo[sample].GetXaxis().GetTitle()
+        if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
     def ScaleHistogram(self):
@@ -376,6 +382,7 @@ class datamc(object):
     ########################################################################################################################################
 
     def setUnc(self,up,dn):
+        if getcwd() != self.fileDir: chdir(self.fileDir)
         self.unc = {}
         for sample in self.MC_FileNames:
             self.unc[sample]={'up':{},'dn':{}}
@@ -385,8 +392,8 @@ class datamc(object):
                 for variable in varlist:
                     self.unc[sample][unc_key[i]][variable] = []
                     for j,fn in enumerate(self.MC_FileNames[sample]):
-                        if not path.isfile(self.fileDir+fn+".root"): continue
-                        rfile=TFile.Open(self.fileDir+fn+".root")
+                        if not path.isfile(fn+".root"): continue
+                        rfile=TFile.Open(fn+".root")
                         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
                         if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
                         else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
@@ -407,6 +414,7 @@ class datamc(object):
                     # if self.MC_Integral[sample] != 0:
                     #     print unc_key[i],sample,'\t|',
                     #     print (self.unc[sample][unc_key[i]][variable].Integral()/self.MC_Integral[sample])
+        if getcwd() != self.cwd: chdir(self.cwd)
     ########################################################################################################################################
 
     def getUnc(self):
