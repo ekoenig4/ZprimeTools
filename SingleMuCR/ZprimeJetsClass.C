@@ -232,10 +232,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			if (getEleHEMVeto(40)) {
 			  eleHEMVeto+=event_weight;
 			  fillHistos(11,event_weight);
-			  fillHistos(12,nokfactor);
 
-			  PSWeights(13,nogen); // 44 Histograms
-			  PFUncertainty(57,event_weight); // 6 Histograms
+			  PSWeights(12,nogen); // 44 Histograms
+			  PFUncertainty(56,event_weight); // 6 Histograms
+			  EWKUncertainty(64,event_weight); // 2 Histograms
 			}
 		      }
 		    }
@@ -248,7 +248,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
 
-    JetEnergyScale(63,weightNorm); // 2 Histograms
+    JetEnergyScale(62,weightNorm); // 2 Histograms
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck - 1)<<endl;

@@ -31,7 +31,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 65;
+  static const int nHisto = 66;
   static const int bHisto = 10;
   
   TH2F *h_eleRecoSF_highpt;

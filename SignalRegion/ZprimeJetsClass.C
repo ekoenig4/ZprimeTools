@@ -182,6 +182,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 		      PSWeights(10,nogen); // 44 Histograms
 		      PFUncertainty(54,event_weight); // 6 Histograms
+		      EWKUncertainty(62,event_weight); // 2 Histograms
 		    }
 		  }
 		}
