@@ -7,5 +7,6 @@ test/
 RootFiles
 !RootFiles/
 PlotTool
-!PloTtool/
+!PlotTool/
 analyze
+Systematics
