@@ -3,6 +3,7 @@ import subprocess
 from sys import argv
 from optparse import OptionParser
 
+user = 'ekoenig4'
 parser = OptionParser()
 parser.add_option("-r","--resubmit",help="resubmit condor jobs that didn't produce output files",action="store_true",default=False)
 parser.add_option("-v","--verbose",help="print all files being checked",action="store_true",default=False)
@@ -93,11 +94,20 @@ def check(dir):
                 finished = False
         status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
         if incomplete != 0:
-            condor_q = subprocess.Popen(['condor_q',cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+            condor_q = subprocess.Popen(['condor_q','-s',user,cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
             stdout, stderr = condor_q.communicate()
-            stdout = stdout.split('\n')[-2]
-            tmp = stdout.split()
-            if cluster != "-1": status = {'jobs':int(tmp[0]),'completed':int(tmp[2]),'removed':int(tmp[4]),'idle':int(tmp[6]),'running':int(tmp[8]),'held':int(tmp[10]),'suspended':int(tmp[12])}
+            info = [ line for line in stdout.split('\n') if "jobs;" in line ]
+            if cluster != "-1":
+                for server in info:
+                    tmp = server.split()
+                    status['jobs']      += int(tmp[0])
+                    status['completed'] += int(tmp[2])
+                    status['removed']   += int(tmp[4])
+                    status['idle']      += int(tmp[6])
+                    status['running']   += int(tmp[8])
+                    status['held']      += int(tmp[10])
+                    status['suspended'] += int(tmp[12])
+            ##############################################
             for type in status: total[type] += status[type]
             printOutput(file,status,incomplete,len(arglist),space=space)
         elif options.verbose:
