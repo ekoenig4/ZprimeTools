@@ -27,3 +27,10 @@ condor_submit:
 	@$(MAKE) -C DoubleEleCR condor_submit
 	@$(MAKE) -C SingleMuCR condor_submit
 	@$(MAKE) -C DoubleMuCR condor_submit
+
+hadd:
+	@$(MAKE) -C SignalRegion hadd
+	@$(MAKE) -C SingleEleCR hadd
+	@$(MAKE) -C DoubleEleCR hadd
+	@$(MAKE) -C SingleMuCR hadd
+	@$(MAKE) -C DoubleMuCR hadd
