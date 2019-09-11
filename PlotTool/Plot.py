@@ -83,7 +83,8 @@ class datamc(object):
         if (type(self.lumi) == dict):
             self.lumi = self.lumi[self.region]
             self.lumi_by_era = self.lumi_by_era[self.region]
-        
+            
+        self.Data_File = self.Data_FileNames[self.region]
         if self.region == "SignalRegion" and self.options.signal != None:
             self.getSignalXsec()
             if self.options.signal == "-1":
@@ -108,12 +109,14 @@ class datamc(object):
         def validfile(fname): return path.isfile(fname)
         mcfiles = [ mcfname for mcfname in self.xsec if not validfile(mcfname+'.root') ]
         datafiles = []
-        if self.region != 'SignalRegion': datafiles = [ self.Data_FileNames[self.region]+"_"+str(i)
+        if self.region != 'SignalRegion': datafiles = [ self.Data_File+"_"+str(i)
                                                         for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                                                        if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                                                        and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
-        if not any(datafiles):
-            if not validfile(self.Data_FileNames[self.region]+'.root'): datafiles = self.Data_FileNames[self.region]
+                                                        if not path.isfile("DataEra/"+self.Data_File+"_"+e+".root")
+                                                        and any(self.Data_File+"_"+str(i) in file for file in listdir(".output"))]
+        if self.region == 'SignalRegion':
+            mcfiles.append(self.Data_File) # Treat as mc file for hadding since we only have one file 
+        elif not any(datafiles):
+            if not validfile(self.Data_File+'.root'): datafiles = self.Data_File
         ##########
         if self.signal != None: mcfiles += [ self.Mx_Mv[mx][mv] for mv in sorted(self.Mx_Mv[mx],key=int) for mx in sorted(self.Mx_Mv,key=int) if not validfile(self.Mx_Mv[mx][mv]+'.root') ]
         merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
@@ -147,7 +150,7 @@ class datamc(object):
     def GetAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
-        rfile=TFile.Open(self.Data_FileNames[self.region]+".root")
+        rfile=TFile.Open(self.Data_File+".root")
         self.args = []
         for key in gDirectory.GetListOfKeys():
             nhisto = key.GetName().split("_")[-1]
@@ -227,7 +230,7 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        hs,cutflow = self.GetPlot(self.Data_FileNames[self.region]+".root",variable)
+        hs,cutflow = self.GetPlot(self.Data_File+".root",variable)
         self.histo['Data'] = hs
 
         if self.signal != None:
