@@ -60,8 +60,6 @@ xsec = {
 "postGJets600toInf":8.521e+01,
     
 "postTTJetsDiLept":5.424e+01,
-"postTTJetsSingleLeptFromT":1.092e+02,
-"postTTJets_MLM":7.268e+02,
     
 "postQCD100to200":2.369e+07,
 "postQCD200to300":1.556e+06,
