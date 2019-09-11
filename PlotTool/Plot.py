@@ -5,6 +5,7 @@ from os import path,system,getcwd,listdir,mkdir,remove,chdir
 from optparse import OptionParser
 from samplenames import samplenames
 from array import array
+import mergeFiles as merge
 
 def getargs():
     parser = OptionParser()
@@ -101,6 +102,23 @@ class datamc(object):
             self.GetAllHisto()
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
+
+    def HaddFiles(self):
+        if getcwd() != self.fileDir: chdir(self.fileDir)
+        def validfile(fname): return path.isfile(fname)
+        mcfiles = [ mcfname for mcfname in self.xsec if not validfile(mcfname+'.root') ]
+        datafiles = []
+        if self.region != 'SignalRegion': datafiles = [ self.Data_FileNames[self.region]+"_"+str(i)
+                                                        for i,e in enumerate(sorted(self.lumi_by_era.keys()))
+                                                        if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
+                                                        and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
+        if not any(datafiles):
+            if not validfile(self.Data_FileNames[self.region]+'.root'): datafiles = self.Data_FileNames[self.region]
+        ##########
+        if self.signal != None: mcfiles += [ self.Mx_Mv[mx][mv] for mv in sorted(self.Mx_Mv[mx],key=int) for mx in sorted(self.Mx_Mv,key=int) if not validfile(self.Mx_Mv[mx][mv]+'.root') ]
+        merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
+        if getcwd() != self.cwd: chdir(self.cwd)
+    ###############################################################################################################
             
     def initiate(self,variable):
         self.GetVariable(variable)
@@ -124,96 +142,6 @@ class datamc(object):
             mv=data.split("_")[1].replace("Mv","")
             if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
             self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
-    ###############################################################################################################
-        
-    def HaddFiles(self):
-        if getcwd() != self.fileDir: chdir(self.fileDir)
-        AllFiles=[]
-        for mcSample in self.xsec: AllFiles.append(mcSample)
-        if self.region != 'SignalRegion':
-            dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
-                          for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                          if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                          and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
-        else: dataFiles = ['postMETdata']
-        # dataFiles = [self.Data_FileNames[self.region]]
-        AllFiles.extend(dataFiles)
-        if self.signal != None:
-            Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
-            for mx in Mx_Value:
-                Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
-                for mv in Mv_Value:
-                    AllFiles.append(self.Mx_Mv[mx][mv])
-        ##################################
-        def singleThread(AllFiles):
-            #Hadd files together
-            for fn in AllFiles:
-                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                    if len(nfile) != 0:
-                        arg = "hadd -f "+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
-                        system(arg)
-        ###################################
-        def multiThread(AllFiles):
-            class haddThread (threading.Thread):
-                def __init__(self, threadID,name,arg):
-                    threading.Thread.__init__(self)
-                    self.threadID = threadID
-                    self.name = name
-                    self.arg = arg
-                def run(self):
-                    system(arg)
-            #Hadd files together
-            threads = {}
-            for fn in AllFiles:
-                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                    if len(nfile) != 0:
-                        arg = "hadd -f "+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
-                        arg += " >/dev/null"
-                        ID = str(len(threads))
-                        threads[ID]=haddThread(ID,fn,arg)
-                        threads[ID].start()
-                        sys.stdout.write("\r"+str(len(threads))+" Started Threads")
-                        sys.stdout.flush()
-            if len(threads) != 0: print
-            nthreads = len(threads)
-            merging = True if nthreads != 0 else False
-            out = "\r"+str(nthreads)+" Threads Remaining"
-            while (len(threads) != 0):
-                IDlist = threads.keys(); IDlist.sort(key=int)
-                for ID in IDlist:
-                    if not threads[ID].isAlive():
-                        threads.pop(ID)
-                if len(threads) != nthreads:
-                    nthreads = len(threads)
-                    out = "\r"+str(nthreads)+" Threads Remaining"
-                if out != None and len(threads) != 0:
-                    sys.stdout.write(out)
-                    sys.stdout.flush()
-                    out = None
-            if merging: print "\nFiles Merged"
-        ###################################
-        def mergeData(dataFiles):
-            if getcwd() != self.fileDir: chdir(self.fileDir)
-            arg = "hadd "+self.Data_FileNames[self.region]+".root "
-            if not path.isdir("DataEra/"): mkdir("DataEra/")
-            for i,e in enumerate(sorted(self.lumi_by_era.keys())):
-                if self.Data_FileNames[self.region]+"_"+str(i)+".root" in listdir("."):
-                    system("mv "+self.Data_FileNames[self.region]+"_"+str(i)+".root DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                if self.Data_FileNames[self.region]+"_"+e+".root" in listdir("DataEra"):
-                    arg += "DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root "
-            arg += " >/dev/null"
-            if path.isfile(self.Data_FileNames[self.region]+".root"): return
-            if self.show: print "Merging Data"
-            system(arg)
-        ###################################
-        if (self.options.single): singleThread(AllFiles)
-        else:multiThread(AllFiles)
-        mergeData(dataFiles)
-        if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
     def GetAllHisto(self):
@@ -261,12 +189,15 @@ class datamc(object):
     def GetHisto(self,fname,variable,rfile=None):
         if rfile == None: rfile=TFile.Open(fname)
         rfile.cd()
-        nhist = variable.split("_")[-1]
-        rdir = "ZprimeJet_"+nhist+"/"
-        rfile.cd(rdir)
-        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-        if variable in keys:hs=rfile.Get(rdir+variable).Clone("temp");hs.SetDirectory(0)
-        else:               hs=None
+        if any( variable == key.GetName() for key in rfile.GetListOfKeys() ):
+            hs = rfile.Get(variable).Clone("temp"); hs.SetDirectory(0)
+        else:
+            nhist = variable.split("_")[-1]
+            rdir = "ZprimeJet_"+nhist+"/"
+            rfile.cd(rdir)
+            keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
+            if variable in keys:hs=rfile.Get(rdir+variable).Clone("temp");hs.SetDirectory(0)
+            else:               hs=None
         return hs
     ###############################################################################################################
 
