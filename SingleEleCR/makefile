@@ -1,4 +1,4 @@
-plugin=${CMSSW_BASE}/src/ZprimeTools2018/plugins/
+plugin=${CMSSW_BASE}/src/ZprimeTools2017/plugins/
 
 rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
 
@@ -23,9 +23,11 @@ condor_clean:
 	rm -r .status
 
 condor_submit: analyze
-	./signalsubmit.sh
 	./submitDATA.sh
 	./submitMC.sh
 
 hadd: PlotTool
 	./PlotTool/plotter.py
+
+plot:
+	./PlotTool/plotter.py $(variable)
