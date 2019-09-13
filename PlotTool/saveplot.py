@@ -15,6 +15,20 @@ outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
 dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/":"e","SingleMuCR/":"m"}
 
+def GetWZLinking(rfile):
+    if type(rfile) == str: rfile = TFile.Open(rfile)
+    rfile.cd(); rfile.cd('sr')
+    lhistos = {}
+    keylist = [ key.GetName().replace('WJets','WZlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() ]
+    for key in keylist:
+        wjet = gDirectory.Get(key.replace('WZlink','WJets'))
+        zjet = gDirectory.Get(key.replace('WZlink','ZJets'))
+        lhistos[key] = GetRatio(wjet,zjet).Clone(key)
+    rfile.cd(); rfile.mkdir('sr/wzlink'); rfile.cd('sr/wzlink')
+    for key,hs in lhistos.iteritems():
+        hs.Write()
+##################################################################
+
 def GetTransferFactors(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
     tfactors = {'ZJets':{},'WJets':{}}
@@ -36,8 +50,8 @@ def GetTransferFactors(rfile):
                 thistos[key] = GetRatio(cr_hs,sr_hs).Clone(key)
             transfer[region] = thistos
     # Write transfer factor histograms to systematic file
-    for sample,transfer in tfactors.items():
-        for region,histos in transfer.items():
+    for sample,transfer in tfactors.iteritems():
+        for region,histos in transfer.iteritems():
             rfile.cd(); rfile.cd(region);
             rfile.mkdir('%s/transfer' % region); rfile.cd('%s/transfer' % region)
             for key,hs in histos.items():
@@ -49,13 +63,16 @@ def saveplot(variable):
     cut = ''
     if '>' in variable: cut = '>'+variable.split('>')[-1]
     if '<' in variable: cut = '<'+variable.split('<')[-1]
-    rfile = TFile( "%s/%s_%s.sys.root" % (outdir,variable,version) ,'recreate')
+    varname = variable.replace('>','+').replace('<','-')
+    rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,version) ,'recreate')
     Uncertainty = config['Uncertainty']
     lumi = max( lumi for region,lumi in mc.items() )
     for region,nhisto in config['regions'].items():
         rfile.cd()
+        if variable == 'h_recoil' and region == 'SignalRegion/': variable = 'pfMET'
+        elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'h_recoil'
         var = variable+'_'+nhisto+cut
-        print region
+        print region,var
         directory = rfile.mkdir(dir[region])
         norm = datamc(fileDir=region,lumi=lumi,show=False)
         norm.initiate(var)
@@ -63,12 +80,11 @@ def saveplot(variable):
         sumOfBkg = norm.getSumOfBkg()
         sumOfBkg.SetName('sumOfBkg')
         sumOfBkg.Write()
+        data_obs = norm.getSumOfBkg()
+        data_obs.SetName('data_obs')
+        data_obs.Write()
         for sample in norm.SampleList:
-            if sample == 'Data':
-                data_obs = norm.getSumOfBkg()
-                data_obs.SetName('data_obs')
-                data_obs.Write()
-            elif sample == "Signal":
+            if sample == "Signal":
                 for signal in norm.signal:
                     norm.histo[signal].SetName(signal)
                     norm.histo[signal].Write()
@@ -100,6 +116,7 @@ def saveplot(variable):
                 ###############################################################
             print
     ###########################################################################
+    GetWZLinking(rfile)
     GetTransferFactors(rfile)
     rfile.cd()
     lumi_hs = TH1F("lumi","lumi",1,0,1)
@@ -112,7 +129,7 @@ def saveplot(variable):
     var_hs.Write()
     rfile.Close()
 ################################################################################
-if __name__ != "__main__": exit()
+if __name__ == "__main__":
 
-options,args = getargs()
-for variable in args: saveplot(variable)
+    options,args = getargs()
+    for variable in args: saveplot(variable)

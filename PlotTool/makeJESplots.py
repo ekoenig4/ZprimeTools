@@ -53,7 +53,7 @@ for variable in samples.args:
     samples.histo['Data'].SetMarkerSize(0.9);
     if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
-    for mc in samples.MC_Color:
+    for mc in samples.MC_Info:
         samples.histo[mc].SetTitle("");
         samples.histo[mc].GetXaxis().SetTitle("");
         samples.histo[mc].GetXaxis().SetTickLength(0);
@@ -61,7 +61,7 @@ for variable in samples.args:
         samples.histo[mc].GetYaxis().SetTitle("");
         samples.histo[mc].GetYaxis().SetTickLength(0);
         samples.histo[mc].GetYaxis().SetLabelOffset(999);
-        samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+        samples.histo[mc].SetFillColor(samples.MC_Info[mc][TColor]);
         if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
         
 
@@ -74,7 +74,7 @@ for variable in samples.args:
         for key in samples.SampleList:
             if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
     else:
-        for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
+        for key in samples.MC_Info:hs_order[str(samples.MC_Info[key][int])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])

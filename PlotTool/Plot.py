@@ -5,6 +5,7 @@ from os import path,system,getcwd,listdir,mkdir,remove,chdir
 from optparse import OptionParser
 from samplenames import samplenames
 from array import array
+import mergeFiles as merge
 
 def getargs():
     parser = OptionParser()
@@ -61,9 +62,50 @@ class datamc(object):
         
         #List of Sample Files
         
-        self.MC_FileNames = {"WJets":mc.WJets_FileNames,"ZJets":mc.ZJets_FileNames,"GJets":mc.GJets_FileNames,"DYJets":mc.DYJets_FileNames,"TTJets":mc.TTJets_FileNames,"DiBoson":mc.DiBoson_FileNames,"QCD":mc.QCD_FileNames};
-        self.MC_Color =     {"WJets":kRed-10        ,"ZJets":kAzure+10      ,"GJets":kGray+2        ,"DYJets":kTeal-9         ,"TTJets":kOrange-2       ,"DiBoson":kCyan-10         ,"QCD":kGray};
-        self.MC_Integral = {"WJets":0     ,"ZJets":0     ,"GJets":0    ,"DYJets":0    ,"TTJets":0     ,"DiBoson":0    ,"QCD":0};
+        self.MC_Info= {
+            "WJets":
+            {
+                'fname':mc.WJets_FileNames,
+                TColor:kRed-10,
+                int:0
+            },
+            "ZJets":
+            {
+                'fname':mc.ZJets_FileNames,
+                TColor:kAzure+10,
+                int:0
+            },
+            "GJets":
+            {
+                'fname':mc.GJets_FileNames,
+                TColor:kGray+2,
+                int:0
+            },
+            "DYJets":
+            {
+                'fname':mc.DYJets_FileNames,
+                TColor:kTeal-9,
+                int:0
+            },
+            "TTJets":
+            {
+                'fname':mc.TTJets_FileNames,
+                TColor:kOrange-2,
+                int:0
+            },
+            "DiBoson":
+            {
+                'fname':mc.DiBoson_FileNames,
+                TColor:kCyan-10,
+                int:0
+            },
+            "QCD":
+            {
+                'fname':mc.QCD_FileNames,
+                TColor:kGray,
+                int:0
+            }
+        };
         self.BkgIntegral = 0
 
         self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
@@ -82,7 +124,8 @@ class datamc(object):
         if (type(self.lumi) == dict):
             self.lumi = self.lumi[self.region]
             self.lumi_by_era = self.lumi_by_era[self.region]
-        
+            
+        self.Data_FileName = self.Data_FileNames[self.region]
         if self.region == "SignalRegion" and self.options.signal != None:
             self.getSignalXsec()
             if self.options.signal == "-1":
@@ -101,6 +144,26 @@ class datamc(object):
             self.GetAllHisto()
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
+
+    def HaddFiles(self):
+        if not path.isdir('.output/'): return
+        if getcwd() != self.fileDir: chdir(self.fileDir)
+        def validfile(fname): return path.isfile(fname)
+        mcfiles = [ mcfname for mcfname in self.xsec if not validfile(mcfname+'.root') ]
+        datafiles = []
+        if self.region != 'SignalRegion': datafiles = [ self.Data_FileName+"_"+str(i)
+                                                        for i,e in enumerate(sorted(self.lumi_by_era.keys()))
+                                                        if not path.isfile("DataEra/"+self.Data_FileName+"_"+e+".root")
+                                                        and any(self.Data_FileName+"_"+str(i) in file for file in listdir(".output"))]
+        if self.region == 'SignalRegion':
+            if not validfile(self.Data_FileName+'.root'): mcfiles.append(self.Data_FileName) # Treat as mc file for hadding since we only have one file 
+        elif not any(datafiles):
+            if not validfile(self.Data_FileName+'.root'): datafiles = self.Data_FileName
+        ##########
+        if self.signal != None: mcfiles += [ self.Mx_Mv[mx][mv] for mv in sorted(self.Mx_Mv[mx],key=int) for mx in sorted(self.Mx_Mv,key=int) if not validfile(self.Mx_Mv[mx][mv]+'.root') ]
+        merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
+        if getcwd() != self.cwd: chdir(self.cwd)
+    ###############################################################################################################
             
     def initiate(self,variable):
         self.GetVariable(variable)
@@ -109,7 +172,7 @@ class datamc(object):
         
     def getSumOfBkg(self):
         sumOfBkg = self.histo["WJets"].Clone()
-        for mc in self.MC_Color:
+        for mc in self.MC_Info:
             if (mc != "WJets"):
                 sumOfBkg.Add(self.histo[mc])
         return sumOfBkg
@@ -125,101 +188,11 @@ class datamc(object):
             if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
             self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
     ###############################################################################################################
-        
-    def HaddFiles(self):
-        if getcwd() != self.fileDir: chdir(self.fileDir)
-        AllFiles=[]
-        for mcSample in self.xsec: AllFiles.append(mcSample)
-        if self.region != 'SignalRegion':
-            dataFiles = [ self.Data_FileNames[self.region]+"_"+str(i)
-                          for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                          if not path.isfile("DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                          and any(self.Data_FileNames[self.region]+"_"+str(i) in file for file in listdir(".output"))]
-        else: dataFiles = ['postMETdata']
-        # dataFiles = [self.Data_FileNames[self.region]]
-        AllFiles.extend(dataFiles)
-        if self.signal != None:
-            Mx_Value=self.Mx_Mv.keys();Mx_Value.sort(key=int)
-            for mx in Mx_Value:
-                Mv_Value=self.Mx_Mv[mx].keys();Mv_Value.sort(key=int)
-                for mv in Mv_Value:
-                    AllFiles.append(self.Mx_Mv[mx][mv])
-        ##################################
-        def singleThread(AllFiles):
-            #Hadd files together
-            for fn in AllFiles:
-                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                    if len(nfile) != 0:
-                        arg = "hadd -f "+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
-                        system(arg)
-        ###################################
-        def multiThread(AllFiles):
-            class haddThread (threading.Thread):
-                def __init__(self, threadID,name,arg):
-                    threading.Thread.__init__(self)
-                    self.threadID = threadID
-                    self.name = name
-                    self.arg = arg
-                def run(self):
-                    system(arg)
-            #Hadd files together
-            threads = {}
-            for fn in AllFiles:
-                if (not path.isfile(fn+".root") or self.options.reset) and not self.options.nohadd:
-                    nfile = [f for f in listdir(".output/") if fn+"_" in f]
-                    if len(nfile) != 0:
-                        arg = "hadd -f "+fn+".root "
-                        for f in nfile:arg+=".output/"+f+" "
-                        arg += " >/dev/null"
-                        ID = str(len(threads))
-                        threads[ID]=haddThread(ID,fn,arg)
-                        threads[ID].start()
-                        sys.stdout.write("\r"+str(len(threads))+" Started Threads")
-                        sys.stdout.flush()
-            if len(threads) != 0: print
-            nthreads = len(threads)
-            merging = True if nthreads != 0 else False
-            out = "\r"+str(nthreads)+" Threads Remaining"
-            while (len(threads) != 0):
-                IDlist = threads.keys(); IDlist.sort(key=int)
-                for ID in IDlist:
-                    if not threads[ID].isAlive():
-                        threads.pop(ID)
-                if len(threads) != nthreads:
-                    nthreads = len(threads)
-                    out = "\r"+str(nthreads)+" Threads Remaining"
-                if out != None and len(threads) != 0:
-                    sys.stdout.write(out)
-                    sys.stdout.flush()
-                    out = None
-            if merging: print "\nFiles Merged"
-        ###################################
-        def mergeData(dataFiles):
-            if getcwd() != self.fileDir: chdir(self.fileDir)
-            arg = "hadd "+self.Data_FileNames[self.region]+".root "
-            if not path.isdir("DataEra/"): mkdir("DataEra/")
-            for i,e in enumerate(sorted(self.lumi_by_era.keys())):
-                if self.Data_FileNames[self.region]+"_"+str(i)+".root" in listdir("."):
-                    system("mv "+self.Data_FileNames[self.region]+"_"+str(i)+".root DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root")
-                if self.Data_FileNames[self.region]+"_"+e+".root" in listdir("DataEra"):
-                    arg += "DataEra/"+self.Data_FileNames[self.region]+"_"+e+".root "
-            arg += " >/dev/null"
-            if path.isfile(self.Data_FileNames[self.region]+".root"): return
-            if self.show: print "Merging Data"
-            system(arg)
-        ###################################
-        if (self.options.single): singleThread(AllFiles)
-        else:multiThread(AllFiles)
-        mergeData(dataFiles)
-        if getcwd() != self.cwd: chdir(self.cwd)
-    ###############################################################################################################
 
     def GetAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
-        rfile=TFile.Open(self.Data_FileNames[self.region]+".root")
+        rfile=TFile.Open(self.Data_FileName+".root")
         self.args = []
         for key in gDirectory.GetListOfKeys():
             nhisto = key.GetName().split("_")[-1]
@@ -245,9 +218,19 @@ class datamc(object):
             if '>' in variable: cut = '>'+variable.split('>')[-1]
             if '<' in variable: cut = '<'+variable.split('<')[-1]
             variable = variable.replace(cut,'')
-            hs = self.GetBranch(fname,variable,rfile=rfile,cut=cut)
+            nhist = variable.split("_")[-1]
+            rdir = rfile.GetDirectory('ZprimeJets_'+nhist+'/')
+            hs = self.GetBranch(fname,variable,rdir=rdir,cut=cut)
         else:
-            hs = self.GetBranch(fname,variable,rfile=rfile)
+            if any( variable == key.GetName() for key in rfile.GetListOfKeys() ):
+                hs = self.GetGlobalHisto(fname,variable,rfile=rfile)
+            else:
+                nhist = variable.split("_")[-1]
+                rdir = rfile.GetDirectory('ZprimeJet_'+nhist+'/')
+                hs = self.GetCutHisto(fname,variable,rdir=rdir)
+                if any( key.GetName() == 'tree' for key in rdir.GetListOfKeys() ):
+                    tree = rdir.Get("tree")
+                    hs = self.GetBranch(fname,variable,tree=tree,hs=hs)
         return hs,cutflow
     ###############################################################################################################
     
@@ -258,33 +241,45 @@ class datamc(object):
         return cutflow
     ###############################################################################################################
 
-    def GetHisto(self,fname,variable,rfile=None):
+    def GetGlobalHisto(self,fname,variable,rfile=None):
         if rfile == None: rfile=TFile.Open(fname)
         rfile.cd()
+        hs = rfile.Get(variable).Clone("temp"); hs.SetDirectory(0)
+        return hs
+    ###############################################################################################################
+
+    def GetCutHisto(self,fname,variable,rfile=None,rdir=None,name='temp'):
         nhist = variable.split("_")[-1]
-        rdir = "ZprimeJet_"+nhist+"/"
-        rfile.cd(rdir)
+        if rdir == None:
+            if rfile == None: rfile = TFile.Open(fname)
+            rfile.cd()
+            rdir = rfile.GetDirectory("ZprimeJet_"+nhist+"/")
+        #####
+        rdir.cd()
         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-        if variable in keys:hs=rfile.Get(rdir+variable).Clone("temp");hs.SetDirectory(0)
+        if variable in keys:hs=rdir.Get(variable).Clone(name);hs.SetDirectory(0)
         else:               hs=None
         return hs
     ###############################################################################################################
 
-    def GetBranch(self,fname,variable,rfile=None,hs=None,cut=''):
-        if rfile == None: rfile=TFile.Open(fname)
-        if hs == None: hs = self.GetHisto(fname,variable,rfile=rfile)
-        rfile.cd()
+    def GetBranch(self,fname,variable,rfile=None,rdir=None,tree=None,hs=None,cut=''):
         nhist = variable.split("_")[-1]
-        rdir = "ZprimeJet_"+nhist+"/"
-        rfile.cd(rdir)
-        if not any( True for key in gDirectory.GetListOfKeys() if "tree" == key.GetName() ): return hs
-        tree = rfile.Get(rdir+"tree")
+        if tree == None:
+            if rdir == None:
+                if rfile == None: rfile = TFile.Open(fname)
+                rfile.cd()
+                rdir = rfile.GetDirectory("ZprimeJet_"+nhist+"/")
+            rdir.cd()
+            tree = rdir.Get('tree')
+        #####
+        if hs == None: hs = self.GetCutHisto(fname,variable,rdir=rdir)
         variable = variable.replace("_"+nhist,"")
         if any( True for key in tree.GetListOfBranches() if variable == key.GetName() ):
+            hs.SetName('treevar')
             hs.SetDirectory(gDirectory)
             hs.Reset()
-            if cut == '': tree.Draw(variable+">>temp","weight","goff")
-            else:         tree.Draw(variable+">>temp","weight*(%s%s)" % (variable,cut),"goff")
+            if cut == '': tree.Draw(variable+">>treevar","weight","goff")
+            else:         tree.Draw(variable+">>treevar","weight*(%s%s)" % (variable,cut),"goff")
             hs.SetDirectory(0)
         return hs 
     ###############################################################################################################
@@ -296,7 +291,7 @@ class datamc(object):
 
         self.GetVariableName(variable)
 
-        hs,cutflow = self.GetPlot(self.Data_FileNames[self.region]+".root",variable)
+        hs,cutflow = self.GetPlot(self.Data_FileName+".root",variable)
         self.histo['Data'] = hs
 
         if self.signal != None:
@@ -308,11 +303,11 @@ class datamc(object):
                 self.total[signal] = cutflow.GetBinContent(1)
             if not 'Signal' in self.SampleList:self.SampleList.append('Signal')
 
-        for sample in self.MC_FileNames:
+        for sample in self.MC_Info:
             # print sample
             self.histo[sample]=[]
             self.total[sample]=[]
-            for fn in self.MC_FileNames[sample]:
+            for fn in self.MC_Info[sample]['fname']:
                 # print '\t',fn
                 if not path.isfile(fn+".root"): continue
                 hs,cutflow = self.GetPlot(fn+".root",variable)
@@ -351,29 +346,29 @@ class datamc(object):
                 if self.histo[sample] == None: continue
                 rawevents = 0
                 for i in range(len(self.histo[sample])):
-                    if self.MC_FileNames[sample] == "null":continue
+                    if self.MC_Info[sample]['fname'] == "null":continue
                     #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
                     rawevents = self.histo[sample][i].Integral()
                     if (self.total[sample][i] == 0): scale = 0
-                    else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_FileNames[sample][i]]
+                    else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_Info[sample]['fname'][i]]
                     self.histo[sample][i].Scale(scale)
-                    # print self.MC_FileNames[sample][i],rawevents,self.total[sample][i],self.xsec[self.MC_FileNames[sample][i]],self.lumi,self.histo[sample][i].Integral()
+                    # print self.MC_Info[sample]['fname'][i],rawevents,self.total[sample][i],self.xsec[self.MC_Info[sample]['fname'][i]],self.lumi,self.histo[sample][i].Integral()
                 if (len(self.histo[sample]) > 0):
                     for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
                     self.histo[sample]=self.histo[sample][0]
-                    self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_FileNames[sample][0],sample))
+                    self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_Info[sample]['fname'][0],sample))
                     integral=(self.histo[sample].Integral())
                     # print 'summed',integral
-                    self.MC_Integral[sample]=integral
+                    self.MC_Info[sample][int]=integral
                     self.BkgIntegral += integral
 
         if self.show:
             bkgInt = {}
-            for sample in self.MC_Integral:bkgInt[str(self.MC_Integral[sample])]=sample
+            for sample in self.MC_Info:bkgInt[str(self.MC_Info[sample][int])]=sample
             keylist = bkgInt.keys();keylist.sort(key=float)
             for i in keylist[::-1]:
                 sample = bkgInt[i]
-                integral = self.MC_Integral[sample]
+                integral = self.MC_Info[sample][int]
                 percentage = 100*integral/self.BkgIntegral
                 space1=" "*(15-len(sample))
                 space2=" "*(8-len("%.6g" % integral))
@@ -391,7 +386,7 @@ class datamc(object):
                 if varlist == None: continue
                 for variable in varlist:
                     self.unc[sample][unc_key[i]][variable] = []
-                    for j,fn in enumerate(self.MC_FileNames[sample]):
+                    for j,fn in enumerate(self.MC_Info[sample]['fname']):
                         if not path.isfile(fn+".root"): continue
                         rfile=TFile.Open(fn+".root")
                         keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
@@ -401,19 +396,19 @@ class datamc(object):
                         self.unc[sample][unc_key[i]][variable].append(hs)
 
                     for j,hs in enumerate(self.unc[sample][unc_key[i]][variable]):
-                        if self.MC_FileNames[sample] == "null":continue
+                        if self.MC_Info[sample]['fname'] == "null":continue
                         #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-                        # print self.MC_FileNames[sample][i],self.total[sample][i],xsec[self.MC_FileNames[sample][i]]
+                        # print self.MC_Info[sample]['fname'][i],self.total[sample][i],xsec[self.MC_Info[sample]['fname'][i]]
                         if (self.total[sample][j] == 0): scale = 0
-                        else:                            scale=(1./self.total[sample][j])*self.lumi*self.xsec[self.MC_FileNames[sample][j]]
+                        else:                            scale=(1./self.total[sample][j])*self.lumi*self.xsec[self.MC_Info[sample]['fname'][j]]
                         hs.Scale(scale)
                     if any(self.unc[sample][unc_key[i]][variable]):
                         for j in range(1,len(self.unc[sample][unc_key[i]][variable])): self.unc[sample][unc_key[i]][variable][0].Add(self.unc[sample][unc_key[i]][variable][j])
                         self.unc[sample][unc_key[i]][variable]=self.unc[sample][unc_key[i]][variable][0]
-                        self.unc[sample][unc_key[i]][variable].SetName(self.unc[sample][unc_key[i]][variable].GetName().replace(self.MC_FileNames[sample][0],sample))
-                    # if self.MC_Integral[sample] != 0:
+                        self.unc[sample][unc_key[i]][variable].SetName(self.unc[sample][unc_key[i]][variable].GetName().replace(self.MC_Info[sample]['fname'][0],sample))
+                    # if self.MC_Info[sample][int] != 0:
                     #     print unc_key[i],sample,'\t|',
-                    #     print (self.unc[sample][unc_key[i]][variable].Integral()/self.MC_Integral[sample])
+                    #     print (self.unc[sample][unc_key[i]][variable].Integral()/self.MC_Info[sample][int])
         if getcwd() != self.cwd: chdir(self.cwd)
     ########################################################################################################################################
 

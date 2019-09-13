@@ -18,8 +18,8 @@ for variable in samples.args:
     c.SetLogy();
     c.cd();
 
-    for mc in samples.MC_Color:
-        samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+    for mc in samples.MC_Info:
+        samples.histo[mc].SetFillColor(samples.MC_Info[mc][TColor]);
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
 
@@ -30,7 +30,7 @@ for variable in samples.args:
         for key in samples.SampleList:
             if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
     else:
-        for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
+        for key in samples.MC_Info:hs_order[str(samples.MC_Info[key][int])] = key
     keylist = hs_order.keys()
     keylist.sort(key=float)
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
