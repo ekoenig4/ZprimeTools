@@ -160,7 +160,12 @@ class datamc(object):
         elif not any(datafiles):
             if not validfile(self.Data_FileName+'.root'): datafiles = self.Data_FileName
         ##########
-        if self.signal != None: mcfiles += [ self.Mx_Mv[mx][mv] for mv in sorted(self.Mx_Mv[mx],key=int) for mx in sorted(self.Mx_Mv,key=int) if not validfile(self.Mx_Mv[mx][mv]+'.root') ]
+        if self.signal != None:
+            for mx in sorted(self.Mx_Mv,key=int):
+                for mv in sorted(self.Mx_Mv[mx],key=int):
+                    if not validfile(self.Mx_Mv[mx][mv]+'.root'):
+                        mcfiles.append(self.Mx_Mv[mx][mv])
+        ##########
         merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
