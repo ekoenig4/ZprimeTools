@@ -266,8 +266,8 @@ def plotVariable(samples,variable):
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
-    c.SaveAs(directory+"/datamc_"+variable+".pdf")
-    c.SaveAs(directory+"/datamc_"+variable+".png")
+    c.SaveAs(directory+"/datamc_"+samples.variable+".pdf")
+    c.SaveAs(directory+"/datamc_"+samples.variable+".png")
 ###################################################################
     
 def plotter():

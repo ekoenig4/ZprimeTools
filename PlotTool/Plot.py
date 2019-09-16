@@ -6,6 +6,7 @@ from optparse import OptionParser
 from samplenames import samplenames
 from array import array
 import mergeFiles as merge
+import changeBinning as binning
 
 def getargs():
     parser = OptionParser()
@@ -18,6 +19,7 @@ def getargs():
     parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
     parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
     parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
+    parser.add_option("-b","--binning",help="specify function for rebinning histogram",action="store",type="str",default=None)
     return parser.parse_args()
 
 class datamc(object):
@@ -34,6 +36,7 @@ class datamc(object):
         self.version = mc.version
         self.xsec = mc.xsec
 
+        self.variable = None
         self.options,self.args = getargs()
         
         #Luminosity
@@ -171,6 +174,7 @@ class datamc(object):
     ###############################################################################################################
             
     def initiate(self,variable):
+        self.variable = variable
         self.GetVariable(variable)
         self.ScaleHistogram()
     ###############################################################################################################
@@ -232,7 +236,8 @@ class datamc(object):
             else:
                 nhist = variable.split("_")[-1]
                 rdir = rfile.GetDirectory('ZprimeJet_'+nhist+'/')
-                hs = self.GetCutHisto(fname,variable,rdir=rdir)
+                if self.options.binning == None: hs = self.GetCutHisto(fname,variable,rdir=rdir)
+                else:                            hs = None
                 if any( key.GetName() == 'tree' for key in rdir.GetListOfKeys() ):
                     tree = rdir.Get("tree")
                     hs = self.GetBranch(fname,variable,tree=tree,hs=hs)
@@ -277,16 +282,26 @@ class datamc(object):
             rdir.cd()
             tree = rdir.Get('tree')
         #####
+        b_name = variable.replace("_"+nhist,"")
+        if self.options.binning != None: hs = self.GetBinning()
         if hs == None: hs = self.GetCutHisto(fname,variable,rdir=rdir)
-        variable = variable.replace("_"+nhist,"")
-        if any( True for key in tree.GetListOfBranches() if variable == key.GetName() ):
+        if any( True for key in tree.GetListOfBranches() if b_name == key.GetName() ):
             hs.SetName('treevar')
             hs.SetDirectory(gDirectory)
             hs.Reset()
-            if cut == '': tree.Draw(variable+">>treevar","weight","goff")
-            else:         tree.Draw(variable+">>treevar","weight*(%s%s)" % (variable,cut),"goff")
+            if cut == '': tree.Draw(b_name+">>treevar","weight","goff")
+            else:         tree.Draw(b_name+">>treevar","weight*(%s%s)" % (b_name,cut),"goff")
             hs.SetDirectory(0)
         return hs 
+    ###############################################################################################################
+
+    def GetBinning(self):
+        hs = None
+        if 'perc' in self.options.binning:
+            nbins = self.options.binning.replace('perc','')
+            hs = binning.percentBinning(nbins=int(nbins))
+            if 'perc' not in self.variable: self.variable += self.options.binning
+        return hs
     ###############################################################################################################
                       
     def GetVariable(self,variable):
