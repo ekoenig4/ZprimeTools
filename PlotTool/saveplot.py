@@ -19,11 +19,16 @@ def GetWZLinking(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
     rfile.cd(); rfile.cd('sr')
     lhistos = {}
-    keylist = [ key.GetName().replace('WJets','WZlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() ]
+    keylist = [ key.GetName().replace('WJets','WZlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
+    wjet_norm = gDirectory.Get('WJets')
+    zjet_norm = gDirectory.Get('ZJets')
+    lhistos['WZlink'] = GetRatio(wjet_norm,zjet_norm).Clone('WZlink')
     for key in keylist:
-        wjet = gDirectory.Get(key.replace('WZlink','WJets'))
-        zjet = gDirectory.Get(key.replace('WZlink','ZJets'))
-        lhistos[key] = GetRatio(wjet,zjet).Clone(key)
+        wkey = '%s_WJets' % key; zkey = '%s_ZJets' % key
+        wjet_unc = gDirectory.Get(key.replace('WZlink','WJets'))
+        zjet_unc = gDirectory.Get(key.replace('WZlink','ZJets'))
+        lhistos[wkey] = GetRatio(wjet_unc,zjet_norm).Clone(wkey)
+        lhistos[zkey] = GetRatio(wjet_norm,zjet_unc).Clone(zkey)
     rfile.cd(); rfile.mkdir('sr/wzlink'); rfile.cd('sr/wzlink')
     for key,hs in lhistos.iteritems():
         hs.Write()
