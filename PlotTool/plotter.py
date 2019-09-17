@@ -7,22 +7,160 @@ import os
 
 gROOT.SetBatch(1)
 
-samples = plot.datamc()
+store = [] # Storage list to be used to keep references around for ROOT before TCanvas is saved
+
+def HigherDimension(samples,variable):
+    axis = variable[-1]
+    samples.initiate(variable[:-1])
+    if (axis in ('x','y','z')):
+        samples.name = samples.name[axis]
+    for hs in samples.histo:
+        if axis == "x":
+            samples.histo[hs] = samples.histo[hs].ProjectionX()
+        if axis == "y":
+            samples.histo[hs] = samples.histo[hs].ProjectionY()
+        if axis == "z":
+            samples.histo[hs] = samples.histo[hs].ProjectionZ()
+            
+###################################################################
+def DataStyle(hs_data):
+    hs_data.SetLineWidth(2)
+    hs_data.SetLineColor(kWhite);
+    hs_data.SetTitle("");
+    hs_data.GetXaxis().SetTitle("");
+    hs_data.GetXaxis().SetTickLength(0);
+    hs_data.GetXaxis().SetLabelOffset(999);
+    hs_data.GetYaxis().SetTitle("");
+    hs_data.GetYaxis().SetTickLength(0);
+    hs_data.GetYaxis().SetLabelOffset(999);
+    hs_data.SetLineColor(kBlack);
+    hs_data.SetMarkerStyle(20);
+    hs_data.SetMarkerSize(0.9);
+###################################################################
     
-for variable in samples.args:    
+def MCStyle(hs_mc,color):
+    hs_mc.SetTitle("");
+    hs_mc.GetXaxis().SetTitle("");
+    hs_mc.GetXaxis().SetTickLength(0);
+    hs_mc.GetXaxis().SetLabelOffset(999);
+    hs_mc.GetYaxis().SetTitle("");
+    hs_mc.GetYaxis().SetTickLength(0);
+    hs_mc.GetYaxis().SetLabelOffset(999);
+    hs_mc.SetFillColor(color);
+###################################################################
+
+def fillStack(samples,hs_datamc):
+    hs_order = {}
+    if (samples.name == "Cutflow"):
+        if samples.region == "SignalRegion":lastBin = 9
+        else:lastBin = 11
+        for key in samples.SampleList:
+            if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
+    else:
+        for key in samples.MC_Info:hs_order[str(samples.MC_Info[key][int])] = key
+    keylist = hs_order.keys()
+    keylist.sort(key=float)
+    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
+###################################################################
+
+def getLegend(xmin,ymin,xmax,ymax):
+    leg = TLegend(xmin,ymin,xmax,ymax,"")
+    leg.SetFillColor(kWhite);
+    leg.SetFillStyle(0);
+    leg.SetTextSize(0.025);
+    return leg
+###################################################################
+
+def getCMSText(lumi,year):
+    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi));
+    texS.SetNDC();
+    texS.SetTextFont(42);
+    texS.SetTextSize(0.040);
+    texS.Draw();
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+year+")");
+    texS1.SetNDC();
+    texS1.SetTextFont(42);
+    texS1.SetTextSize(0.040);
+    texS1.Draw();
+    return texS,texS1
+###################################################################
+
+def RatioStyle(ratio,rymin,rymax):
+    ratio.GetYaxis().SetRangeUser(rymin,rymax);
+    ratio.SetStats(0);
+    ratio.GetYaxis().CenterTitle();
+    ratio.SetMarkerStyle(20);
+    ratio.SetMarkerSize(0.7);
+    ratio.GetYaxis().SetLabelSize(0.14);
+    ratio.GetYaxis().SetTitleSize(0.12);
+    ratio.GetYaxis().SetLabelFont(42);
+    ratio.GetYaxis().SetTitleFont(42);
+    ratio.GetYaxis().SetTitleOffset(0.25);
+    ratio.GetYaxis().SetNdivisions(100);
+    ratio.GetYaxis().SetTickLength(0.05);
+    
+    ratio.GetXaxis().SetLabelSize(0.15);
+    ratio.GetXaxis().SetTitleSize(0.12);
+    ratio.GetXaxis().SetLabelFont(42);
+    ratio.GetXaxis().SetTitleFont(42);
+    ratio.GetXaxis().SetTitleOffset(0.9);
+    ratio.GetXaxis().SetTickLength(0.05);
+###################################################################
+
+def getRatioLine(xmin,xmax):
+    line = TLine(xmin, 1.,xmax, 1.);
+    line.SetLineStyle(8);
+    line.SetLineColor(kBlack);
+    return line
+###################################################################
+
+def StackStyle(hs_stack,ymin,ymax):
+    hs_stack.SetMinimum(ymin);
+    hs_stack.SetMaximum(ymax);
+    hs_stack.GetYaxis().SetTitle("Events");
+    hs_stack.GetYaxis().SetTitleOffset(1.5);
+    hs_stack.SetTitle("");
+###################################################################
+
+def makeXaxis(xmin,xmax,ymin,ndiv,name=None):
+    xaxis = TGaxis(xmin,ymin,xmax,ymin,xmin,xmax,ndiv);
+    if name != None: xaxis.SetTitle(name);
+    xaxis.SetLabelFont(42);
+    xaxis.SetLabelSize(0.10);
+    xaxis.SetTitleFont(42);
+    xaxis.SetTitleSize(0.12);
+    xaxis.SetTitleOffset(1.2);
+    return xaxis
+###################################################################
+
+def XaxisCutflowStyle(xaxis,hs):
+    xaxis.SetLabelOffset(-999)
+    xaxis.SetTitle("");
+    for i in range(1,hs.GetXaxis().GetNbins()+1):
+        label = TLatex(i-0.5,xaxis.GetY1()-0.2,hs.GetXaxis().GetBinLabel(i));
+	label.SetTextSize(0.065);
+	label.SetTextAngle(-30.);
+	label.Draw("SAME");
+        store.append(label)
+###################################################################
+
+def makeYaxis(ymin,ymax,xmin,ndiv,name=None):
+    if name == None: name == 'YAxis'
+    yaxis = TGaxis(xmin,ymin,xmin,ymax,ymin,ymax,ndiv,"");
+    yaxis.SetTitle(name);
+    yaxis.SetLabelFont(42);
+    yaxis.SetLabelSize(0.10);
+    yaxis.SetTitleFont(42);
+    yaxis.SetTitleSize(0.12);
+    yaxis.SetTitleOffset(0.35);
+    return yaxis
+###################################################################
+
+def plotVariable(samples,variable):
+    del store[:] # Clear storage list 
     print "Plotting",variable
     if (samples.options.thn):
-        axis = variable[-1]
-        samples.initiate(variable[:-1])
-        if (axis in ('x','y','z')):
-            samples.name = samples.name[axis]
-        for hs in samples.histo:
-            if axis == "x":
-                samples.histo[hs] = samples.histo[hs].ProjectionX()
-            if axis == "y":
-                samples.histo[hs] = samples.histo[hs].ProjectionY()
-            if axis == "z":
-                samples.histo[hs] = samples.histo[hs].ProjectionZ()
+        HigherDimension(samples,variable)
     else:
         samples.initiate(variable)
     c = TCanvas("c", "canvas",800,800);
@@ -38,51 +176,21 @@ for variable in samples.args:
     pad1.SetFillColor(0); pad1.SetFrameBorderMode(0); pad1.SetBorderMode(0);
     pad1.SetBottomMargin(0.);
 
-    samples.histo['Data'].SetLineWidth(2)
-    samples.histo['Data'].SetLineColor(kWhite);
-    samples.histo['Data'].SetTitle("");
-    samples.histo['Data'].GetXaxis().SetTitle("");
-    samples.histo['Data'].GetXaxis().SetTickLength(0);
-    samples.histo['Data'].GetXaxis().SetLabelOffset(999);
-    samples.histo['Data'].GetYaxis().SetTitle("");
-    samples.histo['Data'].GetYaxis().SetTickLength(0);
-    samples.histo['Data'].GetYaxis().SetLabelOffset(999);
-    samples.histo['Data'].SetLineColor(kBlack);
-    samples.histo['Data'].SetMarkerStyle(20);
-    samples.histo['Data'].SetMarkerSize(0.9);
+    DataStyle(samples.histo['Data'])
     if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
-    for mc in samples.MC_Color:
-        samples.histo[mc].SetTitle("");
-        samples.histo[mc].GetXaxis().SetTitle("");
-        samples.histo[mc].GetXaxis().SetTickLength(0);
-        samples.histo[mc].GetXaxis().SetLabelOffset(999);
-        samples.histo[mc].GetYaxis().SetTitle("");
-        samples.histo[mc].GetYaxis().SetTickLength(0);
-        samples.histo[mc].GetYaxis().SetLabelOffset(999);
-        samples.histo[mc].SetFillColor(samples.MC_Color[mc]);
+    for mc in samples.MC_Info:
+        MCStyle(samples.histo[mc],samples.MC_Info[mc][TColor])
         if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
         
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
-
-    hs_order = {}
-    if (samples.name == "Cutflow"):
-        if samples.region == "SignalRegion":lastBin = 9
-        else:lastBin = 11
-        for key in samples.SampleList:
-            if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
-    else:
-        for key in samples.MC_Integral:hs_order[str(samples.MC_Integral[key])] = key
-    keylist = hs_order.keys()
-    keylist.sort(key=float)
-    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
-    hs_datamc.SetTitle("");
-    min=pow(10,-6);max=pow(10,2.5);
-    hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
-    hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
-
+    fillStack(samples,hs_datamc)
+    ymin_s=pow(10,-6);ymax_s=pow(10,2.5);
+    ymin = 0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*ymin_s
+    ymax = hs_datamc.GetMaximum()*ymax_s
     hs_datamc.Draw("HIST")
+    StackStyle(hs_datamc,ymin,ymax)
 
     samples.histo['Data'].Draw('pex0same')
 
@@ -92,7 +200,7 @@ for variable in samples.args:
 
     #################################################
 
-    leg = TLegend(0.62,0.60,0.86,0.887173,"");
+    leg = getLegend(0.62,0.60,0.86,0.887173);
     leg.AddEntry(samples.histo['Data'],"Data","lp");
     if (samples.signal != None): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
     leg.AddEntry(samples.histo['WJets'],"W#rightarrowl#nu","f");
@@ -102,23 +210,13 @@ for variable in samples.args:
     leg.AddEntry(samples.histo['TTJets'], "Top Quark", "F"); 
     leg.AddEntry(samples.histo['GJets'],"#gamma+jets", "F"); 
     leg.AddEntry(samples.histo['ZJets'],"Z#rightarrow#nu#nu","F");
-    leg.SetFillColor(kWhite);
-    leg.SetFillStyle(0);
-    leg.SetTextSize(0.025);
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
     if (samples.options.normalize): lumi_label="Normalized"
-    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
-    texS.SetNDC();
-    texS.SetTextFont(42);
-    texS.SetTextSize(0.040);
-    texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+")");
-    texS1.SetNDC();
-    texS1.SetTextFont(42);
-    texS1.SetTextSize(0.040);
-    texS1.Draw();
+    texLumi,texCMS = getCMSText(lumi_label,samples.version)
+    texLumi.Draw();
+    texCMS.Draw();
 
     c.cd();
     pad2 = TPad("pad2","pad2",0.01,0.01,0.99,0.25);
@@ -132,37 +230,13 @@ for variable in samples.args:
     Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
 
     rymin = 0.3; rymax = 1.7
-    Ratio.GetYaxis().SetRangeUser(rymin,rymax);
-    Ratio.SetStats(0);
-    Ratio.GetYaxis().CenterTitle();
-    Ratio.SetMarkerStyle(20);
-    Ratio.SetMarkerSize(0.7);
-    
-    line = TLine(hs_datamc.GetXaxis().GetXmin(), 1.,hs_datamc.GetXaxis().GetXmax(), 1.);
-    line.SetLineStyle(8);
-
-    
+    RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("pex0");
-    Ratio.GetYaxis().SetLabelSize(0.14);
-    Ratio.GetYaxis().SetTitleSize(0.12);
-    Ratio.GetYaxis().SetLabelFont(42);
-    Ratio.GetYaxis().SetTitleFont(42);
-    Ratio.GetYaxis().SetTitleOffset(0.25);
-    Ratio.GetYaxis().SetNdivisions(100);
-    Ratio.GetYaxis().SetTickLength(0.05);
     
-    Ratio.GetXaxis().SetLabelSize(0.15);
-    Ratio.GetXaxis().SetTitleSize(0.12);
-    Ratio.GetXaxis().SetLabelFont(42);
-    Ratio.GetXaxis().SetTitleFont(42);
-    Ratio.GetXaxis().SetTitleOffset(0.9);
-    Ratio.GetXaxis().SetTickLength(0.05);
-    line.SetLineColor(kBlack);
+    line = getRatioLine(hs_datamc.GetXaxis().GetXmin(),hs_datamc.GetXaxis().GetXmax())
     line.Draw("same");
-    
+
     c.Update();
-    hs_datamc.GetYaxis().SetTitle("Events");
-    hs_datamc.GetYaxis().SetTitleOffset(1.5);
 
     ###########################################
 
@@ -171,34 +245,15 @@ for variable in samples.args:
     xmax = hs_datamc.GetXaxis().GetXmax();
     xwmin = xmin;
     xwmax = xmax;
-    
-    xaxis = TGaxis(xmin,rymin,xmax,rymin,xwmin,xwmax,510);
-    if type(samples.name) == str: xaxis.SetTitle(samples.name);
-    xaxis.SetLabelFont(42);
-    xaxis.SetLabelSize(0.10);
-    xaxis.SetTitleFont(42);
-    xaxis.SetTitleSize(0.12);
-    xaxis.SetTitleOffset(1.2);
+
+    xname = samples.name if type(samples.name) == str else None
+    xaxis = makeXaxis(xmin,xmax,rymin,510,name=xname);
     xaxis.Draw("SAME");
 
-    if (samples.name == "Cutflow"):
-        xaxis.SetLabelOffset(-999)
-        xaxis.SetTitle("");
-        label = []
-        for i in range(1,nbins+1):
-            label.append(TLatex(i-0.5,rymin-0.2,hs_datamc.GetXaxis().GetBinLabel(i)));
-	    label[i-1].SetTextSize(0.065);
-	    label[i-1].SetTextAngle(-30.);
-	    label[i-1].Draw("SAME");
+    if (samples.name == "Cutflow"): XaxisCutflowStyle(xaxis,hs_datamc)
       
 
-    yaxis = TGaxis(xmin,rymin,xmin,rymax,rymin,rymax,6,"");
-    yaxis.SetTitle("Data/MC");
-    yaxis.SetLabelFont(42);
-    yaxis.SetLabelSize(0.10);
-    yaxis.SetTitleFont(42);
-    yaxis.SetTitleSize(0.12);
-    yaxis.SetTitleOffset(0.35);
+    yaxis = makeYaxis(rymin,rymax,xmin,6,name="Data/MC");
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
@@ -211,6 +266,17 @@ for variable in samples.args:
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
-    c.SaveAs(directory+"/datamc_"+variable+".pdf")
-    c.SaveAs(directory+"/datamc_"+variable+".png")
+    c.SaveAs(directory+"/datamc_"+samples.variable+".pdf")
+    c.SaveAs(directory+"/datamc_"+samples.variable+".png")
+###################################################################
+    
+def plotter():
+    samples = plot.datamc()
+    for variable in samples.args:
+        plotVariable(samples,variable)
+###################################################################
+    
   
+
+if __name__ == "__main__":
+    plotter()
