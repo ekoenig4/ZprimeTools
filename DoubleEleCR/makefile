@@ -29,3 +29,6 @@ condor_submit: analyze
 
 hadd: PlotTool
 	./PlotTool/plotter.py
+
+plot:
+	./PlotTool/plotter.py $(variable)
