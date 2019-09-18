@@ -23,6 +23,9 @@
 #include <vector>
 #include <functional>
 
+#include "ScaleUnc.h"
+#include "ShapeUnc.h"
+
 using namespace std;
 
 class ZprimeJetsCommon {
@@ -32,7 +35,7 @@ public :
 
   TFile *output;
   static const int maxHisto = 50;
-  TTree *trees[maxHisto];
+  TTree *tree;
 
   static const bool debug = true;
   enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
@@ -47,7 +50,10 @@ public :
   } sample;
 
   TH1D *PU,*ewkCorrection,*NNLOCorrection;
-  TH1F* nlo_ewk_hs;
+
+  ScaleUncCollection* scaleUncs;
+  ShapeUncCollection* shapeUncs;
+  
   float bosonPt;
 
   float weight;
@@ -822,10 +828,11 @@ public :
   virtual void AllPFCand(vector<int> jetCand);
   virtual double getKfactor(double bosonPt);
   virtual bool inclusiveCut();
+  virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
 
-  virtual void JetEnergyScale(int nhist, double start_weight, function<bool()> cut = [](){return true;}) { /*Should be overriden by region*/ };
-  virtual void PFUncertainty(int nhist, double event_weight);
-  virtual void EWKUncertainty(int nhist, double event_weight);
+  virtual void JetEnergyScale(double start_weight) { /*Should be overriden by region*/ };
+  virtual void PFUncertainty(double event_weight);
+  virtual void QCDVariations(double event_weight);
 };
 
 #endif
