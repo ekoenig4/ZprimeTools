@@ -124,7 +124,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	for (int i = 0; i < nMC; i++)
 	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
 	    double bosonPID = (*mcPID)[i];
-	    double bosonPt = (*mcPt)[i];
+	    bosonPt = (*mcPt)[i];
 	    double kfactor = getKfactor(bosonPt);
 	    if ( sample.PID == 23 ) {
 	      h_genZPt->Fill(bosonPt,gen_weight);
