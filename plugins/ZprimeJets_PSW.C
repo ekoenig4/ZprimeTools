@@ -1,9 +1,9 @@
 #define ZprimeJetsCommon_cxx
 #include "ZprimeJetsCommon.h"
 
-void ZprimeJetsCommon::PSWeights(int nhist,double event_weight) {
+void ZprimeJetsCommon::PSWeights(double event_weight) {
   /* 44 Histograms
-                   up  dn
+     up  dn
      isrRed        0   2
      fsrRed        1   3
      isrDef        4   6
@@ -27,10 +27,59 @@ void ZprimeJetsCommon::PSWeights(int nhist,double event_weight) {
      isr_Q2QG_cNS  40 41
      isr_X2XG_cNS  42 43
   */
-  int nPS = 44;
+  
+  string psw_uncs[22] = { "isrRed",   
+			  "fsrRed",      
+			  "isrDef",    
+			  "fsrDef",  
+			  "isrCon",
+			  "fsrCon",      
+			  "fsr_G2GG_muR",
+			  "fsr_G2QQ_muR",
+			  "fsr_Q2QG_muR",
+			  "fsr_X2XG_muR",
+			  "fsr_G2GG_cNS",
+			  "fsr_G2QQ_cNS",
+			  "fsr_Q2QG_cNS",
+			  "fsr_X2XG_cNS",
+			  "isr_G2GG_muR",
+			  "isr_G2QQ_muR",
+			  "isr_Q2QG_muR",
+			  "isr_X2XG_muR",
+			  "isr_G2GG_cNS",
+			  "isr_G2QQ_cNS",
+			  "isr_Q2QG_cNS",
+			  "isr_X2XG_cNS"  };
+  
+  string uncname = "PSW_";
+  // Initializing
+  if ( !scaleUncs->contains(uncname+psw_uncs[0]) ) {
+    for (int i = 0; i < 22; i++) {
+      string name = uncname + psw_uncs[i];
+      scaleUncs->addUnc(name,NULL);
+    }
+  }
+  
+  int nPS = 22;
   for (int i = 0; i < nPS; i++) {
-    double ps_weight = event_weight;
-    if (!sample.isData) ps_weight *= psWeight->at(i+2);
-    fillHistos(nhist+i,ps_weight );
+    string name = uncname + psw_uncs[i];
+    float weightUp = event_weight;
+    float weightDn = event_weight;
+    if ( !sample.isData ) {
+      if ( i < 2 ) {
+	weightUp *= psWeight->at(2 + i);
+	weightDn *= psWeight->at(2 + i + 2);
+      } else if ( i < 4 ) {
+	weightUp *= psWeight->at(2 + i + 2);
+	weightDn *= psWeight->at(2 + i + 4);
+      } else if ( i < 6 ) {
+	weightUp *= psWeight->at(2 + i + 4);
+	weightDn *= psWeight->at(2 + i + 6);
+      } else {
+	weightUp *= psWeight->at(2 + 2*i);
+	weightDn *= psWeight->at(2 + 2*i + 1);
+      }
+    }
+    scaleUncs->setUnc(name,weightUp,weightDn);
   }
 }
