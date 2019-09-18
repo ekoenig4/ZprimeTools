@@ -27,7 +27,7 @@ using namespace std;
 
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 19;
+  static const int nHisto = 9;
   static const int bHisto = 8;
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
@@ -38,8 +38,9 @@ public :
   virtual vector<int> JetVetoDecision();
   virtual bool electron_veto_looseID(int jet_index, float elePtCut);
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
+  virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void JetEnergyScale(double start_weight);
 };
 
 #endif

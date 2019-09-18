@@ -31,7 +31,7 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 22;
+  static const int nHisto = 11;
   static const int bHisto = 10;
 
   TH2F *h_tightMuSF_ISO,*h_tightMuSF_ID;
@@ -39,7 +39,7 @@ public :
 
   //CR variables
   int lepindex_leading, lepindex_subleading;
-  double dilepton_mass,dilepton_pt,Recoil;
+  float dilepton_mass,dilepton_pt,Recoil;
   float leptoMET_phi_to_use;
   //CR histograms
   TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto];
@@ -57,8 +57,9 @@ public :
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int leading_ele_index, int subleading_ele_index, float muPtCut);
   virtual double getSF(int lepindex_leading,int lepindex_subleading);
+  virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void JetEnergyScale(double start_weight);
 };
 
 #endif
