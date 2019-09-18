@@ -197,10 +197,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  
 		  if(dPhiJetMETcut(jetveto)) {
 		    nDphiJetMET+=event_weight;
+
+		    QCDVariations(event_weight);
 		    fillHistos(8,event_weight);
 
-		    PFUncertainty(9,event_weight); // 6 Histograms
-		    EWKUncertainty(17,event_weight); // 2 Histograms
+		    PFUncertainty(event_weight);
 		  }
 		}   
 	      }	
@@ -210,7 +211,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
 
-    JetEnergyScale(15,weightNorm); // 2 Histograms
+    JetEnergyScale(weightNorm); // 2 Histograms
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -227,6 +228,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(9,nDphiJetMET);
    
 }//Closing the Loop function
+
+void ZprimeJetsClass::initTree(TTree* tree) {
+  tree->Branch("weight",&weight);
+  tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+  tree->Branch("recoil",&pfMET,"Recoil (GeV)");
+}
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
@@ -251,10 +258,14 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     string histname(ptbins);
     auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
     dir->cd();
-    if (i >= bHisto) {
-      trees[i] = new TTree("tree","tree");
-      trees[i]->Branch("weight",&weight);
-      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    if (i == bHisto) {
+      auto treedir = dir->mkdir("trees");
+      treedir->cd();
+      tree = new TTree("norm","norm");
+      initTree(tree);
+      scaleUncs = new ScaleUncCollection(tree);
+      shapeUncs = new ShapeUncCollection(treedir);
+      dir->cd();
     }
     //Common Histograms
     BookCommon(i,histname);
@@ -264,7 +275,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   fillCommon(histoNumber,event_weight);
   weight = event_weight;
-  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
+  if (histoNumber == bHisto) tree->Fill();
 }
 
 

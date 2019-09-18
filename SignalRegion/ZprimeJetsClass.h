@@ -12,7 +12,7 @@
 using namespace std;
 class ZprimeJetsClass : public ZprimeJetsCommon{
 public:
-  static const int nHisto = 19;
+  static const int nHisto = 9;
   static const int bHisto = 8;
   
   ZprimeJetsClass(const char* file1,const char* file2,const char* fileRange) : ZprimeJetsCommon(file1,file2,fileRange)
@@ -23,8 +23,9 @@ public:
   virtual vector<int> JetVetoDecision();
   virtual bool electron_veto_looseID(int jet_index, float elePtCut);
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
+  virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(int nhist,double event_weight,function<bool()> cut = [](){return true;});
+  virtual void JetEnergyScale(double event_weight);
 };
 
 #endif
