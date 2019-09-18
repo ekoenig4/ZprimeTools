@@ -178,7 +178,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	for(int i=0; i<nMC;i++){
 	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
 	    int bosonPID = (*mcPID)[i];
-	    double bosonPt = (*mcPt)[i];
+	    bosonPt = (*mcPt)[i];
 	    double kfactor = getKfactor(bosonPt);
 	    if ( sample.PID == 23 ) {
 	      h_genZPt->Fill(bosonPt,gen_weight);
@@ -284,11 +284,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			
 			if (getEleHEMVeto(40)) {
 			  nEleHEM+=event_weight;
+			  PSWeights(nogen); // 44 Histograms
+			  QCDVariations(event_weight);
 			  fillHistos(11,event_weight);
 
-			  PSWeights(12,nogen); // 44 Histograms
-			  PFUncertainty(56,event_weight); // 6 Histograms
-			  EWKUncertainty(64,event_weight); // 2 Histograms
+			  PFUncertainty(event_weight); // 6 Histograms
 			}
 		      }
 		    }
@@ -301,7 +301,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
 
-    JetEnergyScale(62,weightNorm);
+    JetEnergyScale(weightNorm);
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck - 1)<<endl;
@@ -320,6 +320,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   h_cutflow->SetBinContent(12,nEleHEM);
 }
 
+void ZprimeJetsClass::initTree(TTree* tree) {
+  tree->Branch("weight",&weight);
+  tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+  tree->Branch("h_recoil",&Recoil,"Recoil (GeV)");
+}
+
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   
   output = new TFile(outputFilename, "RECREATE");
@@ -330,7 +336,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
 
   float LeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
 
-  h_cutflow = new TH1D("h_cutflow","h_cutflow",11,0,11);h_cutflow->Sumw2();
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
   h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
   h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
   h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
@@ -356,10 +362,14 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     string histname(ptbins);
     auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
     dir->cd();
-    if (i >= bHisto) {
-      trees[i] = new TTree("tree","tree");
-      trees[i]->Branch("weight",&weight);
-      trees[i]->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+    if (i == bHisto) {
+      auto treedir = dir->mkdir("trees");
+      treedir->cd();
+      tree = new TTree("norm","norm");
+      initTree(tree);
+      scaleUncs = new ScaleUncCollection(tree);
+      shapeUncs = new ShapeUncCollection(treedir);
+      dir->cd();
     }
     //Common Histograms
     BookCommon(i,histname);
@@ -384,7 +394,7 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
   if(lepton_pt > 0){
     h_recoil[histoNumber]->Fill(Recoil,event_weight);}
   weight = event_weight;
-  if (histoNumber >= bHisto) trees[histoNumber]->Fill();
+  if (histoNumber == bHisto) tree->Fill();
 }
 
 vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int ele_index) {

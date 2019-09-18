@@ -35,15 +35,15 @@ public :
   static const bool applySF = true;
   static const bool applyKF = true;
   static const bool applyInclusive = true;
-  static const int nHisto = 66;
-  static const int bHisto = 10;
+  static const int nHisto = 12;
+  static const int bHisto = 11;
  
   TH2F *h_eleRecoSF_highpt;
   TH2F *h_eleIDSF;
 
   //CR variables
   int lepindex;
-  double lepton_pt,Recoil;
+  float lepton_pt,Recoil;
   //CR histograms
   TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
   TH2F *h_LeptonEtaPhi[nHisto],*h_j1EtaPhi[nHisto];
@@ -61,8 +61,9 @@ public :
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
   virtual double getSF(int ele_index);
+  virtual void initTree(TTree* tree);
   
-  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void JetEnergyScale(double start_weight);
 };
 
 #endif

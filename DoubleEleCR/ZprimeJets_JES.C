@@ -1,10 +1,18 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
-void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
+  string uncname = "JES";
+  if ( !shapeUncs->contains(uncname) ) {
+    shapeUncs->addUnc(uncname);
+
+    initTree(shapeUncs->getTreeUp(uncname));
+    initTree(shapeUncs->getTreeDn(uncname));
+  }
+  
   vector<int> jetCandNorm;
   for(int cand : jetCand) jetCandNorm.push_back(cand);
   vector<double> jetPtNorm;
@@ -112,8 +120,9 @@ void ZprimeJetsClass::JetEnergyScale(int nhist,double start_weight) {
 			if(dPhiJetMETcut(jetveto)){
 			  
 			  if (getEleHEMVeto(40)) {
-			    if (unc == 1)  fillHistos(nhist,event_weight); // up
-			    if (unc == -1) fillHistos(nhist+1,event_weight);// down
+			    weight = event_weight;
+			    if (unc == 1)  shapeUncs->fillUp(uncname);// up
+			    if (unc == -1) shapeUncs->fillDn(uncname);// down
 			  }
 			}   
 		      }	

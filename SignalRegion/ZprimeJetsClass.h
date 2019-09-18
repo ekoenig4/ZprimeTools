@@ -28,8 +28,8 @@ using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
   static const bool applyPU = true;
-  static const int nHisto = 64;
-  static const int bHisto = 8;
+  static const int nHisto = 10;
+  static const int bHisto = 9;
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
   { BookHistos(outputFilename); };
@@ -39,8 +39,9 @@ public :
   virtual vector<int> JetVetoDecision();
   virtual bool electron_veto_looseID(int jet_index, float elePtCut);
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
+  virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(int nhist,double start_weight);
+  virtual void JetEnergyScale(double start_weight);
 };
 
 #endif
