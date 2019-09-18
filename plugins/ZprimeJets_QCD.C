@@ -46,16 +46,17 @@ void ZprimeJetsCommon::QCDVariations(double event_weight) {
       scaleUncs->addUnc(name,histo);
     }
   }
-
-  if (sample.isW_or_ZJet()) {
-    for (int i = 0; i < 16; i++) {
-      string name = uncname + qcd_uncs[i];
+  
+  for (int i = 0; i < 16; i++) {
+    string name = uncname + qcd_uncs[i];
+    float unc = 0;
+    if (sample.isW_or_ZJet()) {
       TH1F* histo = scaleUncs->getHisto(name);
-      float unc = histo->GetBinContent( histo->GetXaxis()->FindBin(bosonPt) );
-
-      float weightUp = event_weight*(1+unc);
-      float weightDn = event_weight*(1-unc);
-      scaleUncs->setUnc(name,weightUp,weightDn);
+      unc = histo->GetBinContent( histo->GetXaxis()->FindBin(bosonPt) );
     }
+    
+    float weightUp = event_weight*(1+unc);
+    float weightDn = event_weight*(1-unc);
+    scaleUncs->setUnc(name,weightUp,weightDn);
   }
 }
