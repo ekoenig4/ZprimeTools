@@ -15,12 +15,12 @@ public :
   static const bool applyPU = true;
   static const bool applySF = true;
   static const bool applyKF = true;
-  static const int nHisto = 22;
+  static const int nHisto = 11;
   static const int bHisto = 10;
   
   //CR variables
   int lepindex;
-  double lepton_pt,Recoil;
+  float lepton_pt,Recoil;
   
   //CR histograms
   TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
@@ -35,8 +35,9 @@ public :
   virtual vector<int> electron_veto_looseID(int jet_index, int mu_index,float elePtCut);
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
+  virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(int nhist,double start_weight,function<bool()> cut = [](){ return true; });
+  virtual void JetEnergyScale(double start_weight);
 };
 
 #endif
