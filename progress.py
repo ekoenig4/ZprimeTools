@@ -7,6 +7,7 @@ user = 'ekoenig4'
 parser = OptionParser()
 parser.add_option("-r","--resubmit",help="resubmit condor jobs that didn't produce output files",action="store_true",default=False)
 parser.add_option("-v","--verbose",help="print all files being checked",action="store_true",default=False)
+parser.add_option("--remove",help="remove all running condor jobs",action="store_true",default=False)
 
 (options,args) = parser.parse_args()
 cwd = os.getcwd()
@@ -30,6 +31,7 @@ def printOutput(condor,status,incomplete,nfiles,space=3):
         print condor+" "*(space+4-len(condor)),
         #STATUS
         if incomplete == 0: print "DONE  "+"   ",
+        elif incomplete == -1: print    "REMOVE"+"   ",
         elif status['jobs'] == 0: print "FAIL  "+"   ",
         else: print "RUN   "+"   ",
         #RUN
@@ -59,9 +61,12 @@ def printOutput(condor,status,incomplete,nfiles,space=3):
     elif state == 2:
         print "Total:",status['jobs'],"jobs;",status['completed'],"completed,",status['removed'],"removed,",
         print status['idle'],"idle,",status['running'],"running,",status['held'],"held,",status['suspended'],"suspended"
-
+def removeProcess(cluster):
+    condor_rm = subprocess.Popen(['condor_rm',cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        
 def check(dir):
     global state
+    state = 0
     print dir
     os.chdir(dir+'/.output/')
     condor = [file for file in os.listdir('.') if 'condor_' in file]
@@ -94,6 +99,9 @@ def check(dir):
                 finished = False
         status = {'jobs':0,'completed':0,'removed':0,'idle':0,'running':0,'held':0,'suspended':0}
         if incomplete != 0:
+            if options.remove:
+                removeProcess(cluster)
+                incomplete = -1
             condor_q = subprocess.Popen(['condor_q','-s',user,cluster],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
             stdout, stderr = condor_q.communicate()
             info = [ line for line in stdout.split('\n') if "jobs;" in line ]
