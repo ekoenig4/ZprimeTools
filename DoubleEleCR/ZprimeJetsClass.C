@@ -286,7 +286,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("recoil",&Recoil,"Recoil (GeV)");
+  tree->Branch("h_recoil",&Recoil,"Recoil (GeV)");
 }
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
