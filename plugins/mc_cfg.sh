@@ -62,8 +62,8 @@ GJETS() {
     ${1} $MC/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT100-200/190515_214007/0000/ postGJets100to200_0.root -1 10000 GJets100_0 split_-1
     ${1} $MC/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT100-200/190515_214007/0001/ postGJets100to200_1.root -1 10000 GJets100_0 split_-1
 
-    ${1} $MC/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT200-400/190509_235511/0000/ postGJet200to400_0.root -1 10000 GJets200_0 split_-1
-    ${1} $MC/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT200-400/190509_235511/0001/ postGJet200to400_1.root -1 10000 GJets200_1 split_-1
+    ${1} $MC/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT200-400/190509_235511/0000/ postGJets200to400_0.root -1 10000 GJets200_0 split_-1
+    ${1} $MC/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT200-400/190509_235511/0001/ postGJets200to400_1.root -1 10000 GJets200_1 split_-1
 
     ${1} $MC/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/crab_job_GJets_HT400-600/190515_214055/0000/ postGJets400to600.root -1 10000 GJets400_0 split_-1
 
