@@ -7,6 +7,7 @@ from samplenames import samplenames
 from array import array
 import mergeFiles as merge
 import changeBinning as binning
+from Process import Process
 
 def getargs():
     parser = OptionParser()
@@ -21,6 +22,24 @@ def getargs():
     parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
     parser.add_option("-b","--binning",help="specify function for rebinning histogram",action="store",type="str",default=None)
     return parser.parse_args()
+
+def GetRegion():
+    preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
+    postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
+    RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
+    
+    region=None
+    for i,region in enumerate(RegionName):
+        if path.isfile(postRegionData[i]): break;
+        if region == None:
+            for i,region in enumerate(RegionName):
+                if any(f for f in listdir('.output') if preRegionData[i] in f): region=region; break
+    if region==None:print "No Region Data Files Found, Exiting...";exit()
+    return region
+def GetMCxsec(filenames,xsecMap):
+    return { fname:xsecMap[fname] for fname in filenames }
+def IsSignal(signal):
+    return 'Mx' in signal and '_Mv' in signal
 
 class datamc(object):
 
@@ -37,6 +56,7 @@ class datamc(object):
         self.xsec = mc.xsec
 
         self.variable = None
+        self.varname = None
         self.options,self.args = getargs()
         
         #Luminosity
@@ -50,9 +70,16 @@ class datamc(object):
         
         #List of Signal Files and Xsec
         
-        self.Mx_Mv = {}
+        self.Mx_Mv_Files = []
         self.Mx_Mv_Xsec = {}
         self.signal=None
+        self.processes = {}
+        self.nuisances = []
+
+        self.region = GetRegion()
+        if (type(self.lumi) == dict):
+            self.lumi = self.lumi[self.region]
+            self.lumi_by_era = self.lumi_by_era[self.region]
         
         #List of Region Data Files
         SignalData_FileNames = "postMETdata";
@@ -63,94 +90,42 @@ class datamc(object):
 
         self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
         
-        #List of Sample Files
-        
-        self.MC_Info= {
-            "WJets":
-            {
-                'fname':mc.WJets_FileNames,
-                TColor:kRed-10,
-                int:0
-            },
-            "ZJets":
-            {
-                'fname':mc.ZJets_FileNames,
-                TColor:kAzure+10,
-                int:0
-            },
-            "GJets":
-            {
-                'fname':mc.GJets_FileNames,
-                TColor:kGray+2,
-                int:0
-            },
-            "DYJets":
-            {
-                'fname':mc.DYJets_FileNames,
-                TColor:kTeal-9,
-                int:0
-            },
-            "TTJets":
-            {
-                'fname':mc.TTJets_FileNames,
-                TColor:kOrange-2,
-                int:0
-            },
-            "DiBoson":
-            {
-                'fname':mc.DiBoson_FileNames,
-                TColor:kCyan-10,
-                int:0
-            },
-            "QCD":
-            {
-                'fname':mc.QCD_FileNames,
-                TColor:kGray,
-                int:0
-            }
-        };
-        self.BkgIntegral = 0
-
-        self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
-
-        preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
-        postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
-        RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
-
-        self.region=None
-        for i,region in enumerate(RegionName):
-            if path.isfile(postRegionData[i]): self.region=region; break;
-        if self.region == None:
-            for i,region in enumerate(RegionName):
-                if any(f for f in listdir('.output') if preRegionData[i] in f): self.region=region; break
-        if self.region==None:print "No Region Data Files Found, Exiting...";exit()
-        if (type(self.lumi) == dict):
-            self.lumi = self.lumi[self.region]
-            self.lumi_by_era = self.lumi_by_era[self.region]
-            
         self.Data_FileName = self.Data_FileNames[self.region]
+        #List of Sample Files
+        self.SampleList = ["Data","WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
+        self.MCList = ["WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
+
+        self.processes["Data"] =    Process("Data",  [self.Data_FileName],None                                 ,  'data')
+        self.processes["WJets"] =   Process("WJets",  mc.WJets_FileNames,  GetMCxsec(mc.WJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kRed-10)
+        self.processes["ZJets"] =   Process("ZJets",  mc.ZJets_FileNames,  GetMCxsec(mc.ZJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kAzure+10)
+        self.processes["GJets"] =   Process("GJets",  mc.GJets_FileNames,  GetMCxsec(mc.GJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kGray+2)
+        self.processes["DYJets"] =  Process("DYJets", mc.DYJets_FileNames, GetMCxsec(mc.DYJets_FileNames,mc.xsec), 'bkg',lumi=self.lumi,color=kTeal-9)
+        self.processes["TTJets"] =  Process("TTJets", mc.TTJets_FileNames, GetMCxsec(mc.TTJets_FileNames,mc.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
+        self.processes["DiBoson"] = Process("DiBoson",mc.DiBoson_FileNames,GetMCxsec(mc.DiBoson_FileNames,mc.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
+        self.processes["QCD"] =     Process("QCD",    mc.QCD_FileNames,    GetMCxsec(mc.QCD_FileNames,mc.xsec),    'bkg',lumi=self.lumi,color=kGray)
+            
         if self.region == "SignalRegion" and self.options.signal != None:
-            self.getSignalXsec()
-            if self.options.signal == "-1":
-                self.signal = []
-                mxList = self.Mx_Mv.keys();mxList.sort(key=int);
-                for mx in mxList:
-                    mvList = self.Mx_Mv[mx].keys();mvList.sort(key=int)
-                    for mv in mvList:
-                        self.signal.append("Mx"+mx+"_Mv"+mv)
-            elif "Mx" in self.options.signal and "_Mv" in self.options.signal: self.signal = [self.options.signal];
+            self.signal = self.options.signal
+            self.getSignalInfo()
+            self.SampleList.insert(1,'Signal')
+            if self.options.signal == '-1':
+                self.processes['Signal'] = Process('Signal',self.Mx_Mv_Files,self.Mx_Mv_Xsec,'signal',lumi=self.lumi)
+            elif IsSignal(self.options.signal):
+                signal = self.options.signal
+                self.processes['Signal'] = Process(signal,['post'+signal],{'post'+signal:self.Mx_Mv_Xsec['post'+signal]},'signal',lumi=self.lumi)
         if self.show:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
         if (self.options.allHisto):
-            self.GetAllHisto()
+            self.getAllHisto()
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
     def HaddFiles(self):
-        if not path.isdir('.output/'): return
+        if self.options.nohadd: return
         if getcwd() != self.fileDir: chdir(self.fileDir)
+        if not path.isdir('.output/'): return
         def validfile(fname): return path.isfile(fname)
         mcfiles = [ mcfname for mcfname in self.xsec if not validfile(mcfname+'.root') ]
         datafiles = []
@@ -164,41 +139,74 @@ class datamc(object):
             if not validfile(self.Data_FileName+'.root'): datafiles = self.Data_FileName
         ##########
         if self.signal != None:
-            for mx in sorted(self.Mx_Mv,key=int):
-                for mv in sorted(self.Mx_Mv[mx],key=int):
-                    if not validfile(self.Mx_Mv[mx][mv]+'.root'):
-                        mcfiles.append(self.Mx_Mv[mx][mv])
+            for fname in self.Mx_Mv_Files:
+                if not validfile(fname+'.root'):
+                    mcfiles.append(fname)
         ##########
         merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
+
+    def output(self):
+        prompt = 'integral of %s: %s'
+        ntemp = '{0:<15}'; itemp = '{0:<8}'
+        print prompt % ( ntemp.format('Data'),itemp.format( '%.6g' % self.processes['Data'].raw_total ) )
+        if 'Signal' in self.processes:
+            process = self.processes['Signal']
+            for signal in process:
+                print prompt % ( ntemp.format(signal.name),itemp.format( '%.6g' % signal.scaled_total ) )
+        for sample in sorted(self.MCList,key=lambda sample: self.processes[sample].scaled_total,reverse=True):
+            process = self.processes[sample]
+            print prompt % ( ntemp.format(sample),itemp.format( '%.6g' % process.scaled_total ) ),'| %.4g%%' % (100*process.scaled_total/self.BkgIntegral)
+    ###############################################################################################################
+
+    def getBinning(self):
+        hs = None
+        if self.options.binning == None: return None
+        elif 'perc' in self.options.binning:
+            nbins = self.options.binning.replace('perc','')
+            hs = binning.percentBinning(nbins=int(nbins))
+            if hs != None: self.varname += 'perc'+nbins
+        return hs
+    ###############################################################################################################
             
     def initiate(self,variable):
-        self.variable = variable
-        self.GetVariable(variable)
-        self.ScaleHistogram()
+        if getcwd() != self.fileDir: chdir(self.fileDir)
+        self.cut = ''
+        if '>' in variable: self.cut = '>'+variable.split('>')[-1]
+        if '<' in variable: self.cut = '<'+variable.split('<')[-1]
+        self.varname = variable.replace('>','+').replace('<','-')
+        self.variable = variable.replace(self.cut,'')
+        self.getVariableName(variable)
+        b_template = self.getBinning()
+        for sample in self.SampleList:
+            process = self.processes[sample]
+            process.getVariable(self.variable,b_template,self.cut)
+            self.nuisances += [ nuisance for nuisance in process.nuisances if nuisance not in self.nuisances ]
+        self.BkgIntegral = sum( process.scaled_total for name,process in self.processes.iteritems() if process.proctype == 'bkg' )
+        if self.show: self.output()
+        if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
         
     def getSumOfBkg(self):
-        sumOfBkg = self.histo["WJets"].Clone()
-        for mc in self.MC_Info:
-            if (mc != "WJets"):
-                sumOfBkg.Add(self.histo[mc])
+        sumOfBkg = self.processes['WJets'].histo.Clone('sumOfBkg')
+        sumOfBkg.Reset()
+        for name,process in self.processes.iteritems():
+            if process.proctype == 'bkg':
+                sumOfBkg.Add(process.histo)
         return sumOfBkg
     ###############################################################################################################
 
-    def getSignalXsec(self,scale=1):
+    def getSignalInfo(self,scale=1):
         from monoZprime_XS import signalxsec
         for data in signalxsec:
             fn="post"+data
             xsec=signalxsec[data]
-            mx=data.split("_")[0].replace("Mx","")
-            mv=data.split("_")[1].replace("Mv","")
-            if not mx in self.Mx_Mv:self.Mx_Mv[mx]={};self.Mx_Mv_Xsec[mx]={}
-            self.Mx_Mv[mx][mv]=fn; self.Mx_Mv_Xsec[mx][mv]=xsec*scale;
+            self.Mx_Mv_Files.append(fn)
+            self.Mx_Mv_Xsec[fn] = scale*xsec
     ###############################################################################################################
 
-    def GetAllHisto(self):
+    def getAllHisto(self):
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
         rfile=TFile.Open(self.Data_FileName+".root")
@@ -209,7 +217,7 @@ class datamc(object):
                 self.args.append(key.GetName())
     ###############################################################################################################
 
-    def GetVariableName(self,variable):
+    def getVariableName(self,variable):
         self.name = 'Xaxis Title'
         for title in samplenames:
             if title in variable:
@@ -220,254 +228,11 @@ class datamc(object):
                 break
     ###############################################################################################################
 
-    def GetPlot(self,fname,variable):
-        rfile=TFile.Open(fname)
-        cutflow = self.GetCutflow(fname,rfile=rfile)
-        if '<' in variable or '>' in variable:
-            if '>' in variable: cut = '>'+variable.split('>')[-1]
-            if '<' in variable: cut = '<'+variable.split('<')[-1]
-            variable = variable.replace(cut,'')
-            nhist = variable.split("_")[-1]
-            rdir = rfile.GetDirectory('ZprimeJets_'+nhist+'/')
-            hs = self.GetBranch(fname,variable,rdir=rdir,cut=cut)
-        else:
-            if any( variable == key.GetName() for key in rfile.GetListOfKeys() ):
-                hs = self.GetGlobalHisto(fname,variable,rfile=rfile)
-            else:
-                nhist = variable.split("_")[-1]
-                rdir = rfile.GetDirectory('ZprimeJet_'+nhist+'/')
-                if self.options.binning == None: hs = self.GetCutHisto(fname,variable,rdir=rdir)
-                else:                            hs = None
-                if any( key.GetName() == 'tree' for key in rdir.GetListOfKeys() ):
-                    tree = rdir.Get("tree")
-                    hs = self.GetBranch(fname,variable,tree=tree,hs=hs)
-        return hs,cutflow
-    ###############################################################################################################
-    
-    def GetCutflow(self,fname,rfile=None):
-        if rfile == None: rfile=TFile.Open(fname)
-        rfile.cd()
-        cutflow=rfile.Get("h_cutflow").Clone();cutflow.SetDirectory(0)
-        return cutflow
-    ###############################################################################################################
-
-    def GetGlobalHisto(self,fname,variable,rfile=None):
-        if rfile == None: rfile=TFile.Open(fname)
-        rfile.cd()
-        hs = rfile.Get(variable).Clone("temp"); hs.SetDirectory(0)
-        return hs
-    ###############################################################################################################
-
-    def GetCutHisto(self,fname,variable,rfile=None,rdir=None,name='temp'):
-        nhist = variable.split("_")[-1]
-        if rdir == None:
-            if rfile == None: rfile = TFile.Open(fname)
-            rfile.cd()
-            rdir = rfile.GetDirectory("ZprimeJet_"+nhist+"/")
-        #####
-        rdir.cd()
-        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-        if variable in keys:hs=rdir.Get(variable).Clone(name);hs.SetDirectory(0)
-        else:               hs=None
-        return hs
-    ###############################################################################################################
-
-    def GetBranch(self,fname,variable,rfile=None,rdir=None,tree=None,hs=None,cut=''):
-        nhist = variable.split("_")[-1]
-        if tree == None:
-            if rdir == None:
-                if rfile == None: rfile = TFile.Open(fname)
-                rfile.cd()
-                rdir = rfile.GetDirectory("ZprimeJet_"+nhist+"/")
-            rdir.cd()
-            tree = rdir.Get('tree')
-        #####
-        b_name = variable.replace("_"+nhist,"")
-        if self.options.binning != None: hs = self.GetBinning()
-        if hs == None: hs = self.GetCutHisto(fname,variable,rdir=rdir)
-        if any( True for key in tree.GetListOfBranches() if b_name == key.GetName() ):
-            hs.SetName('treevar')
-            hs.SetDirectory(gDirectory)
-            hs.Reset()
-            if cut == '': tree.Draw(b_name+">>treevar","weight","goff")
-            else:         tree.Draw(b_name+">>treevar","weight*(%s%s)" % (b_name,cut),"goff")
-            hs.SetDirectory(0)
-        return hs 
-    ###############################################################################################################
-
-    def GetBinning(self):
-        hs = None
-        if 'perc' in self.options.binning:
-            nbins = self.options.binning.replace('perc','')
-            hs = binning.percentBinning(nbins=int(nbins))
-            if 'perc' not in self.variable: self.variable += self.options.binning
-        return hs
-    ###############################################################################################################
-                      
-    def GetVariable(self,variable):
-        if getcwd() != self.fileDir: chdir(self.fileDir)
-        self.histo = {}
-        self.total = {}
-
-        self.GetVariableName(variable)
-
-        hs,cutflow = self.GetPlot(self.Data_FileName+".root",variable)
-        self.histo['Data'] = hs
-
-        if self.signal != None:
-            for signal in self.signal:
-                mx = signal.split("_")[0].replace("Mx","")
-                mv = signal.split("_")[1].replace("Mv","")
-                hs,cutflow = self.GetPlot(self.Mx_Mv[mx][mv]+".root",variable)
-                self.histo[signal]=hs
-                self.total[signal] = cutflow.GetBinContent(1)
-            if not 'Signal' in self.SampleList:self.SampleList.append('Signal')
-
-        for sample in self.MC_Info:
-            # print sample
-            self.histo[sample]=[]
-            self.total[sample]=[]
-            for fn in self.MC_Info[sample]['fname']:
-                # print '\t',fn
-                if not path.isfile(fn+".root"): continue
-                hs,cutflow = self.GetPlot(fn+".root",variable)
-                hs.SetName(variable+"_"+fn)
-                self.histo[sample].append(hs)
-                self.total[sample].append(cutflow.GetBinContent(1))
-        
-        if (self.name == 'Xaxis Title'):
-            for sample in self.histo:
-                if type(self.histo[sample]) == TH1:
-                    self.name = self.histo[sample].GetXaxis().GetTitle()
-        if getcwd() != self.cwd: chdir(self.cwd)
-    ###############################################################################################################
-
-    def ScaleHistogram(self):
-        self.BkgIntegral = 0
-        for sample in self.SampleList:
-            if sample == 'Data':
-                if self.histo[sample] == None: continue
-                integral=(self.histo[sample].Integral())
-                space=" "*(15-len(sample))
-                if self.show:print "integral of "+sample+space+" here:"+"%.6g" % integral
-            elif sample == 'Signal':
-                for signal in self.signal:
-                    if self.histo[signal] == None: continue
-                    mx = signal.split("_")[0].replace("Mx","")
-                    mv = signal.split("_")[1].replace("Mv","")
-                    #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-                    scale=(1./self.total[signal])*self.lumi*self.Mx_Mv_Xsec[mx][mv] 
-                    self.histo[signal].Scale(scale)
-                    integral=(self.histo[signal].Integral())
-                    space=" "*(15-len(signal))
-                    if self.show:print "integral of "+signal+space+" here:"+"%.6g" % integral
-            else:
-                # print sample,'raw','total','xsec','lumi','scaled'
-                if self.histo[sample] == None: continue
-                rawevents = 0
-                for i in range(len(self.histo[sample])):
-                    if self.MC_Info[sample]['fname'] == "null":continue
-                    #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-                    rawevents = self.histo[sample][i].Integral()
-                    if (self.total[sample][i] == 0): scale = 0
-                    else:                            scale=(1./self.total[sample][i])*self.lumi*self.xsec[self.MC_Info[sample]['fname'][i]]
-                    self.histo[sample][i].Scale(scale)
-                    # print self.MC_Info[sample]['fname'][i],rawevents,self.total[sample][i],self.xsec[self.MC_Info[sample]['fname'][i]],self.lumi,self.histo[sample][i].Integral()
-                if (len(self.histo[sample]) > 0):
-                    for i in range(1,len(self.histo[sample])): self.histo[sample][0].Add(self.histo[sample][i])
-                    self.histo[sample]=self.histo[sample][0]
-                    self.histo[sample].SetName(self.histo[sample].GetName().replace(self.MC_Info[sample]['fname'][0],sample))
-                    integral=(self.histo[sample].Integral())
-                    # print 'summed',integral
-                    self.MC_Info[sample][int]=integral
-                    self.BkgIntegral += integral
-
-        if self.show:
-            bkgInt = {}
-            for sample in self.MC_Info:bkgInt[str(self.MC_Info[sample][int])]=sample
-            keylist = bkgInt.keys();keylist.sort(key=float)
-            for i in keylist[::-1]:
-                sample = bkgInt[i]
-                integral = self.MC_Info[sample][int]
-                percentage = 100*integral/self.BkgIntegral
-                space1=" "*(15-len(sample))
-                space2=" "*(8-len("%.6g" % integral))
-                # print "integral of raw"+sample+space+" here:"+"%.6g" % rawevents
-                print "integral of "+sample+space1+" here:"+"%.6g" % integral+space2+" | "+"%.4g" % percentage+"%"
-    ########################################################################################################################################
-
-    def setUnc(self,up,dn):
-        if getcwd() != self.fileDir: chdir(self.fileDir)
-        self.unc = {}
-        for sample in self.MC_FileNames:
-            self.unc[sample]={'up':{},'dn':{}}
-            unc_key = ['up','dn']
-            for i,varlist in enumerate((up,dn)):
-                if varlist == None: continue
-                for variable in varlist:
-                    self.unc[sample][unc_key[i]][variable] = []
-                    for j,fn in enumerate(self.MC_Info[sample]['fname']):
-                        if not path.isfile(fn+".root"): continue
-                        rfile=TFile.Open(fn+".root")
-                        keys = [keylist.GetName() for keylist in gDirectory.GetListOfKeys()]
-                        if variable in keys:hs=rfile.Get(variable).Clone();hs.SetDirectory(0)
-                        else:print "Could not find "+variable+" In "+fn+".root, Exiting...";exit()
-                        hs.SetName(variable+"_"+fn)
-                        self.unc[sample][unc_key[i]][variable].append(hs)
-
-                    for j,hs in enumerate(self.unc[sample][unc_key[i]][variable]):
-                        if self.MC_Info[sample]['fname'] == "null":continue
-                        #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-                        # print self.MC_Info[sample]['fname'][i],self.total[sample][i],xsec[self.MC_Info[sample]['fname'][i]]
-                        if (self.total[sample][j] == 0): scale = 0
-                        else:                            scale=(1./self.total[sample][j])*self.lumi*self.xsec[self.MC_Info[sample]['fname'][j]]
-                        hs.Scale(scale)
-                    if any(self.unc[sample][unc_key[i]][variable]):
-                        for j in range(1,len(self.unc[sample][unc_key[i]][variable])): self.unc[sample][unc_key[i]][variable][0].Add(self.unc[sample][unc_key[i]][variable][j])
-                        self.unc[sample][unc_key[i]][variable]=self.unc[sample][unc_key[i]][variable][0]
-                        self.unc[sample][unc_key[i]][variable].SetName(self.unc[sample][unc_key[i]][variable].GetName().replace(self.MC_Info[sample]['fname'][0],sample))
-                    # if self.MC_Info[sample][int] != 0:
-                    #     print unc_key[i],sample,'\t|',
-                    #     print (self.unc[sample][unc_key[i]][variable].Integral()/self.MC_Info[sample][int])
-        if getcwd() != self.cwd: chdir(self.cwd)
-    ########################################################################################################################################
-
-    def getUnc(self):
-        hs_bkg = self.getSumOfBkg()
-        xbins = hs_bkg.GetNbinsX()
-        hs_up = hs_bkg.Clone(); hs_dn = hs_bkg.Clone()
-        for ibin in range(1,xbins+1):
-            content_up = []; content_dn = [];
-            for sample in self.unc:
-                bin_bk = self.histo[sample].GetBinContent(ibin)
-                for u in self.unc[sample]:
-                    for variable in self.unc[sample][u]:
-                        bin_un = self.unc[sample][u][variable].GetBinContent(ibin)
-                        if bin_un > bin_bk: content_up.append(bin_un - bin_bk)
-                        else:               content_dn.append(bin_bk - bin_un)
-            bin_up = sum(bin**2 for bin in content_up)**0.5
-            bin_dn = sum(bin**2 for bin in content_dn)**0.5
-            bin_bk = hs_bkg.GetBinContent(ibin)
-            hs_up.SetBinContent(ibin,bin_bk + bin_up)
-            hs_dn.SetBinContent(ibin,bin_bk - bin_dn)
-        return hs_up,hs_dn
-    ########################################################################################################################################
-
-    def getStackUnc(self):
-        hs_up = []; hs_dn = []
-        for i in range(len(self.unc['WJets']['up'])):
-            var_up = self.unc['WJets']['up'].keys()[i]
-            var_dn = self.unc['WJets']['dn'].keys()[i]
-            hs_up.append(THStack())
-            hs_dn.append(THStack())
-            for sample in self.unc:
-                sample_up = self.unc[sample]['up'][var_up].Clone()
-                sample_up.SetLineColor(kBlue)
-                sample_dn = self.unc[sample]['dn'][var_dn].Clone()
-                sample_dn.SetLineColor(kRed)
-                hs_up[i].Add(sample_up)
-                hs_dn[i].Add(sample_dn)
-        return hs_up,hs_dn
+    def addUnc(self,nuisance):
+        if nuisance not in self.nuisances: return
+        for name,process in self.processes.iteritems():
+            if process.proctype == 'data': continue
+            process.addUnc(nuisance)
 ######################################################################    
 
             
