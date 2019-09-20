@@ -15,21 +15,21 @@ outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
 dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/":"e","SingleMuCR/":"m"}
 
-def GetWZLinking(rfile):
+def GetZWLinking(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
     rfile.cd(); rfile.cd('sr')
     lhistos = {}
-    keylist = [ key.GetName().replace('WJets','WZlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
+    keylist = [ key.GetName().replace('WJets','ZWlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
     wjet_norm = gDirectory.Get('WJets')
     zjet_norm = gDirectory.Get('ZJets')
-    lhistos['WZlink'] = GetRatio(wjet_norm,zjet_norm).Clone('WZlink')
+    lhistos['ZWlink'] = GetRatio(wjet_norm,zjet_norm).Clone('ZWlink')
     for key in keylist:
         wkey = '%s_WJets' % key; zkey = '%s_ZJets' % key
-        wjet_unc = gDirectory.Get(key.replace('WZlink','WJets'))
-        zjet_unc = gDirectory.Get(key.replace('WZlink','ZJets'))
-        lhistos[wkey] = GetRatio(wjet_unc,zjet_norm).Clone(wkey)
-        lhistos[zkey] = GetRatio(wjet_norm,zjet_unc).Clone(zkey)
-    rfile.cd(); rfile.mkdir('sr/wzlink'); rfile.cd('sr/wzlink')
+        wjet_unc = gDirectory.Get(key.replace('ZWlink','WJets'))
+        zjet_unc = gDirectory.Get(key.replace('ZWlink','ZJets'))
+        lhistos[wkey] = GetRatio(zjet_norm,wjet_unc).Clone(wkey)
+        lhistos[zkey] = GetRatio(zjet_unc,wjet_norm).Clone(zkey)
+    rfile.cd(); rfile.mkdir('sr/zwlink'); rfile.cd('sr/zwlink')
     for key,hs in lhistos.iteritems():
         hs.Write()
 ##################################################################
@@ -69,6 +69,7 @@ def saveplot(variable):
     if '>' in variable: cut = '>'+variable.split('>')[-1]
     if '<' in variable: cut = '<'+variable.split('<')[-1]
     varname = variable.replace('>','+').replace('<','-')
+    variable = variable.replace(cut,'')
     rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,version) ,'recreate')
     Uncertainty = config['Uncertainty']
     lumi = max( lumi for region,lumi in mc.items() )
@@ -90,38 +91,37 @@ def saveplot(variable):
         data_obs.Write()
         for sample in norm.SampleList:
             if sample == "Signal":
-                for signal in norm.signal:
-                    norm.histo[signal].SetName(signal)
-                    norm.histo[signal].Write()
+                signals = norm.processes['Signal']
+                for signal in signals:
+                    signal.histo.SetName(signal.name)
+                    signal.histo.Write()
             else:
-                norm.histo[sample].SetName(sample)
-                norm.histo[sample].Write()
+                process = norm.processes[sample]
+                process.histo.SetName(sample)
+                process.histo.Write()
         ##############################################
-        sample_unc = { name:unc for name,unc in Uncertainty.items() if not any(unc['region']) or region in unc['region'] }
-        for name,unc in sample_unc.items():
-            for var,info in unc['unc'].items():
-                if config['year'] != 2016 and region == 'SignalRegion/':
-                    info[id] = str( int(info[id])-1 )
-                print '\t',var,
-                input = variable+'_'+str( int(info[id]) + int(nhisto) )+cut
-                norm.initiate( input )
+        for name,nuisances in Uncertainty.iteritems():
+            for nuisance in nuisances:
+                print '\t',nuisance,
+                norm.addUnc(nuisance)
                 directory.cd()
-                sumOfBkg = norm.getSumOfBkg()
-                sumOfBkg.SetName('sumOfBkg_'+var)
-                sumOfBkg.Write()
                 for sample in norm.SampleList:
                     if sample == 'Data': continue
-                    elif sample == "Signal":
-                        for signal in norm.signal:
-                            norm.histo[signal].SetName(signal+'_'+var)
-                            norm.histo[signal].Write()
-                    else:
-                        norm.histo[sample].SetName(sample+'_'+var)
-                        norm.histo[sample].Write()
-                ###############################################################
+                    for variation in ('Up','Down'):
+                        if sample == "Signal":
+                            signals = norm.processes['Signal']
+                            for signal in signals:
+                                signal.nuisances[nuisance][variation].SetName(signal.name+'_'+nuisance+variation)
+                                signal.nuisances[nuisance][variation].Write()
+                        else:
+                            process = norm.processes[sample]
+                            process.nuisances[nuisance][variation].SetName(process.name+'_'+nuisance+variation)
+                            process.nuisances[nuisance][variation].Write()
+                        
+            ###############################################################
             print
     ###########################################################################
-    GetWZLinking(rfile)
+    GetZWLinking(rfile)
     GetTransferFactors(rfile)
     rfile.cd()
     lumi_hs = TH1F("lumi","lumi",1,0,1)

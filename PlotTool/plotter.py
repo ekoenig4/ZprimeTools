@@ -14,13 +14,13 @@ def HigherDimension(samples,variable):
     samples.initiate(variable[:-1])
     if (axis in ('x','y','z')):
         samples.name = samples.name[axis]
-    for hs in samples.histo:
+    for name,process in samples.processes.iteritems():
         if axis == "x":
-            samples.histo[hs] = samples.histo[hs].ProjectionX()
+           process.histo = process.histo.ProjectionX()
         if axis == "y":
-            samples.histo[hs] = samples.histo[hs].ProjectionY()
+            process.histo = process.histo.ProjectionY()
         if axis == "z":
-            samples.histo[hs] = samples.histo[hs].ProjectionZ()
+            process.histo = process.histo.ProjectionZ()
             
 ###################################################################
 def DataStyle(hs_data):
@@ -50,17 +50,12 @@ def MCStyle(hs_mc,color):
 ###################################################################
 
 def fillStack(samples,hs_datamc):
-    hs_order = {}
+    order = [ process for name,process in samples.processes.iteritems() if process.proctype == 'bkg' ]
     if (samples.name == "Cutflow"):
-        if samples.region == "SignalRegion":lastBin = 9
-        else:lastBin = 11
-        for key in samples.SampleList:
-            if not (key == "Data" or key == "Signal"):hs_order[str(samples.histo[key].GetBinContent(lastBin))] = key
-    else:
-        for key in samples.MC_Info:hs_order[str(samples.MC_Info[key][int])] = key
-    keylist = hs_order.keys()
-    keylist.sort(key=float)
-    for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
+        nbin = samples.processes['Data'].histo.GetNbinsX()
+        order.sort(key=lambda process: process.histo.GetBinContent(nbin))
+    else: order.sort(key=lambda process: process.scaled_total)
+    for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 
 def getLegend(xmin,ymin,xmax,ymax):
@@ -176,12 +171,14 @@ def plotVariable(samples,variable):
     pad1.SetFillColor(0); pad1.SetFrameBorderMode(0); pad1.SetBorderMode(0);
     pad1.SetBottomMargin(0.);
 
-    DataStyle(samples.histo['Data'])
-    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
+    data = samples.processes['Data']
+    DataStyle(data.histo)
+    if (samples.options.normalize): data.histo.Scale(1/data.total)
 
-    for mc in samples.MC_Info:
-        MCStyle(samples.histo[mc],samples.MC_Info[mc][TColor])
-        if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
+    for mc in samples.MCList:
+        mc_proc = samples.processes[mc]
+        MCStyle(mc_proc.histo,mc_proc.color)
+        if (samples.options.normalize): mc_proc.histo.Scale(1/samples.BkgIntegral)
         
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
@@ -192,24 +189,25 @@ def plotVariable(samples,variable):
     hs_datamc.Draw("HIST")
     StackStyle(hs_datamc,ymin,ymax)
 
-    samples.histo['Data'].Draw('pex0same')
-
+    data.histo.Draw('pex0same')
+    
     if samples.signal != None:
-        samples.histo[samples.signal[0]].SetLineWidth(2)
-        samples.histo[samples.signal[0]].Draw("HIST SAME")
+        signal = samples.processes['Signal']
+        signal[0].histo.SetLineWidth(2)
+        signal[0].histo.Draw("HIST SAME")
 
     #################################################
 
     leg = getLegend(0.62,0.60,0.86,0.887173);
-    leg.AddEntry(samples.histo['Data'],"Data","lp");
-    if (samples.signal != None): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
-    leg.AddEntry(samples.histo['WJets'],"W#rightarrowl#nu","f");
-    leg.AddEntry(samples.histo['DYJets'],"Z#rightarrow ll","F"); 
-    leg.AddEntry(samples.histo['DiBoson'],"WW/WZ/ZZ","F");
-    leg.AddEntry(samples.histo['QCD'], "QCD","F");
-    leg.AddEntry(samples.histo['TTJets'], "Top Quark", "F"); 
-    leg.AddEntry(samples.histo['GJets'],"#gamma+jets", "F"); 
-    leg.AddEntry(samples.histo['ZJets'],"Z#rightarrow#nu#nu","F");
+    leg.AddEntry(data.histo,"Data","lp");
+    if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)   
+    leg.AddEntry(samples.processes['WJets'].histo  ,"W#rightarrowl#nu","f");
+    leg.AddEntry(samples.processes['DYJets'].histo ,"Z#rightarrow ll","F"); 
+    leg.AddEntry(samples.processes['DiBoson'].histo,"WW/WZ/ZZ","F");
+    leg.AddEntry(samples.processes['QCD'].histo    ,"QCD","F");
+    leg.AddEntry(samples.processes['TTJets'].histo , "Top Quark", "F"); 
+    leg.AddEntry(samples.processes['GJets'].histo  ,"#gamma+jets", "F"); 
+    leg.AddEntry(samples.processes['ZJets'].histo  ,"Z#rightarrow#nu#nu","F");
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
@@ -227,7 +225,7 @@ def plotVariable(samples,variable):
 
     ######################################
 
-    Ratio = plot.GetRatio(samples.histo['Data'],hs_datamc.GetStack().Last())
+    Ratio = plot.GetRatio(data.histo,hs_datamc.GetStack().Last())
 
     rymin = 0.3; rymax = 1.7
     RatioStyle(Ratio,rymin,rymax)
@@ -240,7 +238,7 @@ def plotVariable(samples,variable):
 
     ###########################################
 
-    nbins = samples.histo['Data'].GetNbinsX();
+    nbins = data.histo.GetNbinsX();
     xmin = hs_datamc.GetXaxis().GetXmin();
     xmax = hs_datamc.GetXaxis().GetXmax();
     xwmin = xmin;
@@ -266,8 +264,8 @@ def plotVariable(samples,variable):
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
         print directory
-    c.SaveAs(directory+"/datamc_"+samples.variable+".pdf")
-    c.SaveAs(directory+"/datamc_"+samples.variable+".png")
+    c.SaveAs(directory+"/datamc_"+samples.varname+".pdf")
+    c.SaveAs(directory+"/datamc_"+samples.varname+".png")
 ###################################################################
     
 def plotter():

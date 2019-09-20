@@ -2,29 +2,31 @@ config = {
     'year':2016,
     'regions':{'SignalRegion/':'8','SingleEleCR/':'10','SingleMuCR/':'10','DoubleEleCR/':'10','DoubleMuCR/':'10'},
     'Uncertainty':{
-        'pfu': {
-            dir:'PFUncertainty/',
-            'region':[],
-            'unc':{ # ID is relative to the regions basic histogram number
-                'trackerUp'  :{id:'1'},'ecalUp'  :{id:'2'},'hcalUp'  :{id:'3'},
-                'trackerDown':{id:'4'},'ecalDown':{id:'5'},'hcalDown':{id:'6'}
-            }
-        },
-        'jes': {
-            dir:'JetEnergyScale/',
-            'region':[],
-            'unc': { # ID is relative to the regions basic histogram number
-                'jesUp':{id:'7'},
-                'jesDown':{id:'8'}
-            }
-        },
-        'ewk': {
-            dir:'JetEnergyScale/',
-            'region':[],
-            'unc': { # ID is relative to the regions basic histogram number
-                'ewkUp':{id:'9'},
-                'ewkDown':{id:'10'}
-            }
-        },
+        'PFU': [ # ID is relative to the regions basic histogram number
+            'PFU_tracker',
+            'PFU_ecal',
+            'PFU_hcal'
+        ],
+        'JES': [
+            'JES'
+        ],
+        'QCD': [
+            "QCD_LO",
+            "QCD_K_LO",
+            "QCD_d1K_LO",
+            "QCD_d2K_LO",
+            "QCD_K_NLO",
+            "QCD_d1K_NLO",
+            "QCD_d2K_NLO",
+            "QCD_d3K_NLO",
+            "QCD_kappa_NLO_EW",
+            "QCD_kappa_NNLO_Sud",
+            "QCD_kappa_EW",
+            "QCD_d1kappa_EW",
+            "QCD_d2kappa_EW",
+            "QCD_d3kappa_EW",
+            "QCD_dK_NLO_mix",
+            "QCD_gammaind_LO"
+        ],
     }
 }
