@@ -27,14 +27,13 @@ def GetRegion():
     preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
     postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
     RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
-    
-    region=None
-    for i,region in enumerate(RegionName):
-        if path.isfile(postRegionData[i]): break;
-        if region == None:
-            for i,region in enumerate(RegionName):
-                if any(f for f in listdir('.output') if preRegionData[i] in f): region=region; break
-    if region==None:print "No Region Data Files Found, Exiting...";exit()
+
+    found = False
+    for region,pre,post in zip(RegionName,preRegionData,postRegionData):
+        if path.isdir('.output/'):
+            if any( pre in fname for fname in listdir('.output/') ): found = True; break
+        if path.isfile(post): found = True; break
+    if not found: print "No Region Data Files Found, Exiting...";exit()
     return region
 def GetMCxsec(filenames,xsecMap):
     return { fname:xsecMap[fname] for fname in filenames }
@@ -127,7 +126,7 @@ class datamc(object):
         if getcwd() != self.fileDir: chdir(self.fileDir)
         if not path.isdir('.output/'): return
         def validfile(fname): return path.isfile(fname)
-        mcfiles = [ mcfname for mcfname in self.xsec if not validfile(mcfname+'.root') ]
+        mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
         datafiles = []
         if self.region != 'SignalRegion': datafiles = [ self.Data_FileName+"_"+str(i)
                                                         for i,e in enumerate(sorted(self.lumi_by_era.keys()))
