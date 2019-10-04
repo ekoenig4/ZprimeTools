@@ -56,6 +56,7 @@ private:
       this->up = up;
       this->dn = dn;
     }
+    float getBin(float x) { return histo->GetBinContent( histo->GetXaxis()->FindBin(x) ); }
   };
   map<string,ScaleUnc*> uncmap;
 public:
@@ -68,6 +69,7 @@ public:
     tree->Branch( (name+"Down").c_str(),&uncmap[name]->dn, (name+"Down").c_str());
   }
   TH1F* getHisto(string name) { return uncmap[name]->histo; }
+  float getBin(string name, float x) { return uncmap[name]->getBin(x); }
   void setUnc(string name,float up,float dn) { uncmap[name]->setUnc(up,dn); }
   bool contains(string name) { return uncmap.find(name) != uncmap.end(); }
 };

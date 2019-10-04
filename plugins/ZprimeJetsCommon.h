@@ -70,8 +70,13 @@ public :
     bool isW_or_ZJet();
   } sample;
   
-  TH1D *PU,*ewkCorrection,*NNLOCorrection;
-
+  struct HistoCollection : public map<string,TH1F*> {
+    float getBin(string name,float x) {
+      TH1F* histo = (*this)[name];
+      return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
+    }
+  } histomap;
+  
   ScaleUncCollection* scaleUncs;
   ShapeUncCollection* shapeUncs;
   
