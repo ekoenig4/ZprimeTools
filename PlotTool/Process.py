@@ -80,8 +80,8 @@ class SubProcess(object):
         return self.raw_total != 0
     def scale(self,lumi):
         #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-        self.scale = (1./self.cutflow) * self.xsec * lumi
-        self.histo.Scale(self.scale)
+        self.scaling = (1./self.cutflow) * self.xsec * lumi
+        self.histo.Scale(self.scaling)
         self.scaled_total = self.histo.Integral()
     def addUnc(self,nuisance,cut):
         if nuisance not in self.nuisances:
@@ -99,7 +99,7 @@ class SubProcess(object):
             else:
                 tree = self.tdir.Get(nuisance+variation)
                 hs_unc = GetBranch(b_template,b_variable,tree,'weight',cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
-            hs_unc.Scale(self.scale)
+            hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
     
 class Process(object):
