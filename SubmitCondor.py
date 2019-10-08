@@ -9,7 +9,13 @@ if not path.isdir(".output/"): mkdir(".output/")
 #Where all condor output, log, and error files go
 if not path.isdir(".status/"): mkdir(".status/")
 
+if not path.isdir(argv[2]):
+    print "%s is not a directory" % argv[2]
+    exit()
 rootFiles = [fn.replace(".root","") for fn in listdir(argv[2]) if fn.endswith(".root")];
+if not any(rootFiles):
+    print "%s does not have any root files" % argv[2]
+    exit()
 #Getting file number instead of the entire filename
 dataset="null"
 for i in range(len(rootFiles[0]) - 1, -1,-1): #Loop through filename backwards
@@ -51,7 +57,7 @@ elif (len(argv) == 9):
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 30
+    nfile_per_batch = 20
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
