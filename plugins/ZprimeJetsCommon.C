@@ -165,6 +165,7 @@ void ZprimeJetsCommon::getPt123Frac() {
 	hadronPt[j] += j1PFConsPt.at(i);
       }
   }
+  l_jetPt = jetPt->at(jetCand[0]);
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
   PtRawFrac = Pt123/jetRawPt->at(jetCand[0]);
   ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(hadronPt[1]+hadronPt[2]);
@@ -262,7 +263,6 @@ vector<int> ZprimeJetsCommon::getJetCand(double jetPtCut, double jetEtaCut, doub
     if((*jetPFLooseId)[p]==1 && kinematic)
       tmpCand.push_back(p);
   }
-
   return tmpCand;
 }
 
