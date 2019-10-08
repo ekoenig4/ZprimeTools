@@ -217,6 +217,8 @@ void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
   tree->Branch("h_recoil",&pfMET,"Recoil (GeV)");
+  tree->Branch("jetPt",&l_jetPt,"Leading Jet P_{T} (GeV)");
+  tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
 }
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
