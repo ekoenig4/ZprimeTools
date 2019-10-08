@@ -9,7 +9,13 @@ if not path.isdir(".output/"): mkdir(".output/")
 #Where all condor output, log, and error files go
 if not path.isdir(".status/"): mkdir(".status/")
 
+if not path.isdir(argv[2]):
+    print "%s is not a directory" % argv[2]
+    exit()
 rootFiles = [fn.replace(".root","") for fn in listdir(argv[2]) if fn.endswith(".root")];
+if not any(rootFiles):
+    print "%s does not have any root files" % argv[2]
+    exit()
 #Getting file number instead of the entire filename
 dataset="null"
 for i in range(len(rootFiles[0]) - 1, -1,-1): #Loop through filename backwards
