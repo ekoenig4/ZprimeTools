@@ -65,7 +65,7 @@ void ZprimeJetsCommon::PSWeights(double event_weight) {
     string name = uncname + psw_uncs[i];
     float weightUp = event_weight;
     float weightDn = event_weight;
-    if ( !sample.isData ) {
+    if ( !sample.isData && !sample.isSignal ) {
       if ( i < 2 ) {
 	weightUp *= psWeight->at(2 + i);
 	weightDn *= psWeight->at(2 + i + 2);

@@ -39,19 +39,24 @@ public :
 
   static const bool debug = true;
   static const bool applyPU = true;
-  enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
+  enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
     bool isInclusive;
     bool isData;
+    bool isSignal;
     int PID;
     DataMC(){}
     DataMC(string filename);
     bool isW_or_ZJet();
   } sample;
-
-  TH1D *PU,*ewkCorrection,*NNLOCorrection;
-
+  
+  struct HistoCollection : public map<string,TH1F*> {
+    float getBin(string name,float x) {
+      TH1F* histo = (*this)[name];
+      return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
+    }
+  } histomap;
   ScaleUncCollection* scaleUncs;
   ShapeUncCollection* shapeUncs;
   
