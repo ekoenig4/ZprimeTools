@@ -175,6 +175,7 @@ class Process(object):
         tfile = iter(self).next().tfile
         dirname,_ = GetDirname(variable)
         tdir = tfile.Get(dirname)
+        if 'h_recoil' in variable: variable = variable.replace('h_recoil','pfMET')
         self.b_template = tdir.Get(variable)
     def getBranch(self,variable,b_template,cut):
         self.isBranch = True
