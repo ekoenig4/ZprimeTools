@@ -18,8 +18,8 @@ cmsrel CMSSW_10_2_10
 cd CMSSW_10_2_10/src
 cmsenv
 voms-proxy-init --voms=cms --valid=192:00
-git clone -b 2017 https://github.com/ekoenig4/ZprimeTools.git ZprimeJets2017
-cd ZprimeJets2017
+git clone -b 2017 https://github.com/ekoenig4/ZprimeTools.git ZprimeTools2017
+cd ZprimeTools2017
 make
 ```
 To run locally
