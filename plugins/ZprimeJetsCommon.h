@@ -78,7 +78,7 @@ public :
   vector<int>j1PFConsPID;
   float j1TotConsPt;
 
-  float Pt123Fraction,Pt123,PtRawFrac;
+  float Pt123Fraction,Pt123,PtRawFrac,l_jetPt;
 
   float hadronPt[3];
   
