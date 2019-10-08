@@ -23,6 +23,7 @@ condor_clean:
 	rm -r .status
 
 condor_submit: analyze
+	./signalsubmit.sh
 	./submitDATA.sh
 	./submitMC.sh
 
