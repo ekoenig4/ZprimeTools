@@ -26,7 +26,7 @@ def getargs():
 def GetRegion():
     preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
     postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
-    RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
+    RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
     found = False
     for region,pre,post in zip(RegionName,preRegionData,postRegionData):
@@ -87,7 +87,7 @@ class datamc(object):
         DoubleEleData_FileNames = "postDoubleEle";
         DoubleMuData_FileNames = "postDoubleMu";
 
-        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
+        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEleCR":SingleEleData_FileNames,"SingleMuCR":SingleMuData_FileNames,"DoubleEleCR":DoubleEleData_FileNames,"DoubleMuCR":DoubleMuData_FileNames}
         
         self.Data_FileName = self.Data_FileNames[self.region]
         #List of Sample Files
@@ -165,7 +165,16 @@ class datamc(object):
         elif 'perc' in self.options.binning:
             nbins = self.options.binning.replace('perc','')
             hs = binning.percentBinning(nbins=int(nbins))
+            hs.post = lambda hs: None;
             if hs != None: self.varname += 'perc'+nbins
+        elif 'incl'  == self.options.binning:
+            hs = binning.inclusiveBinning()
+            def AddOverflow(hs):
+                nbins = hs.GetNbinsX()
+                overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
+                hs.SetBinContent(nbins,overflow)
+            hs.post = AddOverflow
+            if hs != None: self.varname += 'incl'
         return hs
     ###############################################################################################################
             
