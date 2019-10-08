@@ -66,23 +66,27 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
     TFile *weights = TFile::Open("RootFiles/PU_Central.root");
-    PU = (TH1D*)weights->Get("pileup");
+    TH1F* PU = (TH1F*)weights->Get("pileup");
+    histomap["PU"] = PU;
     
+    if (sample.isW_or_ZJet()) {
+      //This is the root file with EWK Corrections
+      TFile *file = new TFile("RootFiles/kfactors.root");
+      TH1F *ewkCorrection,*NNLOCorrection;
+      if (sample.type == WJets) {
+	ewkCorrection = (TH1F*)file->Get("EWKcorr/W");
+	NNLOCorrection = (TH1F*)file->Get("WJets_LO/inv_pt");
+      } else {
+	ewkCorrection = (TH1F*)file->Get("EWKcorr/Z");
+	NNLOCorrection = (TH1F*)file->Get("ZJets_LO/inv_pt");
+      }
+      histomap["ewkCorrection"] = ewkCorrection;
+      histomap["NNLOCorrection"] = NNLOCorrection;
+    }
     TFile *f_muSF_ISO = new TFile("RootFiles/RunABCD_SF_ISO.root");
     TFile *f_muSF_ID = new TFile("RootFiles/RunABCD_SF_ID.root");
     h_tightMuSF_ISO = (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
     h_tightMuSF_ID = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_TrackerMuons_pt_abseta");
-    if (sample.isW_or_ZJet()) {
-      //This is the root file with EWK Corrections
-      TFile *file = new TFile("RootFiles/kfactors.root");
-      if (sample.type == WJets) {
-	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
-	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
-      } else {
-	ewkCorrection = (TH1D*)file->Get("EWKcorr/Z");
-	NNLOCorrection = (TH1D*)file->Get("ZJets_LO/inv_pt");
-      }
-    }
   }
 
   if (maxEvents != -1LL && nentries > maxEvents)
@@ -110,8 +114,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
       if (applyPU) {
-	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
-	double pileup = PU->GetBinContent(bin);
+	float pileup = histomap.getBin("PU",puTrue->at(0));
 	h_pileup->Fill(pileup);
 	event_weight = pileup;
 	nokfactor = pileup;
