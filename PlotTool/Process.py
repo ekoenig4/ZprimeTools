@@ -75,6 +75,7 @@ class SubProcess(object):
         self.getNuisanceList()
         tree = self.tdir.Get(treename)
         self.histo = GetBranch(b_template,b_variable,tree,weight,cut).Clone('%s_%s' % (b_variable,self.filename))
+        if 'post' in dir(b_template): b_template.post(self.histo)
     def fillRaw(self):
         self.raw_total = self.histo.Integral()
         return self.raw_total != 0
