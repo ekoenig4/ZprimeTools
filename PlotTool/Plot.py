@@ -26,7 +26,7 @@ def getargs():
 def GetRegion():
     preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
     postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
-    RegionName = ["SignalRegion","SingleEle","SingleMu","DoubleEle","DoubleMu"]
+    RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
     found = False
     for region,pre,post in zip(RegionName,preRegionData,postRegionData):
@@ -87,7 +87,7 @@ class datamc(object):
         DoubleEleData_FileNames = "postDoubleEle";
         DoubleMuData_FileNames = "postDoubleMu";
 
-        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEle":SingleEleData_FileNames,"SingleMu":SingleMuData_FileNames,"DoubleEle":DoubleEleData_FileNames,"DoubleMu":DoubleMuData_FileNames}
+        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEleCR":SingleEleData_FileNames,"SingleMuCR":SingleMuData_FileNames,"DoubleEleCR":DoubleEleData_FileNames,"DoubleMuCR":DoubleMuData_FileNames}
         
         self.Data_FileName = self.Data_FileNames[self.region]
         #List of Sample Files

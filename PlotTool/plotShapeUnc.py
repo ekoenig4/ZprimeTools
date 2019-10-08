@@ -1,141 +1,183 @@
 from ROOT import *
 import os
-from optparse import OptionParser
-from Plot import GetRatio,GetUncBand
-from collections import OrderedDict
+from argparse import ArgumentParser
+from Plot import datamc
+from cfg_saveplot import config
+from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMSText
 
 gROOT.SetBatch(1)
 
-parser = OptionParser()
-parser.add_option("-i","--input",help="Specify an input Systematics file to plot on",action="store",type="str",default=None)
+out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
+def plotCRUnc(sample,uncname):
+    print 'Fetching %s' % uncname
+    sample.addUnc(uncname)
+    if 'Single' in sample.region: process = 'WJets'
+    if 'Double' in sample.region: process = 'DYJets'
 
-options,args = parser.parse_args()
+    norm = sample.processes[process].histo.Clone('norm')
+    up   = sample.processes[process].nuisances[uncname]['Up'].Clone('up')
+    dn   = sample.processes[process].nuisances[uncname]['Down'].Clone('dn')
 
-if options.input == None or not os.path.isfile(options.input):
-    print "Please specify an existing systematics file with -i option."
-    exit()
-#######################################################################
-def getXNDC(x): gPad.Update(); return (x - gPad.GetX1())/(gPad.GetX2()-gPad.GetX1());
-def getYNDC(y): gPad.Update(); return (y - gPad.GetY1())/(gPad.GetY2()-gPad.GetY1());
-#######################################################################
-def Metadata(data,rfile):
-    lumi = rfile.Get('lumi').GetBinContent(1)
-    year = str(int( rfile.Get('year').GetBinContent(1) ))
-    type = rfile.Get('variable').GetTitle()
-    xaxis = rfile.Get('variable').GetXaxis().GetTitle()
-    data['lumi'] = lumi
-    data['year'] = year
-    data['variable'] = {'type':type,'xaxis':xaxis}
-#######################################################################
-rfile = TFile.Open(options.input)
-rfile.cd('sr')
-keys = [ key.GetName().replace('Up','') for key in gDirectory.GetListOfKeys() if 'sumOfBkg' in key.GetName() and 'Down' not in key.GetName() ]
-rfile.cd()
-data = {}
-Metadata(data,rfile)
-unclist = []
-categories = OrderedDict([ ('sr','Signal Region'),('e','Single Electron'),('m','Single Muon'),('ee','Double Electron'),('mm','Double Muon') ])
-for cat in categories:
-    histos = {}
-    for key in keys:
-        if key == 'sumOfBkg':
-            norm = rfile.Get(cat+'/'+key).Clone('norm'); norm.SetDirectory(0)
-            histos['norm'] = norm
-        else:
-            unc = key.replace('sumOfBkg_','');
-            if unc not in unclist: unclist.append(unc)
-            keyup = cat+'/'+key+'Up'
-            up = rfile.Get(keyup); up.SetDirectory(0)
-            keydn = cat+'/'+key+'Down'
-            dn = rfile.Get(keydn); dn.SetDirectory(0)
-            up = GetRatio(histos['norm'],up); dn = GetRatio(histos['norm'],dn)
-            band = GetUncBand(up,dn)
-            histos[unc] = band
-    data[cat] = histos
-####################################################################################
-for unc in unclist:
-    print unc
-    c = TCanvas('c', "canvas",800,800);
+    r_up = up.Clone('ratio_up'); r_up.Divide(norm)
+    r_dn = dn.Clone('ratio_dn'); r_dn.Divide(norm)
+
+    c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
-    gStyle.SetTextFont(42)
+    #c.SetLeftMargin(0.15);
+    #c.SetLogy();
+    #c.cd();
+    
+    pad1 = TPad("pad1","pad1",0.01,0.25,0.99,0.99);
+    pad1.Draw(); pad1.cd();
+    pad1.SetLogy();
+    pad1.SetFillColor(0); pad1.SetFrameBorderMode(0); pad1.SetBorderMode(0);
+    pad1.SetBottomMargin(0.);
 
-    store = []
-    for i,cat in enumerate(categories):
-        c.cd()
-        ymax = 0.9-i*0.16;
-        if cat != 'mm': ymin = ymax - 0.16
-        else: ymin = 0
-        scale = 1
-        pad = TPad(cat,cat,0.01,ymin,0.99,ymax)
-        pad.Draw(); pad.cd();
-        pad.SetFillColor(0); pad.SetFrameBorderMode(0); pad.SetBorderMode(0);
-        pad.SetTopMargin(0)
-        if cat != 'mm': pad.SetBottomMargin(0)
-        else: scale=0.16/0.26;pad.SetBottomMargin(1-scale)
+    ymax = max( h.GetMaximum() for h in (norm,up,dn) ) * pow(10,2.5)
+    ymin = ymax * pow(10,-6)
 
-        rymin = 0.3; rymax = 1.7
-        band = data[cat][unc]
-        band.SetTitle('')
-        band.GetYaxis().SetRangeUser(rymin,rymax);
-        band.SetFillColor(12)
-        band.SetLineColor(12)
-        band.SetFillStyle(3001)
-        band.GetYaxis().SetLabelSize(0.14*scale);
-        band.GetYaxis().SetTitleSize(0.12*scale);
-        band.GetYaxis().SetTitleOffset(0.25*scale);
-        band.GetYaxis().SetNdivisions(5);
-        band.GetYaxis().SetTickLength(0.05*scale);
-        
-        band.GetXaxis().SetLabelSize(0);
-        band.GetXaxis().SetTitleSize(0);
-        band.GetXaxis().SetTitleOffset(999);
-        band.GetXaxis().SetTickLength(0.05*scale);
-        band.Draw('A 5')
+    for h in (up,dn): h.SetLineStyle(2)
+    for h in (norm,up,dn):
+        h.SetTitle("")
+        h.GetYaxis().SetTitle("Events")
+        h.GetYaxis().SetRangeUser(ymin,ymax)
+    
+    norm.Draw('hist')
+    up.Draw('hist same')
+    dn.Draw('hist same')
+    
+    lumi_label = '%s' % float('%.3g' % (sample.lumi/1000.)) + " fb^{-1}"
+    texLumi,texCMS = getCMSText(lumi_label,sample.version)
+    texLumi.Draw();
+    texCMS.Draw();
 
-        title = TPaveText(0.4,getYNDC(rymax-0.3),0.6,getYNDC(rymax-0.1),'ndc')
-        title.AddText(categories[cat])
-        title.SetFillColor(0);
-        title.SetTextSize(0.12*scale)
-        title.Draw('same')
-        
-        xmax = band.GetXaxis().GetXmax()
-        xmin = band.GetXaxis().GetXmin()
-        
-        line = TLine(xmin,1,xmax,1)
-        line.SetLineStyle(8);
-        line.SetLineColor(kBlack);
-        line.Draw('same')
+    pt = TPaveText(0.62,0.60,0.86,0.887173,'NDC');
+    pt.AddText("Systematic Variation")
+    pt.AddText(uncname)
+    pt.AddText(process)
+    pt.Draw()
+    
+    c.cd();
+    pad2 = TPad("pad2","pad2",0.01,0.01,0.99,0.25);
+    pad2.Draw(); pad2.cd();
+    pad2.SetFillColor(0); pad2.SetFrameBorderMode(0); pad2.SetBorderMode(0);
+    pad2.SetTopMargin(0);
+    pad2.SetBottomMargin(0.35);
 
-        store.append(pad)
-        store.append(title)
-        store.append(line)
-    ################################################
-    xaxis = TGaxis(xmin,rymin,xmax,rymin,xmin,xmax,510);
-    xaxis.SetTitle(data['variable']['xaxis'])
-    xaxis.SetLabelFont(42)
-    xaxis.SetLabelSize(0.15*scale);
-    xaxis.SetTitleFont(42)
-    xaxis.SetTitleSize(0.15*scale);
-    xaxis.SetTitleOffset(1.2);
+    rbins = []
+    for r in (r_up,r_dn): rbins += [ b for b in r if b != 0 ]
+
+    def avg(bins): return sum(bins)/len(bins)
+    def stdv(bins):
+        bavg = avg(bins)
+        return ( sum( (b - bavg)**2 for b in bins )/(len(bins)-1) ) ** 0.5
+    
+    rstdv = stdv(rbins)
+    rymin = 1 - 3*rstdv; rymax = 1 + 3*rstdv
+    
+    RatioStyle(r_up,rymin,rymax)
+    RatioStyle(r_dn,rymin,rymax)
+
+    for r in (r_up,r_dn):
+        r.SetMarkerStyle(1)
+        r.SetTitle("")
+        r.GetXaxis().SetTitle("");
+        r.GetXaxis().SetTickLength(0);
+        r.GetXaxis().SetLabelOffset(999);
+        r.GetYaxis().SetTitle("");
+        r.GetYaxis().SetTickLength(0);
+        r.GetYaxis().SetLabelOffset(999);
+    
+    r_up.Draw()
+    r_dn.Draw('same')
+    
+    nbins = norm.GetNbinsX();
+    xmin = norm.GetXaxis().GetXmin();
+    xmax = norm.GetXaxis().GetXmax();
+    xwmin = xmin;
+    xwmax = xmax;
+    
+    line = getRatioLine(xmin,xmax)
+    line.Draw("same");
+
+    xname = sample.name if type(sample.name) == str else None
+    xaxis = makeXaxis(xmin,xmax,rymin,510,name=xname);
     xaxis.Draw("SAME");
 
-    c.cd()
+    yaxis = makeYaxis(rymin,rymax,xmin,6,name="syst./cent.");
+    yaxis.Draw("SAME");
     
-    lumi_label = '%s' % float('%.3g' % (data['lumi']/1000.)) + " fb^{-1}"
-    texS = TLatex(0.12092,0.905,("#sqrt{s} = 13 TeV, "+lumi_label));
-    texS.SetNDC();
-    texS.SetTextSize(0.030);
-    texS.Draw('same');
-    texS1 = TLatex(0.12092,0.95,"#bf{CMS} : #it{Preliminary} ("+data['year']+")");
-    texS1.SetNDC();
-    texS1.SetTextSize(0.030);
-    texS1.Draw('same');
-    texS2 = TLatex(0.5,0.905, 'SumOfBkg '+unc.upper()+' Uncertainty')
-    texS2.SetNDC();
-    texS2.SetTextSize(0.030);
-    texS2.Draw('same');
+    outdir = out_dir % sample.version
+    outdir = "%s/%sPlots_EWK/UncertaintyPlots/"  % (outdir,sample.region)
+    if not os.path.isdir(outdir): os.mkdir(outdir)
+    
+    outname = "%s_%s" % (uncname,sample.varname)
+    c.SaveAs( "%s/%s.png" % (outdir,outname) )
+    
+def plotSRUnc(sample,uncname):
+    print 'Fetching %s' % uncname
+    sample.addUnc(uncname)
+    z_norm = sample.processes['ZJets'].histo
+    w_norm = sample.processes['WJets'].histo
 
-    c.SaveAs("~/public_html/MonoZprimeJet/Plots2016/Uncertainty/"+unc.upper()+'_'+data['variable']['type']+'.png')
-####################################################
-        
+    z_up = sample.processes['ZJets'].nuisances[uncname]['Up']
+    z_dn = sample.processes['ZJets'].nuisances[uncname]['Down']
+
+    w_up = sample.processes['WJets'].nuisances[uncname]['Up']
+    w_dn = sample.processes['WJets'].nuisances[uncname]['Down']
+
+    bins = []
+    for w_h in (w_up,w_dn):
+        w_h.Divide(w_norm)
+        for i,b in enumerate(w_h):
+            w_h[i] -= 1
+            if w_h[i] != -1: bins.append( w_h[i] )
+        w_h.SetLineColor(kBlue)
+        w_h.SetLineWidth(2)
+    for z_h in (z_up,z_dn):
+        z_h.Divide(z_norm)
+        for i,b in enumerate(z_h):
+            z_h[i] -= 1
+            if z_h[i] != -1: bins.append( z_h[i] )
+        z_h.SetLineColor(kRed)
+        z_h.SetLineWidth(2)
+
+    maxY = max(bins)
+    minY = min(bins)
+    c = TCanvas(uncname,'',800,800)
+    gStyle.SetOptStat(0);
+    gStyle.SetLegendBorderSize(0);
+    c.SetLeftMargin(0.15)
+    for h in (z_up,z_dn,w_up,w_dn):
+        h.GetXaxis().SetTitle(sample.name)
+        h.GetYaxis().SetRangeUser(minY*1.2,maxY*1.2)
+        h.GetYaxis().SetTitle(uncname)
+        h.Draw('hist same')
+    
+    leg = getLegend(0.62,0.60,0.86,0.887173)
+    leg.AddEntry(z_up,'Z+jets','l')
+    leg.AddEntry(w_up,'W+jets','l')
+    leg.Draw()
+
+    outdir = out_dir % sample.version
+    outdir = "%s/SignalRegionPlots_EWK/UncertaintyPlots/"  % outdir
+    if not os.path.isdir(outdir): os.mkdir(outdir)
+    
+    outname = "%s_%s" % (uncname,sample.varname)
+    c.SaveAs( "%s/%s.png" % (outdir,outname) )
+    
+if __name__ == "__main__":
+    variable = 'ChNemPtFrac'
+    # uncname = 'QCD_Scale'
+    
+    sample = datamc()
+    nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
+    variations = []
+    for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
+
+    sample.initiate(nvariable)
+    if sample.region == 'SignalRegion':
+        for uncname in variations: plotSRUnc(sample,uncname)
+    else:
+        for uncname in variations: plotCRUnc(sample,uncname)
