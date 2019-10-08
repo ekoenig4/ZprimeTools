@@ -51,18 +51,22 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (!sample.isData) {
     //This is the PU histogram obtained from Nick's recipe
     TFile *weights = TFile::Open("RootFiles/PU_Central.root");
-    PU = (TH1D*)weights->Get("pileup");
+    TH1F* PU = (TH1F*)weights->Get("pileup");
+    histomap["PU"] = PU;
     
     if (sample.isW_or_ZJet()) {
       //This is the root file with EWK Corrections
       TFile *file = new TFile("RootFiles/kfactors.root");
+      TH1F *ewkCorrection,*NNLOCorrection;
       if (sample.type == WJets) {
-	ewkCorrection = (TH1D*)file->Get("EWKcorr/W");
-	NNLOCorrection = (TH1D*)file->Get("WJets_LO/inv_pt");
+	ewkCorrection = (TH1F*)file->Get("EWKcorr/W");
+	NNLOCorrection = (TH1F*)file->Get("WJets_LO/inv_pt");
       } else {
-	ewkCorrection = (TH1D*)file->Get("EWKcorr/Z");
-	NNLOCorrection = (TH1D*)file->Get("ZJets_LO/inv_pt");
+	ewkCorrection = (TH1F*)file->Get("EWKcorr/Z");
+	NNLOCorrection = (TH1F*)file->Get("ZJets_LO/inv_pt");
       }
+      histomap["ewkCorrection"] = ewkCorrection;
+      histomap["NNLOCorrection"] = NNLOCorrection;
     }
   }
 
@@ -89,32 +93,31 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     if (!sample.isData) {
       //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
       //binContent as event_weight
-	int bin = PU->GetXaxis()->FindBin(puTrue->at(0));
-	double pileup = PU->GetBinContent(bin);
-	h_pileup->Fill(pileup);
-	event_weight = pileup;
-	gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
-	event_weight *= gen_weight;
-	noweight *= gen_weight;
+      float pileup = histomap.getBin("PU",puTrue->at(0));
+      h_pileup->Fill(pileup);
+      event_weight = pileup;
+      gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
+      event_weight *= gen_weight;
+      noweight *= gen_weight;
 	
-	if (sample.isW_or_ZJet()) {
-	  for (int i = 0; i < nMC; i++)
-	    if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
-	      int bosonPID = (*mcPID)[i];
-	      bosonPt = (*mcPt)[i];
-	      double kfactor = getKfactor(bosonPt);
-	      if ( sample.PID == 23 ) {
-		h_genZPt->Fill(bosonPt,gen_weight);
-		h_genZPtwK->Fill(bosonPt,gen_weight*kfactor);
-	      }
-	      if ( sample.PID == 24 ) {
-		h_genWPt->Fill(bosonPt,gen_weight);
-		h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
-	      }
-	      event_weight *= kfactor;
-	      noweight *= kfactor;
+      if (sample.isW_or_ZJet()) {
+	for (int i = 0; i < nMC; i++)
+	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
+	    int bosonPID = (*mcPID)[i];
+	    bosonPt = (*mcPt)[i];
+	    double kfactor = getKfactor(bosonPt);
+	    if ( sample.PID == 23 ) {
+	      h_genZPt->Fill(bosonPt,gen_weight);
+	      h_genZPtwK->Fill(bosonPt,gen_weight*kfactor);
 	    }
-	}
+	    if ( sample.PID == 24 ) {
+	      h_genWPt->Fill(bosonPt,gen_weight);
+	      h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
+	    }
+	    event_weight *= kfactor;
+	    noweight *= kfactor;
+	  }
+      }
     }
 
     double weightNorm = event_weight;

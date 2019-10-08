@@ -1,8 +1,8 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
-ZprimeJetsCommon::DataMC::DataMC(string filename) {
-  string sampleID[] = {"Run2017","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+ZprimeJetsCommon::DataMC::DataMC(string filename) : ZprimeJetsCommon::DataMC::DataMC() {
+  string sampleID[] = {"Run2017","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
   for (int i = 0; i < Total; i++)
     if (filename.find(sampleID[i]) != string::npos) {

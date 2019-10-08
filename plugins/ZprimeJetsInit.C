@@ -80,8 +80,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
 	}
       fileNumber++;
     }
-  string sampleID[Total] = {"Data","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
-  cout<<"Sample type: "<<sampleID[sample.type]<< (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;
   Init(chain);

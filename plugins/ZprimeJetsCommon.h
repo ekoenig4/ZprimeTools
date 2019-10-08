@@ -38,19 +38,29 @@ public :
   TTree *tree;
 
   static const bool debug = true;
-  enum Type { Data,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
+  enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
+    string name[Total];
     bool isInclusive;
     bool isData;
     int PID;
-    DataMC(){}
+    DataMC(){
+      string name[Total] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+      for (int i = 0; i < Total; i++) this->name[i] = name[i];
+    };
     DataMC(string filename);
     bool isW_or_ZJet();
+    inline string getName() { return name[type]; }
   } sample;
 
-  TH1D *PU,*ewkCorrection,*NNLOCorrection;
-
+  struct HistoCollection : public map<string,TH1F*> {
+    float getBin(string name,float x) {
+      TH1F* histo = (*this)[name];
+      return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
+    }
+  } histomap;
+  
   ScaleUncCollection* scaleUncs;
   ShapeUncCollection* shapeUncs;
   

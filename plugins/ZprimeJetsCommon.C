@@ -326,8 +326,8 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
 }
 
 double ZprimeJetsCommon::getKfactor(double bosonPt) {
-  double EWK_corrected_weight = 1.0*(ewkCorrection->GetBinContent(ewkCorrection->GetXaxis()->FindBin(bosonPt)));
-  double NNLO_weight = 1.0*(NNLOCorrection->GetBinContent(NNLOCorrection->GetXaxis()->FindBin(bosonPt)));
+  double EWK_corrected_weight = histomap.getBin("ewkCorrection",bosonPt);
+  double NNLO_weight = histomap.getBin("NNLOCorrection",bosonPt);
   double kfactor = 1;
   if(EWK_corrected_weight!=0 && NNLO_weight!=0)
     kfactor = (EWK_corrected_weight/NNLO_weight);
