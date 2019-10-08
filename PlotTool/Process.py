@@ -39,6 +39,7 @@ class SubProcess(object):
         self.tfile = tfile
         self.xsec = xsec
         self.tdir = None
+        self.trees = {}
         self.cutflow = 0
         self.init()
     def init(self):
@@ -73,8 +74,8 @@ class SubProcess(object):
         self.b_template = b_template.Clone()
         self.tdir.cd()
         self.getNuisanceList()
-        tree = self.tdir.Get(treename)
-        self.histo = GetBranch(b_template,b_variable,tree,weight,cut).Clone('%s_%s' % (b_variable,self.filename))
+        if treename not in self.trees: self.trees[treename] = self.tdir.Get(treename)
+        self.histo = GetBranch(b_template,b_variable,self.trees[treename],weight,cut).Clone('%s_%s' % (b_variable,self.filename))
         if 'post' in dir(b_template): b_template.post(self.histo)
     def fillRaw(self):
         self.raw_total = self.histo.Integral()
@@ -95,10 +96,14 @@ class SubProcess(object):
         self.tdir.cd()
         for variation in ('Up','Down'):
             if isScale:
-                tree = self.tdir.Get('norm')
+                treename = 'norm'
+                if not treename in self.trees: self.trees[treename] = self.tdir.Get(treename)
+                tree = self.trees[treename]
                 hs_unc = GetBranch(b_template,b_variable,tree,nuisance+variation,cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
             else:
-                tree = self.tdir.Get(nuisance+variation)
+                treename = nuisance+variation
+                if not treename in self.trees: self.trees[treename] = self.tdir.Get(treename)
+                tree = self.trees[treename]
                 hs_unc = GetBranch(b_template,b_variable,tree,'weight',cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
             hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
@@ -235,7 +240,8 @@ class Process(object):
             histo = self.b_template
             histo.Reset()
             for subprocess in self:
-                histo.Add(subprocess.nuisances[nuisance][variation])
+                histo.Add(subprocess.nuisances[nuisance][variation].Clone())
+                subprocess.nuisances[nuisance].pop(variation)
             if self.proctype != 'signal':
                 self.nuisances[nuisance][variation] = histo.Clone( '%s_%s%s' % (self.name,nuisance,variation) )
             
