@@ -7,7 +7,7 @@ from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMS
 
 gROOT.SetBatch(1)
 
-variable = 'ChNemPtFrac'
+variable = 'h_recoil'
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname
