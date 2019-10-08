@@ -7,6 +7,7 @@ from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMS
 
 gROOT.SetBatch(1)
 
+variable = 'ChNemPtFrac'
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname
@@ -168,8 +169,6 @@ def plotSRUnc(sample,uncname):
     c.SaveAs( "%s/%s.png" % (outdir,outname) )
     
 if __name__ == "__main__":
-    variable = 'ChNemPtFrac'
-    # uncname = 'QCD_Scale'
     
     sample = datamc()
     nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
