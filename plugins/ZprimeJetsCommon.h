@@ -42,13 +42,19 @@ public :
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
+    string name[Total];
     bool isInclusive;
     bool isData;
     bool isSignal;
     int PID;
-    DataMC(){}
+    DataMC(){
+      string name[Total] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+      for (int i = 0; i < Total; i++) this->name[i] = name[i];
+    };
     DataMC(string filename);
+    void initRegion();
     bool isW_or_ZJet();
+    inline string getName() { return name[type]; }
   } sample;
   
   struct HistoCollection : public map<string,TH1F*> {
