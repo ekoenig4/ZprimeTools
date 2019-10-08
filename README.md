@@ -18,7 +18,7 @@ cmsrel CMSSW_10_2_10
 cd CMSSW_10_2_10/src
 cmsenv
 voms-proxy-init --voms=cms --valid=192:00
-git clone -b 2016 https://github.com/ekoenig4/ZprimeTools.git ZprimeJets2016
+git clone -b 2016 https://github.com/ekoenig4/ZprimeTools.git ZprimeTools2016
 cd ZprimeJets2016
 make
 ```
