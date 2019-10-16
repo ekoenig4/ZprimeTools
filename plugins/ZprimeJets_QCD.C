@@ -52,6 +52,7 @@ void ZprimeJetsCommon::QCDVariations(double event_weight) {
       float k_ewk = histomap.getBin("K_EW",bosonPt);
       if ( name.find("NNLO") != string::npos || name.find("EWK") != string::npos ) unc *= k_ewk;
       else if ( name.find("QCD") != string::npos ) unc *= k_qcd;
+      
       weightUp += unc;
       weightDn -= unc;
     }

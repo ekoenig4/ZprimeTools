@@ -81,6 +81,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
       fileNumber++;
     }
   cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<"isW_or_ZJet: " << sample.isW_or_ZJet() << endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;
   Init(chain);
