@@ -11,6 +11,11 @@ from optparse import OptionParser
 
 gROOT.SetBatch(1)
 
+def printVars(obj):
+    for var,val in vars(obj).iteritems():
+        print var,':',val
+    exit()
+
 outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
 dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/":"e","SingleMuCR/":"m"}
@@ -109,7 +114,6 @@ def saveplot(variable):
                     if sample == 'Data': continue
                     for variation in ('Up','Down'):
                         if sample == "Signal":
-                            signals = norm.processes['Signal']
                             for signal in signals:
                                 signal.nuisances[nuisance][variation].SetName(signal.name+'_'+nuisance+variation)
                                 signal.nuisances[nuisance][variation].Write()

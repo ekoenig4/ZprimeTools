@@ -7,8 +7,17 @@ from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMS
 
 gROOT.SetBatch(1)
 
-variable = 'ChNemPtFrac'
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
+def getargs():
+    parser = ArgumentParser(description="Plot the systematic uncertainty for the significant backgrounds in the respective region")
+    parser.add_argument('-v','--variable',help='Specify the variable to use (can only be variables stored in the trees/norm tree of the post files)',type=str,default='ChNemPtFrac')
+    try: args = parser.parse_args()
+    except ValueError as err:
+        print err
+        parser.print_help()
+        exit()
+    return args
+
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname
     sample.addUnc(uncname)
@@ -115,6 +124,7 @@ def plotCRUnc(sample,uncname):
     
     outname = "%s_%s" % (uncname,sample.varname)
     c.SaveAs( "%s/%s.png" % (outdir,outname) )
+    sample.removeUnc(uncname)
     
 def plotSRUnc(sample,uncname):
     print 'Fetching %s' % uncname
@@ -231,16 +241,33 @@ def plotSRUnc(sample,uncname):
     
     outname = "%s_%s" % (uncname,sample.varname)
     c.SaveAs( "%s/%s.png" % (outdir,outname) )
-    
-if __name__ == "__main__":
-    
+    sample.removeUnc(uncname)
+
+def runRegion(args):
     sample = datamc()
+    variable = args.variable
     nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
     variations = []
     for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
 
+    print 'Running for %s' % nvariable
     sample.initiate(nvariable)
     if sample.region == 'SignalRegion':
         for uncname in variations: plotSRUnc(sample,uncname)
     else:
         for uncname in variations: plotCRUnc(sample,uncname)
+def runAll(args):
+    cwd = os.getcwd()
+    for region,nhist in config['regions'].items():
+        os.chdir(region)
+        runRegion(args)
+        os.chdir(cwd)
+    
+if __name__ == "__main__":
+    args = getargs()
+    runall = False
+    try: sample = datamc(show=False)
+    except ValueError: runall = True
+
+    if runall: runAll(args)
+    else:      runRegion(args)

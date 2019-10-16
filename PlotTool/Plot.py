@@ -33,7 +33,7 @@ def GetRegion():
         if path.isdir('.output/'):
             if any( pre in fname for fname in listdir('.output/') ): found = True; break
         if path.isfile(post): found = True; break
-    if not found: print "No Region Data Files Found, Exiting...";exit()
+    if not found: raise ValueError("No Region Data Files Found")
     return region
 def GetMCxsec(filenames,xsecMap):
     return { fname:xsecMap[fname] for fname in filenames }
@@ -241,6 +241,13 @@ class datamc(object):
         for name,process in self.processes.iteritems():
             if process.proctype == 'data': continue
             process.addUnc(nuisance)
+    ###############################################################################################################
+
+    def removeUnc(self,nuisance):
+        if nuisance not in self.nuisances: return
+        for name,process in self.processes.iteritems():
+            if process.proctype == 'data': continue
+            process.removeUnc(nuisance)
 ######################################################################    
 
             
