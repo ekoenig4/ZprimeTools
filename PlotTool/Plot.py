@@ -33,7 +33,7 @@ def GetRegion():
         if path.isdir('.output/'):
             if any( pre in fname for fname in listdir('.output/') ): found = True; break
         if path.isfile(post): found = True; break
-    if not found: raise ValueError("No Region Data Files Found")
+    if not found: return None
     return region
 def GetMCxsec(filenames,xsecMap):
     return { fname:xsecMap[fname] for fname in filenames }

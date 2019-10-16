@@ -1,7 +1,7 @@
 from ROOT import *
 import os
-from argparse import ArgumentParser
-from Plot import datamc
+from sys import argv
+from Plot import datamc,GetRegion
 from cfg_saveplot import config
 from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMSText
 
@@ -9,13 +9,10 @@ gROOT.SetBatch(1)
 
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
 def getargs():
-    parser = ArgumentParser(description="Plot the systematic uncertainty for the significant backgrounds in the respective region")
-    parser.add_argument('-v','--variable',help='Specify the variable to use (can only be variables stored in the trees/norm tree of the post files)',type=str,default='ChNemPtFrac')
-    try: args = parser.parse_args()
-    except ValueError as err:
-        print err
-        parser.print_help()
-        exit()
+    args = {}
+    args['variable'] = 'ChNemPtFrac'
+    if len(argv) > 1:
+        args['variable'] = argv[1]
     return args
 
 def plotCRUnc(sample,uncname):
@@ -245,7 +242,7 @@ def plotSRUnc(sample,uncname):
 
 def runRegion(args):
     sample = datamc()
-    variable = args.variable
+    variable = args['variable']
     nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
     variations = []
     for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
@@ -265,9 +262,7 @@ def runAll(args):
     
 if __name__ == "__main__":
     args = getargs()
-    runall = False
-    try: sample = datamc(show=False)
-    except ValueError: runall = True
+    runall = ( GetRegion() == None )
 
     if runall: runAll(args)
     else:      runRegion(args)
