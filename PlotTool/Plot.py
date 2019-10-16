@@ -241,6 +241,13 @@ class datamc(object):
         for name,process in self.processes.iteritems():
             if process.proctype == 'data': continue
             process.addUnc(nuisance)
+    ###############################################################################################################
+
+    def removeUnc(self,nuisance):
+        if nuisance not in self.nuisances: return
+        for name,process in self.processes.iteritems():
+            if process.proctype == 'data': continue
+            process.removeUnc(nuisance)
 ######################################################################    
 
             

@@ -1,4 +1,5 @@
 from ROOT import *
+import os
 
 def ValidProctype(proctype):
     if not (proctype == 'data' or proctype == 'bkg' or proctype == 'signal'):
@@ -107,7 +108,6 @@ class SubProcess(object):
                 hs_unc = GetBranch(b_template,b_variable,tree,'weight',cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
             hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
-    
 class Process(object):
     def __init__(self,name,filenames,xsecs,proctype,lumi=1,color = None):
         ValidProctype(proctype)
@@ -145,15 +145,16 @@ class Process(object):
             yield self[i]
     def open(self):
         self.isOpen = True
-        for filename in self.filenames:
+        filelist = [ file for file in self.filenames ]
+        for filename in filelist:
             fname = filename + '.root'
             name = filename.replace('post','')
+            if not os.path.isfile(fname): print 'No file %s, skipping...' % fname; self.filenames.remove(filename); continue
             tfile = TFile.Open(fname)
             if self.proctype != 'data': xsec = self.xsecs[filename]
             else:                  xsec = None
             subprocess = SubProcess(name,filename,tfile,xsec)
             self.subprocesses[filename] = subprocess
-            
     def getCutflow(self):
         for subprocess in self: subprocess.getCutflow()
     def getGlobal(self,variable):
@@ -175,6 +176,7 @@ class Process(object):
         tfile = iter(self).next().tfile
         dirname,_ = GetDirname(variable)
         tdir = tfile.Get(dirname)
+        if 'jetPt' in variable:    variable = variable.replace('jetPt','j1pT')
         if 'h_recoil' in variable: variable = variable.replace('h_recoil','pfMET')
         self.b_template = tdir.Get(variable)
     def getBranch(self,variable,b_template,cut):
@@ -237,12 +239,20 @@ class Process(object):
             self.nuisances[nuisance] = {}
         for subprocess in self:
             subprocess.addUnc(nuisance,self.cut)
+        if self.proctype == 'signal': return
         for variation in ('Up','Down'):
             histo = self.b_template
             histo.Reset()
             for subprocess in self:
                 histo.Add(subprocess.nuisances[nuisance][variation].Clone())
                 subprocess.nuisances[nuisance].pop(variation)
-            if self.proctype != 'signal':
-                self.nuisances[nuisance][variation] = histo.Clone( '%s_%s%s' % (self.name,nuisance,variation) )
-            
+            self.nuisances[nuisance][variation] = histo.Clone( '%s_%s%s' % (self.name,nuisance,variation) )
+    def removeUnc(self,nuisance):
+        if nuisance not in self.nuisances: return
+        if self.proctype == 'signal':
+            for subprocess in self:
+                subprocess.nuisances[nuisance].pop('Up')
+                subprocess.nuisances[nuisance].pop('Down')
+        else:
+            self.nuisances[nuisance].pop('Up')
+            self.nuisances[nuisance].pop('Down')
