@@ -3,9 +3,9 @@ config = {
     'regions':{'SignalRegion/':'9','DoubleEleCR/':'11','DoubleMuCR/':'11','SingleEleCR/':'11','SingleMuCR/':'11'},
     'Uncertainty':{
         'PFU': [ # ID is relative to the regions basic histogram number
-            'PFU_tracker',
+            # 'PFU_tracker',
             'PFU_ecal',
-            'PFU_hcal'
+            # 'PFU_hcal'
         ],
         'JES': [
             'JES'

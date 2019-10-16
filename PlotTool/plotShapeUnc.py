@@ -243,8 +243,7 @@ def plotSRUnc(sample,uncname):
     c.SaveAs( "%s/%s.png" % (outdir,outname) )
     sample.removeUnc(uncname)
 
-def runRegion():
-    args = getargs()
+def runRegion(args):
     sample = datamc()
     variable = args.variable
     nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
@@ -257,7 +256,18 @@ def runRegion():
         for uncname in variations: plotSRUnc(sample,uncname)
     else:
         for uncname in variations: plotCRUnc(sample,uncname)
+def runAll(args):
+    cwd = os.getcwd()
+    for region,nhist in config['regions'].items():
+        os.chdir(region)
+        runRegion(args)
+        os.chdir(cwd)
     
 if __name__ == "__main__":
+    args = getargs()
+    runall = False
+    try: sample = datamc(show=False)
+    except ValueError: runall = True
 
-    sample = datamc()
+    if runall: runAll(args)
+    else:      runRegion(args)
