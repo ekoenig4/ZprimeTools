@@ -100,7 +100,9 @@ class SubProcess(object):
                 treename = 'norm'
                 if not treename in self.trees: self.trees[treename] = self.tdir.Get(treename)
                 tree = self.trees[treename]
-                hs_unc = GetBranch(b_template,b_variable,tree,nuisance+variation,cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
+                try:
+                    hs_unc = GetBranch(b_template,b_variable,tree,nuisance+variation,cut).Clone('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
+                except SystemError as err: pass
             else:
                 treename = nuisance+variation
                 if not treename in self.trees: self.trees[treename] = self.tdir.Get(treename)
