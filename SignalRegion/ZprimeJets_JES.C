@@ -61,7 +61,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 		if (btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();
 		  
-		  if (dPhiJetMETcut(jetveto)) {
+		  if (dPhiJetMETcut(jetveto,pfMETPhi)) {
 		    weight = event_weight;
 		    if (unc == 1)  shapeUncs->fillUp(uncname);// up
 		    if (unc == -1) shapeUncs->fillDn(uncname);// down

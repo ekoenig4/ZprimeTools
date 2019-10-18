@@ -178,7 +178,7 @@ void ZprimeJetsCommon::getPt123Frac() {
 	hadronPt[j] += j1PFConsPt.at(i);
       }
   }
-  l_jetPt = jetPt->at(jetCand[0]);
+  j1pT = jetPt->at(jetCand[0]);
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
   PtRawFrac = Pt123/jetRawPt->at(jetCand[0]);
   ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(hadronPt[1]+hadronPt[2]);
@@ -310,7 +310,7 @@ bool ZprimeJetsCommon::btagVeto() {
   return btagVeto;
 }
 
-bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
+bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
   //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 
   bool passes = false;
   int njetsMax = jets.size();
@@ -319,7 +319,7 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
     njetsMax = 4;
   int j = 0;
   for(; j < njetsMax; j++)
-    if(DeltaPhi((*jetPhi)[j],pfMETPhi) < 0.5)
+    if(DeltaPhi((*jetPhi)[j],metPhi) < 0.5)
       break;
   if(j==njetsMax)
     passes = true;

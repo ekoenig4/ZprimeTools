@@ -23,7 +23,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   int lepindex_subleadingNorm = lepindex_subleading;
   double dilepton_ptNorm = dilepton_pt;
   double dilepton_massNorm = dilepton_mass;
-  double RecoilNorm = Recoil;
+  double recoilNorm = recoil;
+  double recoilPhiNorm = recoilPhi;
   
   
   int unclist[2] = {1,-1};
@@ -54,7 +55,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
     //CR Variables
     lepindex_leading = -1;
     lepindex_subleading = -1;
-    dilepton_pt = dilepton_mass = Recoil = -99; 
+    dilepton_pt = dilepton_mass = recoil = recoilPhi = -99; 
     
     if (metFilters==0 && inclusiveCut()){ 
       
@@ -99,8 +100,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	      met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
 	      TLorentzVector leptoMET_4vec = ll+met_4vec;
 	      Double_t leptoMET = fabs(leptoMET_4vec.Pt());
-	      Double_t leptoMET_phi = leptoMET_4vec.Phi();
-	      Recoil = leptoMET;
+	      recoilPhi = leptoMET_4vec.Phi();
+	      recoil = leptoMET;
 	      
 	      if (leptoMET>250){
 		//invariant mass of the two electrons is betwen 60 and 120GeV
@@ -109,14 +110,14 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
 		  
 		  if(mulist.size() == 0){
-		    double metcut = (fabs(pfMET-caloMET))/Recoil;
+		    double metcut = (fabs(pfMET-caloMET))/recoil;
 		    
 		    if(metcut < 0.5){
 		      
 		      if(btagVeto()){
 			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
 			
-			if(dPhiJetMETcut(jetveto)){
+			if(dPhiJetMETcut(jetveto,recoilPhi)){
 			  weight = event_weight;
 			  if (unc == 1)  shapeUncs->fillUp(uncname);// up
 			  if (unc == -1) shapeUncs->fillDn(uncname);// down
@@ -144,5 +145,6 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   lepindex_subleading = lepindex_subleadingNorm;
   dilepton_pt = dilepton_ptNorm;
   dilepton_mass = dilepton_massNorm;
-  Recoil = RecoilNorm;
+  recoil = recoilNorm;
+  recoilPhi = recoilPhiNorm;
 }//Closing the Loop function

@@ -20,7 +20,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   double pfMETPhiNorm = pfMETPhi;
 
   int lepindexNorm = lepindex;
-  double RecoilNorm = Recoil;
+  double recoilNorm = recoil;
+  double recoilPhiNorm = recoilPhi;
   
   
   int unclist[2] = {1,-1};
@@ -48,8 +49,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand);
     //CR Variables
-    lepindex = -1;
-    Recoil = -99;
+    lepindex = recoil = recoilPhi = -1;
+    recoil = recoilPhi = -99;
     
     if (metFilters == 0 && inclusiveCut()) {
       
@@ -72,8 +73,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
 	    TLorentzVector leptoMET_4vec = lep_4vec + met_4vec;
 	    double leptoMET = fabs(leptoMET_4vec.Pt());
-	    double leptoMETphi = leptoMET_4vec.Phi();
-	    Recoil = leptoMET;
+	    recoilPhi = leptoMET_4vec.Phi();
+	    recoil = leptoMET;
 	    
 	    if (leptoMET > 250) {
 	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
@@ -83,14 +84,14 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (lepMET_MT < 160) {
-		  double metcut = (fabs(pfMET-caloMET))/Recoil;
+		  double metcut = (fabs(pfMET-caloMET))/recoil;
 		  
 		  if (metcut < 0.5) {
 		    
 		    if (btagVeto()) {
 		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
 		      
-		      if (dPhiJetMETcut(jetveto)) {
+		      if (dPhiJetMETcut(jetveto,recoilPhi)) {
 			weight = event_weight;
 			if (unc == 1)  shapeUncs->fillUp(uncname);// up
 			if (unc == -1) shapeUncs->fillDn(uncname);// down
@@ -114,5 +115,6 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   pfMETPhi = pfMETPhiNorm;
 
   lepindex = lepindex;
-  Recoil = RecoilNorm;
+  recoil = recoilNorm;
+  recoilPhi = recoilPhiNorm;
 }//Closing the Loop function

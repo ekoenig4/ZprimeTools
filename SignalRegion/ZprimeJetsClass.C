@@ -167,7 +167,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  }
 		  h_dphimin->Fill(minDPhiJetMET_first4);
 		  
-		  if (dPhiJetMETcut(jetveto)) {
+		  if (dPhiJetMETcut(jetveto,pfMETPhi)) {
 		    nDphiJetMET+=event_weight;
 		    QCDVariations(event_weight);
 		    fillHistos(8,event_weight);
@@ -202,8 +202,9 @@ void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
   tree->Branch("h_recoil",&pfMET,"Recoil (GeV)");
-  tree->Branch("jetPt",&l_jetPt,"Leading Jet P_{T} (GeV)");
+  tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
+  tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
 }
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
