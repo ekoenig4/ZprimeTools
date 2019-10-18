@@ -1,43 +1,66 @@
 regions = SignalRegion SingleEleCR DoubleEleCR SingleMuCR DoubleMuCR
 
-all:
+all: sr se sm de dm
+
+sr:
 	@$(MAKE) -C SignalRegion
+se:
 	@$(MAKE) -C SingleEleCR
-	@$(MAKE) -C DoubleEleCR
+sm:
 	@$(MAKE) -C SingleMuCR
+de:
+	@$(MAKE) -C DoubleEleCR
+dm:
 	@$(MAKE) -C DoubleMuCR
 
-clean:
+clean: clean_sr clean_sr clean_sm clean_de clean_dm
+
+clean_sr:
 	@$(MAKE) -C SignalRegion clean
+clean_se:
 	@$(MAKE) -C SingleEleCR clean
-	@$(MAKE) -C DoubleEleCR clean
+clean_sm:
 	@$(MAKE) -C SingleMuCR clean
+clean_de:
+	@$(MAKE) -C DoubleEleCR clean
+clean_dm:
 	@$(MAKE) -C DoubleMuCR clean
 
-condor_clean:
+condor_clean: condor_clean_sr condor_clean_sr condor_clean_sm condor_clean_de condor_clean_dm
+
+condor_clean_sr:
 	@$(MAKE) -C SignalRegion condor_clean
+condor_clean_se:
 	@$(MAKE) -C SingleEleCR condor_clean
-	@$(MAKE) -C DoubleEleCR condor_clean
+condor_clean_sm:
 	@$(MAKE) -C SingleMuCR condor_clean
+condor_clean_de:
+	@$(MAKE) -C DoubleEleCR condor_clean
+condor_clean_dm:
 	@$(MAKE) -C DoubleMuCR condor_clean
 
-condor_submit:
+condor_submit: condor_submit_sr condor_submit_sr condor_submit_sm condor_submit_de condor_submit_dm
+
+condor_submit_sr:
 	@$(MAKE) -C SignalRegion condor_submit
+condor_submit_se:
 	@$(MAKE) -C SingleEleCR condor_submit
-	@$(MAKE) -C DoubleEleCR condor_submit
+condor_submit_sm:
 	@$(MAKE) -C SingleMuCR condor_submit
+condor_submit_de:
+	@$(MAKE) -C DoubleEleCR condor_submit
+condor_submit_dm:
 	@$(MAKE) -C DoubleMuCR condor_submit
 
-hadd:
-	@$(MAKE) -C SignalRegion hadd
-	@$(MAKE) -C SingleEleCR hadd
-	@$(MAKE) -C DoubleEleCR hadd
-	@$(MAKE) -C SingleMuCR hadd
-	@$(MAKE) -C DoubleMuCR hadd
+hadd: hadd_sr hadd_sr hadd_sm hadd_de hadd_dm
 
-plot:
-	@$(MAKE) -C SignalRegion plot variable="h_cutflow ChNemPtFrac_8 ChNemPt123_8 ChNemPt_8 PF123PtFraction_8 Pt123_8 j1pT_8 j1Eta_8 j1Phi_8 j1TotPFCands_8 nVtx_8 pfMET_8"
-	@$(MAKE) -C SingleEleCR plot variable="h_cutflow ChNemPtFrac_10 ChNemPt123_10 ChNemPt_10 PF123PtFraction_10 Pt123_10 j1pT_10 j1Eta_10 j1Phi_10 j1TotPFCands_10 nVtx_10 h_recoil_10 h_LeptonPt_10 h_LeptonEta_10 h_LeptonPhi_10"
-	@$(MAKE) -C DoubleEleCR plot variable="h_cutflow ChNemPtFrac_10 ChNemPt123_10 ChNemPt_10 PF123PtFraction_10 Pt123_10 j1pT_10 j1Eta_10 j1Phi_10 j1TotPFCands_10 nVtx_10 h_recoil_10 h_dileptonPt_10 h_dileptonM_10"
-	@$(MAKE) -C SingleMuCR plot variable="h_cutflow ChNemPtFrac_10 ChNemPt123_10 ChNemPt_10 PF123PtFraction_10 Pt123_10 j1pT_10 j1Eta_10 j1Phi_10 j1TotPFCands_10 nVtx_10 h_recoil_10 h_LeptonPt_10 h_LeptonEta_10 h_LeptonPhi_10"
-	@$(MAKE) -C DoubleMuCR plot variable="h_cutflow ChNemPtFrac_10 ChNemPt123_10 ChNemPt_10 PF123PtFraction_10 Pt123_10 j1pT_10 j1Eta_10 j1Phi_10 j1TotPFCands_10 nVtx_10 h_recoil_10 h_dileptonPt_10 h_dileptonM_10"
+hadd_sr:
+	@$(MAKE) -C SignalRegion hadd
+hadd_se:
+	@$(MAKE) -C SingleEleCR hadd
+hadd_sm:
+	@$(MAKE) -C SingleMuCR hadd
+hadd_de:
+	@$(MAKE) -C DoubleEleCR hadd
+hadd_dm:
+	@$(MAKE) -C DoubleMuCR hadd
