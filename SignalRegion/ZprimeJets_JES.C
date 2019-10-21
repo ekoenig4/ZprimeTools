@@ -1,7 +1,7 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
-void ZprimeJetsClass::JetEnergyScale(double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(float start_weight) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
@@ -15,10 +15,10 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   
   vector<int> jetCandNorm;
   for(int cand : jetCand) jetCandNorm.push_back(cand);
-  vector<double> jetPtNorm;
-  for (double pt : (*jetPt)) jetPtNorm.push_back(pt);
-  double pfMETNorm = pfMET;
-  double pfMETPhiNorm = pfMETPhi;
+  vector<float> jetPtNorm;
+  for (float pt : (*jetPt)) jetPtNorm.push_back(pt);
+  float pfMETNorm = pfMET;
+  float pfMETPhiNorm = pfMETPhi;
   
   int unclist[2] = {1,-1};
   for (int unc : unclist) {
@@ -29,7 +29,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
     j1PFConsPhi .clear();
     j1PFConsPID .clear();
 
-    double event_weight = start_weight;
+    float event_weight = start_weight;
     
     for (int i = 0; i < nJet; i++)
       jetPt->at(i) = jetPtNorm[i]*(1+unc*jetJECUnc->at(i));
@@ -52,7 +52,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	if (jetCand.size() > 0) {
 	  
 	  if (pfMET > 250) {
-	    double metcut = (fabs(pfMET-caloMET)/pfMET);
+	    float metcut = (fabs(pfMET-caloMET)/pfMET);
 	    
 	    if (metcut < 0.5) {
 	      

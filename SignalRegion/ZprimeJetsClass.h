@@ -34,13 +34,13 @@ public :
   { BookHistos(outputFilename); };
   virtual void     Loop(Long64_t maxEvents,int reportEvery);
   virtual void BookHistos(const char* outputFilename);
-  virtual void fillHistos(int histoNumber,double event_weight);
+  virtual void fillHistos(int histoNumber,float event_weight);
   virtual vector<int> JetVetoDecision();
   virtual bool electron_veto_looseID(int jet_index, float elePtCut);
   virtual bool muon_veto_looseID(int jet_index, float muPtCut);
   virtual void initTree(TTree* tree);
 
-  virtual void JetEnergyScale(double start_weight);
+  virtual void JetEnergyScale(float start_weight);
 };
 
 #endif
