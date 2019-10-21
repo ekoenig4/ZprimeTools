@@ -205,6 +205,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand);
+    recoil=recoilPhi=-99;
     lepindex = -1;
     nTotalEvents+=gen_weight;
     fillHistos(0,gen_weight);
@@ -244,8 +245,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
 	    TLorentzVector leptoMET_4vec = lep_4vec + met_4vec;
 	    double leptoMET = fabs(leptoMET_4vec.Pt());
-	    double leptoMETphi = leptoMET_4vec.Phi();
-	    Recoil = leptoMET;
+	    recoilPhi = leptoMET_4vec.Phi();
+	    recoil = leptoMET;
 	    
 	    if (leptoMET > 250) {
 	      nMET200+=event_weight;
@@ -262,7 +263,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		if (pfMET > 50) {
 		  pfMET50+=event_weight;
 		  fillHistos(7,event_weight);
-		  double metcut = (fabs(pfMET-caloMET))/Recoil;
+		  double metcut = (fabs(pfMET-caloMET))/recoil;
 		  h_metcut->Fill(metcut,event_weight);
 		  
 		  if (metcut < 0.5) {
@@ -283,7 +284,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      }
 		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		      
-		      if (dPhiJetMETcut(jetveto)) {
+		      if (dPhiJetMETcut(jetveto,recoilPhi)) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
 			
@@ -328,9 +329,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("h_recoil",&Recoil,"Recoil (GeV)");
-  tree->Branch("jetPt",&l_jetPt,"Leading Jet P_{T} (GeV)");
+  tree->Branch("h_recoil",&recoil,"Recoil (GeV)");
+  tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
+  tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
 }
 
 void ZprimeJetsClass::BookHistos(const char* outputFilename) {
@@ -384,7 +386,8 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
     h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",50,-3.1416,3.1416);h_LeptonPhi[i]->Sumw2();
-    h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
+    h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i]->Sumw2();
+    h_recoilPhi[i] = new TH1F(("h_recoilPhi"+histname).c_str(), "Recoil #phi",20,-3.1416,3.1416);h_recoilPhi[i]->Sumw2();
     h_LeptonEtaPhi[i] = new TH2F(("h_LeptonEtaPhi"+histname).c_str(),"h_LeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
   }
 }
@@ -399,7 +402,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
     h_LeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex),elePhi->at(lepindex),event_weight);
   }
   if(lepton_pt > 0){
-    h_recoil[histoNumber]->Fill(Recoil,event_weight);}
+    h_recoil[histoNumber]->Fill(recoil,event_weight);
+    h_recoilPhi[histoNumber]->Fill(recoilPhi,event_weight);}
   weight = event_weight;
   if (histoNumber == bHisto) tree->Fill();
 }

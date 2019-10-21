@@ -46,15 +46,15 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
     h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
-    h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
-    h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
-    h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
+    h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i]->Sumw2(); 
+    h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i]->Sumw2(); 
+    h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i]->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
     h_j1TotConsPt[i]  = new TH1F(("j1TotConsPt"+histname).c_str(), "j1pT;Leading Jet Total Constituent P_{T}", 48,PtBins);h_j1TotConsPt[i]->Sumw2();
     h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
     h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
     h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
-    h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
+    h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i]->Sumw2();
     h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
     h_j1nCons[i] = new TH1F (("j1nCons"+histname).c_str(),"j1nCons; Number of Constituents of Leading Jet",25, 0, 50);h_j1nCons[i]->Sumw2();
     h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",58,Pt123Bins);h_Pt123[i]->Sumw2();
@@ -182,7 +182,7 @@ void ZprimeJetsCommon::getPt123Frac() {
 	hadronPt[j] += j1PFConsPt.at(i);
       }
   }
-  l_jetPt = jetPt->at(jetCand[0]);
+  j1pT = jetPt->at(jetCand[0]);
   Pt123Fraction = Pt123/jetPt->at(jetCand[0]);
   PtRawFrac = Pt123/jetRawPt->at(jetCand[0]);
   ChNemPtFrac = (HadronPtFirst3[1]+HadronPtFirst3[2])/(hadronPt[1]+hadronPt[2]);
@@ -313,7 +313,7 @@ bool ZprimeJetsCommon::btagVeto() {
   return btagVeto;
 }
 
-bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
+bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
   //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 
   bool passes = false;
   int njetsMax = jets.size();
@@ -322,7 +322,7 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets) {
     njetsMax = 4;
   int j = 0;
   for(; j < njetsMax; j++)
-    if(DeltaPhi((*jetPhi)[j],pfMETPhi) < 0.5)
+    if(DeltaPhi((*jetPhi)[j],metPhi) < 0.5)
       break;
   if(j==njetsMax)
     passes = true;

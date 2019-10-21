@@ -80,7 +80,7 @@ public :
   vector<int>j1PFConsPID;
   float j1TotConsPt;
 
-  float Pt123Fraction,Pt123,PtRawFrac,l_jetPt;
+  float Pt123Fraction,Pt123,PtRawFrac,j1pT;
 
   float hadronPt[3];
   
@@ -830,7 +830,7 @@ public :
   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
   virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
   virtual bool btagVeto();
-  virtual bool dPhiJetMETcut(vector<int> jets);
+  virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets);
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
