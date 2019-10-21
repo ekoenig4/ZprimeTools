@@ -268,9 +268,10 @@ def plotVariable(samples,variable):
     c.SaveAs(directory+"/datamc_"+samples.varname+".png")
 ###################################################################
     
-def plotter():
+def plotter(args=[]):
     samples = plot.datamc()
-    for variable in samples.args:
+    if not any(args): args = samples.args
+    for variable in args:
         plotVariable(samples,variable)
 ###################################################################
     
