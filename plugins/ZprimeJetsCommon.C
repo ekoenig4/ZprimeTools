@@ -10,7 +10,6 @@ void ZprimeJetsCommon::SetScalingHistos() {
   if (sample.isW_or_ZJet()) {
     //This is the root file with EWK Corrections
     TFile* f_kfactor_16 = TFile::Open("RootFiles/kfactors.root");
-    TFile* f_kfactor_24bins_17 = TFile::Open("RootFiles/kfactor_24bins.root");
     TFile* f_nlo_qcd_17 = TFile::Open("RootFiles/2017_gen_v_pt_stat1_qcd_sf.root");
     TFile* f_nnlo_qcd_17 = TFile::Open("RootFiles/lindert_qcd_nnlo_sf.root");
 

@@ -103,11 +103,11 @@ float ZprimeJetsClass::getSF(int lepindex_leading, int lepindex_subleading) {
   // cout<<"subleadingElePt = " << elePt->at(lepindex_subleading) <<" leadingEleEta = " << eleEta->at(lepindex_subleading) << endl;
   
   float leadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",leadingElePt,leadingEleEta);
-  float leadingEleEffSF_corr= th2fmap.getBin("eleIDSD_tight",leadingElePt,leadingEleEta);
+  float leadingEleEffSF_corr= th2fmap.getBin("eleIDSF_tight",leadingElePt,leadingEleEta);
   float leadingEleTriggSF = EletriggerSF(elePt->at(lepindex_leading),eleEta->at(lepindex_leading));
   
   float subleadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",subleadingElePt,subleadingEleEta);
-  float subleadingEleEffSF_corr= th2fmap.getBin("eleIDSD_tight",subleadingElePt,subleadingEleEta);
+  float subleadingEleEffSF_corr= th2fmap.getBin("eleIDSF_tight",subleadingElePt,subleadingEleEta);
   float subleadingEleTriggSF = EletriggerSF(elePt->at(lepindex_subleading),eleEta->at(lepindex_subleading));
   // cout<<"leadingEleTriggSF = " << leadingEleTriggSF << endl;
   // cout<<"subleadingEleTriggSF = " << subleadingEleTriggSF << endl;
