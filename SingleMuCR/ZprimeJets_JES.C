@@ -1,6 +1,6 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
-void ZprimeJetsClass::JetEnergyScale(double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(float start_weight) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
@@ -14,14 +14,14 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   
   vector<int> jetCandNorm;
   for(int cand : jetCand) jetCandNorm.push_back(cand);
-  vector<double> jetPtNorm;
-  for (double pt : (*jetPt)) jetPtNorm.push_back(pt);
-  double pfMETNorm = pfMET;
-  double pfMETPhiNorm = pfMETPhi;
+  vector<float> jetPtNorm;
+  for (float pt : (*jetPt)) jetPtNorm.push_back(pt);
+  float pfMETNorm = pfMET;
+  float pfMETPhiNorm = pfMETPhi;
 
   int lepindexNorm = lepindex;
-  double recoilNorm = recoil;
-  double recoilPhiNorm = recoilPhi;
+  float recoilNorm = recoil;
+  float recoilPhiNorm = recoilPhi;
   
   
   int unclist[2] = {1,-1};
@@ -33,7 +33,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
     j1PFConsPhi .clear();
     j1PFConsPID .clear();
 
-    double event_weight = start_weight;
+    float event_weight = start_weight;
 
     for (int i = 0; i < nJet; i++)
       jetPt->at(i) = jetPtNorm[i]*(1+unc*jetJECUnc->at(i));
@@ -62,8 +62,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	  vector<int> looseMu = muon_veto_looseID(jetCand[0],0,10.);
 	  
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
-	    if (!sample.isData && applySF) {
-	      double sf = getSF(mulist[0]);
+	    if (!sample.isData) {
+	      float sf = getSF(mulist[0]);
 	      event_weight *= sf;
 	    }
 	    lepindex = mulist[0];
@@ -73,7 +73,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	    TLorentzVector met_4vec;
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
 	    TLorentzVector leptoMET_4vec = lep_4vec + met_4vec;
-	    double leptoMET = fabs(leptoMET_4vec.Pt());
+	    float leptoMET = fabs(leptoMET_4vec.Pt());
 	    recoilPhi = leptoMET_4vec.Phi();
 	    recoil = leptoMET;
 	    
@@ -85,7 +85,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (lepMET_MT < 160) {
-		  double metcut = (fabs(pfMET - caloMET))/recoil;
+		  float metcut = (fabs(pfMET - caloMET))/recoil;
 		  
 		  if (metcut < 0.5) {
 		    

@@ -1,7 +1,7 @@
 #define ZprimeJetsClass_cxx
 #include "ZprimeJetsClass.h"
 
-void ZprimeJetsClass::JetEnergyScale(double start_weight) {
+void ZprimeJetsClass::JetEnergyScale(float start_weight) {
   // 2 Histograms
   //     up  dn
   //jes  0   1
@@ -15,17 +15,17 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
   
   vector<int> jetCandNorm;
   for(int cand : jetCand) jetCandNorm.push_back(cand);
-  vector<double> jetPtNorm;
-  for (double pt : (*jetPt)) jetPtNorm.push_back(pt);
-  double pfMETNorm = pfMET;
-  double pfMETPhiNorm = pfMETPhi;
+  vector<float> jetPtNorm;
+  for (float pt : (*jetPt)) jetPtNorm.push_back(pt);
+  float pfMETNorm = pfMET;
+  float pfMETPhiNorm = pfMETPhi;
 
   int lepindex_leadingNorm = lepindex_leading;
   int lepindex_subleadingNorm = lepindex_subleading;
-  double dilepton_ptNorm = dilepton_pt;
-  double dilepton_massNorm = dilepton_mass;
-  double recoilNorm = recoil;
-  double recoilPhiNorm = recoilPhi;
+  float dilepton_ptNorm = dilepton_pt;
+  float dilepton_massNorm = dilepton_mass;
+  float recoilNorm = recoil;
+  float recoilPhiNorm = recoilPhi;
   
   
   int unclist[2] = {1,-1};
@@ -37,7 +37,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
     j1PFConsPhi .clear();
     j1PFConsPID .clear();
 
-    double event_weight = start_weight;
+    float event_weight = start_weight;
 
     for (int i = 0; i < nJet; i++)
       jetPt->at(i) = jetPtNorm[i]*(1+unc*jetJECUnc->at(i));
@@ -90,8 +90,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	    }
                     
 	    if(elePairSet){
-	      if (!sample.isData && applySF) {
-		double sf = getSF(lepindex_leading,lepindex_subleading);
+	      if (!sample.isData) {
+		float sf = getSF(lepindex_leading,lepindex_subleading);
 		event_weight *= sf;
 	      }
 	      TLorentzVector ll = e1+e2;
@@ -101,8 +101,8 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 	      TLorentzVector met_4vec;
 	      met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
 	      TLorentzVector leptoMET_4vec = ll+met_4vec;
-	      Double_t leptoMET = fabs(leptoMET_4vec.Pt());
-	      Double_t leptoMET_phi = leptoMET_4vec.Phi();
+	      Float_t leptoMET = fabs(leptoMET_4vec.Pt());
+	      Float_t leptoMET_phi = leptoMET_4vec.Phi();
 	      recoil = leptoMET;
 	      
 	      if (leptoMET>250){
@@ -112,7 +112,7 @@ void ZprimeJetsClass::JetEnergyScale(double start_weight) {
 		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
 		  
 		  if(mulist.size() == 0){
-		    double metcut = (fabs(pfMET-caloMET))/recoil;
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		    
 		    if(metcut < 0.5){
 		      

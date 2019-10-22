@@ -37,8 +37,7 @@ public :
   static const int maxHisto = 70;
   TTree* tree;
 
-  static const bool debug = true;
-  static const bool applyPU = true;
+  static const bool debug = false;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -57,19 +56,27 @@ public :
     inline string getName() { return name[type]; }
   } sample;
   
-  struct HistoCollection : public map<string,TH1F*> {
+  struct TH1FCollection : public map<string,TH1F*> {
     float getBin(string name,float x) {
       TH1F* histo = (*this)[name];
       return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
     }
-  } histomap;
+  } th1fmap;
+
+  struct TH2FCollection : public map<string,TH2F*> {
+    float getBin(string name,float x,float y) {
+      TH2F* histo = (*this)[name];
+      return histo->GetBinContent( histo->GetXaxis()->FindBin(x),histo->GetYaxis()->FindBin(y) );
+    }
+  } th2fmap;
+  
   ScaleUncCollection* scaleUncs;
   ShapeUncCollection* shapeUncs;
   
   float bosonPt;
 
-  float weight;
-  float noweight;
+  float weight,weight_nogen,weight_QCDSF,weight_16K;
+  float kfactor,kfactor_16,qcdSF;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
@@ -89,7 +96,7 @@ public :
   //getPFCandidates
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
    
-  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pileup,*h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_nJets[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto];
+  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_nJets[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto];
   TH1F *h_j1Pt[maxHisto], *h_j1Eta[maxHisto], *h_j1Phi[maxHisto], *h_j1etaWidth[maxHisto], *h_j1phiWidth[maxHisto],*h_j1nCons[maxHisto], *h_PF123PtFraction[maxHisto],*h_Pt123[maxHisto],*h_j1TotConsPt[maxHisto]; 
   TH1F *h_j1TotPFCands[maxHisto], *h_j1ChPFCands[maxHisto], *h_j1NeutPFCands[maxHisto], *h_j1GammaPFCands[maxHisto], *h_j1CHF[maxHisto], *h_j1NHF[maxHisto], *h_j1ChMultiplicity[maxHisto], *h_j1NeutMultiplicity[maxHisto],*h_j1Mt[maxHisto];
   TH1F *h_j1Mass[maxHisto],*h_j1JEC[maxHisto];
@@ -103,8 +110,8 @@ public :
   TH1F *h_bChNemPtFrac[maxHisto],*h_bPF123PtFraction[maxHisto];
   TH1F *h_eChNemPtFrac[maxHisto],*h_ePF123PtFraction[maxHisto];  
   
-  TH1F *h_genHT[maxHisto],*h_puTrueReWeight[maxHisto],*h_puTrueNoWeight[maxHisto],*h_eventWeight[maxHisto];
-  TH1F *h_genZPt,*h_genZPtwK,*h_genWPt,*h_genWPtwK;
+  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_genBosonPt,*h_genBosonPtw16K,*h_genBosonPtw17K,*h_genBosonPtwQCDSF;
   TH2F *h_j1EtaPhi[maxHisto];
   
   TH1D *h_cutflow;
@@ -823,28 +830,35 @@ public :
   virtual void     Init(TTree *tree);
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
+  virtual void SetScalingHistos();
   virtual void BookCommon(int i,string histname);
-  virtual void fillCommon(int histoNumber,double event_weight);
-  virtual void fillHistos(int histoNumber,double event_weight) { /*Should be overriden by region*/ };
+  virtual void fillCommon(int histoNumber,float event_weight);
+  virtual void fillHistos(int histoNumber,float event_weight) { /*Should be overriden by region*/ };
   virtual float DeltaPhi(float phi1, float phi2);
-  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
-  virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
+  virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
+  virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
   virtual bool btagVeto();
   virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets);
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
   virtual void AllPFCand(vector<int> jetCand);
-  virtual double getKfactor(double bosonPt);
+  virtual void ApplyPileup(float &event_weight);
+  virtual void ApplyKFactor(float &event_weight);
+  virtual void ApplySF(float &event_weight,float sf);
+  virtual void SetBoson(int PID);
+  virtual void SetKFactors(float bosonPt);
+  virtual float getKFactor(float bosonPt);
   virtual bool inclusiveCut();
-  virtual bool getEleHEMVeto(double elePtCut);
-  virtual bool getJetHEMVeto(double jetPtCut);
+  virtual bool getEleHEMVeto(float elePtCut);
+  virtual bool getJetHEMVeto(float jetPtCut);
   virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
+  virtual void initVars();
   
-  virtual void JetEnergyScale(double start_weight) { /*Should be overriden by region*/ };
-  virtual void PFUncertainty(double event_weight);
-  virtual void QCDVariations(double event_weight);
-  virtual void PSWeights(double event_weight);
+  virtual void JetEnergyScale(float start_weight) { /*Should be overriden by region*/ };
+  virtual void PFUncertainty(float event_weight);
+  virtual void QCDVariations(float event_weight);
+  virtual void PSWeights(float event_weight);
 };
 
 #endif

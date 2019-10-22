@@ -45,30 +45,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  double nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
+  float nTotalEvents,nFilters, nHLT, nMET200, nMETcut,nLeptonIDs,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
   nTotalEvents = nFilters = nHLT = nMET200 = nMETcut = nLeptonIDs = nDphiJetMET = nbtagVeto = nJetSelection = eleHEMVeto = 0;
 
-  if (!sample.isData) {
-    //This is the PU histogram obtained from Nick's recipe
-    TFile *weights = TFile::Open("RootFiles/PU_Central.root");
-    TH1F* PU = (TH1F*)weights->Get("pileup");
-    histomap["PU"] = PU;
-    
-    if (sample.isW_or_ZJet()) {
-      //This is the root file with EWK Corrections
-      TFile *file = new TFile("RootFiles/kfactors.root");
-      TH1F *ewkCorrection,*NNLOCorrection;
-      if (sample.type == WJets) {
-	ewkCorrection = (TH1F*)file->Get("EWKcorr/W");
-	NNLOCorrection = (TH1F*)file->Get("WJets_LO/inv_pt");
-      } else {
-	ewkCorrection = (TH1F*)file->Get("EWKcorr/Z");
-	NNLOCorrection = (TH1F*)file->Get("ZJets_LO/inv_pt");
-      }
-      histomap["ewkCorrection"] = ewkCorrection;
-      histomap["NNLOCorrection"] = NNLOCorrection;
-    }
-  }
+  if (!sample.isData) SetScalingHistos();
 
   if (maxEvents != -1LL && nentries > maxEvents)
     nentriesToCheck = maxEvents;
@@ -80,59 +60,24 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-    jetCand     .clear();
-    j1PFConsEt  .clear();
-    j1PFConsPt  .clear();
-    j1PFConsEta .clear();
-    j1PFConsPhi .clear();
-    j1PFConsPID .clear();
+    initVars();
 
-    double event_weight = 1.;
-    double gen_weight = 1;
-    double nogen = 1;
-    noweight = 1;
+    float event_weight = 1.;
+    
     if (!sample.isData) {
-      //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
-      //binContent as event_weight
-      if (applyPU) {
-	float pileup = histomap.getBin("PU",puTrue->at(0));
-	h_pileup->Fill(pileup);
-	event_weight = pileup;
-	gen_weight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
-	event_weight *= gen_weight;
-	noweight *= gen_weight;
-	nogen *= pileup;
-      }
+      ApplyPileup(event_weight);
       if(sample.isW_or_ZJet()) {
-	//check which mc particle is W boson
-	for(int i=0; i<nMC;i++){
-	  if((*mcPID)[i] == sample.PID && mcStatusFlag->at(i)>>2&1 == 1){
-	    int bosonPID = (*mcPID)[i];
-	    bosonPt = (*mcPt)[i];
-	    double kfactor = getKfactor(bosonPt);
-	    if ( sample.PID == 23 ) {
-	      h_genZPt->Fill(bosonPt,gen_weight);
-	      h_genZPtwK->Fill(bosonPt,gen_weight*kfactor);
-	    }
-	    if ( sample.PID == 24 ) {
-	      h_genWPt->Fill(bosonPt,gen_weight);
-	      h_genWPtwK->Fill(bosonPt,gen_weight*kfactor);
-	    }
-	    event_weight *= kfactor;
-	    noweight *= kfactor;
-	    nogen *= kfactor;
-	  }
-	}
+	SetBoson(sample.PID);
+	ApplyKFactor(event_weight);
       }
     }
 
-    double weightNorm = event_weight;
+    float weightNorm = event_weight;
 
     jetCand = getJetCand(200,2.5,0.8,0.1);
     AllPFCand(jetCand);
-	
-    nTotalEvents+=gen_weight;
-    fillHistos(0,gen_weight);
+    nTotalEvents+=genWeight;
+    fillHistos(0,genWeight);
     for (int bit = 0; bit < 8; bit++)
       if (metFilters >> bit & 1 == 1)
 	h_metFilters->Fill(bit + 1,event_weight);
@@ -152,7 +97,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  if (pfMET > 250) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
-	    double metcut = (fabs(pfMET-caloMET)/pfMET);
+	    float metcut = (fabs(pfMET-caloMET)/pfMET);
 	    h_metcut->Fill(metcut,event_weight);
 	    
 	    if (metcut < 0.5) {
@@ -167,9 +112,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  nbtagVeto+=event_weight;
 		  fillHistos(7,event_weight);
 		  vector<int> jetveto = JetVetoDecision();
-		  double minDPhiJetMET_first4 = TMath::Pi();
+		  float minDPhiJetMET_first4 = TMath::Pi();
 		  for (int i = 0; i < jetveto.size(); i++) {
-		    double dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
+		    float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
 		    if (dPhiJetMet < minDPhiJetMET_first4) {
 		      if (i < 4)
 			minDPhiJetMET_first4 = dPhiJetMet;
@@ -182,7 +127,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    fillHistos(8,event_weight);
 		    if (getEleHEMVeto(40)) {
 		      eleHEMVeto+=event_weight;
-		      PSWeights(nogen); // 44 Histograms
+
+		      // Use weight without genWeight applied
+		      PSWeights(weight_nogen); // 44 Histograms
 		      QCDVariations(event_weight);
 		      fillHistos(9,event_weight);
 
@@ -261,7 +208,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   }
 }
 
-void ZprimeJetsClass::fillHistos(int histoNumber,double event_weight) {
+void ZprimeJetsClass::fillHistos(int histoNumber,float event_weight) {
   fillCommon(histoNumber,event_weight);
   weight = event_weight;
   if (histoNumber == bHisto) tree->Fill();

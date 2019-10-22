@@ -1,7 +1,7 @@
 #define ZprimeJetsCommon_cxx
 #include "ZprimeJetsCommon.h"
 
-void ZprimeJetsCommon::QCDVariations(double event_weight) {
+void ZprimeJetsCommon::QCDVariations(float event_weight) {
   /* 14 Histograms
      up  dn
      d1K_NLO     11  12
@@ -29,8 +29,8 @@ void ZprimeJetsCommon::QCDVariations(double event_weight) {
 	file = TFile::Open("RootFiles/DYJets_NLO_EWK.root");
 	prefix = "eej_pTV_";
       }
-      histomap["K_NLO_QCD"] = (TH1F*)file->Get( (prefix+"K_NLO").c_str() );
-      histomap["K_EW"]      = (TH1F*)file->Get( (prefix+"kappa_EW").c_str() );
+      th1fmap["K_NLO_QCD"] = (TH1F*)file->Get( (prefix+"K_NLO").c_str() );
+      th1fmap["K_EW"]      = (TH1F*)file->Get( (prefix+"kappa_EW").c_str() );
     }
     
     for (int i = 0; i < 7; i++) {
@@ -48,8 +48,8 @@ void ZprimeJetsCommon::QCDVariations(double event_weight) {
     
     if (sample.isW_or_ZJet()) {
       float unc = scaleUncs->getBin(name,bosonPt);
-      float k_qcd = histomap.getBin("K_NLO_QCD",bosonPt);
-      float k_ewk = histomap.getBin("K_EW",bosonPt);
+      float k_qcd = th1fmap.getBin("K_NLO_QCD",bosonPt);
+      float k_ewk = th1fmap.getBin("K_EW",bosonPt);
       if ( name.find("NNLO") != string::npos || name.find("EWK") != string::npos ) unc *= k_ewk;
       else if ( name.find("QCD") != string::npos ) unc *= k_qcd;
       

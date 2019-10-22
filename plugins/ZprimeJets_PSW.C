@@ -1,7 +1,7 @@
 #define ZprimeJetsCommon_cxx
 #include "ZprimeJetsCommon.h"
 
-void ZprimeJetsCommon::PSWeights(double event_weight) {
+void ZprimeJetsCommon::PSWeights(float event_weight) {
   /* 44 Histograms
      up  dn
      isrRed        0   2

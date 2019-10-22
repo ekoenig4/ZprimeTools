@@ -1,6 +1,40 @@
 #define ZprimeJetsCommon_cxx
 #include "ZprimeJetsCommon.h"
 
+void ZprimeJetsCommon::SetScalingHistos() {
+  //This is the PU histogram obtained from Nick's recipe
+  TFile *weights = TFile::Open("RootFiles/PU_Central.root");
+  TH1F* PU = (TH1F*)weights->Get("pileup");
+  th1fmap["PU"] = PU;
+
+  if (sample.isW_or_ZJet()) {
+    //This is the root file with EWK Corrections
+    TFile* f_kfactor_16 = TFile::Open("RootFiles/kfactors.root");
+    TFile* f_nlo_qcd_17 = TFile::Open("RootFiles/2017_gen_v_pt_stat1_qcd_sf.root");
+    TFile* f_nnlo_qcd_17 = TFile::Open("RootFiles/lindert_qcd_nnlo_sf.root");
+
+    TH1F *LO_QCD,*NLO_QCD_EWK,*NNLO_QCD,*NLO_QCD,*NLO_EWK;
+    if ( sample.type == WJets ) {
+      NLO_EWK = (TH1F*)TFile::Open("RootFiles/merged_kfactors_wjets.root")->Get("kfactor_monojet_ewk");
+      NLO_QCD = (TH1F*)f_nlo_qcd_17->Get("wjet_dilep");
+      NNLO_QCD = (TH1F*)f_nnlo_qcd_17->Get("evj");
+      LO_QCD = (TH1F*)f_kfactor_16->Get("WJets_LO/inv_pt");
+      NLO_QCD_EWK = (TH1F*)f_kfactor_16->Get("EWKcorr/W");
+    } else {
+      NLO_EWK = (TH1F*)TFile::Open("RootFiles/merged_kfactors_zjets.root")->Get("kfactor_monojet_ewk");
+      NLO_QCD = (TH1F*)f_nlo_qcd_17->Get("dy_dilep");
+      NNLO_QCD = (TH1F*)f_nnlo_qcd_17->Get("eej");
+      LO_QCD = (TH1F*)f_kfactor_16->Get("ZJets_LO/inv_pt");
+      NLO_QCD_EWK = (TH1F*)f_kfactor_16->Get("EWKcorr/Z");
+    }
+    th1fmap["LO_QCD"] = LO_QCD;
+    th1fmap["NLO_QCD_EWK"] = NLO_QCD_EWK;
+    th1fmap["NNLO_QCD"] = NNLO_QCD;
+    th1fmap["NLO_QCD"] = NLO_QCD;
+    th1fmap["NLO_EWK"] = NLO_EWK;
+  }
+}
+
 void ZprimeJetsCommon::BookCommon(int i, string histname) {
   
   float MtBins[51]={180.,200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
@@ -26,11 +60,12 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
     h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
     h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
     h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
-    h_pileup = new TH1F("h_pileup","h_pileup;Pileup Weight",50,0,2); h_pileup->Sumw2();
-    h_genZPt = new TH1F("h_genZPt","genZPt;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPt->Sumw2();
-    h_genZPtwK = new TH1F("h_genZPtwK","genZPtwK;Gen Z Boson P_{T}",24,BosonPtBins); h_genZPtwK->Sumw2();
-    h_genWPt = new TH1F("h_genWPt","genWPt;Gen W Boson P_{T}",24,BosonPtBins); h_genWPt->Sumw2();
-    h_genWPtwK = new TH1F("h_genWPtwK","genWPtwK;Gen W Boson P_{T}",24,BosonPtBins); h_genWPtwK->Sumw2();
+    h_puTrueUnWeight = new TH1F("puTrueUnWeight","puTrue;true number of iteractions",100,0,100);h_puTrueUnWeight->Sumw2();
+    h_puTrueReWeight = new TH1F("puTrueReWeight","puTrue;true number of iteractions",100,0,100);h_puTrueReWeight->Sumw2();
+    h_genBosonPt = new TH1F("h_genBosonPt","genBosonPt;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPt->Sumw2();
+    h_genBosonPtw16K = new TH1F("h_genBosonPtw16K","genBosonPtw16K;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPtw16K->Sumw2();
+    h_genBosonPtw17K = new TH1F("h_genBosonPtw17K","genBosonPtw17K;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPtw17K->Sumw2();
+    h_genBosonPtwQCDSF = new TH1F("h_genBosonPtwQCDSF","genBosonPtwQCDSF;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPtwQCDSF->Sumw2();
   
     // Uncertainty Plots
     h_EcalPtUnc=new TH2F("EcalPtUnc","ECAL P_{T} Uncertainty;Photon P_{T} (GeV);Uncertainty",50,0.,2500.,50,0.,1.);
@@ -42,8 +77,6 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
   } else {
 
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_puTrueNoWeight[i] = new TH1F(("puTrueNoWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueNoWeight[i]->Sumw2();
-    h_puTrueReWeight[i] = new TH1F(("puTrueReWeight"+histname).c_str(),"puTrue;true number of iteractions",100,0,100);h_puTrueReWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i]->Sumw2(); 
@@ -98,12 +131,10 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
   }
 }
 
-void ZprimeJetsCommon::fillCommon(int histoNumber,double event_weight) {
+void ZprimeJetsCommon::fillCommon(int histoNumber,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
-    h_puTrueNoWeight[histoNumber]->Fill(puTrue->at(0),noweight);
-    h_puTrueReWeight[histoNumber]->Fill(puTrue->at(0),event_weight);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
@@ -169,7 +200,7 @@ void ZprimeJetsCommon::getPt123Frac() {
   }
   // Neutral, Charged, Photon
   int HadronID[3] = {130,211,22};
-  double HadronPtFirst3[3] = {0,0,0};
+  float HadronPtFirst3[3] = {0,0,0};
   
   for (int i = 0; i < j1PFConsPID.size(); i++) {
     if (i < 3)
@@ -232,10 +263,10 @@ void ZprimeJetsCommon::AllPFCand(vector<int> jetCand) {
 
 
 //Function to calculate regular deltaR separate from jet width variable 'dR'
-double ZprimeJetsCommon::deltaR(double eta1, double phi1, double eta2, double phi2) {
-  double deltaeta = abs(eta1 - eta2);
-  double deltaphi = DeltaPhi(phi1, phi2);
-  double deltar = sqrt(deltaeta*deltaeta + deltaphi*deltaphi);
+float ZprimeJetsCommon::deltaR(float eta1, float phi1, float eta2, float phi2) {
+  float deltaeta = abs(eta1 - eta2);
+  float deltaphi = DeltaPhi(phi1, phi2);
+  float deltar = sqrt(deltaeta*deltaeta + deltaphi*deltaphi);
   return deltar;
 }
 
@@ -265,7 +296,7 @@ float ZprimeJetsCommon::dPhiJetMETmin(vector<int> jets) {
   return dPhimin;
 }
 
-vector<int> ZprimeJetsCommon::getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut) {
+vector<int> ZprimeJetsCommon::getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut) {
   vector<int> tmpCand;
   tmpCand.clear();
   for(int p=0;p<nJet;p++){
@@ -329,12 +360,64 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
   return passes;
 }
 
-double ZprimeJetsCommon::getKfactor(double bosonPt) {
-  double EWK_corrected_weight = histomap.getBin("ewkCorrection",bosonPt);
-  double NNLO_weight = histomap.getBin("NNLOCorrection",bosonPt);
-  double kfactor = 1;
-  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
-    kfactor = (EWK_corrected_weight/NNLO_weight);
+void ZprimeJetsCommon::SetBoson(int PID) {
+  bosonPt = 0;
+  for (int i = 0; i < nMC; i++){
+    if((*mcPID)[i] == PID && mcStatusFlag->at(i)>>2&1 == 1){
+      bosonPt = (*mcPt)[i];
+      SetKFactors(bosonPt);
+
+      h_genBosonPt->Fill(bosonPt,genWeight);
+      h_genBosonPtw16K->Fill(bosonPt,genWeight*kfactor_16);
+      h_genBosonPtw17K->Fill(bosonPt,genWeight*kfactor);
+      h_genBosonPtwQCDSF->Fill(bosonPt,genWeight*qcdSF);
+    }
+  }
+}
+
+void ZprimeJetsCommon::ApplyPileup(float &event_weight) {
+  //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
+  //binContent as event_weight
+  float pileup = th1fmap.getBin("PU",puTrue->at(0));
+  genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
+  event_weight *= pileup * genWeight;
+  weight_QCDSF *= pileup * genWeight;
+  weight_16K  *= pileup * genWeight;
+  weight_nogen *= pileup;
+
+  h_puTrueUnWeight->Fill(puTrue->at(0),genWeight);
+  h_puTrueReWeight->Fill(puTrue->at(0),event_weight);
+}
+
+void ZprimeJetsCommon::ApplySF(float &event_weight,float sf) {
+  event_weight *= sf;
+  weight_QCDSF *= sf;
+  weight_16K *= sf;
+  weight_nogen *= sf;
+}
+
+void ZprimeJetsCommon::ApplyKFactor(float &event_weight) {
+  event_weight *= kfactor;
+  weight_QCDSF *= qcdSF;
+  weight_16K *= kfactor_16;
+  weight_nogen *= kfactor;
+}
+
+void ZprimeJetsCommon::SetKFactors(float bosonPt) {
+  float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
+  float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
+  float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
+  kfactor_16 = getKFactor(bosonPt);
+  qcdSF = nlo_qcd;
+  kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+}
+
+float ZprimeJetsCommon::getKFactor(float bosonPt) {
+  float nlo_qcd_ewk = th1fmap.getBin("NLO_QCD_EWK",bosonPt);
+  float lo_qcd = th1fmap.getBin("LO_QCD",bosonPt);
+  float kfactor = 1;
+  if(nlo_qcd_ewk!=0 && lo_qcd!=0)
+    kfactor = (nlo_qcd_ewk/lo_qcd);
   else
     kfactor= sample.type == WJets ? 1.21 : 1.23;
   h_kfactor->Fill(kfactor);
@@ -347,7 +430,7 @@ bool ZprimeJetsCommon::inclusiveCut() {
   return true;
 }
 
-bool ZprimeJetsCommon::getJetHEMVeto(double jetPtCut){
+bool ZprimeJetsCommon::getJetHEMVeto(float jetPtCut){
 
   bool pass = true;
   for(int p=0;p<nJet;p++)
@@ -362,7 +445,7 @@ bool ZprimeJetsCommon::getJetHEMVeto(double jetPtCut){
   return pass;
 }
 
-bool ZprimeJetsCommon::getEleHEMVeto(double elePtCut){
+bool ZprimeJetsCommon::getEleHEMVeto(float elePtCut){
 
   bool pass = true;
   for(int p=0;p<nEle;p++)
@@ -373,4 +456,19 @@ bool ZprimeJetsCommon::getEleHEMVeto(double elePtCut){
     }
 
   return pass;
+}
+
+void ZprimeJetsCommon::initVars() {
+    jetCand     .clear();
+    j1PFConsPt  .clear();
+    j1PFConsEta .clear();
+    j1PFConsPhi .clear();
+    j1PFConsPID .clear();
+
+    weight = weight_nogen = weight_QCDSF = weight_16K = 1;
+    kfactor = kfactor_16 = qcdSF = 1;
+
+    bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
+    ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
+    TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
 }
