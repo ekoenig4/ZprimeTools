@@ -55,8 +55,12 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    float metcut = (fabs(pfMET-caloMET))/pfMET;
 	      
 	    if(metcut<0.5) {
-		
-	      if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
+
+	      auto elelist = electron_veto_looseID(jetCand[0],10);
+	      auto mulist = muon_veto_looseID(jetCand[0],10);
+	      auto pholist = photon_veto_looseID(jetCand[0],15);
+	      auto taulist = tau_veto_looseID(jetCand[0],18);
+	      if( elelist.size() == 0 && mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0 ) {
 		
 		if(btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();

@@ -64,11 +64,10 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	if(jetCand.size()>0) {
 	  //CR code
 	  //At least one of the two electrons passes the tight selection
-	  vector<int> elelist = electron_veto_looseID(jetCand[0],0,0,10.0);
 	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],0,0,10.0);
+	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],10.0);
 	  
-	  if(elelist.size() == 2) {
+	  if(elelist_subleading.size() == 2) {
 	    bool elePairSet = false;
 	    TLorentzVector e1, e2;
                     
@@ -106,8 +105,10 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 		
 		if(dilepton_mass > 60 && dilepton_mass < 120) {
 		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
+		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
+		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
 		  
-		  if(mulist.size() == 0) {
+		  if(mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		    
 		    if(metcut<0.5) {
 		      

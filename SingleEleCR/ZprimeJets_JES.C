@@ -60,7 +60,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	  //CR code
 	  //At least one of the one electrons passes the tight selection
 	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> looseEles = electron_veto_looseID(jetCand[0],0,10.0);
+	  vector<int> looseEles = electron_veto_looseID(jetCand[0],10.0);
 	  
 	  if(elelist.size() == 1 && looseEles.size() == 1) {
 	    lepindex = elelist[0];
@@ -77,8 +77,10 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    
 	    if (recoil>250) {
 	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.0);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
 	      
-	      if(mulist.size() == 0) {
+	      if(mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		Float_t dPhi_lepMET = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
 		

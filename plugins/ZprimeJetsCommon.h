@@ -99,10 +99,10 @@ public :
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
-  vector<float>j1PFConsEt;
-  vector<float>j1PFConsPt;
-  vector<float>j1PFConsEta;
-  vector<float>j1PFConsPhi;
+  vector<double>j1PFConsEt;
+  vector<double>j1PFConsPt;
+  vector<double>j1PFConsEta;
+  vector<double>j1PFConsPhi;
   vector<int>j1PFConsPID;
   float j1TotConsPt;
 
@@ -363,6 +363,78 @@ public :
   vector<float>   *pfHFEta;
   vector<float>   *pfHFPhi;
   vector<float>   *pfHFIso;
+  Int_t           nTau;
+  vector<bool>    *taupfTausDiscriminationByDecayModeFinding;
+  vector<bool>    *taupfTausDiscriminationByDecayModeFindingNewDMs;
+  vector<bool>    *tauByMVA6VLooseElectronRejection;
+  vector<bool>    *tauByMVA6LooseElectronRejection;
+  vector<bool>    *tauByMVA6MediumElectronRejection;
+  vector<bool>    *tauByMVA6TightElectronRejection;
+  vector<bool>    *tauByMVA6VTightElectronRejection;
+  vector<bool>    *tauByLooseMuonRejection3;
+  vector<bool>    *tauByTightMuonRejection3;
+  vector<bool>    *tauByLooseCombinedIsolationDeltaBetaCorr3Hits;
+  vector<bool>    *tauByMediumCombinedIsolationDeltaBetaCorr3Hits;
+  vector<bool>    *tauByTightCombinedIsolationDeltaBetaCorr3Hits;
+  vector<float>   *tauCombinedIsolationDeltaBetaCorrRaw3Hits;
+  vector<float>   *tauByIsolationMVArun2v1DBnewDMwLTraw;
+  vector<float>   *tauByIsolationMVArun2v1DBoldDMwLTraw;
+  vector<float>   *tauByIsolationMVArun2v1PWnewDMwLTraw;
+  vector<float>   *tauByIsolationMVArun2v1PWoldDMwLTraw;
+  vector<bool>    *tauByVTightIsolationMVArun2v1DBnewDMwLT;
+  vector<bool>    *tauByVTightIsolationMVArun2v1DBoldDMwLT;
+  vector<bool>    *tauByVTightIsolationMVArun2v1PWnewDMwLT;
+  vector<bool>    *tauByVTightIsolationMVArun2v1PWoldDMwLT;
+  vector<bool>    *tauByTightIsolationMVArun2v1DBnewDMwLT;
+  vector<bool>    *tauByTightIsolationMVArun2v1DBoldDMwLT;
+  vector<bool>    *tauByTightIsolationMVArun2v1PWnewDMwLT;
+  vector<bool>    *tauByTightIsolationMVArun2v1PWoldDMwLT;
+  vector<bool>    *tauByMediumIsolationMVArun2v1DBnewDMwLT;
+  vector<bool>    *tauByMediumIsolationMVArun2v1DBoldDMwLT;
+  vector<bool>    *tauByMediumIsolationMVArun2v1PWnewDMwLT;
+  vector<bool>    *tauByMediumIsolationMVArun2v1PWoldDMwLT;
+  vector<bool>    *tauByLooseIsolationMVArun2v1DBnewDMwLT;
+  vector<bool>    *tauByLooseIsolationMVArun2v1DBoldDMwLT;
+  vector<bool>    *tauByLooseIsolationMVArun2v1PWnewDMwLT;
+  vector<bool>    *tauByLooseIsolationMVArun2v1PWoldDMwLT;
+  vector<bool>    *tauByVLooseIsolationMVArun2v1DBnewDMwLT;
+  vector<bool>    *tauByVLooseIsolationMVArun2v1DBoldDMwLT;
+  vector<bool>    *tauByVLooseIsolationMVArun2v1PWnewDMwLT;
+  vector<bool>    *tauByVLooseIsolationMVArun2v1PWoldDMwLT;
+  vector<float>   *tauEta;
+  vector<float>   *tauPhi;
+  vector<float>   *tauPt;
+  vector<float>   *tauEt;
+  vector<float>   *tauCharge;
+  vector<float>   *tauP;
+  vector<float>   *tauPx;
+  vector<float>   *tauPy;
+  vector<float>   *tauPz;
+  vector<float>   *tauVz;
+  vector<float>   *tauEnergy;
+  vector<float>   *tauMass;
+  vector<float>   *tauDxy;
+  vector<float>   *tauZImpact;
+  vector<int>     *tauDecayMode;
+  vector<bool>    *tauLeadChargedHadronExists;
+  vector<float>   *tauLeadChargedHadronEta;
+  vector<float>   *tauLeadChargedHadronPhi;
+  vector<float>   *tauLeadChargedHadronPt;
+  vector<float>   *tauChargedIsoPtSum;
+  vector<float>   *tauNeutralIsoPtSum;
+  vector<float>   *tauPuCorrPtSum;
+  vector<int>     *tauNumSignalPFChargedHadrCands;
+  vector<int>     *tauNumSignalPFNeutrHadrCands;
+  vector<int>     *tauNumSignalPFGammaCands;
+  vector<int>     *tauNumSignalPFCands;
+  vector<int>     *tauNumIsolationPFChargedHadrCands;
+  vector<int>     *tauNumIsolationPFNeutrHadrCands;
+  vector<int>     *tauNumIsolationPFGammaCands;
+  vector<int>     *tauNumIsolationPFCands;
+  vector<float>   *taufootprintCorrection;
+  vector<float>   *tauphotonPtSumOutsideSignalCone;
+  vector<float>   *taudz;
+  vector<float>   *taudxy;
   Int_t           nMu;
   vector<float>   *muPt;
   vector<float>   *muEn;
@@ -405,10 +477,10 @@ public :
   vector<double>  *jetnCHPions;
   vector<double>  *jetnMisc;
   vector<vector<int> > *jetMiscPID;
-  vector<vector<float> > *JetsPFConsPt;
-  vector<vector<float> > *JetsPFConsEta;
-  vector<vector<float> > *JetsPFConsPhi;
-  vector<vector<float> > *JetsPFConsEt;
+  vector<vector<double> > *JetsPFConsPt;
+  vector<vector<double> > *JetsPFConsEta;
+  vector<vector<double> > *JetsPFConsPhi;
+  vector<vector<double> > *JetsPFConsEt;
   vector<vector<int> > *JetsPFConsPID;
   vector<float>   *jetPt;
   vector<float>   *jetEn;
@@ -744,6 +816,78 @@ public :
   TBranch        *b_pfHFEta;   //!
   TBranch        *b_pfHFPhi;   //!
   TBranch        *b_pfHFIso;   //!
+  TBranch        *b_nTau;   //!
+  TBranch        *b_taupfTausDiscriminationByDecayModeFinding;   //!
+  TBranch        *b_taupfTausDiscriminationByDecayModeFindingNewDMs;   //!
+  TBranch        *b_tauByMVA6VLooseElectronRejection;   //!
+  TBranch        *b_tauByMVA6LooseElectronRejection;   //!
+  TBranch        *b_tauByMVA6MediumElectronRejection;   //!
+  TBranch        *b_tauByMVA6TightElectronRejection;   //!
+  TBranch        *b_tauByMVA6VTightElectronRejection;   //!
+  TBranch        *b_tauByLooseMuonRejection3;   //!
+  TBranch        *b_tauByTightMuonRejection3;   //!
+  TBranch        *b_tauByLooseCombinedIsolationDeltaBetaCorr3Hits;   //!
+  TBranch        *b_tauByMediumCombinedIsolationDeltaBetaCorr3Hits;   //!
+  TBranch        *b_tauByTightCombinedIsolationDeltaBetaCorr3Hits;   //!
+  TBranch        *b_tauCombinedIsolationDeltaBetaCorrRaw3Hits;   //!
+  TBranch        *b_tauByIsolationMVArun2v1DBnewDMwLTraw;   //!
+  TBranch        *b_tauByIsolationMVArun2v1DBoldDMwLTraw;   //!
+  TBranch        *b_tauByIsolationMVArun2v1PWnewDMwLTraw;   //!
+  TBranch        *b_tauByIsolationMVArun2v1PWoldDMwLTraw;   //!
+  TBranch        *b_tauByVTightIsolationMVArun2v1DBnewDMwLT;   //!
+  TBranch        *b_tauByVTightIsolationMVArun2v1DBoldDMwLT;   //!
+  TBranch        *b_tauByVTightIsolationMVArun2v1PWnewDMwLT;   //!
+  TBranch        *b_tauByVTightIsolationMVArun2v1PWoldDMwLT;   //!
+  TBranch        *b_tauByTightIsolationMVArun2v1DBnewDMwLT;   //!
+  TBranch        *b_tauByTightIsolationMVArun2v1DBoldDMwLT;   //!
+  TBranch        *b_tauByTightIsolationMVArun2v1PWnewDMwLT;   //!
+  TBranch        *b_tauByTightIsolationMVArun2v1PWoldDMwLT;   //!
+  TBranch        *b_tauByMediumIsolationMVArun2v1DBnewDMwLT;   //!
+  TBranch        *b_tauByMediumIsolationMVArun2v1DBoldDMwLT;   //!
+  TBranch        *b_tauByMediumIsolationMVArun2v1PWnewDMwLT;   //!
+  TBranch        *b_tauByMediumIsolationMVArun2v1PWoldDMwLT;   //!
+  TBranch        *b_tauByLooseIsolationMVArun2v1DBnewDMwLT;   //!
+  TBranch        *b_tauByLooseIsolationMVArun2v1DBoldDMwLT;   //!
+  TBranch        *b_tauByLooseIsolationMVArun2v1PWnewDMwLT;   //!
+  TBranch        *b_tauByLooseIsolationMVArun2v1PWoldDMwLT;   //!
+  TBranch        *b_tauByVLooseIsolationMVArun2v1DBnewDMwLT;   //!
+  TBranch        *b_tauByVLooseIsolationMVArun2v1DBoldDMwLT;   //!
+  TBranch        *b_tauByVLooseIsolationMVArun2v1PWnewDMwLT;   //!
+  TBranch        *b_tauByVLooseIsolationMVArun2v1PWoldDMwLT;   //!
+  TBranch        *b_tauEta;   //!
+  TBranch        *b_tauPhi;   //!
+  TBranch        *b_tauPt;   //!
+  TBranch        *b_tauEt;   //!
+  TBranch        *b_tauCharge;   //!
+  TBranch        *b_tauP;   //!
+  TBranch        *b_tauPx;   //!
+  TBranch        *b_tauPy;   //!
+  TBranch        *b_tauPz;   //!
+  TBranch        *b_tauVz;   //!
+  TBranch        *b_tauEnergy;   //!
+  TBranch        *b_tauMass;   //!
+  TBranch        *b_tauDxy;   //!
+  TBranch        *b_tauZImpact;   //!
+  TBranch        *b_tauDecayMode;   //!
+  TBranch        *b_tauLeadChargedHadronExists;   //!
+  TBranch        *b_tauLeadChargedHadronEta;   //!
+  TBranch        *b_tauLeadChargedHadronPhi;   //!
+  TBranch        *b_tauLeadChargedHadronPt;   //!
+  TBranch        *b_tauChargedIsoPtSum;   //!
+  TBranch        *b_tauNeutralIsoPtSum;   //!
+  TBranch        *b_tauPuCorrPtSum;   //!
+  TBranch        *b_tauNumSignalPFChargedHadrCands;   //!
+  TBranch        *b_tauNumSignalPFNeutrHadrCands;   //!
+  TBranch        *b_tauNumSignalPFGammaCands;   //!
+  TBranch        *b_tauNumSignalPFCands;   //!
+  TBranch        *b_tauNumIsolationPFChargedHadrCands;   //!
+  TBranch        *b_tauNumIsolationPFNeutrHadrCands;   //!
+  TBranch        *b_tauNumIsolationPFGammaCands;   //!
+  TBranch        *b_tauNumIsolationPFCands;   //!
+  TBranch        *b_taufootprintCorrection;   //!
+  TBranch        *b_tauphotonPtSumOutsideSignalCone;   //!
+  TBranch        *b_taudz;   //!
+  TBranch        *b_taudxy;   //!
   TBranch        *b_nMu;   //!
   TBranch        *b_muPt;   //!
   TBranch        *b_muEn;   //!
@@ -914,12 +1058,11 @@ public :
   virtual void     Show(Long64_t entry = -1);
   virtual void SetScalingHistos();
   virtual void BookCommon(int i,string histname);
-  virtual void fillCommon(int histoNumber,float event_weight);
-  virtual void fillHistos(int histoNumber,float event_weight) { /*Should be overriden by region*/ };
+  virtual void fillCommon(int nhist,float event_weight);
+  virtual void fillHistos(int nhist,float event_weight) { /*Should be overriden by region*/ };
   virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
   virtual float DeltaPhi(float phi1, float phi2);
   virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
-  virtual bool btagVeto();
   virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets,float metPhi);
   virtual vector<int>getPFCandidates();
@@ -934,6 +1077,18 @@ public :
   virtual bool inclusiveCut();
   virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
   virtual void initVars();
+
+  virtual vector<int> electron_veto_tightID(int jet_index,float elePtCut);
+  virtual vector<int> electron_veto_looseID(int jet_index,float elePtCut);
+  
+  virtual vector<int> muon_veto_tightID(int jet_index,float muPtCut);
+  virtual vector<int> muon_veto_looseID(int jet_index,float muPtCut);
+
+  virtual vector<int> photon_veto_looseID(int jet_index,float phoPtCut);
+  virtual vector<int> tau_veto_looseID(int jet_index,float tauPtCut);
+
+  virtual vector<int> JetVetoDecision();
+  virtual bool btagVeto();
 
   virtual void JetEnergyScale(float start_weight) { /*Should be overriden by region*/ };
   virtual void PFUncertainty(float event_weight);

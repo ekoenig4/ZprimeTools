@@ -26,15 +26,15 @@ public :
   { BookHistos(file2); };
   virtual void     Loop(Long64_t maxEvents, int reportEvery);
   virtual void BookHistos(const char* file2);
-  virtual void fillHistos(int histoNumber,float event_weight);
-  virtual vector<int> JetVetoDecision(int jet_index, int ele_index);
-  virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
-  virtual vector<int> electron_veto_looseID(int jet_index, int mu_index,float elePtCut);
-  virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
-  virtual vector<int> muon_veto_looseID(int jet_index, int ele_index,float muPtCut);
+  virtual void fillHistos(int nhist,float event_weight);
   virtual void initTree(TTree* tree);
   virtual void initVars();
 
+  virtual vector<int> JetVetoDecision(int jet_index, int lepindex);
+  virtual vector<int> muon_veto_looseID(int jet_index,int lepindex,float elePtCut);
+  virtual vector<int> photon_veto_looseID(int jet_index,int lepindex,float phoPtCut);
+  virtual vector<int> tau_veto_looseID(int jet_index,int lepindex,float tauPtCut);
+  
   virtual void JetEnergyScale(float start_weight);
 };
 

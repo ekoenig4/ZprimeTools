@@ -126,8 +126,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    if(metcut<0.5) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
-	      
-	      if(electron_veto_looseID(jetCand[0],10) &&  muon_veto_looseID(jetCand[0],10)) {
+
+	      bool noLeptonID = electronVeto(jetCand[0],10) && muonVeto(jetCand[0],10) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18);
+	      if( noLeptonID )  {
 		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
 		
@@ -225,71 +226,11 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
   }
 }
 
-void ZprimeJetsClass::fillHistos(int histoNumber,float event_weight) {
-  fillCommon(histoNumber,event_weight);
+void ZprimeJetsClass::fillHistos(int nhist,float event_weight) {
+  fillCommon(nhist,event_weight);
   weight = event_weight;
-  if (histoNumber == bHisto) tree->Fill();
+  if (nhist == bHisto) tree->Fill();
 }
 
 
 
-vector<int> ZprimeJetsClass::JetVetoDecision() {
-
-  vector<int> jetindex;
-  for(int i = 0; i < nJet; i++) {
-    if (jetPt->at(i) < 30. && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
-      jetindex.push_back(i);
-  }
-  return jetindex;
-}
-
-bool ZprimeJetsClass::electron_veto_looseID(int jet_index, float elePtCut) {
-  bool veto_passed = true; //pass veto if no good electron found
-
-  for(int i = 0; i < nEle; i++) {
-    if(eleIDbit->at(i)>>1&1 == 1) {
-      //Electron passes eat cut
-      if (fabs(eleSCEta->at(i)) < 2.5) {
-	//Electron passes pt cut
-	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap photon
-	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
-	}
-      }
-    }
-  }
-  return veto_passed;
-}
-
-
-
-//Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5
-bool ZprimeJetsClass::muon_veto_looseID(int jet_index, float muPtCut) {
-  bool veto_passed = true; //pass veto if no good muon found
-  bool pass_iso = false;
-                                                                                                                                                    
-  Float_t zero = 0.0;
-  Float_t muPhoPU = 999.9;
-  Float_t tightIso_combinedRelative = 999.9;
-    
-  for(int i = 0; i < nMu; i++) {
-    muPhoPU = muPFNeuIso->at(i) + muPFPhoIso->at(i) - 0.5*muPFPUIso->at(i);
-    tightIso_combinedRelative = (muPFChIso->at(i) + TMath::Max(zero,muPhoPU))/(muPt->at(i));
-    pass_iso = tightIso_combinedRelative < 0.25;
-    if (fabs(muEta->at(i)) < 2.4) {
-      if(muPt->at(i) > muPtCut) {
-	if(pass_iso) {
-	  //Muon does not overlap jet  
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
-	}
-      }
-    }
-  }
-  return veto_passed;
-}

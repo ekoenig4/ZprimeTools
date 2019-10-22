@@ -107,57 +107,57 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
   }
 }
 
-void ZprimeJetsCommon::fillCommon(int histoNumber,float event_weight) {
+void ZprimeJetsCommon::fillCommon(int nhist,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
-    h_genHT[histoNumber]->Fill(genHT,event_weight);
+    h_genHT[nhist]->Fill(genHT,event_weight);
   }
 
-  h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
-  h_nVtx[histoNumber]->Fill(nVtx,event_weight);
-  h_nVtx2[histoNumber]->Fill(nVtx,event_weight);
-  h_nJets[histoNumber]->Fill(nJet,event_weight);
-  h_pfMETall[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMET[histoNumber]->Fill(pfMET,event_weight);
-  h_pfMETPhi[histoNumber]->Fill(pfMETPhi,event_weight);
+  h_eventWeight[nhist]->Fill(event_weight,event_weight);
+  h_nVtx[nhist]->Fill(nVtx,event_weight);
+  h_nVtx2[nhist]->Fill(nVtx,event_weight);
+  h_nJets[nhist]->Fill(nJet,event_weight);
+  h_pfMETall[nhist]->Fill(pfMET,event_weight);
+  h_pfMET200[nhist]->Fill(pfMET,event_weight);
+  h_pfMET[nhist]->Fill(pfMET,event_weight);
+  h_pfMETPhi[nhist]->Fill(pfMETPhi,event_weight);
   if(jetCand.size()>0){
-    h_j1TotConsPt[histoNumber]->Fill(j1TotConsPt,event_weight);
-    h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
-    h_j1Eta[histoNumber]->Fill(jetEta->at(jetCand[0]),event_weight);
-    h_j1Phi[histoNumber]->Fill(jetPhi->at(jetCand[0]),event_weight);
-    h_Pt123[histoNumber]->Fill(Pt123,event_weight);
-    h_PF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
-    h_PtRawFrac[histoNumber]->Fill(PtRawFrac,event_weight);
-    h_j1TotPFCands[histoNumber]->Fill(TotalPFCandidates,event_weight);
-    h_j1ChPFCands[histoNumber]->Fill(ChargedPFCandidates,event_weight);
-    h_j1NeutPFCands[histoNumber]->Fill(NeutralPFCandidates,event_weight);
-    h_j1GammaPFCands[histoNumber]->Fill(GammaPFCandidates,event_weight);
-    h_j1CHF[histoNumber]->Fill(jetCHF->at(jetCand[0]),event_weight);
-    h_j1NHF[histoNumber]->Fill(jetNHF->at(jetCand[0]),event_weight);
-    h_j1ChMultiplicity[histoNumber]->Fill(jetNCH->at(jetCand[0]),event_weight);
-    h_j1NeutMultiplicity[histoNumber]->Fill(jetNNP->at(jetCand[0]),event_weight);
-    h_j1Mt[histoNumber]->Fill(jetMt->at(jetCand[0]),event_weight);
-    h_j1etaWidth[histoNumber]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
-    h_j1phiWidth[histoNumber]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
-    h_j1nCons[histoNumber]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
-    h_j1Mass[histoNumber]->Fill(j1Mass,event_weight);
-    h_j1JEC[histoNumber]->Fill(jetJECUnc->at(jetCand[0]),event_weight);
-    h_ChNemPtFrac[histoNumber]->Fill(ChNemPtFrac,event_weight);
-    h_ChNemPt[histoNumber]->Fill(ChNemPt,event_weight);
-    h_ChNemPt123[histoNumber]->Fill(ChNemPt123,event_weight);
-    h_ChPercCons[histoNumber]->Fill(ChargedPFCandidates/(float)TotalPFCandidates,event_weight);
-    h_NhPercCons[histoNumber]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
-    h_GammaPercCons[histoNumber]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
+    h_j1TotConsPt[nhist]->Fill(j1TotConsPt,event_weight);
+    h_j1Pt[nhist]->Fill(jetPt->at(jetCand[0]),event_weight);
+    h_j1Eta[nhist]->Fill(jetEta->at(jetCand[0]),event_weight);
+    h_j1Phi[nhist]->Fill(jetPhi->at(jetCand[0]),event_weight);
+    h_Pt123[nhist]->Fill(Pt123,event_weight);
+    h_PF123PtFraction[nhist]->Fill(Pt123Fraction,event_weight);
+    h_PtRawFrac[nhist]->Fill(PtRawFrac,event_weight);
+    h_j1TotPFCands[nhist]->Fill(TotalPFCandidates,event_weight);
+    h_j1ChPFCands[nhist]->Fill(ChargedPFCandidates,event_weight);
+    h_j1NeutPFCands[nhist]->Fill(NeutralPFCandidates,event_weight);
+    h_j1GammaPFCands[nhist]->Fill(GammaPFCandidates,event_weight);
+    h_j1CHF[nhist]->Fill(jetCHF->at(jetCand[0]),event_weight);
+    h_j1NHF[nhist]->Fill(jetNHF->at(jetCand[0]),event_weight);
+    h_j1ChMultiplicity[nhist]->Fill(jetNCH->at(jetCand[0]),event_weight);
+    h_j1NeutMultiplicity[nhist]->Fill(jetNNP->at(jetCand[0]),event_weight);
+    h_j1Mt[nhist]->Fill(jetMt->at(jetCand[0]),event_weight);
+    h_j1etaWidth[nhist]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
+    h_j1phiWidth[nhist]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
+    h_j1nCons[nhist]->Fill(jetnPhotons->at(jetCand[0])+jetnCHPions->at(jetCand[0])+jetnMisc->at(jetCand[0]),event_weight);
+    h_j1Mass[nhist]->Fill(j1Mass,event_weight);
+    h_j1JEC[nhist]->Fill(jetJECUnc->at(jetCand[0]),event_weight);
+    h_ChNemPtFrac[nhist]->Fill(ChNemPtFrac,event_weight);
+    h_ChNemPt[nhist]->Fill(ChNemPt,event_weight);
+    h_ChNemPt123[nhist]->Fill(ChNemPt123,event_weight);
+    h_ChPercCons[nhist]->Fill(ChargedPFCandidates/(float)TotalPFCandidates,event_weight);
+    h_NhPercCons[nhist]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
+    h_GammaPercCons[nhist]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
 
     
-    h_NeutralPt[histoNumber]->Fill(hadronPt[0],event_weight);
-    h_ChargedPt[histoNumber]->Fill(hadronPt[1],event_weight);
-    h_PhotonPt[histoNumber]->Fill(hadronPt[2],event_weight);
+    h_NeutralPt[nhist]->Fill(hadronPt[0],event_weight);
+    h_ChargedPt[nhist]->Fill(hadronPt[1],event_weight);
+    h_PhotonPt[nhist]->Fill(hadronPt[2],event_weight);
       
-    h_NhPercPt[histoNumber]->Fill( hadronPt[0]/jetPt->at(jetCand[0]) ,event_weight);
-    h_ChPercPt[histoNumber]->Fill( hadronPt[1]/jetPt->at(jetCand[0]) ,event_weight);
-    h_GammaPercPt[histoNumber]->Fill( hadronPt[2]/jetPt->at(jetCand[0]) ,event_weight);
+    h_NhPercPt[nhist]->Fill( hadronPt[0]/jetPt->at(jetCand[0]) ,event_weight);
+    h_ChPercPt[nhist]->Fill( hadronPt[1]/jetPt->at(jetCand[0]) ,event_weight);
+    h_GammaPercPt[nhist]->Fill( hadronPt[2]/jetPt->at(jetCand[0]) ,event_weight);
   }
 }
 
@@ -308,15 +308,6 @@ vector<int>ZprimeJetsCommon::getPFCandidates() {
     }
   }
   return PFCands;
-}
-
-bool ZprimeJetsCommon::btagVeto() {
-
-  bool btagVeto = true;
-  for(int i = 0; i < nJet; i++)
-    if(jetPt->at(i) > 30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8484)
-      btagVeto = false;
-  return btagVeto;
 }
 
 bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
