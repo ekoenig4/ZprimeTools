@@ -470,6 +470,12 @@ void ZprimeJetsCommon::initVars() {
     j1PFConsPhi .clear();
     j1PFConsPID .clear();
 
+    if(sample.isData) {
+      // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
+      // data doesn't have genWeight so set it to 1
+      genWeight = 1;
+    }
+
     weight = weight_nogen = weight_QCDSF = weight_16K = 1;
     kfactor = kfactor_16 = qcdSF = 1;
 
