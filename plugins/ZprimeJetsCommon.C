@@ -379,6 +379,8 @@ void ZprimeJetsCommon::ApplyPileup(float &event_weight) {
   float pileup = th1fmap.getBin("PU",puTrue->at(0));
   genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
   event_weight *= pileup * genWeight;
+  weight_QCDSF *= pileup * genWeight;
+  weight_16K   *= pileup * genWeight;
   
   h_puTrueUnWeight->Fill(puTrue->at(0),genWeight);
   h_puTrueReWeight->Fill(puTrue->at(0),event_weight);
