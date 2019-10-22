@@ -6,6 +6,7 @@ test/
 *.root
 RootFiles
 !RootFiles/
+!RootFiles/*.root
 PlotTool
 !PlotTool/
 analyze
