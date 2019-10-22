@@ -12,15 +12,12 @@
 using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const bool applyPU = true;
-  static const bool applySF = true;
-  static const bool applyKF = true;
   static const int nHisto = 11;
   static const int bHisto = 10;
   
   //CR variables
   int lepindex_leading, lepindex_subleading;
-  float dilepton_mass,dilepton_pt,Recoil;
+  float dilepton_mass,dilepton_pt,recoil,recoilPhi;
   float leptoMET_phi_to_use;
   TLorentzVector m1,m2;
   //CR histograms
@@ -30,15 +27,16 @@ public :
   { BookHistos(file2); };
   virtual void Loop(Long64_t maxEvents, int reportEvery);
   virtual void BookHistos(const char* file2);
-  virtual void fillHistos(int histoNumber,double event_weight);
+  virtual void fillHistos(int histoNumber,float event_weight);
   virtual vector<int> JetVetoDecision(int leading_ele_index, int subleading_ele_index);
   virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
   virtual vector<int> electron_veto_looseID(int jet_index, int leading_mu_index, int subleading_mu_index, float elePtCut);
   virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
   virtual vector<int> muon_veto_looseID(int jet_index, int leading_ele_index, int subleading_ele_index, float muPtCut);
   virtual void initTree(TTree* tree);
+  virtual void initVars();
   
-  virtual void JetEnergyScale(double start_weight);
+  virtual void JetEnergyScale(float start_weight);
 };
 
 #endif

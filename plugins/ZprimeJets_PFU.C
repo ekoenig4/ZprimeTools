@@ -1,7 +1,7 @@
 #define ZprimeJetsCommon_cxx
 #include "ZprimeJetsCommon.h"
 
-void ZprimeJetsCommon::PFUncertainty(double event_weight) {
+void ZprimeJetsCommon::PFUncertainty(float event_weight) {
   // 6 Histograms
   //   Trk ECAL HCAL
   //up  0   1    2
@@ -18,16 +18,16 @@ void ZprimeJetsCommon::PFUncertainty(double event_weight) {
     }
   }
   
-  vector<double> j1PFConsPtNorm;
-  vector<double> j1PFConsPtUnc;
+  vector<float> j1PFConsPtNorm;
+  vector<float> j1PFConsPtUnc;
 
-  double jetPtNorm = jetPt->at(jetCand[0]);
+  float jetPtNorm = jetPt->at(jetCand[0]);
   for(int i=0;i<j1PFConsPID.size();i++) {
     j1PFConsPtNorm.push_back(j1PFConsPt[i]);
     if ( abs(j1PFConsPID[i]) == 211 || abs(j1PFConsPID[i]) == 13 ) {
       //Tracker Uncertainty
       //deltaPt=(1/100)*sqrt((0.015*Pt)^2+(0.5)^2)
-      double deltaPt = (1/100.)*sqrt(pow(0.015*j1PFConsPt[i],2)+pow(0.5,2));
+      float deltaPt = (1/100.)*sqrt(pow(0.015*j1PFConsPt[i],2)+pow(0.5,2));
       j1PFConsPtUnc.push_back(deltaPt);
       h_TrackerPtUnc->Fill(j1PFConsPtNorm[i],j1PFConsPtUnc[i]);
       // cout << "Tracker Unc: " << deltaPt << endl;
@@ -35,7 +35,7 @@ void ZprimeJetsCommon::PFUncertainty(double event_weight) {
     else if ( abs(j1PFConsPID[i]) == 22 || abs(j1PFConsPID[i]) == 11 ) {
       //ECAL Uncertainty
       //deltaPt=(1/100)*sqrt((2.8)^2/Pt+(12.8/Pt)^2+(0.3)^2)
-      double deltaPt = (1/100.)*sqrt(pow(2.8,2)/j1PFConsPt[i]+pow(12.8/j1PFConsPt[i],2)+pow(0.3,2));
+      float deltaPt = (1/100.)*sqrt(pow(2.8,2)/j1PFConsPt[i]+pow(12.8/j1PFConsPt[i],2)+pow(0.3,2));
       j1PFConsPtUnc.push_back(deltaPt);
       h_EcalPtUnc->Fill(j1PFConsPtNorm[i],j1PFConsPtUnc[i]);
       // cout << "ECAL Unc: " << deltaPt << endl;
@@ -43,7 +43,7 @@ void ZprimeJetsCommon::PFUncertainty(double event_weight) {
     else if ( abs(j1PFConsPID[i]) == 130 ) {
       //HCAL Uncertainty
       //deltaPt=(1/100)*sqrt((115)^2/Pt+(5.5)^2)
-      double deltaPt = (1/100.)*sqrt(pow(115,2)/j1PFConsPt[i]+pow(5.5,2));
+      float deltaPt = (1/100.)*sqrt(pow(115,2)/j1PFConsPt[i]+pow(5.5,2));
       j1PFConsPtUnc.push_back(deltaPt);
       h_HcalPtUnc->Fill(j1PFConsPtNorm[i],j1PFConsPtUnc[i]);
       // cout << "HCAL Unc: " << deltaPt << endl;
@@ -104,7 +104,7 @@ void ZprimeJetsCommon::PFUncertainty(double event_weight) {
   
   jetPt->at(jetCand[0]) = jetPtNorm;
   j1PFConsPt.clear();
-  for (double consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
+  for (float consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
   getPt123Frac();
   // cout << "\tReset: " << ChNemPtFrac << endl;
 }//Closing the Loop function

@@ -57,25 +57,37 @@ public :
   static const int maxHisto = 50;
   TTree *tree;
 
-  static const bool debug = true;
+  static const bool debug = false;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   
   struct DataMC {
     Type type;
+    string name[Total];
     bool isInclusive;
     bool isData;
     int PID;
-    DataMC(){}
+    DataMC(){
+      string name[Total] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+      for (int i = 0; i < Total; i++) this->name[i] = name[i];
+    };
     DataMC(string filename);
     bool isW_or_ZJet();
+    inline string getName() { return name[type]; }
   } sample;
   
-  struct HistoCollection : public map<string,TH1F*> {
+  struct TH1FCollection : public map<string,TH1F*> {
     float getBin(string name,float x) {
       TH1F* histo = (*this)[name];
       return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
     }
-  } histomap;
+  } th1fmap;
+  
+  struct TH2FCollection : public map<string,TH2F*> {
+    float getBin(string name,float x,float y) {
+      TH2F* histo = (*this)[name];
+      return histo->GetBinContent( histo->GetXaxis()->FindBin(x),histo->GetYaxis()->FindBin(y) );
+    }
+  } th2fmap;
   
   ScaleUncCollection* scaleUncs;
   ShapeUncCollection* shapeUncs;
@@ -83,20 +95,20 @@ public :
   float bosonPt;
 
   float weight;
-  float noweight;
+  float kfactor;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
-  vector<double>j1PFConsEt;
-  vector<double>j1PFConsPt;
-  vector<double>j1PFConsEta;
-  vector<double>j1PFConsPhi;
+  vector<float>j1PFConsEt;
+  vector<float>j1PFConsPt;
+  vector<float>j1PFConsEta;
+  vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
   float j1TotConsPt;
 
   float j1Mass;
 
-  float Pt123Fraction,Pt123,PtRawFrac,l_jetPt;
+  float Pt123Fraction,Pt123,PtRawFrac,j1pT;
 
   float hadronPt[3];
   
@@ -106,7 +118,7 @@ public :
   int TotalPFCandidates, ChargedPFCandidates,NeutralPFCandidates,GammaPFCandidates;
   int LeptonPFCandidates;
    
-  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pileup,*h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_nJets[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto];
+  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_nJets[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto];
   TH1F *h_j1Pt[maxHisto], *h_j1Eta[maxHisto], *h_j1Phi[maxHisto], *h_j1etaWidth[maxHisto], *h_j1phiWidth[maxHisto],*h_j1nCons[maxHisto], *h_PF123PtFraction[maxHisto],*h_Pt123[maxHisto],*h_j1TotConsPt[maxHisto]; 
   TH1F *h_j1TotPFCands[maxHisto], *h_j1ChPFCands[maxHisto], *h_j1NeutPFCands[maxHisto], *h_j1GammaPFCands[maxHisto], *h_j1CHF[maxHisto], *h_j1NHF[maxHisto], *h_j1ChMultiplicity[maxHisto], *h_j1NeutMultiplicity[maxHisto],*h_j1Mt[maxHisto];
   TH1F *h_j1Mass[maxHisto],*h_j1JEC[maxHisto],*h_j1PID[maxHisto],*h_j1Lepton[maxHisto];
@@ -117,8 +129,8 @@ public :
   TH1F *h_ChargedPt[maxHisto],*h_NeutralPt[maxHisto],*h_PhotonPt[maxHisto];
   TH1F *h_ChPercPt[maxHisto],*h_NhPercPt[maxHisto],*h_GammaPercPt[maxHisto];
 
-  TH1F *h_genHT[maxHisto],*h_puTrueReWeight[maxHisto],*h_puTrueNoWeight[maxHisto],*h_eventWeight[maxHisto];
-  TH1F *h_genZPt,*h_genZPtwK,*h_genWPt,*h_genWPtwK;
+  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_genBosonPt,*h_genBosonPtwK;
   
   TH1D *h_cutflow;
   
@@ -393,10 +405,10 @@ public :
   vector<double>  *jetnCHPions;
   vector<double>  *jetnMisc;
   vector<vector<int> > *jetMiscPID;
-  vector<vector<double> > *JetsPFConsPt;
-  vector<vector<double> > *JetsPFConsEta;
-  vector<vector<double> > *JetsPFConsPhi;
-  vector<vector<double> > *JetsPFConsEt;
+  vector<vector<float> > *JetsPFConsPt;
+  vector<vector<float> > *JetsPFConsEta;
+  vector<vector<float> > *JetsPFConsPhi;
+  vector<vector<float> > *JetsPFConsEt;
   vector<vector<int> > *JetsPFConsPID;
   vector<float>   *jetPt;
   vector<float>   *jetEn;
@@ -900,25 +912,32 @@ public :
   virtual void     Init(TTree *tree);;
   virtual Bool_t   Notify();
   virtual void     Show(Long64_t entry = -1);
+  virtual void SetScalingHistos();
   virtual void BookCommon(int i,string histname);
-  virtual void fillCommon(int histoNumber,double event_weight);
-  virtual void fillHistos(int histoNumber,double event_weight) { /*Should be overriden by region*/ };
-  virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
+  virtual void fillCommon(int histoNumber,float event_weight);
+  virtual void fillHistos(int histoNumber,float event_weight) { /*Should be overriden by region*/ };
+  virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
   virtual float DeltaPhi(float phi1, float phi2);
-  virtual vector<int> getJetCand(double jetPtCut, double jetEtaCut, double jetNHFCut, double jetCHFCut);
+  virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
   virtual bool btagVeto();
-  virtual bool dPhiJetMETcut(vector<int> jets);
-  virtual float dPhiJetMETmin(vector<int> jets);
+  virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
+  virtual float dPhiJetMETmin(vector<int> jets,float metPhi);
   virtual vector<int>getPFCandidates();
   virtual void getPt123Frac();
   virtual void AllPFCand(vector<int> jetCand);
-  virtual double getKfactor(double bosonPt);
+  virtual void ApplyPileup(float &event_weight);
+  virtual void ApplyKFactor(float &event_weight);
+  virtual void ApplySF(float &event_weight,float sf);
+  virtual void SetBoson(int PID);
+  virtual void SetKFactors(float bosonPt);
+  virtual float getKFactor(float bosonPt);
   virtual bool inclusiveCut();
   virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
+  virtual void initVars();
 
-  virtual void JetEnergyScale(double start_weight) { /*Should be overriden by region*/ };
-  virtual void PFUncertainty(double event_weight);
-  virtual void QCDVariations(double event_weight);
+  virtual void JetEnergyScale(float start_weight) { /*Should be overriden by region*/ };
+  virtual void PFUncertainty(float event_weight);
+  virtual void QCDVariations(float event_weight);
 };
 
 #endif
