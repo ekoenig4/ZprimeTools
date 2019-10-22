@@ -27,7 +27,7 @@ using namespace std;
 
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 9;
+  static const int nHisto = 11;
   static const int bHisto = 8;
 
   ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)

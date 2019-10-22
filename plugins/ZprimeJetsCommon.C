@@ -9,26 +9,30 @@ void ZprimeJetsCommon::SetScalingHistos() {
   
   if (sample.isW_or_ZJet()) {
     //This is the root file with EWK Corrections
-    TFile *k_file = new TFile("RootFiles/kfactors.root");
-    TFile *k_file_17 = new TFile("RootFiles/2017_gen_v_pt_stat1_qcd_sf.root");
-    TFile *k_file_17_nnlo = new TFile("RootFiles/lindert_qcd_nnlo_sf.root");
-    TH1F *ewkCorrection,*qcdCorrection_16,*qcdCorrection_17,*nnloCorrection_17;
-    if (sample.type == WJets) {
-      ewkCorrection = (TH1F*)k_file->Get("EWKcorr/W");
-      qcdCorrection_16 = (TH1F*)k_file->Get("WJets_LO/inv_pt");
-      qcdCorrection_17 = (TH1F*)k_file_17->Get("wjet_dilep");
-      nnloCorrection_17 = (TH1F*)k_file_17_nnlo->Get("evj");
+    TFile* f_kfactor_16 = TFile::Open("RootFiles/kfactors.root");
+    TFile* f_kfactor_24bins_17 = TFile::Open("RootFiles/kfactor_24bins.root");
+    TFile* f_nlo_qcd_17 = TFile::Open("RootFiles/2017_gen_v_pt_stat1_qcd_sf.root");
+    TFile* f_nnlo_qcd_17 = TFile::Open("RootFiles/lindert_qcd_nnlo_sf.root");
+
+    TH1F *LO_QCD,*NLO_QCD_EWK,*NNLO_QCD,*NLO_QCD,*NLO_EWK;
+    if ( sample.type == WJets ) {
+      NLO_EWK = (TH1F*)TFile::Open("RootFiles/merged_kfactors_wjets.root")->Get("kfactor_monojet_ewk");
+      NLO_QCD = (TH1F*)f_nlo_qcd_17->Get("wjet_dilep");
+      NNLO_QCD = (TH1F*)f_nnlo_qcd_17->Get("evj");
+      LO_QCD = (TH1F*)f_kfactor_16->Get("WJets_LO/inv_pt");
+      NLO_QCD_EWK = (TH1F*)f_kfactor_16->Get("EWKcorr/W");
     } else {
-      ewkCorrection = (TH1F*)k_file->Get("EWKcorr/Z");
-      qcdCorrection_16 = (TH1F*)k_file->Get("ZJets_LO/inv_pt");
-      qcdCorrection_17 = (TH1F*)k_file_17->Get("dy_dilep");
-      if (sample.type == ZJets) nnloCorrection_17 = (TH1F*)k_file_17_nnlo->Get("vvj");
-      else                      nnloCorrection_17 = (TH1F*)k_file_17_nnlo->Get("eej");
+      NLO_EWK = (TH1F*)TFile::Open("RootFiles/merged_kfactors_zjets.root")->Get("kfactor_monojet_ewk");
+      NLO_QCD = (TH1F*)f_nlo_qcd_17->Get("dy_dilep");
+      NNLO_QCD = (TH1F*)f_nnlo_qcd_17->Get("eej");
+      LO_QCD = (TH1F*)f_kfactor_16->Get("ZJets_LO/inv_pt");
+      NLO_QCD_EWK = (TH1F*)f_kfactor_16->Get("EWKcorr/Z");
     }
-    th1fmap["ewkCorrection"] = ewkCorrection;
-    th1fmap["qcdCorrection_16"] = qcdCorrection_16;
-    th1fmap["qcdCorrection_17"] = qcdCorrection_17;
-    th1fmap["nnloCorrection_17"] = nnloCorrection_17;
+    th1fmap["LO_QCD"] = LO_QCD;
+    th1fmap["NLO_QCD_EWK"] = NLO_QCD_EWK;
+    th1fmap["NNLO_QCD"] = NNLO_QCD;
+    th1fmap["NLO_QCD"] = NLO_QCD;
+    th1fmap["NLO_EWK"] = NLO_EWK;
   }
 }
 
@@ -393,21 +397,20 @@ void ZprimeJetsCommon::ApplyKFactor(float &event_weight) {
 }
 
 void ZprimeJetsCommon::SetKFactors(float bosonPt) {
-  float ewkWeight = th1fmap.getBin("ewkCorrection",bosonPt);
-  float qcdWeight_16 = th1fmap.getBin("qcdCorrection_16",bosonPt);
-  float qcdWeight_17 = th1fmap.getBin("qcdCorrection_17",bosonPt);
-  float nnloWeight_17 = th1fmap.getBin("nnloCorrection_17",bosonPt);
+  float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
+  float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
+  float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
   kfactor_16 = getKFactor(bosonPt);
-  qcdSF = qcdWeight_17;
-  kfactor = ewkWeight * qcdWeight_17 * nnloWeight_17;
+  qcdSF = nlo_qcd;
+  kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
 }
 
 float ZprimeJetsCommon::getKFactor(float bosonPt) {
-  float EWK_corrected_weight = th1fmap.getBin("ewkCorrection",bosonPt);
-  float NNLO_weight = th1fmap.getBin("qcdCorrection_16",bosonPt);
+  float nlo_qcd_ewk = th1fmap.getBin("NLO_QCD_EWK",bosonPt);
+  float lo_qcd = th1fmap.getBin("LO_QCD",bosonPt);
   float kfactor = 1;
-  if(EWK_corrected_weight!=0 && NNLO_weight!=0)
-    kfactor = (EWK_corrected_weight/NNLO_weight);
+  if(nlo_qcd_ewk!=0 && lo_qcd!=0)
+    kfactor = (nlo_qcd_ewk/lo_qcd);
   else
     kfactor= sample.type == WJets ? 1.21 : 1.23;
   h_kfactor->Fill(kfactor);

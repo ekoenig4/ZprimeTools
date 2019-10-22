@@ -124,6 +124,10 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  
 		  if (dPhiJetMETcut(jetveto,pfMETPhi)) {
 		    nDphiJetMET+=event_weight;
+
+		    fillHistos(9,weight_QCDSF);
+		    fillHistos(10,weight_16K);
+		    
 		    QCDVariations(event_weight);
 		    fillHistos(8,event_weight);
 

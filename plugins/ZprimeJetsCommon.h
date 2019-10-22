@@ -59,6 +59,12 @@ public :
       TH1F* histo = (*this)[name];
       return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
     }
+    void printKeys() {
+      cout << "Keylist" << endl;
+      for (TH1FCollection::iterator iter = this->begin(); iter != this->end(); ++iter)
+	cout << iter->first << endl;
+    }
+    bool contains(string name) { return this->find(name) != this->end(); }
   } th1fmap;
 
   struct TH2FCollection : public map<string,TH2F*> {
