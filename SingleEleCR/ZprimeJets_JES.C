@@ -80,7 +80,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.);
 	      
 	      if (mulist.size() == 0) {
-		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
+		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),recoilPhi);
 		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (pfMET > 50) {

@@ -80,7 +80,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
 	      
 	      if (elelist.size() == 0) {
-		float dPhiLepMet = DeltaPhi(muPhi->at(lepindex),pfMETPhi);
+		float dPhiLepMet = DeltaPhi(muPhi->at(lepindex),recoilPhi);
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (lepMET_MT < 160) {

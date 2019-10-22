@@ -856,6 +856,7 @@ public :
   virtual void SetBoson(int PID);
   virtual void SetKFactors(float bosonPt);
   virtual float getKFactor(float bosonPt);
+  virtual float getKFactor_16(float bosonPt);
   virtual bool inclusiveCut();
   virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
   virtual void initVars();

@@ -168,7 +168,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
 		      float minDPhiJetMET_first4 = TMath::Pi();
 		      for (int i = 0; i < jetveto.size(); i++) {
-			float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
+			float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),recoilPhi);
 			if (dPhiJetMet < minDPhiJetMET_first4) {
 			  if (i < 4)
 			    minDPhiJetMET_first4 = dPhiJetMet;

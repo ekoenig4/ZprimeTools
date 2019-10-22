@@ -265,7 +265,7 @@ ApplyKFactor(event_weight);
 			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
 			float minDPhiJetMET_first4 = TMath::Pi();
 			for (int i = 0; i < jetveto.size(); i++) {
-			  float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
+			  float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),recoilPhi);
 			  if (dPhiJetMet < minDPhiJetMET_first4) {
 			    if (i < 4)
 			      minDPhiJetMET_first4 = dPhiJetMet;
