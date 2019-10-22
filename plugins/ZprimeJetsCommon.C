@@ -404,15 +404,20 @@ void ZprimeJetsCommon::ApplyKFactor(float &event_weight) {
 }
 
 void ZprimeJetsCommon::SetKFactors(float bosonPt) {
-  float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
   float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
-  float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
-  kfactor_16 = getKFactor(bosonPt);
+  kfactor_16 = getKFactor_16(bosonPt);
   qcdSF = nlo_qcd;
-  kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+  kfactor = getKFactor(bosonPt);
 }
 
 float ZprimeJetsCommon::getKFactor(float bosonPt) {
+  float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
+  float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
+  float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
+  return nlo_ewk * nlo_qcd * nnlo_qcd;
+}
+
+float ZprimeJetsCommon::getKFactor_16(float bosonPt) {
   float nlo_qcd_ewk = th1fmap.getBin("NLO_QCD_EWK",bosonPt);
   float lo_qcd = th1fmap.getBin("LO_QCD",bosonPt);
   float kfactor = 1;

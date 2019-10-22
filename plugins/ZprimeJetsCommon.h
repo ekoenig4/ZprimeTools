@@ -849,6 +849,7 @@ public :
   virtual void SetBoson(int PID);
   virtual void SetKFactors(float bosonPt);
   virtual float getKFactor(float bosonPt);
+  virtual float getKFactor_16(float bosonPt);
   virtual bool inclusiveCut();
   virtual bool getEleHEMVeto(float elePtCut);
   virtual bool getJetHEMVeto(float jetPtCut);
