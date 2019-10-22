@@ -57,7 +57,7 @@ elif (len(argv) == 9):
 
 #If split_-1 is used program will set custom split for each directory so that there are nfile of files in each batch
 if nBatches == -1:
-    nfile_per_batch = 20
+    nfile_per_batch = 60
     nBatches = len(rootFiles)/nfile_per_batch
     #Dealing with some edge cases
     if nBatches == 0: nBatches = 1
