@@ -16,7 +16,6 @@ test: analyze
 
 clean:
 	rm post*.root
-	rm -r DataEra
 
 condor_clean:
 	rm -r .output
