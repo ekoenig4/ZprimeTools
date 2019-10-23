@@ -333,13 +333,6 @@ vector<int>ZprimeJetsCommon::getPFCandidates() {
   }
   return PFCands;
 }
-bool ZprimeJetsCommon::btagVeto() {
-  bool btagVeto = true;
-  for(int i = 0; i < nJet; i++)
-    if(jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8838)
-      btagVeto = false;
-  return btagVeto;
-}
 
 bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
   //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 

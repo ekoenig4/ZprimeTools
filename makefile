@@ -13,6 +13,19 @@ de:
 dm:
 	@$(MAKE) -C DoubleMuCR
 
+test: test_sr test_se test_sm test_de test_dm
+
+test_sr:
+	@$(MAKE) -C SignalRegion test
+test_se:
+	@$(MAKE) -C SingleEleCR test
+test_sm:
+	@$(MAKE) -C SingleMuCR test
+test_de:
+	@$(MAKE) -C DoubleEleCR test
+test_dm:
+	@$(MAKE) -C DoubleMuCR test
+
 clean: clean_sr clean_sr clean_sm clean_de clean_dm
 
 clean_sr:

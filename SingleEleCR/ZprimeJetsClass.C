@@ -89,7 +89,7 @@ float EletriggerSF(float pt, float eta){
 }
 
 float ZprimeJetsClass::getSF(int ele_index) {
-  float eleEta_to_use = fabs(eleEta->at(ele_index)) < 2.5 ? eleEta->at(ele_index) : 2.49;
+  float eleEta_to_use = fabs(eleSCEta->at(ele_index)) < 2.5 ? eleSCEta->at(ele_index) : 2.49;
   float elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
   
   float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",elePt_to_use,eleEta_to_use);
@@ -179,7 +179,7 @@ ApplyKFactor(event_weight);
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.);
-	  vector<int> looseEle = electron_veto_looseID(jetCand[0],0,10.);
+	  vector<int> looseEle = electron_veto_looseID(jetCand[0],10.);
 	  
 	  if (elelist.size() ==1 && looseEle.size() == 1) {
 	    nCRSelection+=event_weight;
@@ -190,7 +190,7 @@ ApplyKFactor(event_weight);
 	      ApplySF(event_weight,sf);
 	    }
 	    TLorentzVector lep_4vec;
-	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleE->at(lepindex));
+	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleSCEta->at(lepindex),eleSCPhi->at(lepindex),eleE->at(lepindex));
 	    lepton_pt = lep_4vec.Pt();
 	    TLorentzVector met_4vec;
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
@@ -203,11 +203,13 @@ ApplyKFactor(event_weight);
 	      nMET200+=event_weight;
 	      fillHistos(5,event_weight);
 	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
 	      
-	      if (mulist.size() == 0) {
+	      if (mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		nNoMuons+=event_weight;
 		fillHistos(6,event_weight);
-		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
+		float dPhiLepMet = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		h_lepMET_MT->Fill(lepMET_MT);
 		
@@ -343,8 +345,8 @@ void ZprimeJetsClass::fillHistos(int histoNumber,float event_weight) {
   //CR Histograms
   if(lepindex >= 0){ 
     h_LeptonPt[histoNumber]->Fill(elePt->at(lepindex),event_weight);
-    h_LeptonEta[histoNumber]->Fill(eleEta->at(lepindex),event_weight);
-    h_LeptonPhi[histoNumber]->Fill(elePhi->at(lepindex),event_weight);
+    h_LeptonEta[histoNumber]->Fill(eleSCEta->at(lepindex),event_weight);
+    h_LeptonPhi[histoNumber]->Fill(eleSCPhi->at(lepindex),event_weight);
   }
   if(lepton_pt > 0){
     h_recoil[histoNumber]->Fill(recoil,event_weight);
@@ -353,99 +355,55 @@ void ZprimeJetsClass::fillHistos(int histoNumber,float event_weight) {
   if (histoNumber == bHisto) tree->Fill();
 }
 
-vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int ele_index) {
-  bool jetVeto=true;
-  vector<int> jetindex;
-  for(int i = 0; i < nJet; i++){
-    float deltar_ele = deltaR(jetEta->at(i),jetPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index));
-    bool tightJetID = false;
-    bool loosePUID = false;
-    if ((*jetID)[i]>>0&1 == 1) tightJetID = true;
-    if((*jetPUFullID)[i]&(1<<2)) loosePUID=true;
-    if(deltar_ele>0.4 && jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && tightJetID && loosePUID)
-      jetindex.push_back(i);
+vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int lepindex) {
+  vector<int> jetindex; jetindex.clear();
+
+  vector<int> tmpcands = ZprimeJetsCommon::JetVetoDecision();
+  for(int ijet : tmpcands ) {
+    float dR_ele = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
+    if( dR_ele > 0.5 )
+      jetindex.push_back(ijet);
   }
   return jetindex;
 }
 
-vector<int> ZprimeJetsClass::electron_veto_tightID(int jet_index, float elePtCut) {
-  vector<int> ele_cands;
-  ele_cands.clear();
-  for(int i = 0; i < nEle; i++) {
-    //Electron passes Tight Electron ID cuts
-    if(eleIDbit->at(i)>>2&1 == 1) {
-      //Electron passes Eta cut
-      if (fabs(eleEta->at(i)) < 2.5) {
-	//Electron passes pt cut
-	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap photon
-	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-	    ele_cands.push_back(i);
-	}
-      }
-    }
-  }
-  return ele_cands;
-}
-
-vector<int> ZprimeJetsClass::muon_veto_tightID(int jet_index, float muPtCut) {
-  // bool veto_passed = true; //pass veto if no good muon found
+//Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate electron and jet within dR of 0.5
+vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int lepindex, float muPtCut)
+{
+  // cout << "Inside Muon Loose Veto" << endl;
   vector<int> mu_cands;
   mu_cands.clear();
 
-  for(int i = 0; i < nMu; i++) {
-    if(muIDbit->at(i)>>3&1 == 1 && muIDbit->at(i)>>9&1 == 1) {
-      //Muon passes eta cut
-      if (fabs(muEta->at(i)) < 2.4) {
-	//Muon passes pt cut
-	if(muPt->at(i) > muPtCut) {
-	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-	    mu_cands.push_back(i);
-	}
-      }
-    }
+  vector<int> tmpcands = ZprimeJetsCommon::muon_veto_looseID(jet_index,muPtCut);
+  for(int imu : tmpcands) {
+    float dR_ele = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
+    if ( dR_ele > 0.5 )
+      mu_cands.push_back(imu);
   }
+  
   return mu_cands;
 }
 
-vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int mu_index, float elePtCut) {
-  vector<int> ele_cands;
-  ele_cands.clear();
-  for(int i = 0; i < nEle; i++) {
-    //Electron passes Loose Electron ID cuts
-    if(eleIDbit->at(i)>>0&1 == 1) {
-      //Electron passes eta cut
-      if (fabs(eleEta->at(i)) < 2.5) {
-	//Electron passes pt cut
-	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap photon
-	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
-	    ele_cands.push_back(i);
-	}
-      }
-    }
+vector<int> ZprimeJetsClass::photon_veto_looseID(int jet_index,int lepindex,float phoPtCut) {
+  vector<int> pho_cands; pho_cands.clear();
+
+  vector<int> tmpcands = ZprimeJetsCommon::photon_veto_looseID(jet_index,phoPtCut);
+  for (int ipho : tmpcands ) {
+    float dR_ele = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
+    if ( dR_ele > 0.5 )
+      pho_cands.push_back(ipho);
   }
-  return ele_cands;
+  return pho_cands;
 }
 
-//Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5
-vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int ele_index, float muPtCut) {
-  vector<int> mu_cands;
-  mu_cands.clear();
-  for(int i = 0; i < nMu; i++) {
-    if(muIDbit->at(i)>>0&1==1) {
-      //Muon passes eta cut
-      if (fabs(muEta->at(i)) < 2.4) {
-	//Muon passes pt cut
-	if(muPt->at(i) > muPtCut) {
-	  //cout <<"Passed Pt Cut" << endl;
-	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 && deltaR(muEta->at(i),muPhi->at(i),eleEta->at(ele_index),elePhi->at(ele_index)) > 0.5)
-	    mu_cands.push_back(i);
-	}
-      }
-    }
+vector<int> ZprimeJetsClass::tau_veto_looseID(int jet_index,int lepindex,float tauPtCut) {
+  vector<int> tau_cands; tau_cands.clear();
+
+  vector<int> tmpcands = ZprimeJetsCommon::tau_veto_looseID(jet_index,tauPtCut);
+  for (int itau : tmpcands ) {
+    float dR_ele = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
+    if ( dR_ele > 0.5 )
+      tau_cands.push_back(itau);
   }
-  return mu_cands;
+  return tau_cands;
 }

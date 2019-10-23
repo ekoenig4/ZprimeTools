@@ -45,15 +45,15 @@ public :
   virtual void SetScalingHistos();
   virtual void BookHistos(const char* outputFilename);
   virtual void fillHistos(int histoNumber,float event_weight);
-  virtual vector<int> JetVetoDecision(int leading_ele_index, int subleading_ele_index);
-  virtual vector<int> electron_veto_tightID(int jet_index, float elePtCut);
-  virtual vector<int> electron_veto_looseID(int jet_index, int leading_mu_index, int subleading_mu_index, float elePtCut);
-  virtual vector<int> muon_veto_tightID(int jet_index, float muPtCut);
-  virtual vector<int> muon_veto_looseID(int jet_index, int leading_ele_index, int subleading_ele_index, float muPtCut);
   virtual float getSF(int lepindex_leading,int lepindex_subleading);
   virtual void initTree(TTree* tree);
   virtual void initVars();
 
+  virtual vector<int> JetVetoDecision(int leading, int subleading);
+  virtual vector<int> electron_veto_looseID(int jet_index,int leading,int subleading,float elePtCut);
+  virtual vector<int> photon_veto_looseID(int jet_index,int leading,int subleading,float phoPtCut);
+  virtual vector<int> tau_veto_looseID(int jet_index,int leading,int subleading,float tauPtCut);
+  
   virtual void JetEnergyScale(float start_weight);
 };
 
