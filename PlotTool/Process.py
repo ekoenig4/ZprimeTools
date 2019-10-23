@@ -9,6 +9,10 @@ def GetDirname(variable,sub=None):
     dirname = 'ZprimeJet_%s' % ndir
     if sub != None: dirname += '/%s' % sub
     return dirname,ndir
+def GetTObject(name,tfile):
+    tobject = tfile.Get(name)
+    if tobject == None: raise ValueError("Unable to find %s in %s" % (name,tfile.GetName()))
+    return tobject
 def IsGlobal(variable,tfile):
     return tfile.GetListOfKeys().Contains(variable)
 def IsNhisto(variable,tfile):
@@ -59,23 +63,23 @@ class SubProcess(object):
         self.scaled_total = 0
         self.nuisances = {}
     def getCutflow(self):
-        cutflow = self.tfile.Get('h_cutflow')
+        cutflow = GetTObject("h_cutflow",self.tfile)
         cutflow = cutflow.GetBinContent(1)
         self.cutflow = cutflow
-    def getGlobal(self):
-        self.histo = self.tfile.Get(variable)
+    def getGlobal(self,variable):
+        self.histo = GetTObject(variable,self.tfile)
     def setDir(self,dirname):
         # self.tdir = self.tfile.Get(dirname)
         self.dirname = dirname
     def getNhisto(self,variable):
         self.tfile.cd()
-        hs = self.tfile.Get( '%s/%s' % (self.dirname,variable) ).Clone('%s_%s' % (variable,self.filename))
+        hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
         hs.SetDirectory(0)
         self.histo = hs
     def getBranch(self,b_template,b_variable,treename,weight,cut):
         self.tfile.cd()
         if not any(self.nuisances): self.nuisances = GetNuisanceList(self.tfile,self.dirname);
-        if treename not in self.trees: self.trees[treename] = self.tfile.Get( '%s/%s' % (self.dirname,treename) )
+        if treename not in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
         self.histo = GetBranch(b_template,b_variable,self.trees[treename],weight,cut)
         self.histo.SetName('%s_%s' % (b_variable,self.filename))
         if 'post' in dir(b_template): b_template.post(self.histo)
@@ -97,12 +101,12 @@ class SubProcess(object):
         for variation in ('Up','Down'):
             if isScale:
                 treename = 'norm'
-                if not treename in self.trees: self.trees[treename] = self.tfile.Get( '%s/%s' % (self.dirname,treename) )
+                if not treename in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
                 tree = self.trees[treename]
                 hs_unc = GetBranch(b_template,b_variable,tree,nuisance+variation,cut)
             else:
                 treename = nuisance+variation
-                if not treename in self.trees: self.trees[treename] = self.tfile.Get( '%s/%s' % (self.dirname,treename) )
+                if not treename in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
                 tree = self.trees[treename]
                 hs_unc = GetBranch(b_template,b_variable,tree,'weight',cut)
             hs_unc.SetName('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
@@ -161,7 +165,7 @@ class Process(object):
     def getGlobal(self,variable):
         self.isGlobal = True
         self.variable = variable
-        for subprocess in self: subprocess.getGlobal()
+        for subprocess in self: subprocess.getGlobal(self.variable)
     def setDir(self,dirname,ndir):
         self.dirname = dirname
         self.ndir = ndir

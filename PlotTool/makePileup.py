@@ -18,7 +18,7 @@ weightedMC = plot.datamc(show=0)
 unweightedMC = plot.datamc(show=0)
 
 puTrueReWeighted = "puTrueReWeight_10";
-puTrueUnWeighted = "puTrueNoWeight_10";
+puTrueUnWeighted = "puTrueUnWeight_10";
 
 weightedMC.initiate(puTrueReWeighted);
 unweightedMC.initiate(puTrueUnWeighted);
