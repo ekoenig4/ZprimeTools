@@ -173,9 +173,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  fillHistos(6,event_weight);
 		  vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
 		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
-		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
+		  // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
 		  
-		  if(elelist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
+		  if(elelist.size() == 0 && pholist.size() == 0) {
 		    nNoElectrons+=event_weight;
 		    fillHistos(7,event_weight);
 		    float metcut = (fabs(pfMET-caloMET))/recoil;

@@ -106,9 +106,9 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 		if(dilepton_mass > 60 && dilepton_mass < 120) {
 		  vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex_subleading,lepindex_subleading,10.0);
 		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
-		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
+		  // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
 		  
-		  if(elelist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
+		  if(elelist.size() == 0 && pholist.size() == 0) {
 		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		    
 		    if(metcut<0.5) {
