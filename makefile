@@ -1,18 +1,30 @@
 regions = SignalRegion SingleEleCR DoubleEleCR SingleMuCR DoubleMuCR
 
-
 all: sr se sm de dm
 
 sr:
-	@$(MAKE) -C SignalRegion 
+	@$(MAKE) -C SignalRegion
 se:
-	@$(MAKE) -C SingleEleCR 
+	@$(MAKE) -C SingleEleCR
 sm:
-	@$(MAKE) -C SingleMuCR 
+	@$(MAKE) -C SingleMuCR
 de:
-	@$(MAKE) -C DoubleEleCR 
+	@$(MAKE) -C DoubleEleCR
 dm:
-	@$(MAKE) -C DoubleMuCR 
+	@$(MAKE) -C DoubleMuCR
+
+test: test_sr test_se test_sm test_de test_dm
+
+test_sr:
+	@$(MAKE) -C SignalRegion test
+test_se:
+	@$(MAKE) -C SingleEleCR test
+test_sm:
+	@$(MAKE) -C SingleMuCR test
+test_de:
+	@$(MAKE) -C DoubleEleCR test
+test_dm:
+	@$(MAKE) -C DoubleMuCR test
 
 clean: clean_sr clean_sr clean_sm clean_de clean_dm
 
