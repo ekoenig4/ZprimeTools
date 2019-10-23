@@ -59,7 +59,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	
 	if (jetCand.size() > 0) {
 	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.);
-	  vector<int> looseEle = electron_veto_looseID(jetCand[0],0,10.);
+	  vector<int> looseEle = electron_veto_looseID(jetCand[0],10.);
 	  
 	  if (elelist.size() ==1 && looseEle.size() == 1) {
 	    lepindex = elelist[0];
@@ -68,7 +68,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      event_weight *= sf;
 	    }
 	    TLorentzVector lep_4vec;
-	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleE->at(lepindex));
+	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleSCEta->at(lepindex),eleSCPhi->at(lepindex),eleE->at(lepindex));
 	    lepton_pt = lep_4vec.Pt();
 	    TLorentzVector met_4vec;
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
@@ -79,9 +79,11 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    
 	    if (leptoMET > 250) {
 	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
 	      
-	      if (mulist.size() == 0) {
-		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
+	      if (mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
+		float dPhiLepMet = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (pfMET > 50) {

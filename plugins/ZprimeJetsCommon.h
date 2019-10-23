@@ -837,7 +837,6 @@ public :
   virtual float DeltaPhi(float phi1, float phi2);
   virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
   virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
-  virtual bool btagVeto();
   virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets);
   virtual vector<int>getPFCandidates();
@@ -855,6 +854,18 @@ public :
   virtual bool getJetHEMVeto(float jetPtCut);
   virtual void initTree(TTree* tree) { /*Should be overriden by region*/ };
   virtual void initVars();
+  
+  virtual vector<int> electron_veto_tightID(int jet_index,float elePtCut);
+  virtual vector<int> electron_veto_looseID(int jet_index,float elePtCut);
+
+  virtual vector<int> muon_veto_tightID(int jet_index,float muPtCut);
+  virtual vector<int> muon_veto_looseID(int jet_index,float muPtCut);
+
+  virtual vector<int> photon_veto_looseID(int jet_index,float phoPtCut);
+  virtual vector<int> tau_veto_looseID(int jet_index,float tauPtCut);
+
+  virtual vector<int> JetVetoDecision();
+  virtual bool btagVeto();
   
   virtual void JetEnergyScale(float start_weight) { /*Should be overriden by region*/ };
   virtual void PFUncertainty(float event_weight);

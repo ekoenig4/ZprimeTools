@@ -56,7 +56,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    
 	    if (metcut < 0.5) {
 	      
-	      if (electron_veto_looseID(jetCand[0],10.) && muon_veto_looseID(jetCand[0],10.)) {
+	      if (electronVeto(jetCand[0],10.) && muonVeto(jetCand[0],10.) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18)) {
 		
 		if (btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();

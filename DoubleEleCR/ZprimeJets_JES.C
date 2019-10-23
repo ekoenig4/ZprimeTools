@@ -66,19 +66,18 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	if(jetCand.size()>0){
 	  //CR code
 	  //At least one of the two electrons passes the tight selection
-	  vector<int> elelist = electron_veto_looseID(jetCand[0],0,0,10.0);
 	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],0,0,10.0);
+	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],10.0);
 	  
-	  if(elelist.size() == 2){
+	  if(elelist_subleading.size() == 2){
 	    bool elePairSet = false;
 	    TLorentzVector e1, e2;
 	    for(int i=0; i<elelist_leading.size(); ++i){
 	      for(int j=0; j<elelist_subleading.size(); ++j){
 		//Event must have exactly two loose electrons with opposite charge
 		if(eleCharge->at(elelist_leading[i])*eleCharge->at(elelist_subleading[j]) == -1){
-		  e1.SetPtEtaPhiE(elePt->at(elelist_leading[i]),eleEta->at(elelist_leading[i]),elePhi->at(elelist_leading[i]),eleE->at(elelist_leading[i]));
-		  e2.SetPtEtaPhiE(elePt->at(elelist_subleading[j]),eleEta->at(elelist_subleading[j]),elePhi->at(elelist_subleading[j]),eleE->at(elelist_subleading[j]));
+		  e1.SetPtEtaPhiE(elePt->at(elelist_leading[i]),eleSCEta->at(elelist_leading[i]),eleSCPhi->at(elelist_leading[i]),eleE->at(elelist_leading[i]));
+		  e2.SetPtEtaPhiE(elePt->at(elelist_subleading[j]),eleSCEta->at(elelist_subleading[j]),eleSCPhi->at(elelist_subleading[j]),eleE->at(elelist_subleading[j]));
 		  elePairSet = true;
 		  lepindex_leading = elelist_leading[i];
 		  lepindex_subleading = elelist_subleading[j];
@@ -110,8 +109,10 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 		
 		if(dilepton_mass > 60 && dilepton_mass < 120){
 		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
+		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
+		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
 		  
-		  if(mulist.size() == 0){
+		  if(mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0){
 		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		    
 		    if(metcut < 0.5){

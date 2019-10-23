@@ -59,7 +59,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	
 	if (jetCand.size() > 0) {
 	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
-	  vector<int> looseMu = muon_veto_looseID(jetCand[0],0,10.);
+	  vector<int> looseMu = muon_veto_looseID(jetCand[0],10.);
 	  
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    if (!sample.isData) {
@@ -79,8 +79,10 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    
 	    if (leptoMET > 250) {
 	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
 	      
-	      if (elelist.size() == 0) {
+	      if (elelist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		float dPhiLepMet = DeltaPhi(muPhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		

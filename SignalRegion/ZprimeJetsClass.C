@@ -104,7 +104,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
 	      
-	      if (electron_veto_looseID(jetCand[0],10.) && muon_veto_looseID(jetCand[0],10.)) {
+	      if (electronVeto(jetCand[0],10.) && muonVeto(jetCand[0],10.) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18)) {
 		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
 		
@@ -212,58 +212,4 @@ void ZprimeJetsClass::fillHistos(int histoNumber,float event_weight) {
   fillCommon(histoNumber,event_weight);
   weight = event_weight;
   if (histoNumber == bHisto) tree->Fill();
-}
-
-vector<int> ZprimeJetsClass::JetVetoDecision() {
-  vector<int> jetindex;
-  for(int i = 0; i < nJet; i++){
-    bool tightJetID = false;
-    if ((*jetID)[i]>>0&1 == 1) tightJetID = true;
-    if(jetPt->at(i) >30.0 && fabs(jetEta->at(i)) < 2.5 && tightJetID)
-      jetindex.push_back(i);
-  }
-  return jetindex;
-}
-
-bool ZprimeJetsClass::electron_veto_looseID(int jet_index, float elePtCut) {
-  bool veto_passed = true; //pass veto if no good electron found
-  for(int i = 0; i < nEle; i++) {
-    //Electron passes Loose Electron ID cuts
-    if(eleIDbit->at(i)>>0&1 == 1) {
-      //Electron passes eta cut
-      if (fabs(eleEta->at(i)) < 2.5) {
-	//Electron passes pt cut
-	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap photon
-	  if(deltaR(eleEta->at(i),elePhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
-	}
-      }
-    }
-  }
-  return veto_passed;
-}
-
-//Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate photon within dR of 0.5
-bool ZprimeJetsClass::muon_veto_looseID(int jet_index, float muPtCut) {
-  bool veto_passed = true; //pass veto if no good muon found
-  for(int i = 0; i < nMu; i++) {
-    if(muIDbit->at(i)>>0&1==1) {
-      //Muon passes eta cut
-      if (fabs(muEta->at(i)) < 2.4) {
-	//Muon passes pt cut
-	if(muPt->at(i) > muPtCut) {
-	  //cout <<"Passed Pt Cut" << endl;
-	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
-	    veto_passed = false;
-	    break;
-	  }
-	}
-      }
-    }
-  }
-  return veto_passed;
 }
