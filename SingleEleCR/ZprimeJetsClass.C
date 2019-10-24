@@ -91,9 +91,9 @@ float ZprimeJetsClass::getSF(int ele_index) {
   float eleEta_to_use = fabs(eleSCEta->at(ele_index)) < 2.5 ? eleSCEta->at(ele_index) : 2.49;
   float elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
 
-  float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",elePt_to_use,eleEta_to_use);
+  float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",eleEta_to_use,elePt_to_use);
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
-  float eleEffSF_corr= th2fmap.getBin("eleIDSF",elePt_to_use,eleEta_to_use);
+  float eleEffSF_corr= th2fmap.getBin("eleIDSF",eleEta_to_use,elePt_to_use);
   // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
   float eleTriggSF = EletriggerSF(elePt_to_use,eleEta_to_use);
   // cout<<"eleTriggSF = " << eleTriggSF << endl;
