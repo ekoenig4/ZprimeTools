@@ -26,7 +26,7 @@ test_de:
 test_dm:
 	@$(MAKE) -C DoubleMuCR test
 
-clean: clean_sr clean_sr clean_sm clean_de clean_dm
+clean: clean_sr clean_se clean_sm clean_de clean_dm
 
 clean_sr:
 	@$(MAKE) -C SignalRegion clean
@@ -39,7 +39,7 @@ clean_de:
 clean_dm:
 	@$(MAKE) -C DoubleMuCR clean
 
-condor_clean: condor_clean_sr condor_clean_sr condor_clean_sm condor_clean_de condor_clean_dm
+condor_clean: condor_clean_sr condor_clean_se condor_clean_sm condor_clean_de condor_clean_dm
 
 condor_clean_sr:
 	@$(MAKE) -C SignalRegion condor_clean
@@ -52,7 +52,7 @@ condor_clean_de:
 condor_clean_dm:
 	@$(MAKE) -C DoubleMuCR condor_clean
 
-condor_submit: condor_submit_sr condor_submit_sr condor_submit_sm condor_submit_de condor_submit_dm
+condor_submit: condor_submit_sr condor_submit_se condor_submit_sm condor_submit_de condor_submit_dm
 
 condor_submit_sr:
 	@$(MAKE) -C SignalRegion condor_submit
@@ -65,7 +65,7 @@ condor_submit_de:
 condor_submit_dm:
 	@$(MAKE) -C DoubleMuCR condor_submit
 
-hadd: hadd_sr hadd_sr hadd_sm hadd_de hadd_dm
+hadd: hadd_sr hadd_se hadd_sm hadd_de hadd_dm
 
 hadd_sr:
 	@$(MAKE) -C SignalRegion hadd
