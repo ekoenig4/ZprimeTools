@@ -2,7 +2,7 @@
 import sys
 from os import path, system, mkdir, listdir, rename, remove, chdir, getenv
 cmssw_base = getenv("CMSSW_BASE")
-sys.path.append( "%s/src/" % cmssw_base )
+sys.path.append( "%s/src/ZprimeTools2016/" % cmssw_base )
 from CondorTools.CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
@@ -44,7 +44,6 @@ def getargs():
         if nbatches == -1: nbatches = len(args.rfiles)/NFILE_PER_BATCH
         #Dealing with some edge cases
         if nbatches == 0: nbatches = 1
-        elif nbatches == 1: nbatches = 2
         return nbatches
     args.script = checkScript(args.runargs[0])
     args.inputdir,args.rfiles = checkRootDir(args.runargs[1])
@@ -146,7 +145,7 @@ def main():
     config.write('.output/condor_%s' % args.label)
     #Move into .output/ and run newly made condor_submit file
     chdir(".output/")
-    # system("condor_submit condor_%s" % args.label)
+    system("condor_submit condor_%s" % args.label)
     
     
 if __name__ == "__main__": main()
