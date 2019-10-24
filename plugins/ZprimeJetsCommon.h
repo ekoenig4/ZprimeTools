@@ -37,7 +37,7 @@ public :
   static const int maxHisto = 50;
   TTree *tree;
 
-  static const bool debug = true;
+  static const bool debug = false;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;

@@ -2,6 +2,7 @@
 #include "ZprimeJetsClass.h"
 #include "fstream"
 
+#include "TCanvas.h"
 using namespace std;
 
 int main(int argc, const char* argv[]) { 
@@ -91,12 +92,12 @@ float EletriggerSF(float pt, float eta){
 float ZprimeJetsClass::getSF(int ele_index) {
   float eleEta_to_use = fabs(eleSCEta->at(ele_index)) < 2.5 ? eleSCEta->at(ele_index) : 2.49;
   float elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
-  
-  float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",elePt_to_use,eleEta_to_use);
+
+  float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",eleEta_to_use,elePt_to_use);
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
-  float eleEffSF_corr= th2fmap.getBin("eleIDSF",elePt_to_use,eleEta_to_use);
+  float eleEffSF_corr= th2fmap.getBin("eleIDSF",eleEta_to_use,elePt_to_use);
   // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
-  float eleTriggSF = EletriggerSF(elePt_to_use,eleEta_to_use);
+  float eleTriggSF = EletriggerSF(eleEta_to_use,elePt_to_use);
   // cout<<"eleTriggSF = " << eleTriggSF << endl;
 
   h_eleRecoSF_corr->Fill(eleRecoSF_corr);
@@ -153,7 +154,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
       //cout<<"event_weight: "<<event_weight<<endl;
       if (sample.isW_or_ZJet()){
 	SetBoson(sample.PID);
-ApplyKFactor(event_weight);
+	ApplyKFactor(event_weight);
       }
     }
 
