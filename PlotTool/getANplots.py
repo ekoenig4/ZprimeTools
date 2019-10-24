@@ -28,7 +28,7 @@ def getplots(dir,variables):
 #----Signal Region----#
 dir = 'SignalRegion/'
 getplots(dir,nvariables)
-
+exit()
 #----Double Lepton CR----#
 dir = 'DoubleMuCR/'
 getplots(dir,nvariables + doubleleps)
