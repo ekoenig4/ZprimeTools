@@ -127,7 +127,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
 
-	      bool noLeptonID = electronVeto(jetCand[0],10) && muonVeto(jetCand[0],10) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18);
+	      bool noLeptonID = electronVeto(jetCand[0],10) && muonVeto(jetCand[0],10) && photonVeto(jetCand[0],15);
 	      if( noLeptonID )  {
 		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
