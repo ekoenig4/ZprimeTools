@@ -161,20 +161,16 @@ class datamc(object):
 
     def getBinning(self):
         hs = None
+        print self.options.binning
         if self.options.binning == None: return None
         elif 'perc' in self.options.binning:
             nbins = self.options.binning.replace('perc','')
             hs = binning.percentBinning(nbins=int(nbins))
-            hs.post = lambda hs: None;
             if hs != None: self.varname += 'perc'+nbins
-        elif 'incl'  == self.options.binning:
-            hs = binning.inclusiveBinning()
-            def AddOverflow(hs):
-                nbins = hs.GetNbinsX()
-                overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
-                hs.SetBinContent(nbins,overflow)
-            hs.post = AddOverflow
-            if hs != None: self.varname += 'incl'
+        elif 'incl'  in self.options.binning:
+            nbins = self.options.binning.replace('incl','')
+            hs = binning.inclusiveBinning(nbins=int(nbins))
+            if hs != None: self.varname += 'incl'+nbins
         return hs
     ###############################################################################################################
             
