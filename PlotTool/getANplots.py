@@ -27,17 +27,17 @@ def getplots(dir,variables):
 
 #----Signal Region----#
 dir = 'SignalRegion/'
-getplots(dir,nvariables)
+# getplots(dir,nvariables)
 
 #----Double Lepton CR----#
 dir = 'DoubleMuCR/'
-getplots(dir,nvariables + doubleleps)
+# getplots(dir,nvariables + doubleleps)
 dir = 'DoubleEleCR/'
-getplots(dir,nvariables + doubleleps)
+# getplots(dir,nvariables + doubleleps)
 
 #----Single Lepton CR----#
 dir = 'SingleMuCR/'
-getplots(dir,nvariables + singleleps)
+# getplots(dir,nvariables + singleleps)
 dir = 'SingleEleCR/'
 getplots(dir,nvariables + singleleps)
 

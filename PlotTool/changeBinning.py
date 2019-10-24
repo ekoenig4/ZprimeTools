@@ -13,4 +13,11 @@ def percentBinning(nbins=20):
     else: return None
     return TH1F('treevar','',nbins,bins)
 
-def inclusiveBinning(): return TH1F('treevar','',50,0,1)
+def inclusiveBinning(nbins=50):
+    hs = TH1F('treevar','',nbins,0,1)
+    def AddOverflow(hs):
+        nbins = hs.GetNbinsX()
+        overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
+        hs.SetBinContent(nbins,overflow)
+    hs.post = AddOverflow
+    return hs
