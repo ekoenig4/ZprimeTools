@@ -26,20 +26,20 @@ def getplots(dir,variables):
     os.chdir(cwd)
 
 #----Signal Region----#
-dir = 'SignalRegion/'
-getplots(dir,nvariables)
+# dir = 'SignalRegion/'
+# getplots(dir,nvariables)
 
-#----Double Lepton CR----#
+# #----Double Lepton CR----#
 dir = 'DoubleMuCR/'
 getplots(dir,nvariables + doubleleps)
-dir = 'DoubleEleCR/'
-getplots(dir,nvariables + doubleleps)
+# dir = 'DoubleEleCR/'
+# getplots(dir,nvariables + doubleleps)
 
-#----Single Lepton CR----#
-dir = 'SingleMuCR/'
-getplots(dir,nvariables + singleleps)
-dir = 'SingleEleCR/'
-getplots(dir,nvariables + singleleps)
+# #----Single Lepton CR----#
+# dir = 'SingleMuCR/'
+# getplots(dir,nvariables + singleleps)
+# dir = 'SingleEleCR/'
+# getplots(dir,nvariables + singleleps)
 
 for var in outvar:
     print var
