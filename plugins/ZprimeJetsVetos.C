@@ -8,18 +8,18 @@ vector<int> ZprimeJetsCommon::electron_veto_tightID(int jet_index, float elePtCu
   for(int i = 0; i < nEle; i++) {
     //Electron passes Tight Electron ID cuts
     if(eleIDbit->at(i)>>3&1 == 1) {
-      //Electron passes eta cut
-      if(fabs(eleSCEta->at(i)) < 2.5) {
+      //Electron passes Eta cut
+      if (fabs(eleSCEta->at(i)) < eleTightEtaCut) {
 	//Electron passes pt cut
 	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap jet
-	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5){
+	  //Electron does not overlap photon
+	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
 	    
 	    //Ele DZ and D0 selection
-	    if ((fabs(eleSCEta->at(i)) <= 1.479) && (fabs(eleD0->at(i)) < 0.05) && (fabs(eleDz->at(i)) < 0.1 )) {
+	    if ((fabs(eleSCEta->at(i)) <= eleEtaCutLow) && (fabs(eleD0->at(i)) < eleD0CutLow) && (fabs(eleDz->at(i)) < eleDzCutLow )) {
 	      ele_cands.push_back(i);
 	    }
-	    else if( (fabs(eleSCEta->at(i)) > 1.479) && (fabs(eleD0->at(i)) < 0.1) && (fabs(eleDz->at(i)) < 0.2 )){
+	    else if( (fabs(eleSCEta->at(i)) > eleEtaCutHigh) && (fabs(eleD0->at(i)) < eleD0CutHigh) && (fabs(eleDz->at(i)) < eleDzCutHigh )){
 	      ele_cands.push_back(i);
 	    }
 	  }
@@ -38,16 +38,17 @@ vector<int> ZprimeJetsCommon::electron_veto_looseID(int jet_index, float elePtCu
     //Electron passes Loose Electron ID cuts
     if(eleIDbit->at(i)>>1&1 == 1) {
       //Electron passes eta cut
-      if(fabs(eleSCEta->at(i)) < 2.5) {
+      if (fabs(eleSCEta->at(i)) < eleLooseEtaCut) {
 	//Electron passes pt cut
 	if(elePt->at(i) > elePtCut) {
-	  //Electron does not overlap jet
-	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5) {
+	  //Electron does not overlap photon
+	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
+	    
 	    //Ele DZ and D0 selection
-	    if ((fabs(eleSCEta->at(i)) <= 1.479) && (fabs(eleD0->at(i)) < 0.05) && (fabs(eleDz->at(i)) < 0.1 )) {
+	    if ((fabs(eleSCEta->at(i)) <= eleEtaCutLow) && (fabs(eleD0->at(i)) < eleD0CutLow) && (fabs(eleDz->at(i)) < eleDzCutLow )) {
 	      ele_cands.push_back(i);
 	    }
-	    else if( (fabs(eleSCEta->at(i)) > 1.479) && (fabs(eleD0->at(i)) < 0.1) && (fabs(eleDz->at(i)) < 0.2 )){
+	    else if( (fabs(eleSCEta->at(i)) > eleEtaCutHigh) && (fabs(eleD0->at(i)) < eleD0CutHigh) && (fabs(eleDz->at(i)) < eleDzCutHigh )){
 	      ele_cands.push_back(i);
 	    }
 	  }
@@ -98,11 +99,11 @@ vector<int> ZprimeJetsCommon::muon_veto_tightID(int jet_index, float muPtCut) {
     // if(pass_iso && pass_globalMuon && pass_PFMuon && pass_chi2ndf && pass_chamberHit && pass_matchedStations && pass_dxy && pass_dz && pass_pixelHits && pass_trackLayers)
     if(pass_iso && muIDbit->at(i)>>2&1==1) {
       //Muon passes eta cut
-      if (fabs(muEta->at(i)) < 2.4) {
+      if (fabs(muEta->at(i)) < muTightEtaCut) {
 	//Muon passes pt cut
 	if(muPt->at(i) > muPtCut) {
 	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut)
 	    mu_cands.push_back(i);
 	}
       }
@@ -122,14 +123,14 @@ vector<int> ZprimeJetsCommon::muon_veto_looseID(int jet_index, float muPtCut)
   for(int i = 0; i < nMu; i++) {
     if(muIDbit->at(i)>>0&1==1) {
       //Muon passes eta cut
-      if(fabs(muEta->at(i)) < 2.4) {
+      if (fabs(muEta->at(i)) < muLooseEtaCut) {
 	//Muon passes pt cut
 	if(muPt->at(i) > muPtCut) {
-	  // cout <<"Passed Pt Cut" << endl;
-	  //Muon does not overlap jet
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5)
+	  //cout <<"Passed Pt Cut" << endl;
+	  //Muon does not overlap photon
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
 	    mu_cands.push_back(i);
-	}
+	  }
       }
     }
   }
@@ -140,9 +141,9 @@ vector<int> ZprimeJetsCommon::photon_veto_looseID(int jet_index,float phoPtCut) 
   vector<int> pho_cands; pho_cands.clear();
 
   for (int i = 0; i < nPho; i++) {
-    if ( fabs(phoSCEta->at(i)) < 2.4 ){
+    if ( fabs(phoSCEta->at(i)) < phoLooseEtaCut ){
       if ( phoEt->at(i) > phoPtCut ) {
-	if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 )
+	if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
 	  pho_cands.push_back(i);
       }
     }
@@ -155,9 +156,9 @@ vector<int> ZprimeJetsCommon::tau_veto_looseID(int jet_index,float tauPtCut) {
 
   for (int i = 0; i < nTau; i++) {
     if ( taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i) ) {
-      if ( fabs(tauEta->at(i)) < 2.3 ){
-	if ( tauPt->at(i) > tauPtCut ) {
-	  if ( deltaR(tauEta->at(i),tauPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > 0.5 )
+      if ( fabs(tau_Eta->at(i)) < tauLooseEtaCut ){
+	if ( tau_Pt->at(i) > tauPtCut ) {
+	  if ( deltaR(tau_Eta->at(i),tau_Phi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
 	    tau_cands.push_back(i);
 	}
       }
@@ -170,7 +171,7 @@ vector<int> ZprimeJetsCommon::tau_veto_looseID(int jet_index,float tauPtCut) {
 vector<int> ZprimeJetsCommon::JetVetoDecision() {
   vector<int> jetindex; jetindex.clear();
   for(int i = 0; i < nJet; i++) {
-    if (jetPt->at(i) < 30. && fabs(jetEta->at(i)) < 2.5 && jetPFLooseId->at(i)==1)
+    if (jetPt->at(i) > jetVetoPtCut && fabs(jetEta->at(i)) < jetVetoEtaCut && jetPFLooseId->at(i)==1)
       jetindex.push_back(i);
   }
   return jetindex;
@@ -180,7 +181,7 @@ bool ZprimeJetsCommon::btagVeto() {
 
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
-    if(jetPt->at(i) > 30.0 && fabs(jetEta->at(i)) < 2.5 && jetCSV2BJetTags->at(i) > 0.8484)
+    if(jetPt->at(i) > bjetVetoPtCut && fabs(jetEta->at(i)) < bjetVetoEtaCut && jetCSV2BJetTags->at(i) > bjetVetoCSVv2Cut)
       btagVeto = false;
   return btagVeto;
 }

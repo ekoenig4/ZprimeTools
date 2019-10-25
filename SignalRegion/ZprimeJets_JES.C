@@ -42,7 +42,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       pfMETPhi = pfMETPhi_T1JESDo;
     }
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
       
     if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) { 
@@ -51,16 +51,13 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	  
 	if(jetCand.size()>0) {
 	    
-	  if (pfMET>250) {
+	  if (pfMET > recoilCut) {
 	    float metcut = (fabs(pfMET-caloMET))/pfMET;
 	      
-	    if(metcut<0.5) {
+	    if(metcut < metRatioCut) {
 
-	      auto elelist = electron_veto_looseID(jetCand[0],10);
-	      auto mulist = muon_veto_looseID(jetCand[0],10);
-	      auto pholist = photon_veto_looseID(jetCand[0],15);
-	      // auto taulist = tau_veto_looseID(jetCand[0],18);
-	      if( elelist.size() == 0 && mulist.size() == 0 && pholist.size() == 0 ) {
+	      bool noLeptonID = electronVeto(jetCand[0],eleLoosePtCut) && muonVeto(jetCand[0],muLoosePtCut) && photonVeto(jetCand[0],phoLoosePtCut);
+	      if( noLeptonID ) {
 		
 		if(btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();

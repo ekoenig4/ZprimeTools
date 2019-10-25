@@ -103,7 +103,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     }
 
     float weightNorm = event_weight;
-    jetCand   = getJetCand(200,2.5,0.8,0.1);
+    jetCand   = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     nTotalEvents+=genWeight;
     fillHistos(0,genWeight);
@@ -124,8 +124,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  fillHistos(3,event_weight);
 	  //CR code
 	  //At least one of the two electrons passes the tight selection
-	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],10.0);
+	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],eleLoosePtCut);
 	  
 	  if(elelist_subleading.size() == 2) {
 	    bool elePairSet = false;
@@ -162,17 +162,17 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      nCRSelection+=event_weight;
 	      fillHistos(4,event_weight);
 	      
-	      if (recoil>250) {
+	      if (recoil > recoilCut) {
 		nMET200+=event_weight;
 		fillHistos(5,event_weight);
 		//invariant mass of the two electrons is betwen 60 and 120GeV
 		
-		if(dilepton_mass > 60 && dilepton_mass < 120) {
+		if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
 		  ndilepton+=event_weight;
 		  fillHistos(6,event_weight);
-		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
-		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
-		  // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
+		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
+		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
+		  // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 		  if(mulist.size() == 0 && pholist.size() == 0) {
 		    nNoMuons+=event_weight;
@@ -180,7 +180,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		    h_metcut->Fill(metcut);
 		    
-		    if(metcut<0.5) {
+		    if(metcut < metRatioCut) {
 		      nMETcut+=event_weight;
 		      fillHistos(8,event_weight);
 		      
@@ -327,7 +327,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int leading, int subleading) {
   for (int ijet : tmpcands) {
     float dR_leading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(leading),eleSCPhi->at(leading));
     float dR_subleading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(subleading),eleSCPhi->at(subleading));
-    if ( dR_leading > 0.4 && dR_subleading > 0.4 )
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
       jetindex.push_back(ijet);
   }
   return jetindex;
@@ -342,7 +342,7 @@ vector<int> ZprimeJetsClass::muon_veto_looseID(int jet_index, int leading, int s
   for(int imu : tmpcands) {
     float dR_leading = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(leading),eleSCPhi->at(leading));
     float dR_subleading = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(subleading),eleSCPhi->at(subleading));
-    if ( dR_leading > 0.5 && dR_subleading )
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut)
       mu_cands.push_back(imu);
   }
   
@@ -356,7 +356,7 @@ vector<int> ZprimeJetsClass::photon_veto_looseID(int jet_index,int leading,int s
   for (int ipho : tmpcands ) {
     float dR_leading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(leading),eleSCPhi->at(leading));
     float dR_subleading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(subleading),eleSCPhi->at(subleading));
-    if ( dR_leading > 0.5 && dR_subleading > 0.5 )
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
       pho_cands.push_back(ipho);
   }
   return pho_cands;
@@ -369,7 +369,7 @@ vector<int> ZprimeJetsClass::tau_veto_looseID(int jet_index,int leading,int subl
   for (int itau : tmpcands ) {
     float dR_leading = deltaR(tauEta->at(itau),tauPhi->at(itau),eleSCEta->at(leading),eleSCPhi->at(leading));
     float dR_subleading = deltaR(tauEta->at(itau),tauPhi->at(itau),eleSCEta->at(subleading),eleSCPhi->at(subleading));
-    if ( dR_leading > 0.5 && dR_subleading > 0.5 )
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
       tau_cands.push_back(itau);
   }
   return tau_cands;

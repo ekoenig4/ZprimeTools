@@ -46,7 +46,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       pfMETPhi = pfMETPhi_T1JESDo;
     }
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     //CR Variables
     lepindex = -1;
@@ -59,8 +59,8 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	if(jetCand.size()>0) {
 	  //CR code
 	  //At least one of the one electrons passes the tight selection
-	  vector<int> elelist = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> looseEles = electron_veto_looseID(jetCand[0],10.0);
+	  vector<int> elelist = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> looseEles = electron_veto_looseID(jetCand[0],eleLoosePtCut);
 	  
 	  if(elelist.size() == 1 && looseEles.size() == 1) {
 	    lepindex = elelist[0];
@@ -75,19 +75,19 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    recoil = fabs(leptoMET_4vec.Pt());
 	    recoilPhi = leptoMET_4vec.Phi();
 	    
-	    if (recoil>250) {
-	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,10.0);
-	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
-	      // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
+	    if (recoil > recoilCut) {
+	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,muLoosePtCut);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,phoLoosePtCut);
+	      // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,tauLoosePtCut);
 	      
 	      if(mulist.size() == 0 && pholist.size() == 0) {
 		Float_t dPhi_lepMET = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
 		
-		if(pfMET > 50) {
+		if(pfMET > pfMET50Cut) {
 		  float metcut = (fabs(pfMET-caloMET))/recoil;
 		  
-		  if(metcut<0.5) {
+		  if(metcut < metRatioCut) {
 		    
 		    if(btagVeto()) {
 		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);

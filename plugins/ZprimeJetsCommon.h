@@ -44,6 +44,8 @@
 #include "TString.h"
 #include "vector"
 
+#include "ZprimeJetsCutConfig.h"
+
 #include "ScaleUnc.h"
 #include "ShapeUnc.h"
 
