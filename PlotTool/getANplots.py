@@ -4,7 +4,7 @@ from ROOT import gROOT
 from cfg_saveplot import config
 from plotter import plotter
 
-nvariables = [ 'ChNemPtFrac','ChNemPt','ChNemPt123','h_recoil','nJets','j1pT' ]
+nvariables = [ 'ChNemPtFrac','ChNemPt','ChNemPt123','h_recoil','nJets','j1pT','j1Eta' ]
 # nvariables = ['ChNemPtFrac','ChNemPt' ]
 singleleps = [ 'h_LeptonPt','h_LeptonEta' ]
 doubleleps = [ 'h_dileptonM','h_dileptonPt','h_leadingLeptonPt','h_leadingLeptonEta','h_subleadingLeptonEta','h_subleadingLeptonPt' ]
