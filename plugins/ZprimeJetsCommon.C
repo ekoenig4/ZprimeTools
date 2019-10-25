@@ -343,7 +343,7 @@ bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
     njetsMax = 4;
   int j = 0;
   for(; j < njetsMax; j++)
-    if(DeltaPhi((*jetPhi)[j],metPhi) < 0.5)
+    if(DeltaPhi((*jetPhi)[j],metPhi) < metdPhiJetCut)
       break;
   if(j==njetsMax)
     passes = true;

@@ -23,6 +23,8 @@
 #include <vector>
 #include <functional>
 
+#include "ZprimeJetsCutConfig.h"
+
 #include "ScaleUnc.h"
 #include "ShapeUnc.h"
 

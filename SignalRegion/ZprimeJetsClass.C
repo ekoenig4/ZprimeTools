@@ -77,7 +77,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     float weightNorm = event_weight;
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     nTotalEvents+=genWeight;
     fillHistos(0,genWeight);
@@ -94,17 +94,17 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
 	  
-	  if (pfMET > 250) {
+	  if (pfMET > recoilCut) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
 	    float metcut = (fabs(pfMET-caloMET)/pfMET);
 	    h_metcut->Fill(metcut);
 	    
-	    if (metcut < 0.5) {
+	    if (metcut < metRatioCut) {
 	      nMETcut+=event_weight;
 	      fillHistos(5,event_weight);
 	      
-	      if (electronVeto(jetCand[0],10.) && muonVeto(jetCand[0],10.) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18)) {
+	      if (electronVeto(jetCand[0],eleLoosePtCut) && muonVeto(jetCand[0],muLoosePtCut) && photonVeto(jetCand[0],phoLoosePtCut) && tauVeto(jetCand[0],tauLoosePtCut)) {
 		nLeptonIDs+=event_weight;
 		fillHistos(6,event_weight);
 		

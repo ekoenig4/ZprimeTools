@@ -49,7 +49,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       pfMETPhi = pfMETPhi_T1JESDo;
     }
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     //cout<<"|caloMET-pfMET|/pfMET: "<<metcut<<endl;
     //CR Variables
@@ -64,8 +64,8 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	if(jetCand.size()>0){
 	  //CR code
 	  //At least one of the two electrons passes the tight selection
-	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],40.0);
-	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],10.0);
+	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],eleLoosePtCut);
 	  
 	  if(elelist_subleading.size() == 2){
 	    bool elePairSet = false;
@@ -102,18 +102,18 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      recoilPhi = leptoMET_4vec.Phi();
 	      recoil = leptoMET;
 	      
-	      if (leptoMET>250){
+	      if (leptoMET > recoilCut){
 		//invariant mass of the two electrons is betwen 60 and 120GeV
 		
-		if(dilepton_mass > 60 && dilepton_mass < 120){
-		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,10.0);
-		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,15);
-		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,18);
+		if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh){
+		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
+		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
+		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 		  if(mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0){
 		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		    
-		    if(metcut < 0.5){
+		    if(metcut < metRatioCut){
 		      
 		      if(btagVeto()){
 			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
