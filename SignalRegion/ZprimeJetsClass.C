@@ -128,6 +128,9 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    if (getEleHEMVeto(40)) {
 		      eleHEMVeto+=event_weight;
 
+		      fillHistos(10,weight_QCDSF);
+		      fillHistos(11,weight_16K);
+
 		      // Use weight without genWeight applied
 		      PSWeights(weight_nogen); // 44 Histograms
 		      QCDVariations(event_weight);
