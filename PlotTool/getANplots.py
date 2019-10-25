@@ -25,21 +25,11 @@ def getplots(dir,variables):
     plotter(inputvar)
     os.chdir(cwd)
 
-#----Signal Region----#
-dir = 'SignalRegion/'
-# getplots(dir,nvariables)
-
-#----Double Lepton CR----#
-dir = 'DoubleMuCR/'
-# getplots(dir,nvariables + doubleleps)
-dir = 'DoubleEleCR/'
-# getplots(dir,nvariables + doubleleps)
-
-#----Single Lepton CR----#
-dir = 'SingleMuCR/'
-# getplots(dir,nvariables + singleleps)
-dir = 'SingleEleCR/'
-getplots(dir,nvariables + singleleps)
+# getplots('SignalRegion/',nvariables)
+# getplots('DoubleMuCR/',nvariables + doubleleps)
+getplots('DoubleEleCR/',nvariables + doubleleps)
+# getplots('SingleMuCR/',nvariables + singleleps)
+# getplots('SingleEleCR/',nvariables + singleleps)
 
 for var in outvar:
     print var

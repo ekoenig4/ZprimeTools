@@ -154,7 +154,7 @@ def makeYaxis(ymin,ymax,xmin,ndiv,name=None):
 def plotVariable(samples,variable):
     del store[:] # Clear storage list 
     print "Plotting",variable
-    if (samples.options.thn):
+    if (samples.args.thn):
         HigherDimension(samples,variable)
     else:
         samples.initiate(variable)
@@ -173,18 +173,18 @@ def plotVariable(samples,variable):
 
     data = samples.processes['Data']
     DataStyle(data.histo)
-    if (samples.options.normalize): data.histo.Scale(1/data.total)
+    if (samples.args.normalize): data.histo.Scale(1/data.total)
 
     for mc in samples.MCList:
         mc_proc = samples.processes[mc]
         MCStyle(mc_proc.histo,mc_proc.color)
-        if (samples.options.normalize): mc_proc.histo.Scale(1/samples.BkgIntegral)
+        if (samples.args.normalize): mc_proc.histo.Scale(1/samples.BkgIntegral)
         
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
     fillStack(samples,hs_datamc)
     ymin_s=pow(10,-6);ymax_s=pow(10,2.5);
-    ymin = 0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*ymin_s
+    ymin = 0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*ymin_s
     ymax = hs_datamc.GetMaximum()*ymax_s
     hs_datamc.Draw("HIST")
     StackStyle(hs_datamc,ymin,ymax)
@@ -211,7 +211,7 @@ def plotVariable(samples,variable):
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
-    if (samples.options.normalize): lumi_label="Normalized"
+    if (samples.args.normalize): lumi_label="Normalized"
     texLumi,texCMS = getCMSText(lumi_label,samples.version)
     texLumi.Draw();
     texCMS.Draw();
@@ -258,8 +258,8 @@ def plotVariable(samples,variable):
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
-    if (samples.options.allHisto):sub = "all"
-    if (samples.options.sub != None): sub = samples.options.sub
+    if (samples.args.allHisto):sub = "all"
+    if (samples.args.sub != None): sub = samples.args.sub
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
@@ -270,7 +270,7 @@ def plotVariable(samples,variable):
     
 def plotter(args=[]):
     samples = plot.datamc()
-    if not any(args): args = samples.args
+    if not any(args): args = samples.args.argv
     for variable in args:
         plotVariable(samples,variable)
 ###################################################################

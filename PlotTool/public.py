@@ -36,7 +36,7 @@ for variable in samples.args:
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
     min=pow(10,-6);max=pow(10,2.5);
-    hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
+    hs_datamc.SetMinimum(0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*min);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("hist")
@@ -67,7 +67,7 @@ for variable in samples.args:
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
-    if (samples.options.normalize): lumi_label="Normalized"
+    if (samples.args.normalize): lumi_label="Normalized"
     texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
     texS.SetNDC();
     texS.SetTextFont(42);
@@ -83,7 +83,7 @@ for variable in samples.args:
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/APS/2018/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
-    if (samples.options.allHisto):sub = "all"
+    if (samples.args.allHisto):sub = "all"
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)

@@ -51,7 +51,7 @@ for variable in samples.args:
     samples.histo['Data'].SetLineColor(kBlack);
     samples.histo['Data'].SetMarkerStyle(20);
     samples.histo['Data'].SetMarkerSize(0.9);
-    if (samples.options.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
+    if (samples.args.normalize):samples.histo['Data'].Scale(1/samples.histo['Data'].Integral())
 
     for mc in samples.MC_Info:
         samples.histo[mc].SetTitle("");
@@ -62,7 +62,7 @@ for variable in samples.args:
         samples.histo[mc].GetYaxis().SetTickLength(0);
         samples.histo[mc].GetYaxis().SetLabelOffset(999);
         samples.histo[mc].SetFillColor(samples.MC_Info[mc][TColor]);
-        if (samples.options.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
+        if (samples.args.normalize):samples.histo[mc].Scale(1/samples.BkgIntegral)
         
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
@@ -80,7 +80,7 @@ for variable in samples.args:
     for order in keylist:hs_datamc.Add(samples.histo[hs_order[order]])
     hs_datamc.SetTitle("");
     min=pow(10,-6);max=pow(10,2.5);
-    hs_datamc.SetMinimum(0.1 if not samples.options.normalize else hs_datamc.GetMaximum()*min);
+    hs_datamc.SetMinimum(0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*min);
     hs_datamc.SetMaximum(hs_datamc.GetMaximum()*max);
 
     hs_datamc.Draw("HIST")
@@ -111,7 +111,7 @@ for variable in samples.args:
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
-    if (samples.options.normalize): lumi_label="Normalized"
+    if (samples.args.normalize): lumi_label="Normalized"
     texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label));
     texS.SetNDC();
     texS.SetTextFont(42);
@@ -230,8 +230,8 @@ for variable in samples.args:
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/JetEnergyScalePlots_EWK/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
-    if (samples.options.allHisto):sub = "all"
-    if (samples.options.sub != None): sub = samples.options.sub
+    if (samples.args.allHisto):sub = "all"
+    if (samples.args.sub != None): sub = samples.args.sub
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
         os.mkdir(directory,0755)
