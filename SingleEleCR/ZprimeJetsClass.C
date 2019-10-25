@@ -97,7 +97,7 @@ float ZprimeJetsClass::getSF(int ele_index) {
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
   float eleEffSF_corr= th2fmap.getBin("eleIDSF",eleEta_to_use,elePt_to_use);
   // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
-  float eleTriggSF = EletriggerSF(eleEta_to_use,elePt_to_use);
+  float eleTriggSF = EletriggerSF(elePt_to_use,eleEta_to_use);
   // cout<<"eleTriggSF = " << eleTriggSF << endl;
 
   h_eleRecoSF_corr->Fill(eleRecoSF_corr);
@@ -151,7 +151,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
     
     if (!sample.isData) {
       ApplyPileup(event_weight);
-      //cout<<"event_weight: "<<event_weight<<endl;
       if (sample.isW_or_ZJet()){
 	SetBoson(sample.PID);
 	ApplyKFactor(event_weight);

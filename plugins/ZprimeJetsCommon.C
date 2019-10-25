@@ -59,7 +59,10 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
     h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
     h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
     h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
-    h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
+    h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,-2,2); h_kfactor->Sumw2();
+    h_pileup = new TH1F("h_pileup","h_pileup;pileup",50,-2,2); h_pileup->Sumw2();
+    h_genWeight = new TH1F("h_genWeight","h_genWeight;genWeight",50,-2,2); h_genWeight->Sumw2();
+    h_scaleFactor = new TH1F("h_scaleFactor","h_scaleFactor;scaleFactor",50,-2,2); h_scaleFactor->Sumw2();
     h_puTrueUnWeight = new TH1F("puTrueUnWeight","puTrue;true number of iteractions",100,0,100);h_puTrueUnWeight->Sumw2();
     h_puTrueReWeight = new TH1F("puTrueReWeight","puTrue;true number of iteractions",100,0,100);h_puTrueReWeight->Sumw2();
     h_genBosonPt = new TH1F("h_genBosonPt","genBosonPt;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPt->Sumw2();
@@ -373,12 +376,15 @@ void ZprimeJetsCommon::ApplyPileup(float &event_weight) {
   event_weight *= pileup * genWeight;
   weight_QCDSF *= pileup * genWeight;
   weight_16K   *= pileup * genWeight;
-  
+
+  h_pileup->Fill(pileup);
+  h_genWeight->Fill(genWeight);
   h_puTrueUnWeight->Fill(puTrue->at(0),genWeight);
   h_puTrueReWeight->Fill(puTrue->at(0),event_weight);
 }
 
 void ZprimeJetsCommon::ApplySF(float &event_weight,float sf) {
+  h_scaleFactor->Fill(sf);
   event_weight *= sf;
   weight_QCDSF *= sf;
   weight_16K *= sf;
@@ -401,7 +407,9 @@ float ZprimeJetsCommon::getKFactor(float bosonPt) {
   float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
   float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
   float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
-  return nlo_ewk * nlo_qcd * nnlo_qcd;
+  float kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+  h_kfactor->Fill(kfactor);
+  return kfactor;
 }
 
 float ZprimeJetsCommon::getKFactor_16(float bosonPt) {
@@ -412,7 +420,6 @@ float ZprimeJetsCommon::getKFactor_16(float bosonPt) {
     kfactor = (nlo_qcd_ewk/lo_qcd);
   else
     kfactor= sample.type == WJets ? 1.21 : 1.23;
-  h_kfactor->Fill(kfactor);
   return kfactor;
 }
 
