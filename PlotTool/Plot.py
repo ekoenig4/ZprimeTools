@@ -2,26 +2,23 @@ from ROOT import *
 import threading
 import sys
 from os import path,system,getcwd,listdir,mkdir,remove,chdir
-from optparse import OptionParser
+from Parser import PlotParser as parser
 from samplenames import samplenames
 from array import array
 import mergeFiles as merge
 import changeBinning as binning
 from Process import Process
 
-def getargs():
-    parser = OptionParser()
-    parser.add_option("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
-    parser.add_option("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
-    parser.add_option("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
-    parser.add_option("-l","--lumi",help="set the luminosity for scaling",action="store",type="float",dest="lumi")
-    parser.add_option("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
-    parser.add_option("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
-    parser.add_option("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
-    parser.add_option("-s","--signal",help="specify the signal file to use",action="store",type="str",default=None,dest="signal")
-    parser.add_option("--sub",help="specify a sub directory to place output",action="store",type="str",default=None,dest="sub")
-    parser.add_option("-b","--binning",help="specify function for rebinning histogram",action="store",type="str",default=None)
-    return parser.parse_args()
+parser.add_argument("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
+parser.add_argument("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
+parser.add_argument("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+parser.add_argument("-l","--lumi",help="set the luminosity for scaling",action="store",type=float,dest="lumi")
+parser.add_argument("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
+parser.add_argument("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+parser.add_argument("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
+parser.add_argument("-s","--signal",help="specify the signal file to use",action="store",type=str,default=None,dest="signal")
+parser.add_argument("--sub",help="specify a sub directory to place output",action="store",type=str,default=None,dest="sub")
+parser.add_argument("-b","--binning",help="specify function for rebinning histogram",action="store",type=str,default=None)
 
 def GetRegion():
     preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
@@ -56,12 +53,12 @@ class datamc(object):
 
         self.variable = None
         self.varname = None
-        self.options,self.args = getargs()
+        self.args = parser.parse_args()
         
         #Luminosity
         self.lumi_by_era = mc.lumi_by_era
         self.lumi = (mc.lumi if (lumi == None) else lumi)
-        if (self.options.lumi != None): self.lumi = self.options.lumi
+        if (self.args.lumi != None): self.lumi = self.args.lumi
 
         self.show = show
 
@@ -103,26 +100,26 @@ class datamc(object):
         self.processes["DiBoson"] = Process("DiBoson",mc.DiBoson_FileNames,GetMCxsec(mc.DiBoson_FileNames,mc.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
         self.processes["QCD"] =     Process("QCD",    mc.QCD_FileNames,    GetMCxsec(mc.QCD_FileNames,mc.xsec),    'bkg',lumi=self.lumi,color=kGray)
             
-        if self.region == "SignalRegion" and self.options.signal != None:
-            self.signal = self.options.signal
+        if self.region == "SignalRegion" and self.args.signal != None:
+            self.signal = self.args.signal
             self.getSignalInfo()
             self.SampleList.insert(1,'Signal')
-            if self.options.signal == '-1':
+            if self.args.signal == '-1':
                 self.processes['Signal'] = Process('Signal',self.Mx_Mv_Files,self.Mx_Mv_Xsec,'signal',lumi=self.lumi)
-            elif IsSignal(self.options.signal):
-                signal = self.options.signal
+            elif IsSignal(self.args.signal):
+                signal = self.args.signal
                 self.processes['Signal'] = Process(signal,['post'+signal],{'post'+signal:self.Mx_Mv_Xsec['post'+signal]},'signal',lumi=self.lumi)
         if self.show:
             print "Running in "+self.region+":"
             print "Plotting at",self.lumi,"pb^{-1}"
         self.HaddFiles()
-        if (self.options.allHisto):
+        if (self.args.allHisto):
             self.getAllHisto()
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
     def HaddFiles(self):
-        if self.options.nohadd: return
+        if self.args.nohadd: return
         if getcwd() != self.fileDir: chdir(self.fileDir)
         if not path.isdir('.output/'): return
         def validfile(fname): return path.isfile(fname)
@@ -157,18 +154,19 @@ class datamc(object):
         for sample in sorted(self.MCList,key=lambda sample: self.processes[sample].scaled_total,reverse=True):
             process = self.processes[sample]
             print prompt % ( ntemp.format(sample),itemp.format( '%.6g' % process.scaled_total ) ),'| %.4g%%' % (100*process.scaled_total/self.BkgIntegral)
+        ratio = self.processes['Data'].raw_total/self.BkgIntegral
+        print '            %s: %s' % (ntemp.format('data/mc'),itemp.format('%.6g' % ratio))
     ###############################################################################################################
 
     def getBinning(self):
         hs = None
-        print self.options.binning
-        if self.options.binning == None: return None
-        elif 'perc' in self.options.binning:
-            nbins = self.options.binning.replace('perc','')
+        if self.args.binning == None: return None
+        elif 'perc' in self.args.binning:
+            nbins = self.args.binning.replace('perc','')
             hs = binning.percentBinning(nbins=int(nbins))
             if hs != None: self.varname += 'perc'+nbins
-        elif 'incl'  in self.options.binning:
-            nbins = self.options.binning.replace('incl','')
+        elif 'incl'  in self.args.binning:
+            nbins = self.args.binning.replace('incl','')
             hs = binning.inclusiveBinning(nbins=int(nbins))
             if hs != None: self.varname += 'incl'+nbins
         return hs
