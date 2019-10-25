@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import sys
 from os import path, system, mkdir, listdir, rename, remove, chdir, getenv
-cmssw_base = getenv("CMSSW_BASE")
-sys.path.append( "%s/src/ZprimeTools2016/" % cmssw_base )
-from CondorTools.CondorConfig import CondorConfig
+from CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
+script_path = '/'.join(path.realpath(__file__).split('/')[:-1])
+cmssw_base = getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
 
@@ -113,7 +113,7 @@ def main():
     stripDataset(args.rfiles)
     removeOldFiles(args.outputfile,args.label)
     #Assure executable file is in .output/
-    if not path.isfile('.output/runAnalyzer.sh'): system('cp $CMSSW_BASE/src/ZprimeTools2016/CondorTools/runAnalyzer.sh .output/')
+    if not path.isfile('.output/runAnalyzer.sh'): system('cp %s/runAnalyzer.sh .output/' % script_path)
     system('cp %s .output' % args.script)
     
     #Beginning to write condor_submit file
