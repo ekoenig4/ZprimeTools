@@ -103,7 +103,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     float weightNorm = event_weight;
 
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     nTotalEvents+=genWeight;
     fillHistos(0,genWeight);
@@ -122,8 +122,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	if (jetCand.size() > 0) {
 	  nJetSelection+=event_weight;
 	  fillHistos(3,event_weight);
-	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
-	  vector<int> looseMu = muon_veto_looseID(jetCand[0],10.);
+	  vector<int> mulist = muon_veto_tightID(jetCand[0],muTightPtCut);
+	  vector<int> looseMu = muon_veto_looseID(jetCand[0],muLoosePtCut);
 	  
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    nCRSelection+=event_weight;
@@ -143,12 +143,12 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    recoilPhi = leptoMET_4vec.Phi();
 	    recoil = leptoMET;
 	    
-	    if (leptoMET > 250) {
+	    if (leptoMET > recoilCut) {
 	      nMET200+=event_weight;
 	      fillHistos(5,event_weight);
-	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
-	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
-	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
+	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,eleLoosePtCut);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,phoLoosePtCut);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,tauLoosePtCut);
 	      
 	      if (elelist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		nNoElectrons+=event_weight;
@@ -157,13 +157,13 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		h_lepMET_MT->Fill(lepMET_MT);
 		
-		if (lepMET_MT < 160) {
+		if (lepMET_MT < lepMETMtCut) {
 		  lepMET_MT160+=event_weight;
 		  fillHistos(7,event_weight);
 		  float metcut = (fabs(pfMET - caloMET))/recoil;
 		  h_metcut->Fill(metcut,event_weight);
 		  
-		  if (metcut < 0.5) {
+		  if (metcut < metRatioCut) {
 		    nMETcut+=event_weight;
 		    fillHistos(8,event_weight);
 		    
@@ -185,7 +185,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			nDphiJetMET+=event_weight;
 			fillHistos(10,event_weight);
 			
-			if (getEleHEMVeto(40)) {
+			if (getEleHEMVeto(eleHEMVetoPtCut)) {
 			  eleHEMVeto+=event_weight;
 
 			  fillHistos(12,weight_QCDSF);
@@ -317,7 +317,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int mu_index) {
   vector<int> tmpcands = ZprimeJetsCommon::JetVetoDecision();
   for(int ijet : tmpcands) {
     float dR_mu = deltaR(jetEta->at(ijet),jetPhi->at(ijet),muEta->at(mu_index),muPhi->at(mu_index));
-    if(dR_mu > 0.4)
+    if(dR_mu > leptondRCut)
       jetindex.push_back(ijet);
   }
   return jetindex;
@@ -330,7 +330,7 @@ vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int lepindex, 
   vector<int> tmpcands = ZprimeJetsCommon::electron_veto_looseID(jet_index,elePtCut);
   for(int iele : tmpcands) {
     float dR_mu = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > 0.5 )
+    if ( dR_mu > leptondRCut )
       ele_cands.push_back(iele);
   }
   
@@ -343,7 +343,7 @@ vector<int> ZprimeJetsClass::photon_veto_looseID(int jet_index,int lepindex,floa
   vector<int> tmpcands = ZprimeJetsCommon::photon_veto_looseID(jet_index,phoPtCut);
   for (int ipho : tmpcands ) {
     float dR_mu = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > 0.5 )
+    if ( dR_mu > leptondRCut )
       pho_cands.push_back(ipho);
   }
   return pho_cands;
@@ -355,7 +355,7 @@ vector<int> ZprimeJetsClass::tau_veto_looseID(int jet_index,int lepindex,float t
   vector<int> tmpcands = ZprimeJetsCommon::tau_veto_looseID(jet_index,tauPtCut);
   for (int itau : tmpcands ) {
     float dR_mu = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > 0.5 )
+    if ( dR_mu > leptondRCut )
       tau_cands.push_back(itau);
   }
   return tau_cands;

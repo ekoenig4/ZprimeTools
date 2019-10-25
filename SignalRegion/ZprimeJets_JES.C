@@ -42,7 +42,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       pfMETPhi = pfMETPhi_T1JESDo;
     }
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     
     if (metFilters == 0 && inclusiveCut()) {
@@ -51,19 +51,19 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	
 	if (jetCand.size() > 0) {
 	  
-	  if (pfMET > 250) {
+	  if (pfMET > recoilCut) {
 	    float metcut = (fabs(pfMET-caloMET)/pfMET);
 	    
-	    if (metcut < 0.5) {
+	    if (metcut < metRatioCut) {
 	      
-	      if (electronVeto(jetCand[0],10.) && muonVeto(jetCand[0],10.) && photonVeto(jetCand[0],15) && tauVeto(jetCand[0],18)) {
+	      if (electronVeto(jetCand[0],eleLoosePtCut) && muonVeto(jetCand[0],muLoosePtCut) && photonVeto(jetCand[0],phoLoosePtCut) && tauVeto(jetCand[0],tauLoosePtCut)) {
 		
 		if (btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();
 		  
 		  if (dPhiJetMETcut(jetveto,pfMET)) {
 		    
-		    if (getEleHEMVeto(40)) {
+		    if (getEleHEMVeto(eleHEMVetoPtCut)) {
 		      weight = event_weight;
 		      if (unc == 1)  shapeUncs->fillUp(uncname);// up
 		      if (unc == -1) shapeUncs->fillDn(uncname);// down

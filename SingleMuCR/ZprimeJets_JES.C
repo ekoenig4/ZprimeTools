@@ -46,7 +46,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       pfMETPhi = pfMETPhi_T1JESDo;
     }
     
-    jetCand = getJetCand(200,2.5,0.8,0.1);
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
     recoil=recoilPhi=-99;
     //CR Variables
@@ -58,8 +58,8 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
       if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
 	
 	if (jetCand.size() > 0) {
-	  vector<int> mulist = muon_veto_tightID(jetCand[0],20.0);
-	  vector<int> looseMu = muon_veto_looseID(jetCand[0],10.);
+	  vector<int> mulist = muon_veto_tightID(jetCand[0],muTightPtCut);
+	  vector<int> looseMu = muon_veto_looseID(jetCand[0],muLoosePtCut);
 	  
 	  if (mulist.size() ==1 && looseMu.size() == 1) {
 	    if (!sample.isData) {
@@ -77,26 +77,26 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	    recoilPhi = leptoMET_4vec.Phi();
 	    recoil = leptoMET;
 	    
-	    if (leptoMET > 250) {
-	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,10.);
-	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,15);
-	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
+	    if (leptoMET > recoilCut) {
+	      vector<int> elelist = electron_veto_looseID(jetCand[0],lepindex,muLoosePtCut);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,phoLoosePtCut);
+	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,tauLoosePtCut);
 	      
 	      if (elelist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
 		float dPhiLepMet = DeltaPhi(muPhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*muPt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
-		if (lepMET_MT < 160) {
+		if (lepMET_MT < lepMETMtCut) {
 		  float metcut = (fabs(pfMET - caloMET))/recoil;
 		  
-		  if (metcut < 0.5) {
+		  if (metcut < metRatioCut) {
 		    
 		    if (btagVeto()) {
 		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
 		      
 		      if (dPhiJetMETcut(jetveto,recoilPhi)) {
 			
-			if (getEleHEMVeto(40)) {
+			if (getEleHEMVeto(eleHEMVetoPtCut)) {
 			  weight = event_weight;
 			  if (unc == 1)  shapeUncs->fillUp(uncname);// up
 			  if (unc == -1) shapeUncs->fillDn(uncname);// down
