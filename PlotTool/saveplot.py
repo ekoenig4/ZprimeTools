@@ -3,7 +3,8 @@
 from ROOT import *
 from sys import argv
 from sys import path
-from Plot import datamc,getargs,GetRatio
+from Plot import datamc,GetRatio
+from Parser import PlotParser as parser
 from os import system,getcwd,path,mkdir
 from cfg_saveplot import config
 from mcinfo import lumi as mc,version
@@ -140,5 +141,5 @@ def saveplot(variable):
 ################################################################################
 if __name__ == "__main__":
 
-    options,args = getargs()
-    for variable in args: saveplot(variable)
+    args = parser.parse_args()
+    for variable in args.argv: saveplot(variable)
