@@ -14,8 +14,8 @@ const float bjetVetoEtaCut = 2.5;
 const float bjetVetoCSVv2Cut = 0.8838;
 
 /* HEM Veto Floating Cuts */
-const float eleHEMVetoPtCut;
-const float jetHEMVetoPtCut;
+const float eleHEMVetoPtCut = 40;
+const float jetHEMVetoPtCut = 40;
 
 /* Lepton Veto Floating Cuts */
 const float leptondRCut = 0.4;
