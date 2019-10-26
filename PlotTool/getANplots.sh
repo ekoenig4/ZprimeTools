@@ -11,7 +11,7 @@ run() {
     cd $1
     shift 1
     pwd
-    # python PlotTool/autoplotter.py $options --nhist $nvariables $@
+    python PlotTool/autoplotter.py $options --nhist $nvariables $@
     python PlotTool/autoplotter.py $options $extraction
     cd ../
 }
