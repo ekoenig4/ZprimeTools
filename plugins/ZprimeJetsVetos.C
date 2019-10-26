@@ -131,6 +131,7 @@ vector<int> ZprimeJetsCommon::muon_veto_looseID(int jet_index, float muPtCut)
 	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
 	    mu_cands.push_back(i);
 	  }
+	}
       }
     }
   }
@@ -156,9 +157,9 @@ vector<int> ZprimeJetsCommon::tau_veto_looseID(int jet_index,float tauPtCut) {
 
   for (int i = 0; i < nTau; i++) {
     if ( taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i) ) {
-      if ( fabs(tau_Eta->at(i)) < tauLooseEtaCut ){
-	if ( tau_Pt->at(i) > tauPtCut ) {
-	  if ( deltaR(tau_Eta->at(i),tau_Phi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
+      if ( fabs(tauEta->at(i)) < tauLooseEtaCut ){
+	if ( tauPt->at(i) > tauPtCut ) {
+	  if ( deltaR(tauEta->at(i),tauPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
 	    tau_cands.push_back(i);
 	}
       }
