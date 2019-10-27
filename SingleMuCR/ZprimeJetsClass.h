@@ -20,7 +20,7 @@ public :
   float lepton_pt,recoil,recoilPhi;
   
   //CR histograms
-  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto];
+  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto],*h_recoilPhi[nHisto];
   
   ZprimeJetsClass(const char* file1,const char* file2,const char* fileRange) : ZprimeJetsCommon(file1,file2,fileRange)
   { BookHistos(file2); };
