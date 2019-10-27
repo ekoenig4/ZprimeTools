@@ -38,6 +38,7 @@ def GetBranch(b_template,b_variable,tree,weight,cut):
     histo.SetDirectory(0)
     return histo
 def GetNuisanceList(tfile,dirname):
+    return {}
     tdir = tfile.GetDirectory(dirname)
     shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
     tree = tdir.Get('norm')
