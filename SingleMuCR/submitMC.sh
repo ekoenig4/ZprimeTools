@@ -1,4 +1,4 @@
-RUN="python ${CMSSW_BASE}/src/ZprimeTools2016/CondorTools/SubmitCondor.py -y 2016 -WM analyze"
+RUN="python ${CMSSW_BASE}/src/ZprimeTools2016/CondorTools/SubmitCondor.py -y 2016 -r WM analyze"
 
 . "${CMSSW_BASE}/src/ZprimeTools2016/plugins/mc_cfg.sh"
 
