@@ -10,5 +10,5 @@ args = parser.parse_args()
 region = os.getcwd().split('/')[-1]+'/'
 nhist = config['regions'][region]
 variables = args.argv
-variables += [ '%s_%s' % (variable,nhist) for variable in args.nhist ]
+variables += [ '%s_%s' % (variable,int(nhist)+2) for variable in args.nhist ]
 plotter(variables)
