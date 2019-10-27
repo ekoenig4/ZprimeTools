@@ -2,18 +2,13 @@ from ROOT import *
 import os
 from sys import argv
 from Plot import datamc,GetRegion
+from Parser import PlotParser as parser
 from cfg_saveplot import config
 from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMSText
 
 gROOT.SetBatch(1)
 
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
-def getargs():
-    args = {}
-    args['variable'] = 'ChNemPtFrac'
-    if len(argv) > 1:
-        args['variable'] = argv[1]
-    return args
 
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname
@@ -198,7 +193,7 @@ def plotSRUnc(sample,uncname):
         bavg = avg(bins)
         return ( sum( (b - bavg)**2 for b in bins )/(len(bins)-1) ) ** 0.5
     
-    rstdv = stdv(rbins)
+    rstdv = stdv(rbins) if any(rbins) else 0.1
     rymin = 1 - 3*rstdv; rymax = 1 + 3*rstdv
 
     for r in (z_r_up,z_r_dn): r.SetLineColor(kRed)
@@ -242,13 +237,14 @@ def plotSRUnc(sample,uncname):
 
 def runRegion(args):
     sample = datamc()
-    variable = args['variable']
+    variable = args.argv[0]
     nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
     variations = []
     for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
 
     print 'Running for %s' % nvariable
     sample.initiate(nvariable)
+    
     if sample.region == 'SignalRegion':
         for uncname in variations: plotSRUnc(sample,uncname)
     else:
@@ -261,7 +257,8 @@ def runAll(args):
         os.chdir(cwd)
     
 if __name__ == "__main__":
-    args = getargs()
+    args = parser.parse_args()
+    if not any(args.argv): args.argv.append('ChNemPtFrac')
     runall = ( GetRegion() == None )
 
     if runall: runAll(args)
