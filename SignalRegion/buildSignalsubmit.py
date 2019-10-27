@@ -21,6 +21,7 @@ for signaldir in os.listdir(inputdir):
 
 with open('signalsubmit.sh','w') as submit:
     submit.write('#!/bin/sh\n')
+    submit.write('RUN="python ${CMSSW_BASE}/src/ZprimeTools2018/CondorTools/SubmitCondor.py -y 2018 -r SR analyze"')
     submit.write('make || exit -1\n')
     mxlist = sorted(signaldirs.keys(),key=lambda x : int(x.replace('Mx','')) )
     for mx in mxlist:
@@ -29,5 +30,5 @@ with open('signalsubmit.sh','w') as submit:
         mvlist = sorted(mvdirs.keys(),key=lambda x : int(x.replace('Mv','')) )
         for mv in mvlist:
             mvdir = mvdirs[mv]
-            submit.write( 'python ../SubmitCondor.py analyze %s post%s_%s.root -1 1000 %s_%s split_1\n' % (mvdir,mx,mv,mx,mv))
+            submit.write( '$RUN %s post%s_%s.root -1 1000 %s_%s split_1\n' % (mvdir,mx,mv,mx,mv))
         
