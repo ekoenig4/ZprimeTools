@@ -121,7 +121,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    nMET200+=event_weight;
 	    fillHistos(4,event_weight);
 	    float metcut = (fabs(pfMET-caloMET))/pfMET;
-	    h_metcut->Fill(metcut);
+	    h_metcut->Fill(metcut,event_weight);
 	    
 	    if(metcut < metRatioCut) {
 	      nMETcut+=event_weight;
@@ -137,14 +137,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  fillHistos(7,event_weight);
 		  vector<int> jetveto = JetVetoDecision();
 		  float minDPhiJetMET_first4 = TMath::Pi();
-		  for (int i = 0; i < jetveto.size(); i++) {
-		    float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
-		    if (dPhiJetMet < minDPhiJetMET_first4) {
-		      if (i < 4)
-			minDPhiJetMET_first4 = dPhiJetMet;
-		    }
+		  for (int ijet = 0; ijet < jetveto.size(); ijet++) {
+		    float dPhiJetMET = DeltaPhi(jetPhi->at(jetveto[ijet]),recoilPhi);
+		    if (dPhiJetMET < minDPhiJetMET_first4 && ijet < 4) minDPhiJetMET_first4 = dPhiJetMET;
 		  }
-		  h_dphimin->Fill(minDPhiJetMET_first4);
+		  h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		  
 		  if(dPhiJetMETcut(jetveto,pfMETPhi)) {
 		    nDphiJetMET+=event_weight;

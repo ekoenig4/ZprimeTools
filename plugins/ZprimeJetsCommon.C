@@ -311,23 +311,17 @@ vector<int>ZprimeJetsCommon::getPFCandidates() {
 }
 
 bool ZprimeJetsCommon::dPhiJetMETcut(vector<int> jets,float metPhi) {
-  //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 
-  bool passes = false;
-  
-  int njetsMax = jets.size();
   //Only look at first four jets (because that's what monojet analysis do)
-  if(njetsMax > 4)
-    njetsMax = 4;
-  int j=0;
-  for(;j< njetsMax; j++)
-    if(DeltaPhi((*jetPhi)[j],metPhi) < metdPhiJetCut)
-      break;
+  int njets = jets.size() ? jets.size() <= 4 : 4;
+  float minDPhiJetMET_first4 = TMath::Pi();
+  for (int ijet = 0; ijet < njets; ijet++) {
+    float dPhiJetMET = DeltaPhi(jetPhi->at(ijet),metPhi);
+    if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
+  }
 
-  if(j==njetsMax)
-    passes = true;
-
-  return passes;
-  
+  //reject jet if it is found within DeltaPhi(jet,MET) < 0.5 
+  if (minDPhiJetMET_first4 > dPhiJetMETCut) return true;
+  return false;
 }
 
 void ZprimeJetsCommon::SetBoson(int PID) {

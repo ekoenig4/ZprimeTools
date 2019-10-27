@@ -179,7 +179,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    nNoElectrons+=event_weight;
 		    fillHistos(7,event_weight);
 		    float metcut = (fabs(pfMET-caloMET))/recoil;
-		    h_metcut->Fill(metcut);
+		    h_metcut->Fill(metcut,event_weight);
 		    
 		    if(metcut < metRatioCut) {
 		      nMETcut+=event_weight;
@@ -190,14 +190,11 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 			fillHistos(9,event_weight);
 			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
 			float minDPhiJetMET_first4 = TMath::Pi();
-			for (int i = 0; i < jetveto.size(); i++) {
-			  float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),recoilPhi);
-			  if (dPhiJetMet < minDPhiJetMET_first4) {
-			    if (i < 4)
-			      minDPhiJetMET_first4 = dPhiJetMet;
-			  }
+			for (int ijet = 0; ijet < jetveto.size(); ijet++) {
+			  float dPhiJetMET = DeltaPhi(jetPhi->at(jetveto[ijet]),recoilPhi);
+			  if (dPhiJetMET < minDPhiJetMET_first4 && ijet < 4) minDPhiJetMET_first4 = dPhiJetMET;
 			}
-			h_dphimin->Fill(minDPhiJetMET_first4);
+			h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 			
 			if(dPhiJetMETcut(jetveto,recoilPhi)) {
 			  nDphiJetMET+=event_weight;
@@ -297,6 +294,7 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
     h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",20,-3.1416,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
     h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
+    h_recoilPhi[i] = new TH1F(("h_recoilPhi"+histname).c_str(), "Recoil #phi",20,-3.1416,3.1416);h_recoilPhi[i] ->Sumw2();
     h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
     h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
   }
@@ -314,6 +312,7 @@ void ZprimeJetsClass::fillHistos(int nhist,float event_weight) {
     h_subleadingLeptonPhi[nhist]->Fill(muPhi->at(lepindex_subleading),event_weight);}
   if(dilepton_pt >= 0 && dilepton_mass >= 0){  
     h_recoil[nhist]->Fill(recoil,event_weight);
+    h_recoilPhi[nhist]->Fill(recoilPhi,event_weight);
     h_dileptonPt[nhist]->Fill(dilepton_pt,event_weight);
     h_dileptonM[nhist]->Fill(dilepton_mass,event_weight);}
   weight = event_weight;

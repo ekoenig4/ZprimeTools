@@ -45,7 +45,7 @@ const float tauLooseEtaCut = 2.3;
 /* Signal Region Floating Cuts */
 const float recoilCut = 250;
 const float metRatioCut = 0.5;
-const float metdPhiJetCut = 0.5;
+const float dPhiJetMETCut = 0.5;
 
 /* Single Electron CR Floating Cuts */
 const float pfMET50Cut = 50;
