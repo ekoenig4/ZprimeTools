@@ -76,8 +76,8 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 		//Event must have exactly two loose electrons with opposite charge
 		if(eleCharge->at(elelist_leading[i])*eleCharge->at(elelist_subleading[j]) == -1)
 		  {
-		    e1.SetPtEtaPhiE(elePt->at(elelist_leading[i]),eleSCEta->at(elelist_leading[i]),eleSCPhi->at(elelist_leading[i]),eleEn->at(elelist_leading[i]));
-		    e2.SetPtEtaPhiE(elePt->at(elelist_subleading[j]),eleSCEta->at(elelist_subleading[j]),eleSCPhi->at(elelist_subleading[j]),eleEn->at(elelist_subleading[j]));
+		    e1.SetPtEtaPhiE(elePt->at(elelist_leading[i]),eleEta->at(elelist_leading[i]),elePhi->at(elelist_leading[i]),eleEn->at(elelist_leading[i]));
+		    e2.SetPtEtaPhiE(elePt->at(elelist_subleading[j]),eleEta->at(elelist_subleading[j]),elePhi->at(elelist_subleading[j]),eleEn->at(elelist_subleading[j]));
 		    elePairSet = true;
 		    lepindex_leading = elelist_leading[i];
 		    lepindex_subleading = elelist_subleading[j];
