@@ -61,7 +61,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 		if (btagVeto()) {
 		  vector<int> jetveto = JetVetoDecision();
 		  
-		  if (dPhiJetMETcut(jetveto,pfMET)) {
+		  if (dPhiJetMETcut(jetveto,pfMETPhi)) {
 		    
 		    if (getEleHEMVeto(eleHEMVetoPtCut)) {
 		      weight = event_weight;
