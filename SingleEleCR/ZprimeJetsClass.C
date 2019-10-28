@@ -129,7 +129,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    lepindex = elelist[0];
                     
 	    TLorentzVector lep_4vec;
-	    lep_4vec.SetPtEtaPhiE(elePt->at(elelist[0]),eleSCEta->at(elelist[0]),eleSCPhi->at(elelist[0]),eleEn->at(elelist[0]));
+	    lep_4vec.SetPtEtaPhiE(elePt->at(elelist[0]),eleEta->at(elelist[0]),elePhi->at(elelist[0]),eleEn->at(elelist[0]));
 
 	    lepton_pt = lep_4vec.Pt();
 	    TLorentzVector met_4vec;
@@ -150,7 +150,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      if(mulist.size() == 0 && pholist.size() == 0) {
 		nNoMuons+=event_weight;
 		fillHistos(6,event_weight);
-		Float_t dPhi_lepMET = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
+		Float_t dPhi_lepMET = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
 		h_lepMET_MT->Fill(lepMET_MT,event_weight);
 		
@@ -278,8 +278,8 @@ void ZprimeJetsClass::fillHistos(int nhist,float event_weight) {
   //CR Histograms
   if(lepindex >= 0){ 
     h_LeptonPt[nhist]->Fill(elePt->at(lepindex),event_weight);
-    h_LeptonEta[nhist]->Fill(eleSCEta->at(lepindex),event_weight);
-    h_LeptonPhi[nhist]->Fill(eleSCPhi->at(lepindex),event_weight);
+    h_LeptonEta[nhist]->Fill(eleEta->at(lepindex),event_weight);
+    h_LeptonPhi[nhist]->Fill(elePhi->at(lepindex),event_weight);
   }
   if(lepton_pt > 0){
     h_recoil[nhist]->Fill(recoil,event_weight);
