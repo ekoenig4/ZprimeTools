@@ -68,7 +68,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      event_weight *= sf;
 	    }
 	    TLorentzVector lep_4vec;
-	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleSCEta->at(lepindex),eleSCPhi->at(lepindex),eleE->at(lepindex));
+	    lep_4vec.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleE->at(lepindex));
 	    lepton_pt = lep_4vec.Pt();
 	    TLorentzVector met_4vec;
 	    met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
@@ -83,7 +83,7 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,tauLoosePtCut);
 	      
 	      if (mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
-		float dPhiLepMet = DeltaPhi(eleSCPhi->at(lepindex),pfMETPhi);
+		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
 		
 		if (pfMET > pfMET50Cut) {
