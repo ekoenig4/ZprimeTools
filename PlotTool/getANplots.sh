@@ -16,9 +16,8 @@ run() {
     cd ../
 }
 
-run SignalRegion
-exit
-run SingleEleCR $singleleps
+#run SignalRegion
+#run SingleEleCR $singleleps
 run SingleMuCR $singleleps
-run DoubleEleCR $doubleleps
-run DoubleMuCR $doubleleps
+#run DoubleEleCR $doubleleps
+#run DoubleMuCR $doubleleps
