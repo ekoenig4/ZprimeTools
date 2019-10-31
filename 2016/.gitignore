@@ -1,0 +1,14 @@
+*~
+test/
+*.pyc
+.output/
+.status/
+*.root
+RootFiles
+!RootFiles/
+!RootFiles/*.root
+PlotTool
+!PlotTool/
+analyze
+Systematics
+nohup.out

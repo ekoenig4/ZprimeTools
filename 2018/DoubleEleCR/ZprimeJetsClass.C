@@ -1,0 +1,479 @@
+#define ZprimeYear_cxx
+#include "ZprimeYear.h"
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main(int argc, const char* argv[]) { 
+  if (argc == 1) {
+    printf("Running Test\n");
+    argv[1] = "/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DYJets/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/0000/";
+    argv[2] = "test.root";
+    argv[3] = "5000";
+    argv[4] = "100";
+    argv[5] = "1-1";
+  }
+  Long64_t maxEvents = atof(argv[3]);
+  if (maxEvents < -1LL)
+    {
+      cout<<"Please enter a valid value for maxEvents (parameter 3)."<<endl;
+      return 1;
+    }
+  int reportEvery = atof(argv[4]);
+  if (reportEvery < 1)
+    {
+      cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
+      return 1;
+    }
+  ZprimeYear t(argv[1],argv[2],argv[5]);
+  t.Loop(maxEvents,reportEvery);
+  return 0;
+}
+
+float EletriggerSF(float pt, float eta){
+  float sf = 1.0;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
+    if(pt < 40.0) sf = 0.75;
+    if(pt > 40.0 && pt < 50.0) sf = 0.92;
+    if(pt > 50.0 && pt < 60.0) sf = 0.95;
+    if(pt > 60.0 && pt < 70.0) sf = 0.96;
+    if(pt > 70.0 && pt < 80.0) sf = 0.96;
+    if(pt > 80.0 && pt < 90.0) sf = 0.97;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.97;
+    if(pt > 150. && pt < 200.) sf = 0.97;
+    if(pt > 200. && pt < 250.) sf = 0.98;
+    if(pt > 250) sf = 0.93;
+  }
+  if(fabs(eta) >= 0.8   && fabs(eta) < 1.5){
+    if(pt < 40.0) sf = 0.64;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.96;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+    
+  if(fabs(eta) >= 1.5   && fabs(eta) < 2. ) {
+    if(pt < 40.0) sf = 0.63;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.95;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.99;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+  if(fabs(eta) >= 2.) {
+    if(pt < 40.0) sf = 0.5;
+    if(pt > 40.0 && pt < 50.0) sf = 0.83;
+    if(pt > 50.0 && pt < 60.0) sf = 0.89;
+    if(pt > 60.0 && pt < 70.0) sf = 0.90;
+    if(pt > 70.0 && pt < 80.0) sf = 0.92;
+    if(pt > 80.0 && pt < 90.0) sf = 0.93;
+    if(pt > 90.0 && pt < 100.) sf = 0.94;
+    if(pt > 100. && pt < 150.) sf = 0.94;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 1.0;
+    if(pt > 250) sf = 1.0;
+  }
+  return sf;
+}
+
+float ZprimeYear::getSF(int lepindex_leading, int lepindex_subleading) {
+  float leadingElePt = elePt->at(lepindex_leading) < 500 ? elePt->at(lepindex_leading) : 499;
+  float leadingEleEta = fabs(eleSCEta->at(lepindex_leading)) < 2.5 ? eleSCEta->at(lepindex_leading) : 2.49;
+  float subleadingElePt = elePt->at(lepindex_subleading) < 500 ? elePt->at(lepindex_subleading) : 499;
+  float subleadingEleEta = fabs(eleSCEta->at(lepindex_subleading)) < 2.5 ? eleSCEta->at(lepindex_subleading) : 2.49;
+  // cout<<"leadingElePt = " << elePt->at(lepindex_leading) <<" leadingEleEta = " << eleSCEta->at(lepindex_leading) << endl;
+  // cout<<"subleadingElePt = " << elePt->at(lepindex_subleading) <<" leadingEleEta = " << eleSCEta->at(lepindex_subleading) << endl;
+
+  float leadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",leadingEleEta,leadingElePt);
+  float leadingEleEffSF_corr= th2fmap.getBin("eleIDSF_tight",leadingEleEta,leadingElePt);
+  float leadingEleTriggSF = EletriggerSF(elePt->at(lepindex_leading),eleSCEta->at(lepindex_leading));
+
+  float subleadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",subleadingEleEta,subleadingElePt);
+  float subleadingEleEffSF_corr= th2fmap.getBin("eleIDSF_tight",subleadingEleEta,subleadingElePt);
+  float subleadingEleTriggSF = EletriggerSF(elePt->at(lepindex_subleading),eleSCEta->at(lepindex_subleading));
+  // cout<<"leadingEleTriggSF = " << leadingEleTriggSF << endl;
+  // cout<<"subleadingEleTriggSF = " << subleadingEleTriggSF << endl;
+
+  h_tightEleRecoSF_corr->Fill(leadingEleRecoSF_corr);
+  h_tightEleEffSF_corr->Fill(leadingEleEffSF_corr);
+  h_tightEleTriggSF->Fill(leadingEleTriggSF);
+  h_looseEleRecoSF_corr->Fill(subleadingEleRecoSF_corr);
+  h_looseEleEffSF_corr->Fill(subleadingEleEffSF_corr);
+  h_looseEleTriggSF->Fill(subleadingEleTriggSF);
+  return leadingEleRecoSF_corr*leadingEleEffSF_corr*leadingEleTriggSF*subleadingEleRecoSF_corr*subleadingEleEffSF_corr*subleadingEleTriggSF;
+}
+
+void ZprimeYear::SetScalingHistos() {
+  ZprimeJetsCommon::SetScalingHistos();
+  TFile *f_eleReconstrucSF_highpt=new TFile("RootFiles/egammaEffi.txt_EGM2D_updatedAll.root");
+  TFile *f_eleIDeffSF_loose=new TFile("RootFiles/2018_ElectronLoose.root");
+  TFile *f_eleIDeffSF_tight=new TFile("RootFiles/2018_ElectronTight.root");
+  th2fmap["eleRecoSF_highpt"]=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
+  th2fmap["eleIDSF_loose"]=(TH2F*) f_eleIDeffSF_loose->Get("EGamma_SF2D");
+  th2fmap["eleIDSF_tight"]=(TH2F*) f_eleIDeffSF_tight->Get("EGamma_SF2D");
+}
+
+void ZprimeYear::initVars() {
+  ZprimeJetsCommon::initVars();
+
+  lepindex_leading = lepindex_subleading = -1;
+  dilepton_mass = dilepton_pt = recoil = recoilPhi = -99;
+}
+
+void ZprimeYear::Loop(Long64_t maxEvents, int reportEvery) {
+  if (fChain == 0) return;
+
+  Long64_t nentries = fChain->GetEntries();
+  cout<<"Coming in:"<<endl;
+  cout<<"nentries:"<<nentries<<endl;
+  Long64_t nentriesToCheck = nentries;
+
+  int nTotal = 0;
+  float nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, ndilepton, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection,eleHEMVeto;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = ndilepton = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = eleHEMVeto = 0;
+
+  if (!sample.isData) SetScalingHistos();
+
+  if (maxEvents != -1LL && nentries > maxEvents)
+    nentriesToCheck = maxEvents;
+  nTotal = nentriesToCheck;
+  cout<<"Running over "<<nTotal<<" events."<<endl;
+  Long64_t nbytes = 0, nb = 0;
+  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
+    Long64_t ientry = LoadTree(jentry);
+    if (ientry < 0) break;
+    nb = fChain->GetEntry(jentry);   nbytes += nb;
+
+    initVars();
+
+    float event_weight = 1.;
+    
+    if (!sample.isData) {
+      ApplyPileup(event_weight);
+      if(sample.isW_or_ZJet()) {
+	SetBoson(sample.PID);
+	ApplyKFactor(event_weight);
+      }
+    }
+
+    float weightNorm = event_weight;
+    
+    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
+    SetJetPFInfo(jetCand[0]);
+    nTotalEvents+=genWeight;
+    fillHistos(0,genWeight);
+    for (int bit = 0; bit < 8; bit++)
+      if (metFilters >> bit & 1 == 1)
+	h_metFilters->Fill(bit + 1,event_weight);
+    
+    if (metFilters==0 && inclusiveCut()){ 
+      nFilters+=event_weight;
+      fillHistos(1,event_weight);
+      
+      if (HLTEleMuX>>5&1 == 1 || HLTEleMuX>>6&1 == 1 || HLTPho>>11&1 == 1 || !sample.isData) {
+	nHLT+=event_weight;
+	fillHistos(2,event_weight);
+	
+	if(jetCand.size()>0){
+	  nJetSelection+=event_weight;
+	  fillHistos(3,event_weight);
+	  //CR code
+	  //At least one of the two electrons passes the tight selection
+	  vector<int> elelist_leading = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> elelist_subleading = electron_veto_looseID(jetCand[0],eleLoosePtCut);
+	  
+	  if(elelist_subleading.size() == 2){
+	    bool elePairSet = false;
+	    TLorentzVector e1, e2;
+	    for(int i=0; i<elelist_leading.size(); ++i){
+	      for(int j=0; j<elelist_subleading.size(); ++j){
+		//Event must have exactly two loose electrons with opposite charge
+		if(eleCharge->at(elelist_leading[i])*eleCharge->at(elelist_subleading[j]) == -1){
+		  e1.SetPtEtaPhiE(elePt->at(elelist_leading[i]),eleEta->at(elelist_leading[i]),elePhi->at(elelist_leading[i]),eleE->at(elelist_leading[i]));
+		  e2.SetPtEtaPhiE(elePt->at(elelist_subleading[j]),eleEta->at(elelist_subleading[j]),elePhi->at(elelist_subleading[j]),eleE->at(elelist_subleading[j]));
+		  elePairSet = true;
+		  lepindex_leading = elelist_leading[i];
+		  lepindex_subleading = elelist_subleading[j];
+		  break;
+		}
+	      }
+	      if(elePairSet)
+		break;
+	    }
+                    
+	    if(elePairSet){
+	      nCRSelection+=event_weight;
+	      fillHistos(4,event_weight);
+	      if (!sample.isData) {
+		float sf = getSF(lepindex_leading,lepindex_subleading);
+		ApplySF(event_weight,sf);
+	      }
+	      TLorentzVector ll = e1+e2;
+	      dilepton_mass = ll.M();
+	      dilepton_pt = ll.Pt();
+                      
+	      TLorentzVector met_4vec;
+	      met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
+	      TLorentzVector leptoMET_4vec = ll+met_4vec;
+	      Float_t leptoMET = fabs(leptoMET_4vec.Pt());
+	      recoilPhi = leptoMET_4vec.Phi();
+	      recoil = leptoMET;
+	      
+	      if (leptoMET>recoilCut){
+		nMET200+=event_weight;
+		fillHistos(5,event_weight);
+		//invariant mass of the two electrons is betwen 60 and 120GeV
+		
+		if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh){
+		  ndilepton+=event_weight;
+		  fillHistos(6,event_weight);
+		  vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
+		  vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
+		  vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+		  
+		  if(mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0){
+		    nNoMuons+=event_weight;
+		    fillHistos(7,event_weight);
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
+		    h_metcut->Fill(metcut,event_weight);
+		    
+		    if(metcut < metRatioCut){
+		      nMETcut+=event_weight;
+		      fillHistos(8,event_weight);
+		      
+		      if(btagVeto()){
+			nbtagVeto+=event_weight;
+			fillHistos(9,event_weight);
+			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
+			float minDPhiJetMET_first4 = TMath::Pi();
+			for (int i = 0; i < jetveto.size(); i++) {
+			  float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),recoilPhi);
+			  if (dPhiJetMet < minDPhiJetMET_first4) {
+			    if (i < 4)
+			      minDPhiJetMET_first4 = dPhiJetMet;
+			  }
+			}
+			h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
+			
+			if(dPhiJetMETcut(jetveto,recoilPhi)){
+			  nDphiJetMET+=event_weight;
+			  fillHistos(10,event_weight);
+			  
+			  if (getEleHEMVeto(eleHEMVetoPtCut)) {
+			    eleHEMVeto+=event_weight;
+
+			    fillHistos(12,weight_QCDSF);
+			    fillHistos(13,weight_16K);
+
+			    // use weight that didn't have genWeight applied to it 
+			    PSWeights(weight_nogen); // 44 Histograms
+			    
+			    QCDVariations(event_weight);
+			    fillHistos(11,event_weight);
+
+			    PFUncertainty(event_weight); // 6 Histograms
+			  }
+			}
+		      }   
+		    }	
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+
+    JetEnergyScale(weightNorm); // 2 Histograms
+
+    if (jentry%reportEvery == 0){
+      cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
+    }
+  }
+   
+  h_cutflow->SetBinContent(1,nTotalEvents); 
+  h_cutflow->SetBinContent(2,nFilters);
+  h_cutflow->SetBinContent(3,nHLT);
+  h_cutflow->SetBinContent(4,nJetSelection);
+  h_cutflow->SetBinContent(5,nCRSelection);
+  h_cutflow->SetBinContent(6,nMET200);
+  h_cutflow->SetBinContent(7,ndilepton);
+  h_cutflow->SetBinContent(8,nNoMuons);
+  h_cutflow->SetBinContent(9,nMETcut);
+  h_cutflow->SetBinContent(10,nbtagVeto);
+  h_cutflow->SetBinContent(11,nDphiJetMET);
+  h_cutflow->SetBinContent(12,eleHEMVeto);
+   
+}//Closing the Loop function
+
+void ZprimeYear::initTree(TTree* tree) {
+  tree->Branch("weight",&weight);
+  tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
+  tree->Branch("h_recoil",&recoil,"Recoil (GeV)");
+  tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
+  tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
+  tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
+}
+
+void ZprimeYear::BookHistos(const char* outputFilename) {
+  
+  output = new TFile(outputFilename, "RECREATE");
+  output->cd();
+  
+  float MetBins[45]={200.,220.,240.,260.,280.,300.,320.,340.,360.,380.,400.,420.,440.,460.,480.,500.,520.,540.,560.,580.,600.,620.,640.,660.,680.,700.,720.,740.,760.,
+		     780.,800.,820.,840.,860.,880.,900.,920.,940.,960.,980.,1000.,1400.,1800.,2000.,2500.};
+  float LeadingLeptonPtBins[25] = {20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
+
+  float subLeadingLeptonPtBins[26] = {10.,20.,40.,60.,80.,100.,120.,140.,160.,180.,200.,250.,300.,350.,400.,500.,600.,700.,800.,900.,1000.,1100.,1200.,1300.,1400.,1500.};
+
+  h_cutflow = new TH1D("h_cutflow","h_cutflow",12,0,12);h_cutflow->Sumw2();
+  h_cutflow->GetXaxis()->SetBinLabel(1,"Total Events");
+  h_cutflow->GetXaxis()->SetBinLabel(2,"metFilters");
+  h_cutflow->GetXaxis()->SetBinLabel(3,"Trigger");
+  h_cutflow->GetXaxis()->SetBinLabel(4,"GoodJet");
+  h_cutflow->GetXaxis()->SetBinLabel(5,"CRSelection"); 
+  h_cutflow->GetXaxis()->SetBinLabel(6,"leptoMetCut");
+  h_cutflow->GetXaxis()->SetBinLabel(7,"dileptonMassCut");
+  h_cutflow->GetXaxis()->SetBinLabel(8,"NoMuons");
+  h_cutflow->GetXaxis()->SetBinLabel(9,"caloMET cut");
+  h_cutflow->GetXaxis()->SetBinLabel(10,"B-JetVeto");
+  h_cutflow->GetXaxis()->SetBinLabel(11,"DeltaPhiCut");
+  h_cutflow->GetXaxis()->SetBinLabel(12,"EleHEMVeto");
+
+  h_tightEleRecoSF_corr = new TH1F("h_tightEleRecoSF","h_tightEleRecoSF;Leading EleRecoSF",50,0,2); h_tightEleRecoSF_corr->Sumw2(); 
+  h_tightEleEffSF_corr = new TH1F("h_tightEleEffSF","h_tightEleEffSF;Leading EleEffSF",50,0,2); h_tightEleEffSF_corr->Sumw2(); 
+  h_tightEleTriggSF = new TH1F("h_tightEleTriggSF","h_tightEleTriggSF;Leading EleTriggSF",50,0,2); h_tightEleTriggSF->Sumw2();
+  h_looseEleRecoSF_corr = new TH1F("h_looseEleRecoSF","h_looseEleRecoSF;Subleading EleRecoSF",50,0,2); h_looseEleRecoSF_corr->Sumw2(); 
+  h_looseEleEffSF_corr = new TH1F("h_looseEleEffSF","h_looseEleEffSF;Subleading EleEffSF",50,0,2); h_looseEleEffSF_corr->Sumw2(); 
+  h_looseEleTriggSF = new TH1F("h_looseEleTriggSF","h_looseEleTriggSF;Subleading EleTriggSF",50,0,2); h_looseEleTriggSF->Sumw2(); 
+
+  BookCommon(-1,"");
+  for(int i = 0; i<nHisto; i++){
+    char ptbins[100];
+    sprintf(ptbins, "_%d", i);
+    string histname(ptbins);
+    auto dir = output->mkdir( ("ZprimeJet"+histname).c_str() );
+    dir->cd();
+    if (i == bHisto) {
+      auto treedir = dir->mkdir("trees");
+      treedir->cd();
+      tree = new TTree("norm","norm");
+      initTree(tree);
+      scaleUncs = new ScaleUncCollection(tree);
+      shapeUncs = new ShapeUncCollection(treedir);
+      dir->cd();
+    }
+    //Common Histograms
+    BookCommon(i,histname);
+    //CR Histograms
+    h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();
+    h_leadingLeptonEta[i] = new TH1F(("h_leadingLeptonEta"+histname).c_str(),"h_leadingLeptonEta",30,-3.0,3.0);h_leadingLeptonEta[i]->Sumw2();
+    h_leadingLeptonPhi[i] = new TH1F(("h_leadingLeptonPhi"+histname).c_str(),"h_leadingLeptonPhi",20,-3.1416,3.1416);h_leadingLeptonPhi[i]->Sumw2();
+    h_leadingLeptonEtaPhi[i] = new TH2F(("h_leadingLeptonEtaPhi"+histname).c_str(),"h_leadingLeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
+    h_subleadingLeptonPt[i] = new TH1F(("h_subleadingLeptonPt"+histname).c_str(),"h_subleadingLeptonPt",25,subLeadingLeptonPtBins);h_subleadingLeptonPt[i]->Sumw2();
+    h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
+    h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",20,-3.1416,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
+    h_subleadingLeptonEtaPhi[i] = new TH2F(("h_subleadingLeptonEtaPhi"+histname).c_str(),"h_subleadingLeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
+    h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i]->Sumw2();
+    h_recoilPhi[i] = new TH1F(("h_recoilPhi"+histname).c_str(), "Recoil #phi",20,-3.1416,3.1416);h_recoilPhi[i]->Sumw2();
+    h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
+    h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
+  }
+}
+
+void ZprimeYear::fillHistos(int histoNumber,float event_weight){
+  fillCommon(histoNumber,event_weight);
+  //CR Histograms
+  if(lepindex_leading >= 0 && lepindex_subleading >= 0){
+    h_leadingLeptonPt[histoNumber]->Fill(elePt->at(lepindex_leading),event_weight);
+    h_leadingLeptonEta[histoNumber]->Fill(eleEta->at(lepindex_leading),event_weight);
+    h_leadingLeptonPhi[histoNumber]->Fill(elePhi->at(lepindex_leading),event_weight);
+    h_leadingLeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex_leading),elePhi->at(lepindex_leading),event_weight);
+    h_subleadingLeptonPt[histoNumber]->Fill(elePt->at(lepindex_subleading),event_weight);
+    h_subleadingLeptonEta[histoNumber]->Fill(eleEta->at(lepindex_subleading),event_weight);
+    h_subleadingLeptonPhi[histoNumber]->Fill(elePhi->at(lepindex_subleading),event_weight);
+    h_subleadingLeptonEtaPhi[histoNumber]->Fill(eleEta->at(lepindex_subleading),elePhi->at(lepindex_subleading),event_weight);
+  }
+  if(dilepton_pt >= 0 && dilepton_mass >= 0){
+    h_recoil[histoNumber]->Fill(recoil,event_weight);
+    h_recoilPhi[histoNumber]->Fill(recoilPhi,event_weight);
+    h_dileptonPt[histoNumber]->Fill(dilepton_pt,event_weight);
+    h_dileptonM[histoNumber]->Fill(dilepton_mass,event_weight);
+  }
+  weight = event_weight;
+  if (histoNumber == bHisto) tree->Fill();
+}
+
+vector<int> ZprimeYear::JetVetoDecision(int leading, int subleading) {
+  vector<int> jetindex; jetindex.clear();
+			  
+  vector<int> tmpcands = ZprimeJetsCommon::JetVetoDecision();
+  for (int ijet : tmpcands) {
+    float dR_leading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(leading),eleSCPhi->at(leading));
+    float dR_subleading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(subleading),eleSCPhi->at(subleading));
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+      jetindex.push_back(ijet);
+  }
+  return jetindex;
+}
+
+//Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate electrons and jet within dR of 0.5
+vector<int> ZprimeYear::muon_veto_looseID(int jet_index, int leading, int subleading, float muPtCut) {
+  vector<int> mu_cands;
+  mu_cands.clear();
+  
+  vector<int> tmpcands = ZprimeJetsCommon::muon_veto_looseID(jet_index,muPtCut);
+  for(int imu : tmpcands) {
+    float dR_leading = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(leading),eleSCPhi->at(leading));
+    float dR_subleading = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(subleading),eleSCPhi->at(subleading));
+    if ( dR_leading > 0.5 && dR_subleading )
+      mu_cands.push_back(imu);
+  }
+  
+  return mu_cands;
+}
+
+vector<int> ZprimeYear::photon_veto_looseID(int jet_index,int leading,int subleading,float phoPtCut) {
+  vector<int> pho_cands; pho_cands.clear();
+
+  vector<int> tmpcands = ZprimeJetsCommon::photon_veto_looseID(jet_index,phoPtCut);
+  for (int ipho : tmpcands ) {
+    float dR_leading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(leading),eleSCPhi->at(leading));
+    float dR_subleading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(subleading),eleSCPhi->at(subleading));
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+      pho_cands.push_back(ipho);
+  }
+  return pho_cands;
+}
+
+vector<int> ZprimeYear::tau_veto_looseID(int jet_index,int leading,int subleading,float tauPtCut) {
+  vector<int> tau_cands; tau_cands.clear();
+
+  vector<int> tmpcands = ZprimeJetsCommon::tau_veto_looseID(jet_index,tauPtCut);
+  for (int itau : tmpcands ) {
+    float dR_leading = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),eleSCEta->at(leading),eleSCPhi->at(leading));
+    float dR_subleading = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),eleSCEta->at(subleading),eleSCPhi->at(subleading));
+    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+      tau_cands.push_back(itau);
+  }
+  return tau_cands;
+}
