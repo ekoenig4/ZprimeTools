@@ -1,0 +1,50 @@
+{
+    "A": [
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0000/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0001/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0002/", 
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0003/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0004/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0005/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0006/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0007/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0008/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018A/190511_011526/0009/"
+    ],
+    "B": [
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018B/190511_011551/0000/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018B/190511_011551/0001/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018B/190511_011551/0002/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018B/190511_011551/0003/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018B/190511_011551/0004/"
+    ],
+    "C": [
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018C/190511_011627/0000/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018C/190511_011627/0001/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018C/190511_011627/0002/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018C/190511_011627/0003/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/MET/crab_job_MET2018C/190511_011627/0004/"
+    ],
+    "D": [
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0000/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0001/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0002/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0003/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0004/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0005/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0006/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0007/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2/190512_164040/0008/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0000/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0001/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0002/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0003/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0004/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0005/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0006/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0007/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0008/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_2/190516_203151/0009/",
+	"/hdfs/store/user/varuns/Run2018D_Prompt/MET/crab_job_MET2018Dv2_3/190519_232032/0000/"
+    ]
+}
