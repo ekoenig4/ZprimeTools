@@ -19,6 +19,8 @@ parser.add_argument("-n","--normalize",help="normalize plots to 1",action="store
 parser.add_argument("-s","--signal",help="specify the signal file to use",action="store",type=str,default=None,dest="signal")
 parser.add_argument("--sub",help="specify a sub directory to place output",action="store",type=str,default=None,dest="sub")
 parser.add_argument("-b","--binning",help="specify function for rebinning histogram",action="store",type=str,default=None)
+parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",default=False)
+parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
 
 def GetRegion():
     preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
@@ -99,6 +101,11 @@ class datamc(object):
         self.processes["TTJets"] =  Process("TTJets", mc.TTJets_FileNames, GetMCxsec(mc.TTJets_FileNames,mc.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
         self.processes["DiBoson"] = Process("DiBoson",mc.DiBoson_FileNames,GetMCxsec(mc.DiBoson_FileNames,mc.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
         self.processes["QCD"] =     Process("QCD",    mc.QCD_FileNames,    GetMCxsec(mc.QCD_FileNames,mc.xsec),    'bkg',lumi=self.lumi,color=kGray)
+
+        if self.args.mc_solid:
+            for name,process in self.processes.iteritems():
+                if process.proctype == 'bkg':
+                    process.color = 17
             
         if self.region == "SignalRegion" and self.args.signal != None:
             self.signal = self.args.signal
@@ -115,6 +122,8 @@ class datamc(object):
         self.HaddFiles()
         if (self.args.allHisto):
             self.getAllHisto()
+        if (self.args.nhists != None):
+            self.getAllNHisto()
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
 
@@ -209,6 +218,7 @@ class datamc(object):
     ###############################################################################################################
 
     def getAllHisto(self):
+        return
         if (self.region == "SignalRegion"): basic = "8"
         else: basic = "10"
         rfile=TFile.Open(self.Data_FileName+".root")
@@ -217,6 +227,18 @@ class datamc(object):
             nhisto = key.GetName().split("_")[-1]
             if (type(rfile.Get(key.GetName())) == TH1F or type(rfile.Get(key.GetName())) == TH1D) and (not nhisto.isdigit() or nhisto == basic):
                 self.args.append(key.GetName())
+    ###############################################################################################################
+    
+    def getAllNHisto(self):
+        rfile=TFile.Open(self.Data_FileName+".root")
+        self.args.argv = []
+        tdir = rfile.Get('ZprimeJet_%i' % self.args.nhists)
+        if tdir != None:
+            for key in tdir.GetListOfKeys():
+                keyname = key.GetName()
+                obj = tdir.Get(keyname)
+                if type(obj) == TH1F:
+                    self.args.argv.append(keyname)
     ###############################################################################################################
 
     def getVariableName(self,variable):

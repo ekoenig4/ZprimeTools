@@ -14,7 +14,7 @@ lumi_by_era = {"SingleEleCR":{"A":14024,"B":7061,"C":6895,"D":31720},
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
 
-ZJets_FileNames = ["postZ100to200","postZ200to400","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
+ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
 
 GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
 
@@ -26,7 +26,8 @@ DiBoson_FileNames = ["postWW","postWWto2L2Nu","postWWto4Q","postWWtoLNuQQ","post
 
 QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
 
-xsec = {
+# 2018 xsec
+xsec = { 
 "postZ100to200":3.034e+02,
 "postZ200to400":9.171e+01,
 "postZ400to600":1.310e+01,
@@ -79,6 +80,60 @@ xsec = {
     
 "postWZ":2.758e+01,
 "postZZ":1.214e+01,
+}
+
+# 2017 xsec
+xsec_2017 = { 
+"postZ100to200":3.045e+02,
+"postZ200to400":9.185e+01,
+"postZ400to600":1.311e+01,
+"postZ600to800":3.257e+00,
+"postZ800to1200":1.499e+00,
+"postZ1200to2500":3.430e-01,
+"postZ2500toInf":5.146e-03,
+    
+"postWJets_MLM":5.279e+04,
+"postW100to200":1.395e+03,
+"postW200to400":4.093e+02,
+"postW400to600":5.791e+01,
+"postW600to800":1.293e+01,
+"postW800to1200":5.395e+00,
+"postW1200to2500":1.080e+00,
+"postW2500toInf":8.053e-03,
+    
+"postDY70to100":1.471e+02,
+"postDY100to200":1.610e+02,
+"postDY200to400":4.858e+01,
+"postDY400to600":6.982e+00,
+"postDY600to800":1.747e+00,
+"postDY800to1200":8.052e-01,
+"postDY1200to2500":1.927e-01,
+"postDY2500toInf":3.478e-03,
+    
+"postGJets40to100":1.862e+04,
+"postGJets100to200":8.622e+03,
+"postGJets200to400":2.193e+03,
+"postGJets400to600":2.585e+02,
+"postGJets600toInf":8.521e+01,
+    
+"postTTJetsDiLept":5.424e+01,
+    
+"postQCD100to200":2.369e+07,
+"postQCD200to300":1.556e+06,
+"postQCD300to500":3.236e+05,
+"postQCD500to700":2.999e+04,
+"postQCD700to1000":6.351e+03,
+"postQCD1000to1500":1.094e+03,
+"postQCD1500to2000":9.901e+01,
+"postQCD2000toInf":2.023e+01,
+    
+"postWW":7.590e+01,
+"postWWtoLNuQQ":4.599e+01,
+"postWWto2L2Nu":1.108e+01,
+"postWWto4Q":4.773e+01,
+    
+"postWZ":2.757e+01,
+"postZZ":1.214e+01
 }
 
 old_xsec = {
