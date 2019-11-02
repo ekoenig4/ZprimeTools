@@ -375,7 +375,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int leading, int subleading) {
   for(int ijet : tmpcands ) {
     float dR_leading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(jetEta->at(ijet),jetPhi->at(ijet),muEta->at(subleading),muPhi->at(subleading));
-    if( dR_leading > leptondRCut && dR_subleading > leptondRCut)
+    if( dR_leading > Iso4Cut && dR_subleading > Iso4Cut)
       jetindex.push_back(ijet);
   }
   return jetindex;
@@ -389,7 +389,7 @@ vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int leading, i
   for(int iele : tmpcands) {
     float dR_leading = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(subleading),muPhi->at(subleading));
-    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+    if ( dR_leading > Iso5Cut && dR_subleading > Iso5Cut )
       ele_cands.push_back(iele);
   }
   
@@ -403,7 +403,7 @@ vector<int> ZprimeJetsClass::photon_veto_looseID(int jet_index,int leading,int s
   for (int ipho : tmpcands ) {
     float dR_leading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(subleading),muPhi->at(subleading));
-    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+    if ( dR_leading > Iso5Cut && dR_subleading > Iso5Cut )
       pho_cands.push_back(ipho);
   }
   return pho_cands;
@@ -416,7 +416,7 @@ vector<int> ZprimeJetsClass::tau_veto_looseID(int jet_index,int leading,int subl
   for (int itau : tmpcands ) {
     float dR_leading = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),muEta->at(subleading),muPhi->at(subleading));
-    if ( dR_leading > leptondRCut && dR_subleading > leptondRCut )
+    if ( dR_leading > Iso4Cut && dR_subleading > Iso4Cut )
       tau_cands.push_back(itau);
   }
   return tau_cands;

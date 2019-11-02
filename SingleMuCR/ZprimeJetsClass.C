@@ -317,7 +317,7 @@ vector<int> ZprimeJetsClass::JetVetoDecision(int jet_index, int mu_index) {
   vector<int> tmpcands = ZprimeJetsCommon::JetVetoDecision();
   for(int ijet : tmpcands) {
     float dR_mu = deltaR(jetEta->at(ijet),jetPhi->at(ijet),muEta->at(mu_index),muPhi->at(mu_index));
-    if(dR_mu > leptondRCut)
+    if(dR_mu > Iso4Cut)
       jetindex.push_back(ijet);
   }
   return jetindex;
@@ -330,7 +330,7 @@ vector<int> ZprimeJetsClass::electron_veto_looseID(int jet_index, int lepindex, 
   vector<int> tmpcands = ZprimeJetsCommon::electron_veto_looseID(jet_index,elePtCut);
   for(int iele : tmpcands) {
     float dR_mu = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > leptondRCut )
+    if ( dR_mu > Iso5Cut )
       ele_cands.push_back(iele);
   }
   
@@ -343,7 +343,7 @@ vector<int> ZprimeJetsClass::photon_veto_looseID(int jet_index,int lepindex,floa
   vector<int> tmpcands = ZprimeJetsCommon::photon_veto_looseID(jet_index,phoPtCut);
   for (int ipho : tmpcands ) {
     float dR_mu = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > leptondRCut )
+    if ( dR_mu > Iso5Cut )
       pho_cands.push_back(ipho);
   }
   return pho_cands;
@@ -355,7 +355,7 @@ vector<int> ZprimeJetsClass::tau_veto_looseID(int jet_index,int lepindex,float t
   vector<int> tmpcands = ZprimeJetsCommon::tau_veto_looseID(jet_index,tauPtCut);
   for (int itau : tmpcands ) {
     float dR_mu = deltaR(tau_Eta->at(itau),tau_Phi->at(itau),muEta->at(lepindex),muPhi->at(lepindex));
-    if ( dR_mu > leptondRCut )
+    if ( dR_mu > Iso4Cut )
       tau_cands.push_back(itau);
   }
   return tau_cands;

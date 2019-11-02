@@ -128,6 +128,9 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
     h_ePF123PtFraction[i]= new TH1F(("ePF123PtFraction"+histname).c_str(), "ePF123PtFraction;Endcap P_{T}^{123} Fraction" ,50,0,1.1);h_ePF123PtFraction[i]->Sumw2();
     
     h_j1EtaPhi[i] = new TH2F(("j1EtaPhi"+histname).c_str(),"j1EtaPhi;Leading Jet #eta;Leading Jet #phi",50,-3.0,3.0,50,-3.1416,3.1416);
+    
+    h_nJetVeto[i] = new TH1F(("nJetVeto"+histname).c_str(),"nJetVeto;Number of Jet with P_{T} > 30 GeV & |#eta| < 2.4",21,-0.5,20.5); h_nJetVeto[i]->Sumw2();
+    h_nJetVetoPt[i] = new TH2F(("nJetVetoPt"+histname).c_str(),"nJetVetoPt;jet P_{T};nJet",50,0,2000,21,-0.5,20.5);
   }
 }
 
@@ -190,6 +193,10 @@ void ZprimeJetsCommon::fillCommon(int histoNumber,float event_weight) {
       h_ePF123PtFraction[histoNumber]->Fill(Pt123Fraction,event_weight);
     }
     
+    h_nJetVeto[histoNumber]->Fill(jetveto.size(),event_weight);
+    for (int i = 0; i < jetveto.size(); i++) {
+      h_nJetVetoPt[histoNumber]->Fill( jetPt->at(jetveto[i]),i+1,event_weight );
+    }
   }
 }
 
@@ -294,6 +301,10 @@ float ZprimeJetsCommon::dPhiJetMETmin(vector<int> jets) {
       }
     }
   return dPhimin;
+}
+
+float ZprimeJetsCommon::getMt(float pt1,float phi1,float pt2,float phi2) {
+  return TMath::Sqrt(2 * pt1 * pt2 * (1-TMath::Cos(phi1-phi2)));
 }
 
 vector<int> ZprimeJetsCommon::getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut) {
@@ -457,22 +468,23 @@ bool ZprimeJetsCommon::getEleHEMVeto(float elePtCut){
 }
 
 void ZprimeJetsCommon::initVars() {
-    jetCand     .clear();
-    j1PFConsPt  .clear();
-    j1PFConsEta .clear();
-    j1PFConsPhi .clear();
-    j1PFConsPID .clear();
+  jetveto     .clear();
+  jetCand     .clear();
+  j1PFConsPt  .clear();
+  j1PFConsEta .clear();
+  j1PFConsPhi .clear();
+  j1PFConsPID .clear();
 
-    if(sample.isData) {
-      // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
-      // data doesn't have genWeight so set it to 1
-      genWeight = 1;
-    }
+  if(sample.isData) {
+    // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
+    // data doesn't have genWeight so set it to 1
+    genWeight = 1;
+  }
 
-    weight = weight_nogen = weight_QCDSF = weight_16K = 1;
-    kfactor = kfactor_16 = qcdSF = 1;
+  weight = weight_nogen = weight_QCDSF = weight_16K = 1;
+  kfactor = kfactor_16 = qcdSF = 1;
 
-    bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
-    ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
-    TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
+  bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
+  ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
+  TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
 }

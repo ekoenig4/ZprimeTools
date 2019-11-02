@@ -31,8 +31,8 @@ using namespace std;
 
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 14;
-  static const int bHisto = 11;
+  static const int nHisto = 15;
+  static const int bHisto = 12;
 
   //CR variables
   int lepindex;
