@@ -97,3 +97,7 @@ ELE_C() {
     ${1} $DATA1/EGamma/crab_job_EGamma2018Cv4/190604_144802/0000/ post${2}_2_18.root -1 10000 ${3}_2_18 split_-1
     ${1} $DATA1/EGamma/crab_job_EGamma2018Cv4/190604_144802/0001/ post${2}_2_19.root -1 10000 ${3}_2_19 split_-1
 }
+
+ELE_D() {
+    ${1} /hdfs/store/user/varuns/Egamma2018D-run_102X_data2018_farmout/ post${2}_3_0.root -1 10000 ${3}_3_0 split_-1
+}
