@@ -1,35 +1,37 @@
 #!/usr/bin/env python
 import sys
-from os import path, system, mkdir, listdir, rename, remove, chdir, getenv
+import os
+import stat
 from CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
-script_path = '/'.join(path.realpath(__file__).split('/')[:-1])
-cmssw_base = getenv("CMSSW_BASE")
+script_path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
+cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
 
 def init():
     #Create Directories to put condor files in
     #Where executable and output files go
-    if not path.isdir(".output/"): mkdir(".output/")
+    if not os.path.isdir(".output/"): os.mkdir(".output/")
     #Where all condor output, log, and error files go
-    if not path.isdir(".status/"): mkdir(".status/")
+    if not os.path.isdir(".status/"): os.mkdir(".status/")
 def getargs():
     parser = ArgumentParser()
     parser.add_argument('runargs',help='Specify arguments for run',type=str,nargs='+')
     parser.add_argument('-y','--year',help='Specify year of run',type=str,default='')
     parser.add_argument('-r','--region',help='Specify region of run',type=str,default='')
+    parser.add_argument('-f','--filelist',help='Use direct filenames as input',action='store_true',default=False)
     args = parser.parse_args()
     args.error = False
     def checkScript(arg):
-        if path.isfile(arg): return arg
+        if os.path.isfile(arg): return arg
         else:
             print 'Unable to find script %s' % arg
             args.error = True
     def checkRootDir(arg):
-        if path.isdir(arg):
-            rfiles = [ fn.replace(".root","") for fn in listdir(arg) if fn.endswith(".root") ]
+        if os.path.isdir(arg):
+            rfiles = [ fn.replace(".root","") for fn in os.listdir(arg) if fn.endswith(".root") ]
             if any(rfiles): return arg,rfiles
             print '%s does not have any root files' % arg
         else:
@@ -71,12 +73,12 @@ def stripDataset(rootFiles):
 def removeOldFiles(filekey,label):
     #Remove any old condor files
     filekey = filekey.replace(".root","_")
-    for fn in listdir(".output/"):
+    for fn in os.listdir(".output/"):
         if filekey in fn:
-            remove(".output/"+fn)
+            os.remove(".output/"+fn)
 
-    if not path.isdir(".status/"+label): mkdir(".status/"+label)
-    for fn in listdir(".status/"+label): remove(".status/"+label+"/"+fn)
+    if not os.path.isdir(".status/"+label): os.mkdir(".status/"+label)
+    for fn in os.listdir(".status/"+label): os.remove(".status/"+label+"/"+fn)
 
 def splitArgument(nbatches,rfiles,config):
     #Get how many files are in each batch
@@ -106,15 +108,29 @@ def splitArgument(nbatches,rfiles,config):
         config['Arguments'] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) " + fileRange
         config.queue()
 
+def inputFilelist(nbatches,rfiles,config):
+    batch = len(rfiles)
+    binsize = batch/nbatches
+    print 'Total files:   %i' % batch
+    print 'Files per job: %i' % binsize
+    for i in range(nbatches):
+        if binsize > len(rfiles): binsize = len(rfiles)
+        fileRange = [ rfiles.pop(0)+'.root' for _ in range(binsize) ]
+
+        print "----Batch",i+1,'%i files' % len(fileRange)
+
+        config["Arguments"] = "$(script) -i $(inputdir) -o $(outputfile)_$(Process).root -r %s" %  ' '.join(fileRange)
+        config.queue()
+            
+
 def main():
     init()
     args = getargs()
     print "Processesing %s" % args.outputfile
-    stripDataset(args.rfiles)
     removeOldFiles(args.outputfile,args.label)
     #Assure executable file is in .output/
-    if not path.isfile('.output/runAnalyzer.sh'): system('cp %s/runAnalyzer.sh .output/' % script_path)
-    system('cp %s .output' % args.script)
+    if not os.path.isfile('.output/runAnalyzer.sh'): os.system('cp %s/runAnalyzer.sh .output/' % script_path)
+    os.system('cp -p %s .output' % args.script)
     
     #Beginning to write condor_submit file
     config = CondorConfig()
@@ -137,15 +153,20 @@ def main():
     config['reportevery'] = args.reportevery
     config['label'] = args.label
     config['Batch_Name'] = '%s%s_$(label)' % (args.region,args.year)
-    config['Transfer_Input_Files'] = ['$(script)','../../RootFiles']
+    config['Transfer_Input_Files'] = ['$(script)']
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'
-    splitArgument(args.nbatches,args.rfiles,config)
+
+    if not args.filelist:    
+        stripDataset(args.rfiles)
+        splitArgument(args.nbatches,args.rfiles,config)
+    else:
+        inputFilelist(args.nbatches,args.rfiles,config)
     config.write('.output/condor_%s' % args.label)
     #Move into .output/ and run newly made condor_submit file
-    chdir(".output/")
-    system("condor_submit condor_%s" % args.label)
+    os.chdir(".output/")
+    os.system("condor_submit condor_%s" % args.label)
     
     
 if __name__ == "__main__": main()
