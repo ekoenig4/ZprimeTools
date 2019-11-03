@@ -30,8 +30,8 @@ public :
   static const int nHisto = 12;
   static const int bHisto = 9;
 
-  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
-  { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) : ZprimeJetsCommon(inputFilename,outputFilename,filelist) { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange) : ZprimeJetsCommon(inputFilename,outputFilename,fileRange) { BookHistos(outputFilename); };
   virtual void     Loop(Long64_t maxEvents,int reportEvery);
   virtual void BookHistos(const char* outputFilename);
   virtual void fillHistos(int histoNumber,float event_weight);

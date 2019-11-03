@@ -83,23 +83,25 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,tauLoosePtCut);
 	      
 	      if (mulist.size() == 0 && pholist.size() == 0 && taulist.size() == 0) {
-		float dPhiLepMet = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
-		float lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhiLepMet)));
-		
-		if (pfMET > pfMET50Cut) {
-		  float metcut = (fabs(pfMET-caloMET))/recoil;
+		float lepMET_MT = getMt(elePt->at(lepindex),elePhi->at(lepindex),pfMET,pfMETPhi);
+
+		if (lepMET_MT < lepMETMtCut) {
 		  
-		  if (metcut < metRatioCut) {
+		  if (pfMET > pfMET50Cut) {
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
+		  
+		    if (metcut < metRatioCut) {
 		    
-		    if (btagVeto()) {
-		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
+		      if (btagVeto()) {
+			vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
 		      
-		      if (dPhiJetMETcut(jetveto,recoilPhi)) {
+			if (dPhiJetMETcut(jetveto,recoilPhi)) {
 			
-			if (getEleHEMVeto(eleHEMVetoPtCut)) {
-			  weight = event_weight;
-			  if (unc == 1)  shapeUncs->fillUp(uncname);// up
-			  if (unc == -1) shapeUncs->fillDn(uncname);// down
+			  if (getEleHEMVeto(eleHEMVetoPtCut)) {
+			    weight = event_weight;
+			    if (unc == 1)  shapeUncs->fillUp(uncname);// up
+			    if (unc == -1) shapeUncs->fillDn(uncname);// down
+			  }
 			}
 		      }   
 		    }	

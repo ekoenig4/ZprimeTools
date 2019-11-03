@@ -823,8 +823,11 @@ public :
   TBranch        *b_mcStatusFlag;   //!
   TBranch        *b_mcIndex;   //!
 
+  ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
   ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,const char* fileRange);
   virtual ~ZprimeJetsCommon();
+  int getFilesByNumber(TChain *chain,TString path,const char* fileRange);
+  int getFilesByList(TChain *chain,TString path,vector<const char*> filelist);
   virtual vector<string> split(string str, string delim);
   virtual bool fileSelection(string filename, string fileRange);
   virtual Int_t    Cut(Long64_t entry);

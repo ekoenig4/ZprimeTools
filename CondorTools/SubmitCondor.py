@@ -6,6 +6,7 @@ from CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
 script_path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
+repo_path = script_path.replace('/CondorTools','')
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
@@ -119,7 +120,7 @@ def inputFilelist(nbatches,rfiles,config):
 
         print "----Batch",i+1,'%i files' % len(fileRange)
 
-        config["Arguments"] = "$(script) -i $(inputdir) -o $(outputfile)_$(Process).root -r %s" %  ' '.join(fileRange)
+        config["Arguments"] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) %s" %  ' '.join(fileRange)
         config.queue()
             
 
@@ -153,7 +154,7 @@ def main():
     config['reportevery'] = args.reportevery
     config['label'] = args.label
     config['Batch_Name'] = '%s%s_$(label)' % (args.region,args.year)
-    config['Transfer_Input_Files'] = ['$(script)']
+    config['Transfer_Input_Files'] = ['$(script)','%s/RootFiles/' % repo_path]
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'
@@ -166,7 +167,7 @@ def main():
     config.write('.output/condor_%s' % args.label)
     #Move into .output/ and run newly made condor_submit file
     os.chdir(".output/")
-    os.system("condor_submit condor_%s" % args.label)
+    # os.system("condor_submit condor_%s" % args.label)
     
     
 if __name__ == "__main__": main()

@@ -11,6 +11,13 @@
 using namespace std;
 
 int main(int argc, const char* argv[]) { 
+  /*
+    argv[1] = inputDirPath
+    argv[2] = outputFileName
+    argv[3] = maxEvents
+    argv[4] = reportEvery
+    argv[5] = fileRange or argv[5:] = filelist
+   */
   if (argc == 1) {
     printf("Running Test\n");
     argv[1] = "/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx10_Mv100/";
@@ -18,7 +25,10 @@ int main(int argc, const char* argv[]) {
     argv[3] = "5000";
     argv[4] = "1000";
     argv[5] = "-1";
+    argc = 6;
   }
+  const char* inputFilename = argv[1];
+  const char* outputFilename = argv[2];
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL)
     {
@@ -31,8 +41,16 @@ int main(int argc, const char* argv[]) {
       cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
       return 1;
     }
-  ZprimeJetsClass t(argv[1],argv[2],argv[5]);
-  t.Loop(maxEvents,reportEvery);
+  if ( !TFile( (string(inputFilename) + string(argv[5])).c_str() ).IsZombie() ) {
+    vector<const char*>filelist;
+    for (int i = 5; i < argc; i++) filelist.push_back( argv[i] );
+    ZprimeJetsClass t(inputFilename,outputFilename,filelist);
+    t.Loop(maxEvents,reportEvery);
+  } else {
+    const char* fileRange = argv[5];
+    ZprimeJetsClass t(inputFilename,outputFilename,fileRange);
+    t.Loop(maxEvents,reportEvery);
+  }
   return 0;
 }
 

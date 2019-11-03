@@ -41,8 +41,8 @@ public :
 
   TH1F *h_tightEleRecoSF_corr,*h_tightEleEffSF_corr,*h_tightEleTriggSF,*h_looseEleRecoSF_corr,*h_looseEleEffSF_corr,*h_looseEleTriggSF;
   
-  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
-  { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) : ZprimeJetsCommon(inputFilename,outputFilename,filelist) { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange) : ZprimeJetsCommon(inputFilename,outputFilename,fileRange) { BookHistos(outputFilename); };
   virtual void     Loop(Long64_t maxEvents,int reportEvery);
   virtual void SetScalingHistos();
   virtual void BookHistos(const char* outputFilename);

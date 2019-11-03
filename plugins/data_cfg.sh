@@ -1,5 +1,6 @@
 DATA1=/hdfs/store/user/varuns/Run2018_17Sep2018_May2019
 DATA2=/hdfs/store/user/varuns/Run2018D_Prompt
+DATA3=/hdfs/store/user/varuns/Run2018_17Sep2018_EG2018A
 
 MET_A() {
     ${1} $DATA1/MET/crab_job_MET2018A/190511_011526/0000/ post${2}_0_0.root -1 10000 ${3}_0_0 split_-1
@@ -48,6 +49,33 @@ MET_D() {
     ${1} $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0008/ post${2}_3_17.root -1 10000 ${3}_3_17 split_-1
     ${1} $DATA2/MET/crab_job_MET2018Dv2_2/190516_203151/0009/ post${2}_3_18.root -1 10000 ${3}_3_18 split_-1
     ${1} $DATA2/MET/crab_job_MET2018Dv2_3/190519_232032/0000/ post${2}_3_19.root -1 10000 ${3}_3_19 split_-1
+}
+
+ELE_A() {
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0000/ post${2}_0_0.root -1 10000 ${3}_0_0 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0001/ post${2}_0_1.root -1 10000 ${3}_0_1 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0002/ post${2}_0_2.root -1 10000 ${3}_0_2 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0003/ post${2}_0_3.root -1 10000 ${3}_0_3 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0004/ post${2}_0_4.root -1 10000 ${3}_0_4 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A2/190721_082804/0005/ post${2}_0_5.root -1 10000 ${3}_0_5 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0000/ post${2}_0_6.root -1 10000 ${3}_0_6 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0001/ post${2}_0_7.root -1 10000 ${3}_0_7 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0002/ post${2}_0_8.root -1 10000 ${3}_0_8 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0003/ post${2}_0_9.root -1 10000 ${3}_0_9 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0004/ post${2}_0_10.root -1 10000 ${3}_0_10 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0005/ post${2}_0_11.root -1 10000 ${3}_0_11 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A3/190721_081700/0006/ post${2}_0_12.root -1 10000 ${3}_0_12 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0000/ post${2}_0_13.root -1 10000 ${3}_0_13 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0001/ post${2}_0_14.root -1 10000 ${3}_0_14 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0002/ post${2}_0_15.root -1 10000 ${3}_0_15 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0003/ post${2}_0_16.root -1 10000 ${3}_0_16 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0004/ post${2}_0_17.root -1 10000 ${3}_0_17 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A4/190721_081358/0005/ post${2}_0_18.root -1 10000 ${3}_0_18 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A5/190720_191811/0000/ post${2}_0_19.root -1 10000 ${3}_0_19 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A5/190720_191811/0001/ post${2}_0_20.root -1 10000 ${3}_0_20 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A5/190720_191811/0002/ post${2}_0_21.root -1 10000 ${3}_0_21 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A5/190720_191811/0003/ post${2}_0_22.root -1 10000 ${3}_0_22 split_-1
+    ${1} $DATA3/EGamma/crab_job_EGamma2018A5/190720_191811/0004/ post${2}_0_23.root -1 10000 ${3}_0_23 split_-1
 }
 
 ELE_B() {

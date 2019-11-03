@@ -4,6 +4,7 @@
 using namespace std;
 
 #ifdef ZprimeJetsCommon_cxx
+
 vector<string> ZprimeJetsCommon::split(string str,string delim) {
   vector<string> splitString;
   char strChar[str.size() + 1];
@@ -39,10 +40,7 @@ bool ZprimeJetsCommon::fileSelection(string filename,string fileRange)
   return false;
 }
 
-ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,const char* fileRange) 
-{
-  TChain *chain = new TChain("phoJetNtuplizer/eventTree");
-  TString path = inputFilename;
+int ZprimeJetsCommon::getFilesByNumber(TChain *chain,TString path,const char* fileRange) {
   TSystemDirectory sourceDir("hi",path);
   TList* fileList = sourceDir.GetListOfFiles();
   TIter nextlist(fileList);
@@ -50,7 +48,6 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
   int fileNumber = 0;
   int maxFiles = -1;
   int inFile=0;
-  sample = DataMC(string(inputFilename));
   while ((filename = (TSystemFile*)nextlist()) && fileNumber >  maxFiles)
     {
       //Debug
@@ -59,7 +56,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
 	cout<<"name: "<<(filename->GetName())<<endl;
 	cout<<"fileNumber: "<<fileNumber<<endl;
       }
-
+      
       TString dataset = ".root";
       TString  FullPathInputFile = (path+filename->GetName());
       TString name = filename->GetName();
@@ -80,6 +77,49 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
 	}
       fileNumber++;
     }
+  return inFile;
+}
+
+int ZprimeJetsCommon::getFilesByList(TChain *chain,TString path,vector<const char*> filelist) {
+  int inFile=0;
+  TSystemFile* filename;
+  for (const char* fname : filelist) {
+    filename = new TSystemFile(fname,path);
+    TString FullPathInputFile = (path+filename->GetName());
+    if (debug) {
+      cout<<"file path found: "<<FullPathInputFile<<endl;
+      cout<<"name:"<<filename->GetName()<<endl;
+      cout<<"fileNumber"<<inFile<<endl;
+      cout <<"Adding FullPathInputFile to chain:"<<FullPathInputFile<<endl<<endl;
+    }
+    chain->Add(FullPathInputFile);
+    inFile++;
+  }
+  return inFile;
+}
+
+ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) {
+  TChain *chain = new TChain("phoJetNtuplizer/eventTree");
+  TString path = inputFilename;
+  sample = DataMC(string(inputFilename));
+  int inFile = 0;
+  if ( filelist.size() == 0 )
+    inFile = getFilesByNumber(chain,path,"-1");
+  else
+    inFile = getFilesByList(chain,path,filelist);
+  cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<"isW_or_ZJet: " << sample.isW_or_ZJet() << endl;
+  cout<<inFile<<" files added."<<endl;
+  cout<<"Initializing chain."<<endl;
+  Init(chain);
+}
+
+ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,const char* fileRange) 
+{
+  TChain *chain = new TChain("phoJetNtuplizer/eventTree");
+  TString path = inputFilename;
+  sample = DataMC(string(inputFilename));
+  int inFile = getFilesByNumber(chain,path,fileRange);
   cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<"isW_or_ZJet: " << sample.isW_or_ZJet() << endl;
   cout<<inFile<<" files added."<<endl;
