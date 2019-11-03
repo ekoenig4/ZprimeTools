@@ -17,8 +17,7 @@ run() {
 }
 
 run SignalRegion
-exit
-run SingleEleCR $singleleps
-run SingleMuCR $singleleps
-run DoubleEleCR $doubleleps
-run DoubleMuCR $doubleleps
+# run SingleEleCR $singleleps
+# run SingleMuCR $singleleps
+# run DoubleEleCR $doubleleps
+# run DoubleMuCR $doubleleps

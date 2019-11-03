@@ -43,9 +43,9 @@ def MCStyle(hs_mc,color):
     hs_mc.GetXaxis().SetTitle("");
     hs_mc.GetXaxis().SetTickLength(0);
     hs_mc.GetXaxis().SetLabelOffset(999);
-    hs_mc.GetYaxis().SetTitle("");
-    hs_mc.GetYaxis().SetTickLength(0);
-    hs_mc.GetYaxis().SetLabelOffset(999);
+    # hs_mc.GetYaxis().SetTitle("");
+    # hs_mc.GetYaxis().SetTickLength(0);
+    # hs_mc.GetYaxis().SetLabelOffset(999);
     hs_mc.SetFillColor(color);
 ###################################################################
 
@@ -186,9 +186,14 @@ def plotVariable(samples,variable):
     ymin_s=pow(10,-6);ymax_s=pow(10,2.5);
     ymin = 0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*ymin_s
     ymax = hs_datamc.GetMaximum()*ymax_s
-    hs_datamc.Draw("HIST")
-    StackStyle(hs_datamc,ymin,ymax)
-
+    if samples.args.mc_solid:
+        hs_bkg = hs_datamc.GetStack().Last()
+        hs_bkg.Draw("hist")
+        StackStyle(hs_bkg,ymin,ymax)
+    else:
+        hs_datamc.Draw("hist")
+        StackStyle(hs_datamc,ymin,ymax)
+        
     data.histo.Draw('pex0same')
     
     if samples.signal != None:
@@ -200,14 +205,18 @@ def plotVariable(samples,variable):
 
     leg = getLegend(0.62,0.60,0.86,0.887173);
     leg.AddEntry(data.histo,"Data","lp");
-    if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)   
-    leg.AddEntry(samples.processes['WJets'].histo  ,"W#rightarrowl#nu","f");
-    leg.AddEntry(samples.processes['DYJets'].histo ,"Z#rightarrow ll","F"); 
-    leg.AddEntry(samples.processes['DiBoson'].histo,"WW/WZ/ZZ","F");
-    leg.AddEntry(samples.processes['QCD'].histo    ,"QCD","F");
-    leg.AddEntry(samples.processes['TTJets'].histo , "Top Quark", "F"); 
-    leg.AddEntry(samples.processes['GJets'].histo  ,"#gamma+jets", "F"); 
-    leg.AddEntry(samples.processes['ZJets'].histo  ,"Z#rightarrow#nu#nu","F");
+    if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)
+
+    if samples.args.mc_solid:
+        leg.AddEntry(hs_bkg,"Background","f")
+    else:
+        leg.AddEntry(samples.processes['WJets'].histo  ,"W#rightarrowl#nu","f");
+        leg.AddEntry(samples.processes['DYJets'].histo ,"Z#rightarrow ll","F"); 
+        leg.AddEntry(samples.processes['DiBoson'].histo,"WW/WZ/ZZ","F");
+        leg.AddEntry(samples.processes['QCD'].histo    ,"QCD","F");
+        leg.AddEntry(samples.processes['TTJets'].histo , "Top Quark", "F"); 
+        leg.AddEntry(samples.processes['GJets'].histo  ,"#gamma+jets", "F"); 
+        leg.AddEntry(samples.processes['ZJets'].histo  ,"Z#rightarrow#nu#nu","F");
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
@@ -231,7 +240,7 @@ def plotVariable(samples,variable):
     RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("pex0");
     
-    line = getRatioLine(hs_datamc.GetXaxis().GetXmin(),hs_datamc.GetXaxis().GetXmax())
+    line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");
 
     c.Update();
@@ -239,8 +248,8 @@ def plotVariable(samples,variable):
     ###########################################
 
     nbins = data.histo.GetNbinsX();
-    xmin = hs_datamc.GetXaxis().GetXmin();
-    xmax = hs_datamc.GetXaxis().GetXmax();
+    xmin = data.histo.GetXaxis().GetXmin();
+    xmax = data.histo.GetXaxis().GetXmax();
     xwmin = xmin;
     xwmax = xmax;
 
