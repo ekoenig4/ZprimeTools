@@ -196,6 +196,8 @@ class datamc(object):
             self.nuisances += [ nuisance for nuisance in process.nuisances if nuisance not in self.nuisances ]
         self.BkgIntegral = sum( process.scaled_total for name,process in self.processes.iteritems() if process.proctype == 'bkg' )
         if self.show: self.output()
+        if self.name == 'Xaxis Title':
+            self.name = next( process.histo.GetXaxis().GetTitle() for name,process in self.processes.iteritems() if process.histo != None )
         if getcwd() != self.cwd: chdir(self.cwd)
     ###############################################################################################################
         
