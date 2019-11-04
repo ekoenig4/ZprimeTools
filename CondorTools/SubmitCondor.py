@@ -17,13 +17,13 @@ def init():
     if not os.path.isdir(".output/"): os.mkdir(".output/")
     #Where all condor output, log, and error files go
     if not os.path.isdir(".status/"): os.mkdir(".status/")
-def getargs():
+def getargs(argv):
     parser = ArgumentParser()
     parser.add_argument('runargs',help='Specify arguments for run',type=str,nargs='+')
     parser.add_argument('-y','--year',help='Specify year of run',type=str,default='')
     parser.add_argument('-r','--region',help='Specify region of run',type=str,default='')
     parser.add_argument('-f','--filelist',help='Use direct filenames as input',action='store_true',default=False)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     args.error = False
     def checkScript(arg):
         if os.path.isfile(arg): return arg
@@ -81,12 +81,12 @@ def removeOldFiles(filekey,label):
     if not os.path.isdir(".status/"+label): os.mkdir(".status/"+label)
     for fn in os.listdir(".status/"+label): os.remove(".status/"+label+"/"+fn)
 
-def splitArgument(nbatches,rfiles,config):
+def splitArgument(nbatches,rfiles,config,show):
     #Get how many files are in each batch
     batch = len(rfiles)
     binsize = batch/nbatches
-    print "Total files:   %i" % batch
-    print "Files per job: %i" % binsize
+    if show: print "Total files:   %i" % batch
+    if show: print "Files per job: %i" % binsize
     for i in range(nbatches):
         if nbatches == 1: fileRange = "-1"
         else:
@@ -103,30 +103,29 @@ def splitArgument(nbatches,rfiles,config):
                 rfiles.pop(j) #Remove files already accounted for
                 batch-=1
 
-        print "----Batch",i+1,fileRange
+        if show: print "----Batch",i+1,fileRange
 
         #Append argument lines to condor_submit file adding the file range for this batch
         config['Arguments'] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) " + fileRange
         config.queue()
 
-def inputFilelist(nbatches,rfiles,config):
+def inputFilelist(nbatches,rfiles,config,show):
     batch = len(rfiles)
     binsize = batch/nbatches
-    print 'Total files:   %i' % batch
-    print 'Files per job: %i' % binsize
+    if show: print 'Total files:   %i' % batch
+    if show: print 'Files per job: %i' % binsize
     for i in range(nbatches):
         if binsize > len(rfiles): binsize = len(rfiles)
         fileRange = [ rfiles.pop(0)+'.root' for _ in range(binsize) ]
 
-        print "----Batch",i+1,'%i files' % len(fileRange)
+        if show: print "----Batch",i+1,'%i files' % len(fileRange)
 
         config["Arguments"] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) %s" %  ' '.join(fileRange)
         config.queue()
             
 
-def main():
-    init()
-    args = getargs()
+def submit(argv=sys.argv,minimal=False):
+    args = getargs(argv)
     print "Processesing %s" % args.outputfile
     removeOldFiles(args.outputfile,args.label)
     #Assure executable file is in .output/
@@ -161,13 +160,13 @@ def main():
 
     if not args.filelist:    
         stripDataset(args.rfiles)
-        splitArgument(args.nbatches,args.rfiles,config)
+        splitArgument(args.nbatches,args.rfiles,config,not minimal)
     else:
-        inputFilelist(args.nbatches,args.rfiles,config)
+        inputFilelist(args.nbatches,args.rfiles,config,not minimal)
     config.write('.output/condor_%s' % args.label)
     #Move into .output/ and run newly made condor_submit file
     os.chdir(".output/")
     os.system("condor_submit condor_%s" % args.label)
     
-    
-if __name__ == "__main__": main()
+init()
+if __name__ == "__main__": submit()
