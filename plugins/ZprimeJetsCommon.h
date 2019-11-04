@@ -39,7 +39,7 @@ public :
   static const int maxHisto = 50;
   TTree *tree;
 
-  static const bool debug = false;
+  static const bool debug = true;
   enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
     Type type;
@@ -828,9 +828,12 @@ public :
   TBranch        *b_mcStatus;   //!
   TBranch        *b_mcStatusFlag;   //!
   TBranch        *b_mcIndex;   //!
-
+  
+  ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
   ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,const char* fileRange);
   virtual ~ZprimeJetsCommon();
+  int getFilesByNumber(TChain *chain,TString path,const char* fileRange);
+  int getFilesByList(TChain *chain,TString path,vector<const char*> filelist);
   virtual vector<string> split(string str, string delim);
   virtual bool fileSelection(string filename, string fileRange);
   virtual Int_t    Cut(Long64_t entry);
@@ -845,6 +848,7 @@ public :
   virtual void fillHistos(int histoNumber,float event_weight) { /*Should be overriden by region*/ };
   virtual float DeltaPhi(float phi1, float phi2);
   virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
+  virtual float getMt(float pt1,float phi1,float pt2,float phi2);
   virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
   virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets);

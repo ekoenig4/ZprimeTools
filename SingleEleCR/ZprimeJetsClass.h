@@ -31,8 +31,8 @@ using namespace std;
 
 class ZprimeJetsClass : ZprimeJetsCommon{
 public :
-  static const int nHisto = 13;
-  static const int bHisto = 10;
+  static const int nHisto = 14;
+  static const int bHisto = 11;
   
   //CR variables
   int lepindex;
@@ -42,8 +42,8 @@ public :
 
   TH1F *h_eleRecoSF_corr,*h_eleEffSF_corr,*h_eleTriggSF;
   
-  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange): ZprimeJetsCommon(inputFilename,outputFilename,fileRange)
-  { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) : ZprimeJetsCommon(inputFilename,outputFilename,filelist) { BookHistos(outputFilename); };
+  ZprimeJetsClass(const char* inputFilename,const char* outputFilename,const char* fileRange) : ZprimeJetsCommon(inputFilename,outputFilename,fileRange) { BookHistos(outputFilename); };
   virtual void     Loop(Long64_t maxEvents,int reportEvery);
   virtual void SetScalingHistos();
   virtual void BookHistos(const char* outputFilename);

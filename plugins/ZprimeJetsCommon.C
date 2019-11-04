@@ -278,6 +278,10 @@ float ZprimeJetsCommon::DeltaPhi(float phi1, float phi2) {
   return dphi;
 }
 
+float ZprimeJetsCommon::getMt(float pt1,float phi1,float pt2,float phi2) {
+  return TMath::Sqrt(2 * pt1 * pt2 * (1-TMath::Cos(phi1-phi2)));
+}
+
 float ZprimeJetsCommon::dPhiJetMETmin(vector<int> jets) {
   float dPhimin=TMath::Pi();
   int njetsMax = jets.size();

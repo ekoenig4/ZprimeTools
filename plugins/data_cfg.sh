@@ -71,6 +71,18 @@ MET_F() {
     ${1} $DATA/MET/crab_job_MET2017Fv4/190522_094103/0002/ post${2}_4_26.root -1 10000 ${3}_4_26 split_-1
 }
 
+ELE_B() {
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0000/   post${2}_0_0.root -1 10000 ${3}_0_0 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0001/   post${2}_0_1.root -1 10000 ${3}_0_1 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0002/   post${2}_0_2.root -1 10000 ${3}_0_2 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0003/   post${2}_0_3.root -1 10000 ${3}_0_3 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0004/   post${2}_0_4.root -1 10000 ${3}_0_4 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0005/   post${2}_0_5.root -1 10000 ${3}_0_5 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017B/190522_153830/0006/   post${2}_0_6.root -1 10000 ${3}_0_6 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017Bv2/190524_103450/0000/ post${2}_0_7.root -1 10000 ${3}_0_7 split_-1
+    ${1} $DATA/SingleElectron/crab_job_SingleEle2017Bv3/190529_111922/0000/ post${2}_0_8.root -1 10000 ${3}_0_8 split_-1
+}
+
 ELE_C() {
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017C/190519_232250/0000/ post${2}_1_0.root -1 10000 ${3}_1_0 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017C/190519_232250/0001/ post${2}_1_1.root -1 10000 ${3}_1_1 split_-1
@@ -114,4 +126,8 @@ ELE_E() {
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0004/ post${2}_3_11.root -1 10000 ${3}_3_11 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0005/ post${2}_3_12.root -1 10000 ${3}_3_12 split_-1
     ${1} $DATA/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0006/ post${2}_3_13.root -1 10000 ${3}_3_13 split_-1
+}
+
+ELE_F() {
+    ${1} /hdfs/store/user/varuns/SingleEle2017F-run_102X_data2017-farmout/ post${3}_4_0.root -1 10000 ${3}_4_0 split_-1
 }
