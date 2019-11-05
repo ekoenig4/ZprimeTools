@@ -74,8 +74,8 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
   
   } else {
 
-    h_puTrueNoW = new TH1F("puTrueNoW","puTrue;true number of iteractions",100,0,100);h_puTrueNoW->Sumw2();
-    h_puTrueReW = new TH1F("puTrueReW","puTrue;true number of iteractions",100,0,100);h_puTrueReW->Sumw2();
+    h_puTrueNoW[i] = new TH1F("puTrueNoW","puTrue;true number of iteractions",100,0,100);h_puTrueNoW[i]->Sumw2();
+    h_puTrueReW[i] = new TH1F("puTrueReW","puTrue;true number of iteractions",100,0,100);h_puTrueReW[i]->Sumw2();
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();

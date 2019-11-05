@@ -2,12 +2,15 @@
 #include "ZprimeJetsClass.h"
 
 ZprimeJetsCommon::DataMC::DataMC(string filename) : ZprimeJetsCommon::DataMC::DataMC() {
-  string sampleID[] = {"Egamma2018","monoZprime","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+  string sampleID[] = {"Run2018","monoZprime","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
-  for (int i = 0; i < Total; i++)
+  for (int i = 0; i < Total; i++){
     if (filename.find(sampleID[i]) != string::npos) {
       type = static_cast<Type>(i);
+    } else if (filename.find("run_102X_data2018_farmout") != string::npos) {
+      type = Data;
     }
+  }
   isData = (type == Data);
   isSignal = (type == Signal);
   isInclusive = false;
