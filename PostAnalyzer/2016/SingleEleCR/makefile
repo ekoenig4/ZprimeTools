@@ -1,33 +1,37 @@
-plugin=${CMSSW_BASE}/src/ZprimeTools2016/plugins/
+RFLAGS:=-I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore -Wno-deprecated
 
-rflags = -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore
+ROOT:=../../
+YEAR:=../
+SRC:=src/
+INC:=inc/
+BIN:=bin/
 
-analyze: ZprimeJets* $(plugin)/ZprimeJets* RootFiles PlotTool
-	g++ -I $(plugin) -Wno-deprecated ZprimeJets*.C $(plugin)/*.C -o analyze $(rflags)
+CR:=ZprimeSingleCR
+LEP:=$(CR:CR=EleCR)
 
-RootFiles:
-	if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
+LIBRARY:=$(addprefix $(ROOT)$(BIN),ScaleUncCollection.o ShapeUncCollection.o Utilities.o)
+INCLUDE:=$(addprefix $(ROOT)$(INC),ZprimeCutConfig.h ZprimeDataMC.h VariableBins.h ScaleUncCollection.h ShapeUncCollection.h Utilities.h)
+OBJECTS:=$(BIN)ZprimeDataMC.o $(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)$(LEP).o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
 
-PlotTool:
-	if [ ! -d PlotTool ]; then ln -s ../PlotTool/; fi
+analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
+	@if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
+	@if [ ! -d PlotTool ]; then ln -s ../PlotTool/; fi
+	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) $(WARNINGS) $< $(OBJECTS) -o $@
 
 test: analyze
 	./analyze
 
-clean:
-	rm post*.root
-	rm -r DataEra
+$(BIN)ZprimeDataMC.o: $(SRC)ZprimeDataMC.C $(ROOT)$(INC)ZprimeDataMC.h
+	g++ -I$(ROOT)$(INC) -c $< -o $@
 
-condor_clean:
-	rm -r .output
-	rm -r .status
+$(YEAR)$(BIN)ZprimeYear.o: $(YEAR)$(SRC)ZprimeYear.C $(YEAR)$(INC)ZprimeYear.h $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
+	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) $(RFLAGS) -c $< -o $@
 
-condor_submit: analyze
-	./submitDATA.sh
-	./submitMC.sh
+$(ROOT)$(BIN)$(LEP).o: $(ROOT)$(SRC)$(LEP).C $(ROOT)$(INC)$(CR).h $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
+	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
 
-hadd: PlotTool
-	./PlotTool/plotter.py
+$(ROOT)$(BIN)ZprimeAnalysis.o: $(ROOT)$(SRC)ZprimeAnalysis.C $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
+	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
 
-plot:
-	./PlotTool/plotter.py $(variable)
+$(ROOT)$(BIN)%.o: $(ROOT)$(SRC)%.C $(ROOT)$(INC)%.h
+	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@

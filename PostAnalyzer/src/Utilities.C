@@ -27,6 +27,10 @@ float deltaR(float eta1, float phi1, float eta2, float phi2) {
   return deltar;
 }
 
+float getMt(float pt1,float phi1,float pt2,float phi2) {
+  return TMath::Sqrt( 2 * pt1 * pt2 * (1 - TMath::Cos(deltaPhi(phi1,phi2))) );
+}
+
 
 vector<string> split(string str,string delim) {
   vector<string> splitString;

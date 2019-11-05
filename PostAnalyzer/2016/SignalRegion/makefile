@@ -1,4 +1,4 @@
-RFLAGS:=-I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore -Wno-deprecated -Wall -Wparentheses -Wsign-compare
+RFLAGS:=-I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore -Wno-deprecated
 
 ROOT:=../../
 YEAR:=../
@@ -8,17 +8,15 @@ BIN:=bin/
 
 LIBRARY:=$(addprefix $(ROOT)$(BIN),ScaleUncCollection.o ShapeUncCollection.o Utilities.o)
 INCLUDE:=$(addprefix $(ROOT)$(INC),ZprimeCutConfig.h ZprimeDataMC.h VariableBins.h ScaleUncCollection.h ShapeUncCollection.h Utilities.h)
+OBJECTS:=$(BIN)ZprimeDataMC.o $(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
 
-analyze: $(BIN)ZprimeClass.o $(BIN)ZprimeDataMC.o $(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
+analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	@if [ ! -d RootFiles ]; then ln -s ../RootFiles/; fi
 	@if [ ! -d PlotTool ]; then ln -s ../PlotTool/; fi
-	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) $^ -o $@
+	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) $< $(OBJECTS) -o $@
 
 test: analyze
 	./analyze
-
-$(BIN)ZprimeClass.o: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(BIN)ZprimeDataMC.o $(YEAR)$(INC)ZprimeYear.h $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
-	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) -c $< -o $@
 
 $(BIN)ZprimeDataMC.o: $(SRC)ZprimeDataMC.C $(ROOT)$(INC)ZprimeDataMC.h
 	g++ -I$(ROOT)$(INC) -c $< -o $@
@@ -29,5 +27,5 @@ $(YEAR)$(BIN)ZprimeYear.o: $(YEAR)$(SRC)ZprimeYear.C $(YEAR)$(INC)ZprimeYear.h $
 $(ROOT)$(BIN)ZprimeAnalysis.o: $(ROOT)$(SRC)ZprimeAnalysis.C $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
 	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
 
-%$(BIN)%.o: %$(SRC)%.C %$(INC)%.h
-	g++ -I$(INC) $(RFLAGS) -c $< -o $@
+$(ROOT)$(BIN)%.o: $(ROOT)$(SRC)%.C $(ROOT)$(INC)%.h
+	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@

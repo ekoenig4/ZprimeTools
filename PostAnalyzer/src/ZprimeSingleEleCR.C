@@ -8,9 +8,13 @@
 
 using namespace std;
 
+void ZprimeSingleCR::initVars() {
+  lepindex = lepton_pt = -1;
+}
+
 void ZprimeSingleCR::BookHistos(int i,string histname) {
   if (i == -1) {
-    
+    h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
   } else {
     h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
     h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
@@ -20,7 +24,7 @@ void ZprimeSingleCR::BookHistos(int i,string histname) {
 
 void ZprimeSingleCR::fillHistos(int nhist,float event_weight) {
   //CR Histograms
-  if(lepindex >= 0){ 
+  if(lepindex >= 0){
     h_LeptonPt[nhist]->Fill(elePt->at(lepindex),event_weight);
     h_LeptonEta[nhist]->Fill(eleEta->at(lepindex),event_weight);
     h_LeptonPhi[nhist]->Fill(elePhi->at(lepindex),event_weight);
@@ -53,6 +57,18 @@ vector<int> ZprimeSingleCR::JetVetoDecision(int lepindex) {
       jetindex.push_back(ijet);
   }
   return jetindex;
+}
+
+vector<int> ZprimeSingleCR::electron_veto_looseID(int jet_index,float elePtCut) {
+  return ZprimeAnalysis::electron_veto_looseID(jet_index,elePtCut);
+}
+
+vector<int> ZprimeSingleCR::electron_veto_looseID(int jet_index,int lepindex,float elePtCut) {
+  return ZprimeAnalysis::electron_veto_looseID(jet_index,elePtCut);
+}
+
+vector<int> ZprimeSingleCR::muon_veto_looseID(int jet_index,float muPtCut) {
+  return ZprimeAnalysis::muon_veto_looseID(jet_index,muPtCut);
 }
 
 //Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate electron and jet within dR of 0.5

@@ -5,6 +5,10 @@
 
 using namespace std;
 
+void ZprimeYear::initVars() {
+  ZprimeAnalysis::initVars();
+}
+
 void ZprimeYear::BookHistos(int i,string histname) {
   ZprimeAnalysis::BookHistos(i,histname);
 }

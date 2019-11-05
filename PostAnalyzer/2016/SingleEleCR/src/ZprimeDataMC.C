@@ -1,10 +1,13 @@
-#define ZprimeYear_cxx
-#include "ZprimeYear.h"
+#ifndef DataMC_C
+#define DataMC_C
+#include "ZprimeDataMC.h"
 
-ZprimeJetsCommon::DataMC::DataMC(string filename) {
+using namespace std;
+
+void DataMC::setInfo(string filename) {
   string sampleID[] = {"SingleElectron","MonoZprime_Mx","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   string inclusiveID[] = {"WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8","DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8"};
-  for (int i = 0; i < Total; i++)
+  for (int i = 0; i < nType; i++)
     if (filename.find(sampleID[i]) != string::npos) {
       type = static_cast<Type>(i);
     }
@@ -17,4 +20,6 @@ ZprimeJetsCommon::DataMC::DataMC(string filename) {
   if (type == WJets) PID = 24;
   if (type == ZJets || type == DYJets) PID = 23;
 }
-bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
+bool DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
+
+#endif

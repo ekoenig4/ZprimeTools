@@ -2,7 +2,7 @@
 ////Required arguments: 1 is folder containing input files, 2 is output file path, 3 is maxEvents (-1 to run over all events), 4 is reportEvery
 ////
 ////To compile using rootcom to an executable named 'analyze':
-////$ ./rootcom ZprimeJetsClass analyze
+////$ ./rootcom ZprimeClass analyze
 ////
 ////To run, assuming this is compiled to an executable named 'analyze':
 ////$ ./analyze /hdfs/store/user/uhussain/Zprime_Ntuples/ /cms/uhussain/MonoZprimeJet/CMSSW_8_0_8/src/LightZPrimeAnalysis/JetAnalyzer/test/output.root -1 10000
@@ -20,11 +20,11 @@ using namespace std;
 int main(int argc, const char* argv[]) { 
   if (argc == 1) {
     printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/varuns/NTuples/monoZprime_2016_80X/MonoZprime_Mx10_Mv1000/";
+    argv[1] = "/hdfs/store/user/uhussain/Zprime_Ntuples_May2018/WJetsToLNu_HT-400To600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_W3Jets/180528_145820/0000/";
     argv[2] = "test.root";
-    argv[3] = "-1";
+    argv[3] = "5000";
     argv[4] = "100";
-    argv[5] = "-1";
+    argv[5] = "1-1";
   }
   Long64_t maxEvents = atof(argv[3]);
   if (maxEvents < -1LL) {
@@ -37,6 +37,7 @@ int main(int argc, const char* argv[]) {
     return 1;
   }
   //const char* file2 = argv[2];
+
   ZprimeClass t(argv[1],argv[2],argv[5]);
   t.Loop(maxEvents,reportEvery);
   return 0;
@@ -44,23 +45,24 @@ int main(int argc, const char* argv[]) {
 
 void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
+
   Long64_t nentries = fChain->GetEntries();
   cout<<"Coming in:"<<endl;
   cout<<"nentries:"<<nentries<<endl;
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  
+  float nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = pfMET50 = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+
   if (!sample.isData) SetScalingHistos();
-  
+
   if (maxEvents != -1LL && nentries > maxEvents)
     nentriesToCheck = maxEvents;
   nTotal = nentriesToCheck;
   Long64_t nbytes = 0, nb = 0;
-  cout<<"Running over "<<nTotal<<" events."<<endl;
-  for (Long64_t jentry=0; jentry<nentriesToCheck;) {
-    if (sample.isData) jentry+=4;
-    else               jentry++;
+  cout<<"Running over "<<nTotal<<" events."<<endl;   
+  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -70,83 +72,106 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     float event_weight = 1.;
     if (!sample.isData) {
       ApplyPileup(event_weight);
-
+      
       if (sample.isW_or_ZJet()) {
-	SetBoson(event_weight);
+	SetBoson(sample.PID);
 	ApplyKFactor(event_weight);
       }
     }
 
-    // float weightNorm = event_weight;
-    jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
+    float weightNorm = event_weight;
+    jetCand   = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
     fillHistos(0,genWeight);
     for (int bit = 0; bit < 11; bit++)
-      if ((metFilters >> bit & 1) == 1)
+      if (metFilters >> bit & 1 == 1)
 	h_metfilters->Fill(bit + 1,event_weight);
     
-    if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData && inclusiveCut()) ) {    
+    if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
       fillHistos(1,event_weight);
       
-      if ( (HLTJet>>4&1) == 1 || (HLTJet>>5&1) == 1 || (HLTJet>>6&1) == 1 || (HLTJet>>8&1) == 1 || !sample.isData) {//Mono-jet triggers
+      if ((HLTEleMuX>>4&1 == 1) || (HLTEleMuX>>38&1 == 1) || (HLTPho>>7&1 ==1) || !sample.isData) {
 	cutflow->Fill("Trigger",event_weight);
 	fillHistos(2,event_weight);
 	
 	if(jetCand.size()>0) {
 	  cutflow->Fill("GoodJet",event_weight);
 	  fillHistos(3,event_weight);
+	  //CR code
+	  //At least one of the one electrons passes the tight selection
+	  vector<int> elelist = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> looseEles = electron_veto_looseID(jetCand[0],eleLoosePtCut);
 	  
-	  if (pfMET > recoilCut) {
-	    cutflow->Fill("MetCut",event_weight);
+	  if( CRSelection(elelist,looseEles) ) {
+	    cutflow->Fill("CRSelection",event_weight);
 	    fillHistos(4,event_weight);
-	    float metcut = (fabs(pfMET-caloMET))/pfMET;
-	    h_metcut->Fill(metcut,event_weight);
 	    
-	    if(metcut < metRatioCut) {
-	      cutflow->Fill("caloMET Cut",event_weight);
+	    if (recoil > recoilCut) {
+	      cutflow->Fill("leptoMetCut",event_weight);
 	      fillHistos(5,event_weight);
-
-	      bool noLeptonID = electronVeto(jetCand[0],eleLoosePtCut) && muonVeto(jetCand[0],muLoosePtCut) && photonVeto(jetCand[0],phoLoosePtCut);
-	      if( noLeptonID )  {
-		cutflow->Fill("LeptonIDs",event_weight);
+	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,muLoosePtCut);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,phoLoosePtCut);
+	      // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
+	      
+	      if(mulist.size() == 0 && pholist.size() == 0) {
+		cutflow->Fill("LeptonVeto",event_weight);
 		fillHistos(6,event_weight);
-		
-		if(btagVeto()) {
-		  cutflow->Fill("B-JetVeto",event_weight);
+		Float_t lepMET_MT = getMt(elePt->at(lepindex),elePhi->at(lepindex),pfMET,pfMETPhi);
+		h_lepMET_MT->Fill(lepMET_MT,event_weight);
+
+		if (lepMET_MT < lepMETMtCut) {
+		  cutflow->Fill("lepMETMt160",event_weight);
 		  fillHistos(7,event_weight);
-		  vector<int> jetveto = JetVetoDecision();
-		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
-		  h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
-		  
-		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
-		    cutflow->Fill("DeltaPhiCut",event_weight);
-		    
+		
+		  if(pfMET > pfMET50Cut) {
+		    cutflow->Fill("pfMET50",event_weight);
 		    fillHistos(8,event_weight);
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
+		    h_metcut->Fill(metcut,event_weight);
+		  
+		    if(metcut < metRatioCut) {
+		      cutflow->Fill("caloMET Cut",event_weight);
+		      fillHistos(9,event_weight);
+		    
+		      if(btagVeto()) {
+			cutflow->Fill("B-JetVeto",event_weight);
+			fillHistos(10,event_weight);
+			vector<int> jetveto = JetVetoDecision(lepindex);
+			float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+			h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
+		      
+			if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+			  cutflow->Fill("DeltaPhiCut",event_weight);
+			  fillHistos(11,event_weight);
+			}
+		      }
+		    }   
 		  }
-		}   
-	      }	
+		}
+	      }
 	    }
 	  }
-	}	    
+	}
       }
     }
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
   }
-   
+  
 }//Closing the Loop function
 
 void ZprimeClass::BookHistos(const char* outputFilename) {
+
   output = new TFile(outputFilename, "RECREATE");
   output->cd();
 
-  cutflow = new Cutflow({"Total Events","metFilters","Trigger","GoodJet","MetCut","caloMET Cut","LeptonIDs","B-JetVeto","DeltaPhiCut"});
-  
-  ZprimeYear::BookHistos(-1,"");
-  for(int i = 0; i<nHisto; i++){
+  cutflow = new Cutflow( {"Total Events","metFilters","Trigger","GoodJet","CRSelection","leptoMetCut","NoMuons","lepMETMt160","pfMET50","caloMETCut","B-JetVeto","DeltaPhiCut"});
+
+  BookHistos(-1,"");
+  for(int i = 0; i<nHisto; i++) {
     char ptbins[100];
     sprintf(ptbins, "_%d", i);
     string histname(ptbins);
@@ -162,15 +187,18 @@ void ZprimeClass::BookHistos(const char* outputFilename) {
       dir->cd();
     }
     //Common Histograms
-    ZprimeYear::BookHistos(i,histname);
+    BookHistos(i,histname);
   }
 }
 
 void ZprimeClass::fillHistos(int nhist,float event_weight) {
+  // cout << nhist << endl;
   ZprimeYear::fillHistos(nhist,event_weight);
+  ZprimeSingleCR::fillHistos(nhist,event_weight);
   weight = event_weight;
   if (nhist == bHisto) tree->Fill();
 }
+
 
 void ZprimeClass::JetEnergyScale(float start_weight) {
   // 2 Histograms
@@ -179,7 +207,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
   string uncname = "JES";
   if ( !shapeUncs.contains(uncname) ) {
     shapeUncs.addUnc(uncname);
-    
+
     initTree(shapeUncs.getTreeUp(uncname));
     initTree(shapeUncs.getTreeDn(uncname));
   }
@@ -190,6 +218,11 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
   for (float pt : (*jetPt)) jetPtNorm.push_back(pt);
   float pfMETNorm = pfMET;
   float pfMETPhiNorm = pfMETPhi;
+
+  int lepindexNorm = lepindex;
+  float recoilNorm = recoil;
+  float recoilPhiNorm = recoilPhi;
+  
   
   int unclist[2] = {1,-1};
   for (int unc : unclist) {
@@ -201,7 +234,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     j1PFConsPID .clear();
 
     float event_weight = start_weight;
-    
+
     for (int i = 0; i < nJet; i++)
       jetPt->at(i) = jetPtNorm[i]*(1+unc*jetJECUnc->at(i));
     if (unc == 1) {
@@ -215,46 +248,68 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     
     jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
+    //CR Variables
+    lepindex = -1;
+    recoil = -99;
+    
+    if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
       
-    if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) { 
+      if ((HLTEleMuX>>4&1 == 1) || (HLTEleMuX>>38&1 == 1) || (HLTPho>>7&1 ==1) || !sample.isData) {
 	
-      if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
-	  
 	if(jetCand.size()>0) {
+	  //CR code
+	  //At least one of the one electrons passes the tight selection
+	  vector<int> elelist = electron_veto_tightID(jetCand[0],eleTightPtCut);
+	  vector<int> looseEles = electron_veto_looseID(jetCand[0],eleLoosePtCut);
+	  
+	  if( CRSelection(elelist,looseEles) ) {
 	    
-	  if (pfMET > recoilCut) {
-	    float metcut = (fabs(pfMET-caloMET))/pfMET;
+	    if (recoil > recoilCut) {
+	      vector<int> mulist = muon_veto_looseID(jetCand[0],lepindex,muLoosePtCut);
+	      vector<int> pholist = photon_veto_looseID(jetCand[0],lepindex,phoLoosePtCut);
+	      // vector<int> taulist = tau_veto_looseID(jetCand[0],lepindex,18);
 	      
-	    if(metcut < metRatioCut) {
+	      if(mulist.size() == 0 && pholist.size() == 0) {
+		Float_t lepMET_MT = getMt(elePt->at(lepindex),elePhi->at(lepindex),pfMET,pfMETPhi);
 
-	      bool noLeptonID = electronVeto(jetCand[0],eleLoosePtCut) && muonVeto(jetCand[0],muLoosePtCut) && photonVeto(jetCand[0],phoLoosePtCut);
-	      if( noLeptonID ) {
+		if (lepMET_MT < lepMETMtCut) {
 		
-		if(btagVeto()) {
-		  vector<int> jetveto = JetVetoDecision();
-		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+		  if(pfMET > pfMET50Cut) {
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		  
-		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
-		    weight = event_weight;
-		    if (unc == 1)  shapeUncs.fillUp(uncname);// up
-		    if (unc == -1) shapeUncs.fillDn(uncname);// down
+		    if(metcut < metRatioCut) {
+		    
+		      if(btagVeto()) {
+			vector<int> jetveto = JetVetoDecision(lepindex);
+			float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+		      
+			if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+			  weight = event_weight;
+			  if (unc == 1)  shapeUncs.fillUp(uncname);// up
+			  if (unc == -1) shapeUncs.fillDn(uncname);// down
+			}
+		      }   
+		    }	
 		  }
-		}   
-	      }	
+		}
+	      }
 	    }
 	  }
-	}	    
+	}
       }
     }
   }
-
+    
   jetCand     .clear();
   for (int cand : jetCandNorm) jetCand.push_back(cand);
   SetJetPFInfo(jetCand);
   for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   pfMET = pfMETNorm;
   pfMETPhi = pfMETPhiNorm;
-  
+
+  lepindex = lepindexNorm;
+  recoil = recoilNorm;
+  recoilPhi = recoilPhiNorm;
 }//Closing the Loop function
 
 

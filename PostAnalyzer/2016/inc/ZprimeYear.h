@@ -22,6 +22,7 @@ public:
   ZprimeYear(const char * inputFilename,const char * outputFilename,const char * fileRange);
   virtual void BookHistos(int i,string histname);
   virtual void fillHistos(int nhist,float event_weight);
+  virtual void initVars();
   virtual void SetScalingHistos();
   virtual void Init(TTree* tree);
   virtual float getKFactor(float bosonPt);
