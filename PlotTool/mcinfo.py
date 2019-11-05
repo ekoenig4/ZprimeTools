@@ -1,7 +1,7 @@
 version = "2018"
 
-lumi = {"SingleEleCR":13955 + 31720,
-        "DoubleEleCR":13955 + 31720,
+lumi = {"SingleEleCR":13955,
+        "DoubleEleCR":13955,
         "SingleMuCR":59699,
         "DoubleMuCR":59699,
         "SignalRegion":3506}

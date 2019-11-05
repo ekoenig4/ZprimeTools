@@ -52,7 +52,7 @@ MET_D() {
 }
 
 ELE_A() {
-    ${1} /hdfs/store/user/varuns/Egamma2018A-run_102X_data2018_farmout/ post${2}_0_0 -1 10000 ${3}_0_0 split_-1
+    ${1} /hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018A-run_102X_data2018_farmout/ post${2}_0_0 -1 10000 ${3}_0_0 split_-1
 }
 
 ELE_B() {
@@ -104,5 +104,5 @@ ELE_C() {
 }
 
 ELE_D() {
-    ${1} /hdfs/store/user/varuns/Egamma2018D-run_102X_data2018_farmout/ post${2}_3_0.root -1 10000 ${3}_3_0 split_-1
+    ${1} /hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018D-run_102X_data2018_farmout/ post${2}_3_0.root -1 10000 ${3}_3_0 split_-1
 }
