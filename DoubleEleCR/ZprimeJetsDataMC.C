@@ -2,7 +2,7 @@
 #include "ZprimeJetsClass.h"
 
 ZprimeJetsCommon::DataMC::DataMC(string filename) : ZprimeJetsCommon::DataMC::DataMC() {
-  string sampleID[] = {"Run2018","monoZprime","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
+  string sampleID[] = {"Egamma2018","monoZprime","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
   string inclusiveID[] = {"WJetsToLNu_Incl","DYJetsToLL_Incl"};
   for (int i = 0; i < Total; i++)
     if (filename.find(sampleID[i]) != string::npos) {

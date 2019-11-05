@@ -60,8 +60,6 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
     h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
     h_metFilters = new TH1F("h_metFilters","metFilters",8,0.5,8.5); h_metFilters->Sumw2();
     h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,0,2); h_kfactor->Sumw2();
-    h_puTrueUnWeight = new TH1F("puTrueUnWeight","puTrue;true number of iteractions",100,0,100);h_puTrueUnWeight->Sumw2();
-    h_puTrueReWeight = new TH1F("puTrueReWeight","puTrue;true number of iteractions",100,0,100);h_puTrueReWeight->Sumw2();
     h_genBosonPt = new TH1F("h_genBosonPt","genBosonPt;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPt->Sumw2();
     h_genBosonPtw16K = new TH1F("h_genBosonPtw16K","genBosonPtw16K;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPtw16K->Sumw2();
     h_genBosonPtw17K = new TH1F("h_genBosonPtw17K","genBosonPtw17K;Gen Boson P_{T}",24,BosonPtBins); h_genBosonPtw17K->Sumw2();
@@ -76,6 +74,8 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
   
   } else {
 
+    h_puTrueNoW = new TH1F("puTrueNoW","puTrue;true number of iteractions",100,0,100);h_puTrueNoW->Sumw2();
+    h_puTrueReW = new TH1F("puTrueReW","puTrue;true number of iteractions",100,0,100);h_puTrueReW->Sumw2();
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
@@ -138,6 +138,8 @@ void ZprimeJetsCommon::fillCommon(int histoNumber,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[histoNumber]->Fill(genHT,event_weight);
+    h_puTrueNoW[histoNumber]->Fill(puTrue->at(0),genWeight);
+    h_puTrueReW[histoNumber]->Fill(puTrue->at(0),genWeight*pileup);
   }
 
   h_eventWeight[histoNumber]->Fill(event_weight,event_weight);
@@ -382,15 +384,12 @@ void ZprimeJetsCommon::SetBoson(int PID) {
 void ZprimeJetsCommon::ApplyPileup(float &event_weight) {
   //For each event we find the bin in the PU histogram that corresponds to puTrue->at(0) and store
   //binContent as event_weight
-  float pileup = th1fmap.getBin("PU",puTrue->at(0));
+  pileup = th1fmap.getBin("PU",puTrue->at(0));
   genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
   event_weight *= pileup * genWeight;
   weight_QCDSF *= pileup * genWeight;
   weight_16K  *= pileup * genWeight;
   weight_nogen *= pileup;
-
-  h_puTrueUnWeight->Fill(puTrue->at(0),genWeight);
-  h_puTrueReWeight->Fill(puTrue->at(0),event_weight);
 }
 
 void ZprimeJetsCommon::ApplySF(float &event_weight,float sf) {
@@ -481,6 +480,7 @@ void ZprimeJetsCommon::initVars() {
     genWeight = 1;
   }
 
+  pileup = 1;
   weight = weight_nogen = weight_QCDSF = weight_16K = 1;
   kfactor = kfactor_16 = qcdSF = 1;
 
