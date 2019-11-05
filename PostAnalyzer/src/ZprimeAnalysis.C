@@ -15,7 +15,7 @@ void ZprimeAnalysis::SetScalingHistos() {
 void ZprimeAnalysis::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("h_recoil",&recoil,"Recoil (GeV)");
+  tree->Branch("recoil",&recoil,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
@@ -92,9 +92,11 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
   h_pfMET200[nhist]->Fill(pfMET,event_weight);
   h_pfMET[nhist]->Fill(pfMET,event_weight);
   h_pfMETPhi[nhist]->Fill(pfMETPhi,event_weight);
+  h_recoil[nhist]->Fill(recoil,event_weight);
+  h_recoilPhi[nhist]->Fill(recoilPhi,event_weight);
   h_nJets[nhist]->Fill(nJet,event_weight);
   if (jetCand.size() > 0) {
-    h_j1pT[nhist]->Fill(jetPt->at(jetCand[0]),event_weight);
+    h_j1pT[nhist]->Fill(j1pT,event_weight);
     h_j1Eta[nhist]->Fill(jetEta->at(jetCand[0]),event_weight);
     h_j1Phi[nhist]->Fill(jetPhi->at(jetCand[0]),event_weight);
     h_j1etaWidth[nhist]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
@@ -122,10 +124,10 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
     h_NeutralPt[nhist]->Fill(pfHadronPt[1],event_weight);
     h_PhotonPt[nhist]->Fill(pfHadronPt[2],event_weight);
     h_MiscPt[nhist]->Fill(pfHadronPt[3],event_weight);
-    h_ChPercPt[nhist]->Fill( pfHadronPt[0]/jetPt->at(jetCand[0]) ,event_weight);
-    h_NhPercPt[nhist]->Fill( pfHadronPt[1]/jetPt->at(jetCand[0]) ,event_weight);
-    h_GammaPercPt[nhist]->Fill( pfHadronPt[2]/jetPt->at(jetCand[0]) ,event_weight);
-    h_MiscPercPt[nhist]->Fill( pfHadronPt[3]/jetPt->at(jetCand[0]) ,event_weight);
+    h_ChPercPt[nhist]->Fill( pfHadronPt[0]/j1pT ,event_weight);
+    h_NhPercPt[nhist]->Fill( pfHadronPt[1]/j1pT ,event_weight);
+    h_GammaPercPt[nhist]->Fill( pfHadronPt[2]/j1pT ,event_weight);
+    h_MiscPercPt[nhist]->Fill( pfHadronPt[3]/j1pT ,event_weight);
   }
 }
 
@@ -136,7 +138,7 @@ void ZprimeAnalysis::SetPtFrac() {
   }
   float first3_HadronPt[4] = {0,0,0,0};
 
-  for (unsigned int i = 0; i < j1PFConsPID.size(); i++) {
+  for (int i = 0; i < j1PFConsPID.size(); i++) {
     int absPID = abs(j1PFConsPID[i]);
     float consPt = j1PFConsPt[i];
     bool first3 = i < 3;
@@ -165,11 +167,7 @@ void ZprimeAnalysis::SetJetPFInfo(vector<int> jetCands) {
   if (jetCands.size() == 0) return;
   int jetCand = jetCands[0];
   j1pT = jetPt->at(jetCand);
-  j1PFConsEt = jetConstEt->at(jetCand);
-  j1PFConsPt = jetConstPt->at(jetCand);
-  j1PFConsEta = jetConstEta->at(jetCand);
-  j1PFConsPhi = jetConstPhi->at(jetCand);
-  j1PFConsPID = jetConstPID->at(jetCand);
+  SetPFVectors(jetCand);
 
   TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = 0;
   for (int PID : j1PFConsPID) {
@@ -186,23 +184,29 @@ void ZprimeAnalysis::SetJetPFInfo(vector<int> jetCands) {
   SetPtFrac();
 }
 
+void ZprimeAnalysis::SetPFVectors(int jetCand) {
+  j1PFConsEt = jetConstEt->at(jetCand);
+  j1PFConsPt = jetConstPt->at(jetCand);
+  j1PFConsEta = jetConstEta->at(jetCand);
+  j1PFConsPhi = jetConstPhi->at(jetCand);
+  j1PFConsPID = jetConstPID->at(jetCand);
+}
+
 
 vector<int> ZprimeAnalysis::getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut) {
-  cout << "Analysis getJetCand" <<endl;
   vector<int> tmpCand;
   tmpCand.clear();
   for(int p=0;p<nJet;p++){
     bool kinematic = (*jetPt)[p] > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
-    cout << jetPt->at(p) << " | " << jetEta->at(p) << " | " << jetNHF->at(p) << " | " << jetCHF->at(p) << " | pass:" << kinematic << " | pass ID:" << jetSelectionID(p) << endl;
-    if(kinematic && jetSelectionID(p)){
-      cout << "jetCand found" << endl;
-      tmpCand.push_back(p);
+    bool jetID = jetSelectionID(p);
+    if(kinematic && jetID) {
+	tmpCand.push_back(p);
     }
   }
   return tmpCand;
 }
 
-bool ZprimeAnalysis::dPhiJetMET(vector<int> jets,float metPhi) {
+float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   //Only look at first four jets (because that's what monojet analysis do)
   int njets = jets.size() ? jets.size() <= 4 : 4;
   float minDPhiJetMET_first4 = TMath::Pi();
@@ -210,10 +214,7 @@ bool ZprimeAnalysis::dPhiJetMET(vector<int> jets,float metPhi) {
     float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
     if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
   }
-
-  //reject jet if it is found within deltaPhi(jet,MET) < 0.5 
-  if (minDPhiJetMET_first4 > dPhiJetMETCut) return true;
-  return false;
+  return minDPhiJetMET_first4;
 }
 
 void ZprimeAnalysis::SetBoson(int PID) {
@@ -265,28 +266,28 @@ bool ZprimeAnalysis::inclusiveCut() {
 }
 
 void ZprimeAnalysis::initVars() {
-    jetCand     .clear();
-    j1PFConsPt  .clear();
-    j1PFConsEta .clear();
-    j1PFConsPhi .clear();
-    j1PFConsPID .clear();
+  jetCand     .clear();
+  j1PFConsPt  .clear();
+  j1PFConsEta .clear();
+  j1PFConsPhi .clear();
+  j1PFConsPID .clear();
 
-    if(sample.isData) {
-      // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
-      // data doesn't have genWeight so set it to 1
-      genWeight = 1;
-    }
+  if(sample.isData) {
+    // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
+    // data doesn't have genWeight so set it to 1
+    genWeight = 1;
+  }
 
-    weight = kfactor = pileup = sf = 1;
+  weight = kfactor = pileup = sf = 1;
 
-    bosonPt = Pt123Fraction = Pt123 = j1pT = -99;
-    ChNemPtFrac = ChNemPt = ChNemPt123 = -99;
-    TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = -99;
-    for (int i = 0; i < 4; i++) {
-      pfHadronPt[i] = -99;
-    }
-    recoil = pfMET;
-    recoilPhi = pfMETPhi;
+  bosonPt = Pt123Fraction = Pt123 = j1pT = -99;
+  ChNemPtFrac = ChNemPt = ChNemPt123 = -99;
+  TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = -99;
+  for (int i = 0; i < 4; i++) {
+    pfHadronPt[i] = -99;
+  }
+  recoil = pfMET;
+  recoilPhi = pfMETPhi;
 }
 
 

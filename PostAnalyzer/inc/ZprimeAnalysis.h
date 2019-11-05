@@ -71,6 +71,27 @@ public:
   ScaleUncCollection scaleUncs;
   ShapeUncCollection shapeUncs;
 
+  struct Cutflow {
+    TH1F *h_cutflow;
+    std::map<std::string,int> labels;
+    Cutflow(std::vector<std::string> labels) {
+      h_cutflow = new TH1F("h_cutflow","h_cutflow",labels.size(),0,labels.size());
+    
+      for (int i = 0; i < labels.size(); i++) {
+	h_cutflow->GetXaxis()->SetBinLabel(i+1,labels[i].c_str());
+	this->labels[labels[i]] = i;
+      }
+      h_cutflow->Sumw2();
+    }
+    void Fill(std::string label,float weight) {
+      this->Fill( labels[label],weight );
+    }
+    void Fill(std::size_t idx,float weight) {
+      h_cutflow->Fill(idx,weight);
+    }
+  };
+  Cutflow *cutflow;
+
   /* Event Weight Variables */
   float weight;
   float kfactor;
@@ -97,7 +118,7 @@ public:
   float recoil,recoilPhi;
 
   /* Histograms */
-  TH1F *h_cutflow,*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt,*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt,*h_puTrueReWeight,*h_puTrueUnWeight;
   /* MET Histograms */
   TH1F *h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto],*h_recoil[maxHisto],*h_recoilPhi[maxHisto];
   /* Jet Histograms */
@@ -216,7 +237,6 @@ public:
   vector<float>   *jetConstituentPtDistribution;
   vector<float>   *jetPileup;
   vector<unsigned short> *jetID;
-  vector<unsigned short> *jetPFLooseID;
   vector<float>   *jetPUID;
   vector<int>     *jetPUFullID;
   vector<int>     *jetPartonID;
@@ -578,7 +598,6 @@ public:
   TBranch        *b_jetConstituentPtDistribution;   //!
   TBranch        *b_jetPileup;   //!
   TBranch        *b_jetID;   //!
-  TBranch        *b_jetPFLooseID; //!
   TBranch        *b_jetPUID;   //!
   TBranch        *b_jetPUFullID;   //!
   TBranch        *b_jetPartonID;   //!
@@ -851,8 +870,9 @@ public:
   virtual vector<int> getJetCand(float,float,float,float);
   virtual void SetPtFrac();
   virtual void SetJetPFInfo(vector<int> jetCand);
+  virtual void SetPFVectors(int jetCand);
 
-  virtual bool dPhiJetMET(vector<int>,float);
+  virtual float dPhiJetMETmin(vector<int>,float);
   virtual void SetBoson(int PID);
   virtual float getKFactor(float bosonPt) { return 1; };
   virtual void SetKFactors(float bosonPt);

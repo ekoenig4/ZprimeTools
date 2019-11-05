@@ -44,6 +44,16 @@ float ZprimeYear::getKFactor(float bosonPt) {
   return kfactor;
 }
 
+void ZprimeYear::SetPFVectors(int jetCand) {
+  for (int i = 0; i < JetsPFConsPID->at(jetCand).size(); i++) {
+    j1PFConsPt.push_back(JetsPFConsPt->at(jetCand)[i]);
+    j1PFConsEt.push_back(JetsPFConsEt->at(jetCand)[i]);
+    j1PFConsEta.push_back(JetsPFConsEta->at(jetCand)[i]);
+    j1PFConsPhi.push_back(JetsPFConsPhi->at(jetCand)[i]);
+    j1PFConsPID.push_back(JetsPFConsPID->at(jetCand)[i]);
+  }
+}
+
 bool ZprimeYear::eleTightID(int iele) {
   return (eleIDbit->at(iele)>>3&1) == 1;
 }
@@ -231,6 +241,11 @@ void ZprimeYear::Init(TTree *tree) {
   jetConstEta = 0;
   jetConstPhi = 0;
   jetConstPID = 0;
+  JetsPFConsPt = 0;
+  JetsPFConsEta = 0;
+  JetsPFConsPhi = 0;
+  JetsPFConsEt = 0;
+  JetsPFConsPID = 0;
   ak8JetPt = 0;
   ak8JetE = 0;
   ak8JetEta = 0;
@@ -466,14 +481,16 @@ void ZprimeYear::Init(TTree *tree) {
   fChain->SetBranchAddress("jetNEF", &jetNEF, &b_jetNEF);
   fChain->SetBranchAddress("jetCHF", &jetCHF, &b_jetCHF);
   fChain->SetBranchAddress("jetNHF", &jetNHF, &b_jetNHF);
+  fChain->SetBranchAddress("jetNCH", &jetNChargedHad, &b_jetNChargedHad);
+  fChain->SetBranchAddress("jetNNP", &jetNNeutralHad, &b_jetNNeutralHad);
   fChain->SetBranchAddress("jetCSV2BJetTags", &jetCSV2BJetTags, &b_jetCSV2BJetTags);
   fChain->SetBranchAddress("jetetaWidth", &jetetaWidth, &b_jetetaWidth);
   fChain->SetBranchAddress("jetphiWidth", &jetphiWidth, &b_jetphiWidth);
-  fChain->SetBranchAddress("JetsPFConsPt", &jetConstPt, &b_jetConstPt);
-  fChain->SetBranchAddress("JetsPFConsEt", &jetConstEt, &b_jetConstEt);
-  fChain->SetBranchAddress("JetsPFConsEta", &jetConstEta, &b_jetConstEta);
-  fChain->SetBranchAddress("JetsPFConsPhi", &jetConstPhi, &b_jetConstPhi);
-  fChain->SetBranchAddress("JetsPFConsPID", &jetConstPID, &b_jetConstPID);
+  fChain->SetBranchAddress("JetsPFConsPt", &JetsPFConsPt, &b_JetsPFConsPt);
+  fChain->SetBranchAddress("JetsPFConsEta", &JetsPFConsEta, &b_JetsPFConsEta);
+  fChain->SetBranchAddress("JetsPFConsPhi", &JetsPFConsPhi, &b_JetsPFConsPhi);
+  fChain->SetBranchAddress("JetsPFConsEt", &JetsPFConsEt, &b_JetsPFConsEt);
+  fChain->SetBranchAddress("JetsPFConsPID", &JetsPFConsPID, &b_JetsPFConsPID);
   /* Electron Info */
   fChain->SetBranchAddress("nEle", &nEle, &b_nEle);
   fChain->SetBranchAddress("elePt", &elePt, &b_elePt);
