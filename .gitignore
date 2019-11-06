@@ -12,4 +12,4 @@ PlotTool
 analyze
 Systematics
 nohup.out
-LumiMonitor
+LumiMonitor/Monitor/*.json
