@@ -1,4 +1,3 @@
-import json
 import os
 wd,wf = os.path.split(__file__)
 if wd == '': wd = '.'
@@ -7,24 +6,28 @@ EFLAGS = {
 }
 def getDataset(label):
     dataset = {}
-    jsonfile = '%s/ntuples/%s.json' % (wd,label)
-    if not os.path.isfile(jsonfile): return None
-    with open(jsonfile) as f:
-        try:data = json.load(f)
-        except ValueError:
-            print '%s.json not formatted correctly' % label
-            return {}
+    fname = '%s/ntuples/%s.txt' % (wd,label)
+    if not os.path.isfile(fname): return None
     def checkdir(directory):
         if os.path.isdir(directory): return True
         else: print '%s not a directory' % directory; EFLAGS[ValueError] = True; return False
-    dataset[label] = { subdir:[ directory for directory in data[subdir] if checkdir(directory) ] for subdir in data }
+    with open(fname) as f:
+        subset = {}; subname = None
+        for line in f.readlines():
+            line = line.replace('\n','')
+            if '>>' in line:
+                subname = line.replace('>>','')
+                subset[subname] = []
+            elif any(line):
+                if checkdir(line): subset[subname].append(line)
+    dataset[label] = subset
     return dataset
     
 def getAllDatasets():
     dataset = {}
     ntuples = '%s/ntuples/' % wd
     for fname in os.listdir(ntuples):
-        if fname.endswith('.json'): dataset.update( getDataset(fname.replace('.json','')) )
+        if fname.endswith('.txt'): dataset.update( getDataset(fname.replace('.txt','')) )
     if EFLAGS[ValueError]: print 'Invalid directories detected, exiting...'; exit()
     return dataset
 
