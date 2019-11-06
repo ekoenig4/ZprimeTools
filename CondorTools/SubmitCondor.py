@@ -11,7 +11,7 @@ repo_path = script_path.replace('/CondorTools','')
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
-DoSubmit = False
+DoSubmit = True
 
 def output(string,redirect=False):
     if redirect is False: print string
@@ -40,9 +40,11 @@ def getargs(argv):
             rfiles = [ fn.replace(".root","") for fn in os.listdir(arg) if fn.endswith(".root") ]
             if any(rfiles): return arg,rfiles
             print '%s does not have any root files' % arg
+            args.error = True
         else:
             print '%s is not a directory' % arg
             args.error = True
+        return None,None
     def checkOutput(arg):
         if arg.endswith('.root'): return arg[:-5]
     def checkSplit(arg):

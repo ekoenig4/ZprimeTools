@@ -5,7 +5,7 @@ import SubmitCondor
 sys.path.append(SubmitCondor.repo_path)
 
 from datasets import getDataset
-labelmap = { 'dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','ttjets':'TTJets','wjets':'W','zjets':'Z','met':'METdata_','egamma':'EGdata_' }
+labelmap = { 'dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','ttjets':'TTJets','wjets':'W','zjets':'Z','met':'METdata_','egamma':'EGdata_','signal':'' }
 
 options = {
     'year':None,
