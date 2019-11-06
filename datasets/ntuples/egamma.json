@@ -1,5 +1,8 @@
 {
-    'B': [
+    "A": [
+	"/hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018A-run_102X_data2018_farmout/"
+    ],
+    "B": [
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018B/190528_233825/0000/",
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018B/190528_233825/0001/",
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018B/190528_233825/0002/",
@@ -44,9 +47,9 @@
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018Cv3/190530_145804/0003/",
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018Cv3/190530_145804/0004/",
 	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018Cv4/190604_144802/0000/",
-	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018Cv4/190604_144802/0001/",
+	"/hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018Cv4/190604_144802/0001/"
     ],
     "D": [
-	"/hdfs/store/user/varuns/Egamma2018D-run_102X_data2018_farmout/"
+	"/hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018D-run_102X_data2018_farmout/"
     ]
 }
