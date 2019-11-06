@@ -13,6 +13,9 @@ USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
 DoSubmit = True
 
+def ignore(path,fn):
+    toignore = ["/hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_May2019/MET/MET2018D_prompt/Data_MET2018D_578.root"]
+    return (path+fn) in toignore
 def output(string,redirect=False):
     if redirect is False: print string
     else: redirect.write(string+'\n')
@@ -37,7 +40,7 @@ def getargs(argv):
             args.error = True
     def checkRootDir(arg):
         if os.path.isdir(arg):
-            rfiles = [ fn.replace(".root","") for fn in os.listdir(arg) if fn.endswith(".root") ]
+            rfiles = [ fn.replace(".root","") for fn in os.listdir(arg) if fn.endswith(".root") and not ignore(arg,fn) ]
             if any(rfiles): return arg,rfiles
             print '%s does not have any root files' % arg
             args.error = True
