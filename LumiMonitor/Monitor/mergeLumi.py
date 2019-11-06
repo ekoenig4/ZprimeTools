@@ -1,4 +1,5 @@
 import os
+import json
 
 jsonlist = {}
 eralist = ['A','B','C','D']
@@ -9,41 +10,53 @@ for era in eralist:
     for pattern in (egamma_pattern,met_pattern):
         jsonlist[ pattern % era ] = {}
 
-def AddJson(fname,json):
-    with open(file,"r") as f: text = f.readlines()
+def AddToJson(fname):
+    for pattern,jmap in jsonlist.iteritems():
+        if pattern in fname: break
+        else: jmap = None
+    if jmap == None: return
+    with open('.output/%s' % fname,"r") as f: text = f.readlines()
     for line in text:
         data = line.split("|")
         run = data[0]
-        if run not in json: json[run] = []
+        if run not in jmap: jmap[run] = []
         lumilist = data[1].replace('[','').replace(']','')
         for lumi in lumilist.split(','):
-            if lumi not in json[run]: json[run].append( int(lumi) )
-for i,file in enumerate(files):
-    for label in jsonlist:
-        if label in file: json = jsonlist[label]
-    AddJson(file,json)
-    # print "Merged Files:",i+1,"of",len(files)
+            if lumi not in jmap[run]: jmap[run].append( int(lumi) )
+for fname in os.listdir('.output'):
+    if fname.endswith('.root'): AddToJson(fname)
 print "Merge Successful."
 ####################################################################
-def WriteJson(json,output):
+def FormatJson(jmap):
+    for run,lumis in jmap.iteritems():
+        jmap[run] = []
+        lumis.sort()
+        first = lumis[0]
+        last = lumis[0]
+        for lumi in lumis:
+            if lumi - last > 1:
+                jmap[run].append( [first,last] )
+                first = lumi
+            last = lumi
+        if not any(jmap[run]): jmap[run].append( [first,last] )
+def WriteJson(jmap,output):
+    if not any(jmap): return
     output = output.replace('post','processedLumis_')+".json"
     print output
-    with open(output,"w") as f:
-        f.write('{')
-        for i,(run,lumis) in enumerate(json.items()):
-            if i != 0: f.write(",")
-            f.write('"'+run+'":')
-            lumis.sort()
-            value = "[["+str(lumis[0])
-            last = lumis[0]
-            for lumi in lumis[1:]:  
-                if lumi - last > 1:
-                    value += ","+str(last)+"],["+str(lumi)
-                last = lumi
-            value += ","+str(last)+"]]"
-            f.write(value)
-        f.write("}")
+    FormatJson(jmap)
+    with open(output,'w') as jfile:
+        jfile.write('{\n')
+        for i,run in enumerate(sorted(jmap.keys(),key=int)):
+            jfile.write('    "%s": [\n' % run)
+            lumistr = [ str(lumi) for lumi in jmap[run] ]
+            lumistr = ','.join(lumistr)
+            jfile.write('          %s\n' % lumistr)
+            jfile.write('     ]' + (',\n' if i+1 < len(jmap) else '\n'))
+        jfile.write('}\n')
+            
+    
 print "Creating JSONS"
-for output,json in jsonlist.items(): WriteJson()
+for output,jmap in jsonlist.items():
+    WriteJson(jmap,output)
 ################################
 print "Finished."        
