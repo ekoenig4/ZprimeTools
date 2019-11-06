@@ -256,6 +256,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      Float_t leptoMET = fabs(leptoMET_4vec.Pt());
 	      recoilPhi = leptoMET_4vec.Phi();
 	      recoil = leptoMET;
+	      jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
 	      
 	      if (leptoMET>recoilCut){
 		nMET200+=event_weight;
@@ -282,7 +283,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      if(btagVeto()){
 			nbtagVeto+=event_weight;
 			fillHistos(9,event_weight);
-			vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
 			float minDPhiJetMET_first4 = TMath::Pi();
 			for (int i = 0; i < jetveto.size(); i++) {
 			  float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),recoilPhi);

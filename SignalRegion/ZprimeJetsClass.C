@@ -96,6 +96,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 
     jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     AllPFCand(jetCand);
+    jetveto = JetVetoDecision();
     nTotalEvents+=genWeight;
     fillHistos(0,genWeight);
     for (int bit = 0; bit < 8; bit++)
@@ -131,7 +132,6 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		if (btagVeto()) {
 		  nbtagVeto+=event_weight;
 		  fillHistos(7,event_weight);
-		  vector<int> jetveto = JetVetoDecision();
 		  float minDPhiJetMET_first4 = TMath::Pi();
 		  for (int i = 0; i < jetveto.size(); i++) {
 		    float dPhiJetMet = DeltaPhi(jetPhi->at(jetveto[i]),pfMETPhi);
