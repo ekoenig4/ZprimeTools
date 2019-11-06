@@ -34,7 +34,7 @@ def getAllDatasets():
 if __name__ == '__main__':
     datasets = getAllDatasets()
 
-    datalist = ['egamma','met','zjets','wjets','dyjets','gjets','ttjets','ewk','qcd']
+    datalist = ['egamma','met','signal','zjets','wjets','dyjets','gjets','ttjets','ewk','qcd']
     for data in datalist:
         for sub in datasets[data]:
             print '%s----%s' % (data,sub)

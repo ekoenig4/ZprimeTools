@@ -54,6 +54,8 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
+
 float ZprimeJetsClass::getSF(int lepindex_leading,int lepindex_subleading) {
   float leadingMuPt = muPt->at(lepindex_leading);
   float leadingMuEta = fabs(muEta->at(lepindex_leading));

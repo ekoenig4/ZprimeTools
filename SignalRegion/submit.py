@@ -10,6 +10,7 @@ options['year'] = '2018'
 options['region'] = 'SR'
 options['parallel'] = True
 #----Submit---#
+submit('signal',split=1)
 submit('met',sub='A',filelist=True)
 submit('wjets')
 submit('zjets')

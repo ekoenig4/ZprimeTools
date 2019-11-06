@@ -11,7 +11,7 @@ repo_path = script_path.replace('/CondorTools','')
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
-DoSubmit = True
+DoSubmit = False
 
 def output(string,redirect=False):
     if redirect is False: print string
@@ -164,7 +164,7 @@ def submit(argv=sys.argv,redirect=False):
     config['reportevery'] = args.reportevery
     config['label'] = args.label
     config['Batch_Name'] = '%s%s_$(label)' % (args.region,args.year)
-    config['Transfer_Input_Files'] = ['$(script)','%s/RootFiles' % repo_path]
+    config['Transfer_Input_Files'] = ['$(script)','%s/RootFiles' % repo_path,'%s/datasets/ntuples' % repo_path]
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'

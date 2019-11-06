@@ -105,6 +105,8 @@ float EletriggerSF(float pt, float eta){
   return sf;
 }
 
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
+
 float ZprimeJetsClass::getSF(int ele_index) {
   float eleEta_to_use = fabs(eleSCEta->at(ele_index)) < 2.5 ? eleSCEta->at(ele_index) : 2.49;
   float elePt_to_use = elePt->at(ele_index) < 500 ? elePt->at(ele_index) : 499;
