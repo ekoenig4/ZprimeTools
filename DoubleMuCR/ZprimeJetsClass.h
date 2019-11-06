@@ -33,10 +33,10 @@ public :
   
   //CR variables
   int lepindex_leading, lepindex_subleading;
-  float dilepton_mass,dilepton_pt,recoil,recoilPhi;
+  float dilepton_mass,dilepton_pt;
   float leptoMET_phi_to_use;
   //CR histograms
-  TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto], *h_recoil[nHisto],*h_recoilPhi[nHisto];
+  TH1F *h_leadingLeptonPt[nHisto], *h_leadingLeptonEta[nHisto],*h_leadingLeptonPhi[nHisto],*h_subleadingLeptonPt[nHisto],*h_subleadingLeptonEta[nHisto], *h_subleadingLeptonPhi[nHisto],*h_dileptonPt[nHisto],*h_dileptonM[nHisto];
   TH2F *h_j1EtaPhi[nHisto],*h_leadingLeptonEtaPhi[nHisto],*h_subleadingLeptonEtaPhi[nHisto];
 
   TH1F *h_tightMuISO,*h_tightMuID,*h_looseMuISO,*h_looseMuID;

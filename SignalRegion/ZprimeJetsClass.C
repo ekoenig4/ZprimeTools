@@ -187,7 +187,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("h_recoil",&pfMET,"Recoil (GeV)");
+  tree->Branch("recoil",&pfMET,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");

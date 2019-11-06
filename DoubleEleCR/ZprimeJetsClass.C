@@ -348,7 +348,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("h_recoil",&recoil,"Recoil (GeV)");
+  tree->Branch("recoil",&recoil,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
@@ -413,8 +413,6 @@ void ZprimeJetsClass::BookHistos(const char* outputFilename) {
     h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
     h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",20,-3.1416,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
     h_subleadingLeptonEtaPhi[i] = new TH2F(("h_subleadingLeptonEtaPhi"+histname).c_str(),"h_subleadingLeptonEtaPhi",50,-3.0,3.0,50,-3.1416,3.1416);
-    h_recoil[i] = new TH1F(("h_recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i]->Sumw2();
-    h_recoilPhi[i] = new TH1F(("h_recoilPhi"+histname).c_str(), "Recoil #phi",20,-3.1416,3.1416);h_recoilPhi[i]->Sumw2();
     h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
     h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
   }

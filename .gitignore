@@ -13,3 +13,4 @@ analyze
 Systematics
 nohup.out
 LumiMonitor/Monitor/*.json
+LumiMonitor/Results

@@ -83,6 +83,8 @@ void ZprimeJetsCommon::BookCommon(int i, string histname) {
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i]->Sumw2(); 
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i]->Sumw2();
     h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
+    h_recoil[i] = new TH1F(("recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i]->Sumw2();
+    h_recoilPhi[i] = new TH1F(("recoilPhi"+histname).c_str(), "Recoil #phi",20,-3.1416,3.1416);h_recoilPhi[i]->Sumw2();
     h_j1TotConsPt[i]  = new TH1F(("j1TotConsPt"+histname).c_str(), "j1pT;Leading Jet Total Constituent P_{T}", 48,PtBins);h_j1TotConsPt[i]->Sumw2();
     h_j1Pt[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1Pt[i]->Sumw2();
     h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
@@ -150,6 +152,8 @@ void ZprimeJetsCommon::fillCommon(int histoNumber,float event_weight) {
   h_pfMET200[histoNumber]->Fill(pfMET,event_weight);
   h_pfMET[histoNumber]->Fill(pfMET,event_weight);
   h_pfMETPhi[histoNumber]->Fill(pfMETPhi,event_weight);
+  h_recoil[histoNumber]->Fill(recoil,event_weight);
+  h_recoilPhi[histoNumber]->Fill(recoilPhi,event_weight);
   if(jetCand.size()>0){
     h_j1TotConsPt[histoNumber]->Fill(j1TotConsPt,event_weight);
     h_j1Pt[histoNumber]->Fill(jetPt->at(jetCand[0]),event_weight);
@@ -484,6 +488,8 @@ void ZprimeJetsCommon::initVars() {
   weight = weight_nogen = weight_QCDSF = weight_16K = 1;
   kfactor = kfactor_16 = qcdSF = 1;
 
+  recoil = pfMET;
+  recoilPhi = pfMETPhi;
   bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
   ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
   TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
