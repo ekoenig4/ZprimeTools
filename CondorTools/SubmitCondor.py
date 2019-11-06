@@ -11,6 +11,8 @@ repo_path = script_path.replace('/CondorTools','')
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
+DoSubmit = True
+
 def output(string,redirect=False):
     if redirect is False: print string
     else: redirect.write(string+'\n')
@@ -125,13 +127,17 @@ def inputFilelist(nbatches,rfiles,config,redirect):
 
         config["Arguments"] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) %s" %  ' '.join(fileRange)
         config.queue()
-            
+
+def condor_submit(command):
+    if DoSubmit: os.system(command)
+    else: pass
 
 def submit(argv=sys.argv,redirect=False):
     args = getargs(argv)
     removeOldFiles(args.outputfile,args.label)
-    if redirect: redirect = open('.status/%s/submit.txt' % args.label,'w')
-    else: print  "Processesing %s" % args.outputfile
+    if redirect:
+        redirect = open('.status/%s/submit.txt' % args.label,'w')
+        print  "Processesing %s" % args.outputfile
     output("Processesing %s" % args.outputfile,redirect)
     #Assure executable file is in .output/
     if not os.path.isfile('.output/runAnalyzer.sh'): os.system('cp %s/runAnalyzer.sh .output/' % script_path)
@@ -174,9 +180,9 @@ def submit(argv=sys.argv,redirect=False):
     command = "condor_submit condor_%s" % args.label
     if redirect is not False:
         redirect.close()
-        os.system(command + ' >> ../.status/%s/submit.txt' % args.label)
+        condor_submit(command + ' >> ../.status/%s/submit.txt' % args.label)
     else:
-        os.system(command)
+        condor_submit(command)
     os.chdir("../")
     
 init()

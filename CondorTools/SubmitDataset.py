@@ -13,7 +13,7 @@ options = {
     'parallel':False
 }
     
-def submit(data,sub=None,label=None,split=-1,filelist=False):
+def submit(data,sub=None,label=None,split=-1,filelist=False,script='analyze'):
     dataset = getDataset(data)
     if dataset == None: print '%s not found in dataset' % data; exit()
     if label is None: label = labelmap[data]
@@ -28,7 +28,7 @@ def submit(data,sub=None,label=None,split=-1,filelist=False):
         for i,input in enumerate(subset[sub]):
             clabel = '%s%s_%i' % (label,sub,i)
             nlabel = '%s%s_%i' % (labelmap[data],sub,i)
-            command = ['analyze',input,'post%s.root' % clabel,'-1','10000',nlabel,'split_%i' % split]
+            command = [script,input,'post%s.root' % clabel,'-1','10000',nlabel,'split_%i' % split]
             if filelist: command = ['-f'] + command
             if options['region'] is not None: command = ['-r',options['region']] + command
             if options['year'] is not None: command = ['-y',options['year']] + command
@@ -36,7 +36,6 @@ def submit(data,sub=None,label=None,split=-1,filelist=False):
             if options['parallel']:
                 proc = Process(target=SubmitCondor.submit,args=(command,True))
                 proc.start()
-                proc.join()
             else:
                 SubmitCondor.submit( command )
     
