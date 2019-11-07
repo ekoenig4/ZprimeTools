@@ -54,5 +54,4 @@
 /hdfs/store/user/varuns/Run2017_31Mar2018_May2019/SingleElectron/crab_job_SingleEle2017Ev2/190524_101121/0006/
 
 >>F
-/hdfs/store/user/varuns/SingleEle2017F-run_102X_data2017-farmout/
-
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SingleEle/SingleEle2017F/
