@@ -13,6 +13,7 @@ options['parallel'] = True
 submit('met',label='DoubleMu_',filelist=True)
 submit('wjets')
 submit('zjets')
+submit('dyjets')
 submit('qcd')
 submit('ttjets')
 submit('gjets')
