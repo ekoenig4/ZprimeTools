@@ -107,6 +107,9 @@ public :
 
   float weight;
   float kfactor;
+  float pileup;
+
+  float recoil,recoilPhi;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetveto;
@@ -141,8 +144,10 @@ public :
   TH1F *h_ChargedPt[maxHisto],*h_NeutralPt[maxHisto],*h_PhotonPt[maxHisto];
   TH1F *h_ChPercPt[maxHisto],*h_NhPercPt[maxHisto],*h_GammaPercPt[maxHisto];
 
-  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReW[maxHisto],*h_puTrueNoW[maxHisto];
   TH1F *h_genBosonPt,*h_genBosonPtwK;
+
+  TH1F *h_recoil[maxHisto],*h_recoilPhi[maxHisto];
   
   TH1D *h_cutflow;
 
