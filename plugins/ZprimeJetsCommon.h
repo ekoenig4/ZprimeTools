@@ -100,6 +100,7 @@ public :
   float kfactor;
   
   //Declaring these jet Vectors and jet substructure vectors
+  vector<int> jetveto;
   vector<int> jetCand;
   vector<double>j1PFConsEt;
   vector<double>j1PFConsPt;
@@ -123,7 +124,7 @@ public :
   TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_metcut,*h_lepMET_MT,*h_dphimin,*h_metFilters,*h_kfactor,*h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_nJets[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto];
   TH1F *h_j1Pt[maxHisto], *h_j1Eta[maxHisto], *h_j1Phi[maxHisto], *h_j1etaWidth[maxHisto], *h_j1phiWidth[maxHisto],*h_j1nCons[maxHisto], *h_PF123PtFraction[maxHisto],*h_Pt123[maxHisto],*h_j1TotConsPt[maxHisto]; 
   TH1F *h_j1TotPFCands[maxHisto], *h_j1ChPFCands[maxHisto], *h_j1NeutPFCands[maxHisto], *h_j1GammaPFCands[maxHisto], *h_j1CHF[maxHisto], *h_j1NHF[maxHisto], *h_j1ChMultiplicity[maxHisto], *h_j1NeutMultiplicity[maxHisto],*h_j1Mt[maxHisto];
-  TH1F *h_j1Mass[maxHisto],*h_j1JEC[maxHisto],*h_j1PID[maxHisto],*h_j1Lepton[maxHisto];
+  TH1F *h_j1Mass[maxHisto],*h_j1JEC[maxHisto],*h_j1PID[maxHisto],*h_j1Lepton[maxHisto],*h_nJetVeto[maxHisto];
 
   TH1F *h_PtRawFrac[maxHisto];
   TH1F *h_ChNemPtFrac[maxHisto],*h_ChNemPt[maxHisto],*h_ChNemPt123[maxHisto];
@@ -135,6 +136,8 @@ public :
   TH1F *h_genBosonPt,*h_genBosonPtwK;
   
   TH1D *h_cutflow;
+
+  TH2F *h_nJetVetoPt[maxHisto];
   
   // Uncertainty Plots
   TH2F *h_TrackerPtUnc,*h_EcalPtUnc,*h_HcalPtUnc;
@@ -1064,6 +1067,7 @@ public :
   virtual void fillHistos(int nhist,float event_weight) { /*Should be overriden by region*/ };
   virtual float deltaR(float eta1, float phi1, float eta2, float phi2);
   virtual float DeltaPhi(float phi1, float phi2);
+  virtual float getMt(float pt1,float phi1,float pt2,float phi2);
   virtual vector<int> getJetCand(float jetPtCut, float jetEtaCut, float jetNHFCut, float jetCHFCut);
   virtual bool dPhiJetMETcut(vector<int> jets,float metPhi);
   virtual float dPhiJetMETmin(vector<int> jets,float metPhi);

@@ -1,20 +1,23 @@
 /* Jet Selection Floating Cuts */
 const float jetCandPtCut = 200;
-const float jetCandEtaCut = 2.5;
+const float jetCandEtaCut = 2.4;
 const float jetCandNHFCut = 0.8;
 const float jetCandCHFCut = 0.1;
 
 /* Jet Veto Floating Cuts */
 const float jetVetoPtCut = 30;
-const float jetVetoEtaCut = 2.5;
+const float jetVetoEtaCut = 2.4;
 
 /* B-Jet Veto Floating Cuts */
 const float bjetVetoPtCut = 30;
 const float bjetVetoEtaCut = 2.5;
 const float bjetVetoCSVv2Cut = 0.8484;
 
+/* Isolation Floating Cuts */
+const float Iso4Cut = 0.4;
+const float Iso5Cut = 0.5;
+
 /* Lepton Veto Floating Cuts */
-const float leptondRCut = 0.4;
 
 const float eleTightPtCut = 40;
 const float eleTightEtaCut = 2.5;

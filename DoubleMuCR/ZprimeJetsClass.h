@@ -12,7 +12,7 @@
 using namespace std;
 class ZprimeJetsClass : ZprimeJetsCommon {
 public :
-  static const int nHisto = 11;
+  static const int nHisto = 12;
   static const int bHisto = 10;
   
   //CR variables

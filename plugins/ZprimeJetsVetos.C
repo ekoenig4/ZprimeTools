@@ -13,7 +13,7 @@ vector<int> ZprimeJetsCommon::electron_veto_tightID(int jet_index, float elePtCu
 	//Electron passes pt cut
 	if(elePt->at(i) > elePtCut) {
 	  //Electron does not overlap photon
-	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
+	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut) {
 	    
 	    //Ele DZ and D0 selection
 	    if ((fabs(eleSCEta->at(i)) <= eleEtaCutLow) && (fabs(eleD0->at(i)) < eleD0CutLow) && (fabs(eleDz->at(i)) < eleDzCutLow )) {
@@ -42,7 +42,7 @@ vector<int> ZprimeJetsCommon::electron_veto_looseID(int jet_index, float elePtCu
 	//Electron passes pt cut
 	if(elePt->at(i) > elePtCut) {
 	  //Electron does not overlap photon
-	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
+	  if(deltaR(eleSCEta->at(i),eleSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut) {
 	    
 	    //Ele DZ and D0 selection
 	    if ((fabs(eleSCEta->at(i)) <= eleEtaCutLow) && (fabs(eleD0->at(i)) < eleD0CutLow) && (fabs(eleDz->at(i)) < eleDzCutLow )) {
@@ -103,7 +103,7 @@ vector<int> ZprimeJetsCommon::muon_veto_tightID(int jet_index, float muPtCut) {
 	//Muon passes pt cut
 	if(muPt->at(i) > muPtCut) {
 	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut)
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso4Cut)
 	    mu_cands.push_back(i);
 	}
       }
@@ -128,7 +128,7 @@ vector<int> ZprimeJetsCommon::muon_veto_looseID(int jet_index, float muPtCut)
 	if(muPt->at(i) > muPtCut) {
 	  //cout <<"Passed Pt Cut" << endl;
 	  //Muon does not overlap photon
-	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut) {
+	  if(deltaR(muEta->at(i),muPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso4Cut) {
 	    mu_cands.push_back(i);
 	  }
 	}
@@ -144,7 +144,7 @@ vector<int> ZprimeJetsCommon::photon_veto_looseID(int jet_index,float phoPtCut) 
   for (int i = 0; i < nPho; i++) {
     if ( fabs(phoSCEta->at(i)) < phoLooseEtaCut ){
       if ( phoEt->at(i) > phoPtCut ) {
-	if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
+	if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut )
 	  pho_cands.push_back(i);
       }
     }
@@ -159,7 +159,7 @@ vector<int> ZprimeJetsCommon::tau_veto_looseID(int jet_index,float tauPtCut) {
     if ( taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i) ) {
       if ( fabs(tauEta->at(i)) < tauLooseEtaCut ){
 	if ( tauPt->at(i) > tauPtCut ) {
-	  if ( deltaR(tauEta->at(i),tauPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > leptondRCut )
+	  if ( deltaR(tauEta->at(i),tauPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso4Cut )
 	    tau_cands.push_back(i);
 	}
       }

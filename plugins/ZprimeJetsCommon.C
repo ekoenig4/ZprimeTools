@@ -104,6 +104,9 @@ void ZprimeJetsCommon::BookCommon(int i,string histname) {
     h_ChPercPt[i] = new TH1F(("ChPercPt"+histname).c_str(), "ChPercPt; Charged Constituent P_{T} Percentage" ,50,0,1.1);h_ChPercPt[i]->Sumw2();
     h_NhPercPt[i] = new TH1F(("NhPercPt"+histname).c_str(), "NhPercPt; Nharged Constituent P_{T} Percentage" ,50,0,1.1);h_NhPercPt[i]->Sumw2();
     h_GammaPercPt[i] = new TH1F(("GammaPercPt"+histname).c_str(), "GammaPercPt; Gammaarged Constituent P_{T} Percentage" ,50,0,1.1);h_GammaPercPt[i]->Sumw2();
+    
+    h_nJetVeto[i] = new TH1F(("nJetVeto"+histname).c_str(),"nJetVeto;Number of Jet with P_{T} > 30 GeV & |#eta| < 2.4",21,-0.5,20.5); h_nJetVeto[i]->Sumw2();
+    h_nJetVetoPt[i] = new TH2F(("nJetVetoPt"+histname).c_str(),"nJetVetoPt;jet P_{T};nJet",50,0,2000,21,-0.5,20.5);
   }
 }
 
@@ -150,7 +153,6 @@ void ZprimeJetsCommon::fillCommon(int nhist,float event_weight) {
     h_NhPercCons[nhist]->Fill(NeutralPFCandidates/(float)TotalPFCandidates,event_weight);
     h_GammaPercCons[nhist]->Fill(GammaPFCandidates/(float)TotalPFCandidates,event_weight);
 
-    
     h_NeutralPt[nhist]->Fill(hadronPt[0],event_weight);
     h_ChargedPt[nhist]->Fill(hadronPt[1],event_weight);
     h_PhotonPt[nhist]->Fill(hadronPt[2],event_weight);
@@ -158,6 +160,11 @@ void ZprimeJetsCommon::fillCommon(int nhist,float event_weight) {
     h_NhPercPt[nhist]->Fill( hadronPt[0]/jetPt->at(jetCand[0]) ,event_weight);
     h_ChPercPt[nhist]->Fill( hadronPt[1]/jetPt->at(jetCand[0]) ,event_weight);
     h_GammaPercPt[nhist]->Fill( hadronPt[2]/jetPt->at(jetCand[0]) ,event_weight);
+
+    h_nJetVeto[nhist]->Fill(jetveto.size(),event_weight);
+    for (int i = 0; i < jetveto.size(); i++) {
+      h_nJetVetoPt[nhist]->Fill( jetPt->at(jetveto[i]),i+1,event_weight );
+    }
   }
 }
 
@@ -254,6 +261,11 @@ float ZprimeJetsCommon::DeltaPhi(float phi1, float phi2) {
     dphi = 2.0*pi - dphi;
   return dphi;
 }
+
+float ZprimeJetsCommon::getMt(float pt1,float phi1,float pt2,float phi2) {
+  return TMath::Sqrt(pt1 * pt2 * (1-TMath::Cos(phi1-phi2)));
+}
+
 float ZprimeJetsCommon::dPhiJetMETmin(vector<int> jets,float metPhi) {
   float dPhimin=TMath::Pi();
   int njetsMax = jets.size();
@@ -379,22 +391,23 @@ bool ZprimeJetsCommon::inclusiveCut() {
 }
 
 void ZprimeJetsCommon::initVars() {
-    jetCand     .clear();
-    j1PFConsPt  .clear();
-    j1PFConsEta .clear();
-    j1PFConsPhi .clear();
-    j1PFConsPID .clear();
+  jetveto     .clear();
+  jetCand     .clear();
+  j1PFConsPt  .clear();
+  j1PFConsEta .clear();
+  j1PFConsPhi .clear();
+  j1PFConsPID .clear();
 
-    if(sample.isData) {
-      // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
-      // data doesn't have genWeight so set it to 1
-      genWeight = 1;
-    }
+  if(sample.isData) {
+    // genWeight is used for the total events rather than event_weight since it has pileup and kfactors applied at the beginning
+    // data doesn't have genWeight so set it to 1
+    genWeight = 1;
+  }
     
-    weight = 1;
-    kfactor = 1;
+  weight = 1;
+  kfactor = 1;
 
-    bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
-    ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
-    TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
+  bosonPt = Pt123Fraction = Pt123 = PtRawFrac = j1pT = 0;
+  ChNemPtFrac = ChNemPt = ChNemPt123 = 0;
+  TotalPFCandidates = ChargedPFCandidates = NeutralPFCandidates = GammaPFCandidates = 0;
 }
