@@ -2,7 +2,7 @@
 import os
 import sys
 cmssw = os.getenv("CMSSW_BASE")
-repo = os.path.realpath('../../')
+repo = os.path.realpath('../')
 sys.path.append(repo)
 
 from CondorTools.SubmitDataset import submit,options
