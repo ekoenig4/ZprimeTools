@@ -2,12 +2,16 @@
 
 from ROOT import *
 from sys import argv, path
+from Parser import PlotParser as parser
 import Plot as plot
 import os
 
 gROOT.SetBatch(1)
 
 store = [] # Storage list to be used to keep references around for ROOT before TCanvas is saved
+parser.add_argument("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
+parser.add_argument("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
+parser.add_argument("--sub",help="specify a sub directory to place output",action="store",type=str,default=None,dest="sub")
 
 def HigherDimension(samples,variable):
     axis = variable[-1]

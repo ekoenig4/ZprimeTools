@@ -1,7 +1,6 @@
 from ROOT import *
-import threading
 import sys
-from os import path,system,getcwd,listdir,mkdir,remove,chdir
+import os
 from Parser import PlotParser as parser
 from samplenames import samplenames
 from array import array
@@ -9,29 +8,30 @@ import mergeFiles as merge
 import changeBinning as binning
 from Process import Process
 
+def valid_directory(directory):
+    if not os.path.isdir(directory): raise ValueError("%s is not a valid directory" % directory)
+    return directory
+
 parser.add_argument("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
 parser.add_argument("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
-parser.add_argument("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
 parser.add_argument("-l","--lumi",help="set the luminosity for scaling",action="store",type=float,dest="lumi")
 parser.add_argument("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
 parser.add_argument("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
-parser.add_argument("-n","--normalize",help="normalize plots to 1",action="store_true",default=False)
 parser.add_argument("-s","--signal",help="specify the signal file to use",action="store",type=str,default=None,dest="signal")
-parser.add_argument("--sub",help="specify a sub directory to place output",action="store",type=str,default=None,dest="sub")
 parser.add_argument("-b","--binning",help="specify function for rebinning histogram",action="store",type=str,default=None)
 parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",default=False)
 parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
+parser.add_argument("-d","--directory",help="Specify directory to get post files from",type=valid_directory)
 
 def GetRegion():
-    preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
-    postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
+    region_pattern = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
     RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
     found = False
-    for region,pre,post in zip(RegionName,preRegionData,postRegionData):
-        if path.isdir('.output/'):
-            if any( pre in fname for fname in listdir('.output/') ): found = True; break
-        if path.isfile(post): found = True; break
+    for region,pattern in zip(RegionName,region_pattern):
+        if os.path.isdir('.output/'):
+            if any( pattern in fname for fname in os.listdir('.output/') ): found = True; break
+        if any( pattern in fname for fname in os.listdir('.') ): found = True; break
     if not found: return None
     return region
 def GetMCxsec(filenames,xsecMap):
@@ -43,19 +43,20 @@ class datamc(object):
 
     def __init__(self,command=None,show=True,lumi=None,fileDir="./"):
 
-        self.cwd = getcwd()
-        chdir(fileDir)
-        self.fileDir = getcwd()
-        if fileDir != "./":
-            if path.isdir("PlotTool/"):
-                sys.path[0] = "PlotTool/"
+        self.args = parser.parse_args()
+        self.cwd = os.getcwd()
+        if fileDir != './': os.chdir(fileDir)
+        self.fileDir = os.getcwd()
+        if self.args.directory is not None:
+            print 'Using %s to get files' % self.args.directory
+            self.fileDir = self.args.directory
+            os.chdir(self.fileDir)
         import mcinfo as mc
         self.version = mc.version
         self.xsec = mc.xsec
 
         self.variable = None
         self.varname = None
-        self.args = parser.parse_args()
         
         #Luminosity
         self.lumi_by_era = mc.lumi_by_era
@@ -124,32 +125,27 @@ class datamc(object):
             self.getAllHisto()
         if (self.args.nhists != None):
             self.getAllNHisto()
-        if getcwd() != self.cwd: chdir(self.cwd)
+        if os.getcwd() != self.cwd: os.chdir(self.cwd)
     ###############################################################################################################
 
     def HaddFiles(self):
         if self.args.nohadd: return
-        if getcwd() != self.fileDir: chdir(self.fileDir)
-        if not path.isdir('.output/'): return
-        def validfile(fname): return path.isfile(fname)
+        if os.getcwd() != self.fileDir: os.chdir(self.fileDir)
+        if not os.path.isdir('.output/'): return
+        def validfile(fname): return os.path.isfile(fname)
         mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
-        datafiles = []
-        if self.region != 'SignalRegion': datafiles = [ self.Data_FileName+"_"+str(i)
-                                                        for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                                                        if not path.isfile("DataEra/"+self.Data_FileName+"_"+e+".root")
-                                                        and any(self.Data_FileName+"_"+str(i) in file for file in listdir(".output"))]
-        if self.region == 'SignalRegion':
-            if not validfile(self.Data_FileName+'.root'): mcfiles.append(self.Data_FileName) # Treat as mc file for hadding since we only have one file 
-        elif not any(datafiles):
-            if not validfile(self.Data_FileName+'.root'): datafiles = self.Data_FileName
+        eralist = sorted(self.lumi_by_era.keys())
+        datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
+        datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
+        datafiles = datafiles_v1 + datafiles_v2
         ##########
         if self.signal != None:
             for fname in self.Mx_Mv_Files:
                 if not validfile(fname+'.root'):
                     mcfiles.append(fname)
         ##########
-        merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
-        if getcwd() != self.cwd: chdir(self.cwd)
+        merge.HaddFiles(datafiles,mcfiles,eralist=eralist)
+        if os.getcwd() != self.cwd: os.chdir(self.cwd)
     ###############################################################################################################
 
     def output(self):
@@ -182,7 +178,7 @@ class datamc(object):
     ###############################################################################################################
             
     def initiate(self,variable):
-        if getcwd() != self.fileDir: chdir(self.fileDir)
+        if os.getcwd() != self.fileDir: os.chdir(self.fileDir)
         self.cut = ''
         if '>' in variable: self.cut = '>'+variable.split('>')[-1]
         if '<' in variable: self.cut = '<'+variable.split('<')[-1]
@@ -198,7 +194,7 @@ class datamc(object):
         if self.show: self.output()
         if self.name == 'Xaxis Title':
             self.name = next( process.histo.GetXaxis().GetTitle() for name,process in self.processes.iteritems() if process.histo != None )
-        if getcwd() != self.cwd: chdir(self.cwd)
+        if os.getcwd() != self.cwd: os.chdir(self.cwd)
     ###############################################################################################################
         
     def getSumOfBkg(self):
@@ -239,7 +235,7 @@ class datamc(object):
             for key in tdir.GetListOfKeys():
                 keyname = key.GetName()
                 obj = tdir.Get(keyname)
-                if type(obj) == TH1F:
+                if type(obj) == TH1F and ('_%i' % self.args.nhists) in keyname:
                     self.args.argv.append(keyname)
     ###############################################################################################################
 

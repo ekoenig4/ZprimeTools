@@ -12,7 +12,7 @@ lumi_by_era = {"SingleEleCR":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
                "DoubleMuCR":{"B":4793,"C":9633,"D":4248,"E":9314,"F":13498},
                "SignalRegion":{"B":1198}}
 
-WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
+WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
 
@@ -35,7 +35,7 @@ xsec = {
 "postZ1200to2500":3.430e-01,
 "postZ2500toInf":5.146e-03,
     
-"postWJets_MLM":5.279e+04,
+"postWMLM":5.279e+04,
 "postW100to200":1.395e+03,
 "postW200to400":4.093e+02,
 "postW400to600":5.791e+01,
@@ -88,7 +88,7 @@ usama_xsec = {
 'postZ1200to2500': 0.28633,
 'postZ2500toInf': 0.0006945,
 
-'postWJets_MLM': 50690,
+'postWMLM': 50690,
 'postW100to200': 1343,
 'postW200to400': 359.7,
 'postW400to600': 48.91,

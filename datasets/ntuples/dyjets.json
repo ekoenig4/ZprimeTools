@@ -1,6 +1,6 @@
 {
     "70to100": [
-	"/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT70To100/0000/",
+	"/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT70To100/0000/test/",
 	"/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT70To100/0001/"
     ],
     "100to200": [
