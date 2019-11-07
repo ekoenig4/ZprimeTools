@@ -45,9 +45,10 @@ public :
   struct DataMC {
     Dataset dataset;
     Type type;
-    string name[Total];
+    string name[nType];
     bool isInclusive;
     bool isData;
+    bool isSignal;
     int PID;
     void setInfo(string filename) {
       auto typeinfo = dataset.getTypeInfo(filename);
@@ -91,6 +92,9 @@ public :
 
   float weight,weight_QCDSF,weight_16K;
   float kfactor,kfactor_16,qcdSF;
+  float pileup;
+
+  float recoil,recoilPhi;
   
   //Declaring these jet Vectors and jet substructure vectors
   vector<int> jetCand;
@@ -124,8 +128,10 @@ public :
   TH1F *h_bChNemPtFrac[maxHisto],*h_bPF123PtFraction[maxHisto];
   TH1F *h_eChNemPtFrac[maxHisto],*h_ePF123PtFraction[maxHisto];  
   
-  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_genHT[maxHisto],*h_eventWeight[maxHisto],*h_puTrueReW[maxHisto],*h_puTrueNoW[maxHisto];
   TH1F *h_genBosonPt,*h_genBosonPtw16K,*h_genBosonPtw17K,*h_genBosonPtwQCDSF;
+  
+  TH1F *h_recoil[maxHisto],*h_recoilPhi[maxHisto];
   
   TH1D *h_cutflow;
 

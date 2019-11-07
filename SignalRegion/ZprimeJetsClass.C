@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, const char* argv[]) {
   if (argc == 1) {
     printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/varuns/MC2017_12Apr2018_May2019/ZJetsToNuNu_HT-400To600_13TeV-madgraph/crab_job_ZJetsToNuNu_HT400-600/190508_233318/0000/";
+    argv[1] = "/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets/ZJetsToNuNu_HT400To600/0000/";
     argv[2] = "test.root";
     argv[3] = "5000";
     argv[4] = "100";
@@ -160,7 +160,7 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 void ZprimeJetsClass::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
-  tree->Branch("h_recoil",&pfMET,"Recoil (GeV)");
+  tree->Branch("recoil",&pfMET,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");

@@ -36,9 +36,9 @@ public :
   
   //CR variables
   int lepindex;
-  float lepton_pt,recoil,recoilPhi;
+  float lepton_pt;
   //CR histograms
-  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto],*h_recoil[nHisto],*h_recoilPhi[nHisto];
+  TH1F *h_LeptonPt[nHisto], *h_LeptonEta[nHisto],*h_LeptonPhi[nHisto];
 
   TH1F *h_eleRecoSF_corr,*h_eleEffSF_corr,*h_eleTriggSF;
   
