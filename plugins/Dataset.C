@@ -1,6 +1,7 @@
 #ifndef Dataset_C
 #define Dataset_C
 
+#include <sys/stat.h>
 #include <TSystemDirectory.h>
 #include <TList.h>
 #include <fstream>
@@ -9,9 +10,10 @@
 
 using namespace std;
 
-bool isDir(string path) {
-  TSystemDirectory dir(path.c_str(),path.c_str());
-  return dir.IsDirectory();
+bool isDir(const string &s)
+{
+  struct stat buffer;
+  return (stat (s.c_str(), &buffer) == 0);
 }
 
 bool contains(string str,string delim) {
@@ -28,8 +30,8 @@ Dataset::Dataset() {
   string ntuple_path1 = "ntuples/";
   string ntuple_path2 = "../datasets/ntuples/";
   if ( isDir(ntuple_path1) ) ntuples = ntuple_path1;
-  if ( isDir(ntuple_path1) ) ntuples = ntuple_path2;
-
+  else if ( isDir(ntuple_path2) ) ntuples = ntuple_path2;
+  cout << "Using path " << ntuples << " for datasets." << endl;
   TSystemDirectory dir(ntuples.c_str(),ntuples.c_str());
   TList* filelist = dir.GetListOfFiles();
   TIter fileiter(filelist);
