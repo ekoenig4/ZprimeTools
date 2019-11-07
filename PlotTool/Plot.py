@@ -135,8 +135,8 @@ class datamc(object):
         def validfile(fname): return os.path.isfile(fname)
         mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
         eralist = sorted(self.lumi_by_era.keys())
-        datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist ]
-        datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) ]
+        datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
+        datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
         datafiles = datafiles_v1 + datafiles_v2
         ##########
         if self.signal != None:
@@ -144,7 +144,7 @@ class datamc(object):
                 if not validfile(fname+'.root'):
                     mcfiles.append(fname)
         ##########
-        merge.HaddFiles(datafiles,[],eralist=eralist)
+        merge.HaddFiles(datafiles,mcfiles,eralist=eralist)
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     ###############################################################################################################
 
@@ -235,7 +235,7 @@ class datamc(object):
             for key in tdir.GetListOfKeys():
                 keyname = key.GetName()
                 obj = tdir.Get(keyname)
-                if type(obj) == TH1F:
+                if type(obj) == TH1F and ('_%i' % self.args.nhists) in keyname:
                     self.args.argv.append(keyname)
     ###############################################################################################################
 

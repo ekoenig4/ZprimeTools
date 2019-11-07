@@ -4,6 +4,12 @@ from subprocess import Popen,PIPE,STDOUT
 from time import sleep
 import re
 
+def progress(current,total,prompt):
+    percent = 100 * (total - current)/float(total)
+    out = '\r%s : %.3f%%' % (prompt,percent)
+    sys.stdout.write(out)
+    sys.stdout.flush()
+
 def singleThread(AllFiles,show=False):
     #Hadd files together
     for fn in AllFiles:
@@ -28,10 +34,12 @@ def multiThread(AllFiles,show=False):
             nthreads += 1
             sys.stdout.write("\r"+str(nthreads)+" Started Threads")
             sys.stdout.flush()
-    if len(threads) != 0: print
-    merging = nthreads != 0 
-    out = "\r"+str(nthreads)+" Threads Remaining"
-    dthreads = []
+    merging = False
+    total_threads = len(threads)
+    if total_threads != 0:
+        print
+        merging = True
+        progress(total_threads,total_threads,'Threads Complete')
     while any(threads):
         IDlist = threads.keys(); IDlist.sort(key=int)
         for ID in IDlist:
@@ -39,12 +47,10 @@ def multiThread(AllFiles,show=False):
                 threads.pop(ID)
         if len(threads) != nthreads:
             nthreads = len(threads)
-            out = "\r"+str(nthreads)+" Threads Remaining"
-            if out != None and len(threads) != 0:
-                sys.stdout.write(out)
-                sys.stdout.flush()
-                out = None
-    if merging: print "\nFiles Merged"
+            progress(nthreads,total_threads,'Threads Complete')
+    if merging:
+        progress(0,total_threads,'Threads Complete')
+        print "\nFiles Merged"
 ###################################
 def mergeData(datafiles,eralist,show=False):
     if not any(datafiles): return
@@ -70,8 +76,8 @@ def mergeData(datafiles,eralist,show=False):
 
 def HaddFiles(datafiles,mcfiles,eralist=None,single=False,show=False):
     haddfiles = datafiles + mcfiles
-    # if (single): singleThread(haddfiles,show=show)
-    # else:multiThread(haddfiles,show=show)
+    if (single): singleThread(haddfiles,show=show)
+    else:multiThread(haddfiles,show=show)
     mergeData(datafiles,eralist,show=show)
 ###############################################################################################################
     
