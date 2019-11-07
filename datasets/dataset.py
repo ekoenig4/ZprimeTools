@@ -15,6 +15,7 @@ def getDataset(label):
         subset = {}; subname = None
         for line in f.readlines():
             line = line.replace('\n','')
+            if '#' in line: continue
             if '>>' in line:
                 subname = line.replace('>>','')
                 subset[subname] = []

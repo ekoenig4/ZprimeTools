@@ -10,6 +10,7 @@ options['year'] = '2018'
 options['region'] = 'LM'
 options['parallel'] = True
 #----Submit---#
-submit('met',script='calcLumi.py',filelist=True)
-submit('egamma',script='calcLumi.py',filelist=True)
+submit('egamma',sub='D',script='calcLumi.py',filelist=True)
+# submit('met',script='calcLumi.py',filelist=True)
+# submit('egamma',script='calcLumi.py',filelist=True)
 

@@ -54,6 +54,7 @@ void Dataset::addDataset(string path,string filename) {
   string line;
   Subset subset; string subname;
   while ( infile >> line ) {
+    if ( contains(line,"#") ) continue;
     if ( contains(line,">>") ) {
       subname = line.erase(0,2);
       subset[subname] = vector<string>();
