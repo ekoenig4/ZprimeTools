@@ -47,11 +47,11 @@ def WriteJson(jmap,output):
     with open(output,'w') as jfile:
         jfile.write('{\n')
         for i,run in enumerate(sorted(jmap.keys(),key=int)):
-            jfile.write('    "%s": [\n' % run)
+            jfile.write('    "%s": [' % run)
             lumistr = [ str(lumi) for lumi in jmap[run] ]
             lumistr = ','.join(lumistr)
-            jfile.write('          %s\n' % lumistr)
-            jfile.write('     ]' + (',\n' if i+1 < len(jmap) else '\n'))
+            jfile.write('%s' % lumistr)
+            jfile.write(']' + (',\n' if i+1 < len(jmap) else '\n'))
         jfile.write('}\n')
             
     
