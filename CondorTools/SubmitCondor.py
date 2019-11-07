@@ -1,40 +1,53 @@
 #!/usr/bin/env python
 import sys
-from os import path, system, mkdir, listdir, rename, remove, chdir, getenv
+import os
+import stat
+from subprocess import Popen,STDOUT,PIPE
 from CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
-script_path = '/'.join(path.realpath(__file__).split('/')[:-1])
-cmssw_base = getenv("CMSSW_BASE")
+script_path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
+repo_path = script_path.replace('/CondorTools','')
+cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 20
+DoSubmit = True
 
+def ignore(path,fn):
+    toignore = ["/hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_May2019/MET/MET2018D_prompt/Data_MET2018D_578.root"]
+    return (path+fn) in toignore
+def output(string,redirect=False):
+    if redirect is False: print string
+    else: redirect.write(string+'\n')
 def init():
     #Create Directories to put condor files in
     #Where executable and output files go
-    if not path.isdir(".output/"): mkdir(".output/")
+    if not os.path.isdir(".output/"): os.mkdir(".output/")
     #Where all condor output, log, and error files go
-    if not path.isdir(".status/"): mkdir(".status/")
-def getargs():
+    if not os.path.isdir(".status/"): os.mkdir(".status/")
+def getargs(argv):
     parser = ArgumentParser()
     parser.add_argument('runargs',help='Specify arguments for run',type=str,nargs='+')
     parser.add_argument('-y','--year',help='Specify year of run',type=str,default='')
     parser.add_argument('-r','--region',help='Specify region of run',type=str,default='')
-    args = parser.parse_args()
+    parser.add_argument('-f','--filelist',help='Use direct filenames as input',action='store_true',default=False)
+    args = parser.parse_args(argv)
     args.error = False
     def checkScript(arg):
-        if path.isfile(arg): return arg
+        if os.path.isfile(arg): return arg
         else:
             print 'Unable to find script %s' % arg
             args.error = True
     def checkRootDir(arg):
-        if path.isdir(arg):
-            rfiles = [ fn.replace(".root","") for fn in listdir(arg) if fn.endswith(".root") ]
+        if os.path.isdir(arg):
+            rfiles = [ fn.replace(".root","") for fn in os.listdir(arg) if fn.endswith(".root") and not ignore(arg,fn) ]
             if any(rfiles): return arg,rfiles
             print '%s does not have any root files' % arg
+            args.error = True
         else:
             print '%s is not a directory' % arg
             args.error = True
+        return None,None
     def checkOutput(arg):
         if arg.endswith('.root'): return arg[:-5]
     def checkSplit(arg):
@@ -71,19 +84,19 @@ def stripDataset(rootFiles):
 def removeOldFiles(filekey,label):
     #Remove any old condor files
     filekey = filekey.replace(".root","_")
-    for fn in listdir(".output/"):
+    for fn in os.listdir(".output/"):
         if filekey in fn:
-            remove(".output/"+fn)
+            os.remove(".output/"+fn)
 
-    if not path.isdir(".status/"+label): mkdir(".status/"+label)
-    for fn in listdir(".status/"+label): remove(".status/"+label+"/"+fn)
+    if not os.path.isdir(".status/"+label): os.mkdir(".status/"+label)
+    for fn in os.listdir(".status/"+label): os.remove(".status/"+label+"/"+fn)
 
-def splitArgument(nbatches,rfiles,config):
+def splitArgument(nbatches,rfiles,config,redirect):
     #Get how many files are in each batch
     batch = len(rfiles)
     binsize = batch/nbatches
-    print "Total files:   %i" % batch
-    print "Files per job: %i" % binsize
+    output("Total files:   %i" % batch,redirect)
+    output("Files per job: %i" % binsize,redirect)
     for i in range(nbatches):
         if nbatches == 1: fileRange = "-1"
         else:
@@ -100,21 +113,40 @@ def splitArgument(nbatches,rfiles,config):
                 rfiles.pop(j) #Remove files already accounted for
                 batch-=1
 
-        print "----Batch",i+1,fileRange
+        output("----Batch %i %s" % (i+1,fileRange),redirect)
 
         #Append argument lines to condor_submit file adding the file range for this batch
         config['Arguments'] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) " + fileRange
         config.queue()
 
-def main():
-    init()
-    args = getargs()
-    print "Processesing %s" % args.outputfile
-    stripDataset(args.rfiles)
+def inputFilelist(nbatches,rfiles,config,redirect):
+    batch = len(rfiles)
+    binsize = batch/nbatches
+    output('Total files:   %i' % batch,redirect)
+    output('Files per job: %i' % binsize,redirect)
+    for i in range(nbatches):
+        if binsize > len(rfiles): binsize = len(rfiles)
+        fileRange = [ rfiles.pop(0)+'.root' for _ in range(binsize) ]
+
+        output("----Batch %i %i files" % (i+1,len(fileRange)),redirect)
+
+        config["Arguments"] = "$(script) $(inputdir) $(outputfile)_$(Process).root $(maxevents) $(reportevery) %s" %  ' '.join(fileRange)
+        config.queue()
+
+def condor_submit(command):
+    if DoSubmit: os.system(command)
+    else: pass
+
+def submit(argv=sys.argv,redirect=False):
+    args = getargs(argv)
     removeOldFiles(args.outputfile,args.label)
+    if redirect:
+        redirect = open('.status/%s/submit.txt' % args.label,'w')
+        print  "Processesing %s" % args.outputfile
+    output("Processesing %s" % args.outputfile,redirect)
     #Assure executable file is in .output/
-    if not path.isfile('.output/runAnalyzer.sh'): system('cp %s/runAnalyzer.sh .output/' % script_path)
-    system('cp %s .output' % args.script)
+    if not os.path.isfile('.output/runAnalyzer.sh'): os.system('cp %s/runAnalyzer.sh .output/' % script_path)
+    os.system('cp -p %s .output' % args.script)
     
     #Beginning to write condor_submit file
     config = CondorConfig()
@@ -137,15 +169,26 @@ def main():
     config['reportevery'] = args.reportevery
     config['label'] = args.label
     config['Batch_Name'] = '%s%s_$(label)' % (args.region,args.year)
-    config['Transfer_Input_Files'] = ['$(script)','../../RootFiles']
+    config['Transfer_Input_Files'] = ['$(script)','%s/RootFiles' % repo_path,'%s/datasets/ntuples' % repo_path]
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'
-    splitArgument(args.nbatches,args.rfiles,config)
+
+    if not args.filelist:    
+        stripDataset(args.rfiles)
+        splitArgument(args.nbatches,args.rfiles,config,redirect)
+    else:
+        inputFilelist(args.nbatches,args.rfiles,config,redirect)
     config.write('.output/condor_%s' % args.label)
     #Move into .output/ and run newly made condor_submit file
-    chdir(".output/")
-    system("condor_submit condor_%s" % args.label)
+    os.chdir(".output/")
+    command = "condor_submit condor_%s" % args.label
+    if redirect is not False:
+        redirect.close()
+        condor_submit(command + ' >> ../.status/%s/submit.txt' % args.label)
+    else:
+        condor_submit(command)
+    os.chdir("../")
     
-    
-if __name__ == "__main__": main()
+init()
+if __name__ == "__main__": submit()
