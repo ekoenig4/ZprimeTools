@@ -35,26 +35,28 @@ class Table:
                 if type(v) == str: str_row.append(v)
                 else:              str_row.append( self.num_temp % v )
             str_table.append(str_row)
-        def RowStr(row,sep):
+        def RowStr(row,sep,raw=False):
             rowstr = []
-            for i,col in enumerate(row):rowstr.append( col.center(self.nspaces[i]) )
+            for i,col in enumerate(row):
+                if not raw:rowstr.append( col.center(self.nspaces[i]) )
+                else: rowstr.append(col)
             return sep.join(rowstr)
         def RowSep(char): return char*( sum(self.nspaces)+3*len(self.nspaces) )
         lines = [ ]
         if optionmap['raw-output']:
             rowdivide = ' '
-            coldivide = ' '
+            coldivide = '|'
         else:
             rowdivide = '-'
             coldivide = ' | '
             lines.append( RowSep('=') )
             
         rowsep = RowSep(rowdivide)
-        lines.append(RowStr(self.header,coldivide))
-        lines.append( rowsep )
+        lines.append(RowStr(self.header,coldivide,raw=optionmap['raw-output']))
+        if not optionmap['raw-output']: lines.append( rowsep )
         for row in str_table:
-            lines.append( RowStr(row,coldivide) )
-            lines.append( rowsep )
+            lines.append( RowStr(row,coldivide,raw=optionmap['raw-output']) )
+            if not optionmap['raw-output']: lines.append( rowsep )
         return '\n'.join(lines)
 
 class TableSet:
