@@ -74,8 +74,13 @@ TypeInfo Dataset::getTypeInfo(string path) {
     for (auto& sub : subset) {
       for (string directory : sub.second) {
 	if ( contains(path,directory) ) {
-	  typeinfo.type = typemap.find(data)->second;
-	  typeinfo.isInclusive = contains(sub.first,"MLM");
+	  Type type = typemap.find(data)->second;
+	  typeinfo.type = type;
+	  if ( type == WJets || type == DYJets ) {
+	    typeinfo.isInclusive = contains(sub.first,"MLM");
+	  } else {
+	    typeinfo.isInclusive = false;
+	  }
 	}
       }
     }
