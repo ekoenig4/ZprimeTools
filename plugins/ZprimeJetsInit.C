@@ -50,7 +50,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
   int fileNumber = 0;
   int maxFiles = -1;
   int inFile=0;
-  sample = DataMC(string(inputFilename));
+  sample.setInfo(string(inputFilename));
   while ((filename = (TSystemFile*)nextlist()) && fileNumber >  maxFiles)
     {
       //Debug
@@ -78,8 +78,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
 	}
       fileNumber++;
     }
-  string sampleID[Total] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
-  cout<<"Sample type: "<<sampleID[sample.type]<< (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<"isW_or_ZJets: "<<sample.isW_or_ZJet() << endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;

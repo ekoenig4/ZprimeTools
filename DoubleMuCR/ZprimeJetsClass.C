@@ -57,7 +57,7 @@ int main(int argc, const char* argv[]) {
   t.Loop(maxEvents,reportEvery);
   return 0;
 }
-
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
 void ZprimeJetsClass::initVars() {
   ZprimeJetsCommon::initVars();
 

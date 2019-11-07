@@ -59,6 +59,7 @@ int main(int argc, const char* argv[]) {
   return 0;
 }
 
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets; }
 void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
   Long64_t nentries = fChain->GetEntries();
