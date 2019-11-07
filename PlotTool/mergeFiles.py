@@ -1,12 +1,13 @@
-from os import listdir,path,mkdir
+import os
 import sys
 from subprocess import Popen,PIPE,STDOUT
 from time import sleep
+import re
 
 def singleThread(AllFiles,show=False):
     #Hadd files together
     for fn in AllFiles:
-        nfile = [f for f in listdir(".output/") if fn+"_" in f]
+        nfile = [f for f in os.listdir(".output/") if fn+"_" in f]
         if len(nfile) != 0:
             arg = ["hadd","-f",fn+".root"]
             for f in nfile:arg.append(".output/"+f)
@@ -18,7 +19,7 @@ def multiThread(AllFiles,show=False):
     threads = {}
     nthreads = 0
     for fn in AllFiles:
-        nfile = [f for f in listdir(".output/") if fn+"_" in f]
+        nfile = [f for f in os.listdir(".output/") if fn+"_" in f]
         if len(nfile) != 0:
             arg = ["hadd","-f",fn+".root"]
             for f in nfile:arg.append(".output/"+f)
@@ -45,32 +46,32 @@ def multiThread(AllFiles,show=False):
                 out = None
     if merging: print "\nFiles Merged"
 ###################################
-def mergeData(dataFiles,eramap,show=False):
-    if not any(dataFiles): return
-    if type(dataFiles) == str: final = dataFiles
-    else:                      final = dataFiles[0].split('_')[0]
-    arg = ["hadd",final+".root"]
-    if not path.isdir("DataEra/"): mkdir("DataEra/")
-    def mvEraFiles():
-        for i,e in enumerate(sorted(eramap.keys())):
-            i_fname = final+"_"+str(i)+".root"
-            o_fname = "DataEra/"+final+"_"+e+".root"
-            if not path.isfile(i_fname): continue
-            proc = Popen(["mv",i_fname,o_fname])
-            proc.wait()
-    ################################################
-    if eramap != None and type(dataFiles) == list: mvEraFiles()
-    arg += [ 'DataEra/'+fname for fname in listdir('DataEra') ]
-    if show: print "Merging Data"
-    proc = Popen(arg)
-    proc.wait()
+def mergeData(datafiles,eralist,show=False):
+    if not any(datafiles): return
+    def checkfile(fname):
+        if os.path.isfile(fname+'.root'):
+            marked = re.findall(r'_\d*$',fname)
+            if any(marked):
+                nera = int(marked[0].split('_')[1])
+                new_fname = fname.replace(marked[0],'_%s' % eralist[nera])
+                os.rename(fname+'.root',new_fname+'.root')
+                fname = new_fname
+            return fname
+        return None
+    filelist = []
+    for fname in datafiles:
+        fname = checkfile(fname)
+        if fname is not None and fname not in filelist: filelist.append(fname+'.root')
+    if any(filelist):
+        output = filelist[0].split('_')[0]
+        command = ['hadd','-f','%s.root' % output ] + filelist
+        os.system(' '.join(command))
 ###################################
 
-def HaddFiles(datafiles,mcfiles,eramap=None,single=False,show=False):
-    if type(datafiles) == str: haddfiles = mcfiles
-    else: haddfiles = datafiles + mcfiles
-    if (single): singleThread(haddfiles,show=show)
-    else:multiThread(haddfiles,show=show)
-    mergeData(datafiles,eramap,show=show)
+def HaddFiles(datafiles,mcfiles,eralist=None,single=False,show=False):
+    haddfiles = datafiles + mcfiles
+    # if (single): singleThread(haddfiles,show=show)
+    # else:multiThread(haddfiles,show=show)
+    mergeData(datafiles,eralist,show=show)
 ###############################################################################################################
     

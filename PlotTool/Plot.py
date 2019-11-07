@@ -134,22 +134,17 @@ class datamc(object):
         if not os.path.isdir('.output/'): return
         def validfile(fname): return os.path.isfile(fname)
         mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
-        datafiles = []
-        if self.region != 'SignalRegion': datafiles = [ self.Data_FileName+"_"+str(i)
-                                                        for i,e in enumerate(sorted(self.lumi_by_era.keys()))
-                                                        if not os.path.isfile("DataEra/"+self.Data_FileName+"_"+e+".root")
-                                                        and any(self.Data_FileName+"_"+str(i) in file for file in os.listdir(".output"))]
-        if self.region == 'SignalRegion':
-            if not validfile(self.Data_FileName+'.root'): mcfiles.append(self.Data_FileName) # Treat as mc file for hadding since we only have one file 
-        elif not any(datafiles):
-            if not validfile(self.Data_FileName+'.root'): datafiles = self.Data_FileName
+        eralist = sorted(self.lumi_by_era.keys())
+        datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist ]
+        datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) ]
+        datafiles = datafiles_v1 + datafiles_v2
         ##########
         if self.signal != None:
             for fname in self.Mx_Mv_Files:
                 if not validfile(fname+'.root'):
                     mcfiles.append(fname)
         ##########
-        merge.HaddFiles(datafiles,mcfiles,eramap=self.lumi_by_era)
+        merge.HaddFiles(datafiles,[],eralist=eralist)
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     ###############################################################################################################
 
