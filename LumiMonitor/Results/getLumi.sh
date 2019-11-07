@@ -1,4 +1,6 @@
 #!/bin/sh
+BRILWS=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.1.7/bin
+if [[ ":$PATH:" != *":$BRILWS:"* ]]; then export PATH=$BRILWS:$PATH; fi
 cwd=$(pwd)
 for dir in $@; do
     if [[ -d $dir ]]; then
