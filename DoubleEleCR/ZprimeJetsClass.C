@@ -111,7 +111,7 @@ float EletriggerSF(float pt, float eta){
   }
   return sf;
 }
-
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
 float ZprimeJetsClass::getSF(int lepindex_leading, int lepindex_subleading) {
   float leadingElePt = elePt->at(lepindex_leading) < 500 ? elePt->at(lepindex_leading) : 499;
   float leadingEleEta = fabs(eleSCEta->at(lepindex_leading)) < 2.5 ? eleSCEta->at(lepindex_leading) : 2.49;

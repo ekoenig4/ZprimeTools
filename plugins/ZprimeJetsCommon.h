@@ -24,6 +24,8 @@
 #include <functional>
 
 #include "ZprimeJetsCutConfig.h"
+#include "ZprimeEnums.h"
+#include "Dataset.h"
 
 #include "ScaleUnc.h"
 #include "ShapeUnc.h"
@@ -40,20 +42,26 @@ public :
   TTree *tree;
 
   static const bool debug = true;
-  enum Type { Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,WW,WZ,ZZ,Total };
   struct DataMC {
+    Dataset dataset;
     Type type;
     string name[Total];
     bool isInclusive;
     bool isData;
     int PID;
-    DataMC(){
-      string name[Total] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","WW","WZ","ZZ"};
-      for (int i = 0; i < Total; i++) this->name[i] = name[i];
-    };
-    DataMC(string filename);
+    void setInfo(string filename) {
+      auto typeinfo = dataset.getTypeInfo(filename);
+      type = typeinfo.type;
+      isInclusive = typeinfo.isInclusive;
+      isData = (type == Data);
+      isSignal = (type == Signal);
+      isInclusive = false;
+      if (type == WJets) PID = 24;
+      if (type == ZJets || type == DYJets) PID = 23;
+    }
+    void initRegion();
     bool isW_or_ZJet();
-    inline string getName() { return name[type]; }
+    inline const char* getName() { return TypeName[type]; }
   } sample;
 
   struct TH1FCollection : public map<string,TH1F*> {

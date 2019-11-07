@@ -59,8 +59,6 @@ int ZprimeJetsCommon::getFilesByNumber(TChain *chain,TString path,const char* fi
       TString dataset = ".root";
       TString  FullPathInputFile = (path+filename->GetName());
       TString name = filename->GetName();
-      if (sample.type  < 0)
-	sample = DataMC(string(name));
       if (name.Contains(dataset))
 	{
 	  string fname = string(name);
@@ -100,7 +98,7 @@ int ZprimeJetsCommon::getFilesByList(TChain *chain,TString path,vector<const cha
 ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) {
   TChain *chain = new TChain("phoJetNtuplizer/eventTree");
   TString path = inputFilename;
-  sample = DataMC(string(inputFilename));
+  sample.setInfo(string(inputFilename));
   int inFile = 0;
   if ( filelist.size() == 0 )
     inFile = getFilesByNumber(chain,path,"-1");
@@ -117,7 +115,7 @@ ZprimeJetsCommon::ZprimeJetsCommon(const char* inputFilename,const char* outputF
 {
   TChain *chain = new TChain("phoJetNtuplizer/eventTree");
   TString path = inputFilename;
-  sample = DataMC(string(inputFilename));
+  sample.setInfo(string(inputFilename));
   int inFile = getFilesByNumber(chain,path,fileRange);
   cout<<"Sample type: "<< sample.getName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<"isW_or_ZJet: " << sample.isW_or_ZJet() << endl;

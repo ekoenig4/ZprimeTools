@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
   t.Loop(maxEvents,reportEvery);
   return 0;
 }
-
+bool ZprimeJetsCommon::DataMC::isW_or_ZJet() { return type == WJets || type == ZJets || type == DYJets; }
 float ZprimeJetsClass::getSF(int mu_index) {
   float muEta_to_use = fabs(muEta->at(mu_index));
   float muPt_to_use = muPt->at(mu_index);
