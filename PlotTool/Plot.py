@@ -23,15 +23,14 @@ parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",
 parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
 
 def GetRegion():
-    preRegionData = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
-    postRegionData =["postMETdata.root","postSingleEle.root","postSingleMu.root","postDoubleEle.root","postDoubleMu.root"] 
+    region_pattern = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
     RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
     found = False
-    for region,pre,post in zip(RegionName,preRegionData,postRegionData):
+    for region,pattern in zip(RegionName,region_pattern):
         if path.isdir('.output/'):
-            if any( pre in fname for fname in listdir('.output/') ): found = True; break
-        if path.isfile(post): found = True; break
+            if any( pattern in fname for fname in listdir('.output/') ): found = True; break
+        if any( pattern in fname for fname in listdir('.') ): found = True; break
     if not found: return None
     return region
 def GetMCxsec(filenames,xsecMap):
