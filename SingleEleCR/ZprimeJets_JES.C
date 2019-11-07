@@ -83,22 +83,25 @@ void ZprimeJetsClass::JetEnergyScale(float start_weight) {
 	      if(mulist.size() == 0 && pholist.size() == 0) {
 		Float_t dPhi_lepMET = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
+
+		if (lepMET_MT < lepMETMtCut) { 
 		
-		if(pfMET > pfMET50Cut) {
-		  float metcut = (fabs(pfMET-caloMET))/recoil;
+		  if(pfMET > pfMET50Cut) {
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
 		  
-		  if(metcut < metRatioCut) {
+		    if(metcut < metRatioCut) {
 		    
-		    if(btagVeto()) {
-		      vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
+		      if(btagVeto()) {
+			vector<int> jetveto = JetVetoDecision(jetCand[0],lepindex);
 		      
-		      if(dPhiJetMETcut(jetveto,recoilPhi)) {
-			weight = event_weight;
-			if (unc == 1)  shapeUncs->fillUp(uncname);// up
-			if (unc == -1) shapeUncs->fillDn(uncname);// down
-		      }
-		    }   
-		  }	
+			if(dPhiJetMETcut(jetveto,recoilPhi)) {
+			  weight = event_weight;
+			  if (unc == 1)  shapeUncs->fillUp(uncname);// up
+			  if (unc == -1) shapeUncs->fillDn(uncname);// down
+			}
+		      }   
+		    }	
+		  }
 		}
 	      }
 	    }

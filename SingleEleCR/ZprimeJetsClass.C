@@ -73,8 +73,8 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  float nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = pfMET50 = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
+  float nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, lepMETMT160, pfMET50, nNoMuons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
+  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = lepMETMT160 = pfMET50 = nNoMuons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
 
   if (!sample.isData) SetScalingHistos();
 
@@ -154,40 +154,45 @@ void ZprimeJetsClass::Loop(Long64_t maxEvents, int reportEvery) {
 		Float_t dPhi_lepMET = DeltaPhi(elePhi->at(lepindex),pfMETPhi);
 		Float_t lepMET_MT = sqrt(2*elePt->at(lepindex)*pfMET*(1-TMath::Cos(dPhi_lepMET)));
 		h_lepMET_MT->Fill(lepMET_MT,event_weight);
-		
-		if(pfMET > pfMET50Cut) {
-		  pfMET50+=event_weight;
+
+		if (lepMET_MT < lepMETMtCut) {
+		  lepMETMT160+=event_weight;
 		  fillHistos(7,event_weight);
-		  float metcut = (fabs(pfMET-caloMET))/recoil;
-		  h_metcut->Fill(metcut,event_weight);
-		  
-		  if(metcut < metRatioCut) {
-		    nMETcut+=event_weight;
+		
+		  if(pfMET > pfMET50Cut) {
+		    pfMET50+=event_weight;
 		    fillHistos(8,event_weight);
-		    
-		    if(btagVeto()) {
-		      nbtagVeto+=event_weight;
+		    float metcut = (fabs(pfMET-caloMET))/recoil;
+		    h_metcut->Fill(metcut,event_weight);
+		  
+		    if(metcut < metRatioCut) {
+		      nMETcut+=event_weight;
 		      fillHistos(9,event_weight);
-		      float minDPhiJetMET_first4 = TMath::Pi();
-		      for (int ijet = 0; ijet < jetveto.size(); ijet++) {
-			float dPhiJetMET = DeltaPhi(jetPhi->at(jetveto[ijet]),recoilPhi);
-			if (dPhiJetMET < minDPhiJetMET_first4 && ijet < 4) minDPhiJetMET_first4 = dPhiJetMET;
-		      }
-		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
-		      
-		      if(dPhiJetMETcut(jetveto,recoilPhi)) {
-			nDphiJetMET+=event_weight;
-			
-			QCDVariations(event_weight); // 14 Histograms
+		    
+		      if(btagVeto()) {
+			nbtagVeto+=event_weight;
 			fillHistos(10,event_weight);
-
-			PFUncertainty(event_weight); // 6 Histograms
-
-			if (jetveto.size() == 1) {
-			  fillHistos(11,event_weight);
+			float minDPhiJetMET_first4 = TMath::Pi();
+			for (int ijet = 0; ijet < jetveto.size(); ijet++) {
+			  float dPhiJetMET = DeltaPhi(jetPhi->at(jetveto[ijet]),recoilPhi);
+			  if (dPhiJetMET < minDPhiJetMET_first4 && ijet < 4) minDPhiJetMET_first4 = dPhiJetMET;
 			}
-		      }
-		    }   
+			h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
+		      
+			if(dPhiJetMETcut(jetveto,recoilPhi)) {
+			  nDphiJetMET+=event_weight;
+			
+			  QCDVariations(event_weight); // 14 Histograms
+			  fillHistos(11,event_weight);
+
+			  PFUncertainty(event_weight); // 6 Histograms
+
+			  if (jetveto.size() == 1) {
+			    fillHistos(12,event_weight);
+			  }
+			}
+		      }   
+		    }
 		  }
 		}
 	      }
