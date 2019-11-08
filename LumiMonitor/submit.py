@@ -8,9 +8,8 @@ sys.path.append(repo)
 from CondorTools.SubmitDataset import submit,options
 options['year'] = '2018'
 options['region'] = 'LM'
-options['parallel'] = True
+# options['parallel'] = True
 #----Submit---#
-submit('egamma',sub='D',script='calcLumi.py',filelist=True)
-# submit('met',script='calcLumi.py',filelist=True)
+submit('met',script='calcLumi.py',filelist=True)
 # submit('egamma',script='calcLumi.py',filelist=True)
 

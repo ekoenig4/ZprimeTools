@@ -65,7 +65,7 @@ def getargs(argv):
     args.reportevery = int(args.runargs[4])
     args.label = args.runargs[5]
     args.nbatches = checkSplit(args.runargs[6])
-
+    
     if args.error:
         print 'Errors found in arguments, exitting'
         exit()
@@ -173,7 +173,6 @@ def submit(argv=sys.argv,redirect=False):
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'
-
     if not args.filelist:    
         stripDataset(args.rfiles)
         splitArgument(args.nbatches,args.rfiles,config,redirect)

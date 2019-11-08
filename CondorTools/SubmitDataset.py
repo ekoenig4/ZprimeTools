@@ -22,7 +22,6 @@ def submit(data,sub=None,label=None,split=-1,filelist=False,script='analyze'):
     if sub is None: sublist = subset.keys()
     elif type(sub) != list: sublist = [sub]
     else: sublist = sub
-
     for sub in sublist:
         if sub not in subset: print '%s not found in subset' % sub; continue
         for i,input in enumerate(subset[sub]):
@@ -32,7 +31,7 @@ def submit(data,sub=None,label=None,split=-1,filelist=False,script='analyze'):
             if filelist: command = ['-f'] + command
             if options['region'] is not None: command = ['-r',options['region']] + command
             if options['year'] is not None: command = ['-y',options['year']] + command
-
+            
             if options['parallel']:
                 proc = Process(target=SubmitCondor.submit,args=(command,True))
                 proc.start()

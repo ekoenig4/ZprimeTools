@@ -27,3 +27,11 @@
 >>D
 /hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_May2019/MET/MET2018D_prompt/
 
+>>v2A
+/hdfs/store/user/varuns/NTuples/Data/Run2018_102X_JECv19/MET/MET2018A_17Sep2018/
+
+>>v2B
+/hdfs/store/user/varuns/NTuples/Data/Run2018_102X_JECv19/MET/MET2018B_17Sep2018/
+
+>>v2D
+/hdfs/store/user/varuns/NTuples/Data/Run2018_102X_JECv19/MET/MET2018D-PromptReco/

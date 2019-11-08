@@ -1,11 +1,13 @@
 class CondorConfig():
-    order = list()
+    def __init__(self):
+        self.order = list()
     def queue(self): self.order.append('Queue')
     def append(self,element): self.order.append(element)
     def __getitem__(self,index): return self.order[index]
     def __setitem__(self,key,value): self.order.append( (key,value) )
     def __iter__(self): return iter(self.order)
     def __str__(self):
+        if not any(self.order): return str(self.order)
         nspace = max( len( element[0] ) for element in self if type(element) == tuple )
         spacer = '{0:<%i}' % nspace
         lines = []

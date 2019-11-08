@@ -4,9 +4,12 @@ if wd == '': wd = '.'
 EFLAGS = {
     ValueError:False
 }
+
+if os.path.isdir('ntuples/'): ntuple_path = 'ntuples'
+else: ntuple_path = '%s/ntuples' % wd
 def getDataset(label):
     dataset = {}
-    fname = '%s/ntuples/%s.txt' % (wd,label)
+    fname = '%s/%s.txt' % (ntuple_path,label)
     if not os.path.isfile(fname): return None
     def checkdir(directory):
         if os.path.isdir(directory): return True
@@ -26,18 +29,31 @@ def getDataset(label):
     
 def getAllDatasets():
     dataset = {}
-    ntuples = '%s/ntuples/' % wd
+    ntuples = ntuple_path
     for fname in os.listdir(ntuples):
         if fname.endswith('.txt'): dataset.update( getDataset(fname.replace('.txt','')) )
     if EFLAGS[ValueError]: print 'Invalid directories detected, exiting...'; exit()
     return dataset
 
 if __name__ == '__main__':
-    datasets = getAllDatasets()
-
     datalist = ['egamma','met','signal','zjets','wjets','dyjets','gjets','ttjets','ewk','qcd']
+    from sys import argv
+    if len(argv) == 1: datasets = getAllDatasets()
+    else:
+        datasets = {}
+        for data in argv[1:]: datasets.update( getDataset(data) )
+    import re
+    def sort_nicely( l ):
+        """ Sort the given list in the way that humans expect.
+        """
+        convert = lambda text: int(text) if text.isdigit() else text
+        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
+        l.sort( key=alphanum_key )
     for data in datalist:
-        for sub in datasets[data]:
+        if data not in datasets: continue
+        sublist = datasets[data].keys()
+        sort_nicely(sublist)
+        for sub in sublist:
             print '%s----%s' % (data,sub)
             for directory in datasets[data][sub]:
                 print '------%s' % directory
