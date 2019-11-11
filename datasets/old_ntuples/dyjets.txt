@@ -26,6 +26,3 @@
 >>2500toInf
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT2500-Inf/0000/
 
->>MLM
-/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_Incl/
-
