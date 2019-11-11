@@ -81,8 +81,8 @@ def saveplot(variable):
     lumi = max( lumi for region,lumi in mc.items() )
     for region,nhisto in config['regions'].items():
         rfile.cd()
-        if variable == 'h_recoil' and region == 'SignalRegion/': variable = 'pfMET'
-        elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'h_recoil'
+        if variable == 'recoil' and region == 'SignalRegion/': variable = 'pfMET'
+        elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'recoil'
         var = variable+'_'+nhisto+cut
         print region,var
         directory = rfile.mkdir(dir[region])

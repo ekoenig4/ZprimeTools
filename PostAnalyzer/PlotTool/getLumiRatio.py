@@ -7,4 +7,7 @@ fn_known = TFile.Open(argv[2])
 c_unknown = fn_unknown.Get("h_cutflow")
 c_known = fn_known.Get("h_cutflow")
 
-print c_unknown.GetBinContent(1)/c_known.GetBinContent(1)
+print fn_unknown.GetName(),c_unknown[1]
+print fn_known.GetName(),c_known[1]
+print 'ratio',c_unknown[1]/c_known[1]
+
