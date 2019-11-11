@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 
 cmssw = os.getenv("CMSSW_BASE")
 cwd = os.getcwd()
-years = ["ZprimeTools2016","ZprimeTools2017","ZprimeTools2018"]
+years = ["2016","2017","2018"]
 regions = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
 def getStatusDirs(cwd):
