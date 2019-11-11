@@ -6,8 +6,10 @@ from subprocess import Popen,STDOUT,PIPE
 from CondorConfig import CondorConfig
 from argparse import ArgumentParser
 
-script_path = '/'.join(os.path.realpath(__file__).split('/')[:-1])
-repo_path = script_path.replace('/CondorTools','')
+def updirectory(path): path += '/../'; return path
+
+script_path = os.path.dirname(os.path.realpath(__file__))
+repo_path = os.path.realpath( updirectory(script_path) )
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
 NFILE_PER_BATCH = 60
@@ -19,6 +21,21 @@ def ignore(path,fn):
 def output(string,redirect=False):
     if redirect is False: print string
     else: redirect.write(string+'\n')
+def findInputDirectories():
+    # search current directory and parent directories for input directories
+    directories = []
+    find_these = ['RootFiles','datasets/ntuples']
+    def helper(path,check):
+        realpath = os.path.realpath(path)
+        check_path = os.path.join(realpath,check)
+        print check_path
+        if os.path.isdir(check_path) and not os.path.islink(check_path): return os.path.relpath(check_path)
+        elif realpath != repo_path: return helper( updirectory(realpath),check )
+    for check in find_these:
+        path = helper('.',check)
+        if path != None: directories.append(path)
+    return directories
+    
 def init():
     #Create Directories to put condor files in
     #Where executable and output files go
@@ -135,7 +152,7 @@ def inputFilelist(nbatches,rfiles,config,redirect):
 
 def condor_submit(command):
     if DoSubmit: os.system(command)
-    else: pass
+    else: print "Not Submitting"
 
 def submit(argv=sys.argv,redirect=False):
     args = getargs(argv)
@@ -169,7 +186,7 @@ def submit(argv=sys.argv,redirect=False):
     config['reportevery'] = args.reportevery
     config['label'] = args.label
     config['Batch_Name'] = '%s%s_$(label)' % (args.region,args.year)
-    config['Transfer_Input_Files'] = ['$(script)','%s/RootFiles' % repo_path,'%s/datasets/ntuples' % repo_path]
+    config['Transfer_Input_Files'] = ['$(script)'] + findInputDirectories()
     config['output'] = '../.status/$(label)/$(Process)_$(label).out'
     config['error']  = '../.status/$(label)/$(Process)_$(label).err'
     config['Log']    = '../.status/$(label)/$(Process)_$(label).log'

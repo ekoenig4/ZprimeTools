@@ -13,9 +13,9 @@ options = {
     'submit':True
 }
     
-def submit(data,sub=None,label=None,split=-1,batchsize=options['batchsize'],doSubmit=options['submit'],filelist=False,script='analyze'):
-    SubmitCondor.NFILE_PER_BATCH = batchsize
-    SubmitCondor.DoSubmit = doSubmit
+def submit(data,sub=None,label=None,split=-1,filelist=False,script='analyze'):
+    SubmitCondor.NFILE_PER_BATCH = options['batchsize']
+    SubmitCondor.DoSubmit = options['submit']
     dataset = getDataset(data)
     if dataset == None: print '%s not found in dataset' % data; exit()
     if label is None: label = labelmap[data]

@@ -1,9 +1,13 @@
-YEARS=2016
+YEARS=2016 2017
 
-.PHONY: $(YEARS)
+.PHONY: $(YEARS) all
 
 all: $(YEARS)
 
 $(YEARS):
-	$(MAKE) -C $@
+	@$(MAKE) -C $@
 
+%::	
+	@for year in $(YEARS); do \
+		$(MAKE) -C $${year} $@; \
+	done
