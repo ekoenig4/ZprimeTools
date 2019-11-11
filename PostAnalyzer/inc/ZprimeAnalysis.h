@@ -65,7 +65,18 @@ public:
   struct TH2FCollection : public std::map<std::string,TH2F*> {
     float getBin(std::string name,float x,float y) {
       TH2F* histo = (*this)[name];
-      return histo->GetBinContent( histo->GetXaxis()->FindBin(x),histo->GetYaxis()->FindBin(y) );
+      int xbin,ybin;
+      float xmax = histo->GetXaxis()->GetXmax(); float xmin = histo->GetXaxis()->GetXmin();
+      float ymax = histo->GetYaxis()->GetXmax(); float ymin = histo->GetYaxis()->GetXmin();
+      if ( x >= xmax )      xbin = histo->GetNbinsX();
+      else if ( x <= xmin ) xbin = 1;
+      else                  xbin = histo->GetXaxis()->FindBin(x);
+
+      if ( y >= ymax )      ybin = histo->GetNbinsY();
+      else if ( y <= ymin ) ybin = 1;
+      else                  ybin = histo->GetYaxis()->FindBin(y);
+      
+      return histo->GetBinContent( xbin,ybin );
     }
   } th2fmap;
   ScaleUncCollection scaleUncs;
@@ -874,7 +885,7 @@ public:
 
   virtual float dPhiJetMETmin(vector<int>,float);
   virtual void SetBoson(int PID);
-  virtual float getKFactor(float bosonPt) { return 1; };
+  virtual float getKFactor(float bosonPt);
   virtual void SetKFactors(float bosonPt);
   virtual void ApplyKFactor(float &event_weight);
   virtual void ApplyPileup(float &event_weight);
@@ -901,7 +912,8 @@ public:
   virtual bool tauLooseID(int);
   virtual vector<int> JetVetoDecision();
   virtual bool jetSelectionID(int);
-  virtual bool btagVeto();
+  bool btagVeto();
+  virtual float getCSV2Cut();
 };
 
 #endif

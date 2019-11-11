@@ -237,6 +237,8 @@ void ZprimeAnalysis::SetBoson(int PID) {
   }
 }
 
+float ZprimeAnalysis::getKFactor(float bosonPt) { return 1; }
+
 void ZprimeAnalysis::SetKFactors(float bosonPt) {
   kfactor = getKFactor(bosonPt);
 }
@@ -461,23 +463,24 @@ vector<int> ZprimeAnalysis::JetVetoDecision() {
   return jetindex;
 }
 
-bool ZprimeAnalysis::btagVeto() {
+float ZprimeAnalysis::getCSV2Cut() { return -999; }
 
+bool ZprimeAnalysis::btagVeto() {
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
-    if(jetPt->at(i) > bjetVetoPtCut && fabs(jetEta->at(i)) < bjetVetoEtaCut && jetCSV2BJetTags->at(i) > bjetVetoCSVv2Cut)
+    if(jetPt->at(i) > bjetVetoPtCut && fabs(jetEta->at(i)) < bjetVetoEtaCut && jetCSV2BJetTags->at(i) > getCSV2Cut())
       btagVeto = false;
   return btagVeto;
 }
 
 
-bool ZprimeAnalysis::eleTightID(int iele)     { throw runtime_error("No eleTightID Specified"); }
-bool ZprimeAnalysis::eleLooseID(int iele)     { throw runtime_error("No eleLooseID Specified"); }
-bool ZprimeAnalysis::muTightID(int imu)       { throw runtime_error("No muTightID Specified"); }
-bool ZprimeAnalysis::muLooseID(int imu)       { throw runtime_error("No muLooseID Specified"); }
-bool ZprimeAnalysis::phoLooseID(int ipho)     { throw runtime_error("No phoLooseID Specified"); }
-bool ZprimeAnalysis::tauLooseID(int itau)     { throw runtime_error("No tauLooseID Specified"); }
-bool ZprimeAnalysis::jetSelectionID(int ijet) { throw runtime_error("No jetSelectionID Specified"); }
+bool ZprimeAnalysis::eleTightID(int iele)     { return true; }
+bool ZprimeAnalysis::eleLooseID(int iele)     { return true; }
+bool ZprimeAnalysis::muTightID(int imu)       { return true; }
+bool ZprimeAnalysis::muLooseID(int imu)       { return true; }
+bool ZprimeAnalysis::phoLooseID(int ipho)     { return true; }
+bool ZprimeAnalysis::tauLooseID(int itau)     { return true; }
+bool ZprimeAnalysis::jetSelectionID(int ijet) { return true; }
 
 ZprimeAnalysis::~ZprimeAnalysis()
 {

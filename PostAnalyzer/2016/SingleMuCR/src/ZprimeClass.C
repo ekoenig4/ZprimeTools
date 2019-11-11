@@ -53,8 +53,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nentriesToCheck = nentries;
 
   int nTotal = 0;
-  float nTotalEvents,nFilters, nHLT, nCRSelection, nMET200, lepMET_MT160, nNoElectrons, nMETcut,nbtagVeto, nDphiJetMET,nJetSelection;
-  nTotalEvents = nFilters = nHLT = nCRSelection = nMET200 = lepMET_MT160 = nNoElectrons = nMETcut = nDphiJetMET = nbtagVeto = nJetSelection = 0;
 
   if (!sample.isData) SetScalingHistos();
   
@@ -84,7 +82,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     float weightNorm = event_weight;
     jetCand   = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
-    nTotalEvents+=genWeight;
     cutflow->Fill("Total Events",genWeight);
     for (int bit = 0; bit < 11; bit++)
       if (metFilters >> bit & 1 == 1)

@@ -21,7 +21,7 @@ public:
   bool tau_veto(int jet_index,int leading,int subleading,float tauPtCut);
   vector<int> JetVetoDecision(int leading,int subleading);
   bool CRSelection(std::vector<int> tight,std::vector<int> loose);
-  
+  float getSF(int leading,int subleading);
 };
 
 #endif

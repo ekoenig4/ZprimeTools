@@ -11,7 +11,8 @@ const float jetVetoEtaCut = 2.4;
 /* B-Jet Veto Floating Cuts */
 const float bjetVetoPtCut = 30;
 const float bjetVetoEtaCut = 2.5;
-const float bjetVetoCSVv2Cut = 0.8484;
+const float bjetVetoCSVv2Cut_16 = 0.8484;
+const float bjetVetoCSVv2Cut_17 = 0.8838;
 
 /* Isolation Cone Cuts */
 const float Iso4Cut = 0.4;

@@ -32,6 +32,7 @@ public:
   virtual bool muTightID(int);
   virtual bool muLooseID(int);
   virtual bool jetSelectionID(int);
+  virtual float getCSV2Cut();
 };
 
 #endif

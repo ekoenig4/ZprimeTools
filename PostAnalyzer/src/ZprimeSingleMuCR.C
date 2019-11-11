@@ -48,6 +48,16 @@ bool ZprimeSingleCR::CRSelection(vector<int> tight,vector<int> loose) {
   return false;
 }
 
+float ZprimeSingleCR::getSF(int lepindex) {
+  float eta = fabs(muEta->at(lepindex));
+  float pt = muPt->at(lepindex);
+  
+  float tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",pt,eta);
+  float tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",pt,eta);
+  
+  return tightMuISO_SF_corr*tightMuID_SF_corr;
+}
+
 vector<int> ZprimeSingleCR::JetVetoDecision(int lepindex) {
   vector<int> jetindex; jetindex.clear();
 

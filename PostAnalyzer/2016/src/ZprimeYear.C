@@ -82,6 +82,8 @@ bool ZprimeYear::jetSelectionID(int ijet) {
   return jetPFLooseID->at(ijet)==1;
 }
 
+float ZprimeYear::getCSV2Cut() { return bjetVetoCSVv2Cut_16; }
+
 ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange) {
   TChain *chain = new TChain("ggNtuplizer/EventTree");
   TString path = inputFilename;

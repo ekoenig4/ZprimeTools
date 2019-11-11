@@ -78,6 +78,18 @@ bool ZprimeDoubleCR::CRSelection(vector<int> tightlist,vector<int> looselist) {
   return false;
 }
 
+float ZprimeDoubleCR::getSF(int leading,int subleading) {
+  float leading_pt = muPt->at(leading); float leading_eta = fabs(muEta->at(leading)); 
+  float subleading_pt = muPt->at(subleading); float subleading_eta = fabs(muEta->at(subleading)); 
+  
+  float tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",leading_pt,leading_eta);
+  float tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",leading_pt,leading_eta);
+  float looseMuISO_SF_corr = th2fmap.getBin("looseMuSF_ISO",subleading_pt,subleading_eta);
+  float looseMuID_SF_corr = th2fmap.getBin("looseMuSF_ID",subleading_pt,subleading_eta);
+  
+  return tightMuISO_SF_corr*tightMuID_SF_corr*looseMuISO_SF_corr*looseMuID_SF_corr;
+}
+
 vector<int> ZprimeDoubleCR::JetVetoDecision(int leading, int subleading) {
   vector<int> jetindex; jetindex.clear();
 			  

@@ -69,6 +69,78 @@ bool ZprimeDoubleCR::CRSelection(vector<int> tightlist,vector<int> looselist) {
   }
   return false;
 }
+float EletriggerSF(float pt, float eta){
+  float sf = 1.0;
+  if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
+    if(pt < 40.0) sf = 0.75;
+    if(pt > 40.0 && pt < 50.0) sf = 0.92;
+    if(pt > 50.0 && pt < 60.0) sf = 0.95;
+    if(pt > 60.0 && pt < 70.0) sf = 0.96;
+    if(pt > 70.0 && pt < 80.0) sf = 0.96;
+    if(pt > 80.0 && pt < 90.0) sf = 0.97;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.97;
+    if(pt > 150. && pt < 200.) sf = 0.97;
+    if(pt > 200. && pt < 250.) sf = 0.98;
+    if(pt > 250) sf = 0.93;
+  }
+  if(fabs(eta) >= 0.8   && fabs(eta) < 1.5){
+    if(pt < 40.0) sf = 0.64;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.96;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+    
+  if(fabs(eta) >= 1.5   && fabs(eta) < 2. ) {
+    if(pt < 40.0) sf = 0.63;
+    if(pt > 40.0 && pt < 50.0) sf = 0.91;
+    if(pt > 50.0 && pt < 60.0) sf = 0.94;
+    if(pt > 60.0 && pt < 70.0) sf = 0.95;
+    if(pt > 70.0 && pt < 80.0) sf = 0.95;
+    if(pt > 80.0 && pt < 90.0) sf = 0.95;
+    if(pt > 90.0 && pt < 100.) sf = 0.96;
+    if(pt > 100. && pt < 150.) sf = 0.96;
+    if(pt > 150. && pt < 200.) sf = 0.99;
+    if(pt > 200. && pt < 250.) sf = 0.97;
+    if(pt > 250) sf = 1.0;
+  }
+  if(fabs(eta) >= 2.) {
+    if(pt < 40.0) sf = 0.5;
+    if(pt > 40.0 && pt < 50.0) sf = 0.83;
+    if(pt > 50.0 && pt < 60.0) sf = 0.89;
+    if(pt > 60.0 && pt < 70.0) sf = 0.90;
+    if(pt > 70.0 && pt < 80.0) sf = 0.92;
+    if(pt > 80.0 && pt < 90.0) sf = 0.93;
+    if(pt > 90.0 && pt < 100.) sf = 0.94;
+    if(pt > 100. && pt < 150.) sf = 0.94;
+    if(pt > 150. && pt < 200.) sf = 0.96;
+    if(pt > 200. && pt < 250.) sf = 1.0;
+    if(pt > 250) sf = 1.0;
+  }
+  return sf;
+}
+
+float ZprimeDoubleCR::getSF(int leading, int subleading) {
+  float leading_eta = eleSCEta->at(leading); float leading_pt = elePt->at(leading);
+  float subleading_eta = eleSCEta->at(subleading); float subleading_pt = elePt->at(subleading);
+  
+  float leadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",leading_eta,leading_pt);
+  float leadingEleEffSF_corr= th2fmap.getBin("eleIDSF_tight",leading_eta,leading_pt);
+  float leadingEleTriggSF = EletriggerSF(leading_pt,leading_eta);
+  
+  float subleadingEleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",subleading_eta,subleading_pt);
+  float subleadingEleEffSF_corr= th2fmap.getBin("eleIDSF_loose",subleading_eta,subleading_pt);
+  float subleadingEleTriggSF = EletriggerSF(subleading_pt,subleading_eta);
+  
+  return leadingEleRecoSF_corr*leadingEleEffSF_corr*leadingEleTriggSF*subleadingEleRecoSF_corr*subleadingEleEffSF_corr*subleadingEleTriggSF;
+}
 
 vector<int> ZprimeDoubleCR::JetVetoDecision(int leading, int subleading) {
   vector<int> jetindex; jetindex.clear();

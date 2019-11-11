@@ -117,7 +117,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		fillHistos(6,event_weight);
 		bool muVeto = muon_veto(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
 		bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
-		// bool tau_veto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+		// bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 		if(muVeto && phoVeto) {
 		  cutflow->Fill("LeptonVeto",event_weight);
@@ -270,7 +270,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 	      if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
 		bool muVeto = muon_veto(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
 		bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
-		// bool tau_veto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+		// bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 		if(muVeto && phoVeto) {
 		  float metcut = (fabs(pfMET-caloMET))/recoil;
