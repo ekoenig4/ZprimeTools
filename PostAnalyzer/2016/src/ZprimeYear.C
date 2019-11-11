@@ -1,6 +1,7 @@
 #ifndef ZprimeYear_C
 #define ZprimeYear_C
 #include "ZprimeYear.h"
+#include "ZprimeCutConfig.h"
 #include "Utilities.h"
 
 using namespace std;

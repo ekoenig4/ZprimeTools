@@ -35,3 +35,6 @@ clean:
 condor_clean:
 	rm -r .output/
 	rm -r .status/
+
+condor_submit:
+	./submit.py
