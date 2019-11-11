@@ -1,9 +1,15 @@
 #ifndef ZprimeAnalysis_C
 #define ZprimeAnalysis_C
+
+#include <stdexcept>
+
 #include "ZprimeAnalysis.h"
 #include "ZprimeCutConfig.h"
+#include "ZprimeEnums.h"
 #include "VariableBins.h"
 #include "Utilities.h"
+
+using namespace std;
 
 void ZprimeAnalysis::SetScalingHistos() {
   //This is the PU histogram obtained from Nick's recipe
@@ -259,6 +265,8 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   h_puTrueReWeight->Fill(puTrue->at(0),pileup*genWeight);
 }
 
+bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }
+
 bool ZprimeAnalysis::inclusiveCut() {
   if (sample.isInclusive)
     return genHT < 100;
@@ -291,7 +299,7 @@ void ZprimeAnalysis::initVars() {
 }
 
 
-vector<int> ZprimeAnalysis::electron_veto_tightID(int jet_index, float elePtCut) {
+vector<int> ZprimeAnalysis::electron_tightID(int jet_index, float elePtCut) {
   vector<int> ele_cands;
   ele_cands.clear();
 
@@ -320,7 +328,7 @@ vector<int> ZprimeAnalysis::electron_veto_tightID(int jet_index, float elePtCut)
   return ele_cands;
 }
 
-vector<int> ZprimeAnalysis::electron_veto_looseID(int jet_index, float elePtCut) {
+vector<int> ZprimeAnalysis::electron_looseID(int jet_index, float elePtCut) {
   vector<int> ele_cands;
   ele_cands.clear();
 
@@ -349,8 +357,12 @@ vector<int> ZprimeAnalysis::electron_veto_looseID(int jet_index, float elePtCut)
   return ele_cands;
 }
 
+bool ZprimeAnalysis::electron_veto(int jet_index,float elePtCut) {
+  return electron_looseID(jet_index,elePtCut).size() == 0;
+}
 
-vector<int> ZprimeAnalysis::muon_veto_tightID(int jet_index, float muPtCut) {
+
+vector<int> ZprimeAnalysis::muon_tightID(int jet_index, float muPtCut) {
   // bool veto_passed = true; //pass veto if no good muon found
   vector<int> mu_cands;
   mu_cands.clear();
@@ -374,7 +386,7 @@ vector<int> ZprimeAnalysis::muon_veto_tightID(int jet_index, float muPtCut) {
 
 //For MuonCR
 //Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate jet within dR of 0.5
-vector<int> ZprimeAnalysis::muon_veto_looseID(int jet_index, float muPtCut)
+vector<int> ZprimeAnalysis::muon_looseID(int jet_index, float muPtCut)
 {
   // cout << "Inside Muon Loose Veto" << endl;
   vector<int> mu_cands;
@@ -398,7 +410,11 @@ vector<int> ZprimeAnalysis::muon_veto_looseID(int jet_index, float muPtCut)
   return mu_cands;
 }
 
-vector<int> ZprimeAnalysis::photon_veto_looseID(int jet_index,float phoPtCut) {
+bool ZprimeAnalysis::muon_veto(int jet_index,float muPtCut) {
+  return muon_looseID(jet_index,muPtCut).size() == 0;
+}
+
+vector<int> ZprimeAnalysis::photon_looseID(int jet_index,float phoPtCut) {
   vector<int> pho_cands; pho_cands.clear();
 
   for (int i = 0; i < nPho; i++) {
@@ -412,7 +428,11 @@ vector<int> ZprimeAnalysis::photon_veto_looseID(int jet_index,float phoPtCut) {
   return pho_cands;
 }
 
-vector<int> ZprimeAnalysis::tau_veto_looseID(int jet_index,float tauPtCut) {
+bool ZprimeAnalysis::photon_veto(int jet_index,float phoPtCut) {
+  return photon_looseID(jet_index,phoPtCut).size() == 0;
+}
+
+vector<int> ZprimeAnalysis::tau_looseID(int jet_index,float tauPtCut) {
   vector<int> tau_cands; tau_cands.clear();
 
   for (int i = 0; i < nTau; i++) {
@@ -428,6 +448,9 @@ vector<int> ZprimeAnalysis::tau_veto_looseID(int jet_index,float tauPtCut) {
   return tau_cands;
 }
 
+bool ZprimeAnalysis::tau_veto(int jet_index,float tauPtCut) {
+  return tau_looseID(jet_index,tauPtCut).size() == 0;
+}
 
 vector<int> ZprimeAnalysis::JetVetoDecision() {
   vector<int> jetindex; jetindex.clear();
@@ -448,13 +471,13 @@ bool ZprimeAnalysis::btagVeto() {
 }
 
 
-bool ZprimeAnalysis::eleTightID(int iele) { return true; }
-bool ZprimeAnalysis::eleLooseID(int iele) { return true; }
-bool ZprimeAnalysis::muTightID(int imu) { return true; }
-bool ZprimeAnalysis::muLooseID(int imu) { return true; }
-bool ZprimeAnalysis::phoLooseID(int ipho) { return true; }
-bool ZprimeAnalysis::tauLooseID(int itau) { return true; }
-bool ZprimeAnalysis::jetSelectionID(int ijet) { return true; }
+bool ZprimeAnalysis::eleTightID(int iele)     { throw runtime_error("No eleTightID Specified"); }
+bool ZprimeAnalysis::eleLooseID(int iele)     { throw runtime_error("No eleLooseID Specified"); }
+bool ZprimeAnalysis::muTightID(int imu)       { throw runtime_error("No muTightID Specified"); }
+bool ZprimeAnalysis::muLooseID(int imu)       { throw runtime_error("No muLooseID Specified"); }
+bool ZprimeAnalysis::phoLooseID(int ipho)     { throw runtime_error("No phoLooseID Specified"); }
+bool ZprimeAnalysis::tauLooseID(int itau)     { throw runtime_error("No tauLooseID Specified"); }
+bool ZprimeAnalysis::jetSelectionID(int ijet) { throw runtime_error("No jetSelectionID Specified"); }
 
 ZprimeAnalysis::~ZprimeAnalysis()
 {

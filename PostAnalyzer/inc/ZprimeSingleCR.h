@@ -16,13 +16,12 @@ public:
   virtual void BookHistos(int i,std::string histname);
   virtual void fillHistos(int nhist,float event_weight);
   virtual void initVars();
-  std::vector<int> electron_veto_looseID(int jet_index,float elePtCut);
-  std::vector<int> electron_veto_looseID(int jet_index,int lepindex,float elePtCut);
-  std::vector<int> muon_veto_looseID(int jet_index,float muPtCut);
-  std::vector<int> muon_veto_looseID(int jet_index,int lepindex,float muPtCut);
-  std::vector<int> photon_veto_looseID(int jet_index,int lepindex,float phoPtCut);
-  std::vector<int> tau_veto_looseID(int jet_index,int lepindex,float tauPtCut);
-  std::vector<int> JetVetoDecision(int lepindex);
+  inline bool isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets || sample.type == DYJets; }
+  bool electron_veto(int jet_index,int lepindex,float elePtCut);
+  bool muon_veto(int jet_index,int lepindex,float muPtCut);
+  bool photon_veto(int jet_index,int lepindex,float phoPtCut);
+  bool tau_veto(int jet_index,int lepindex,float tauPtCut);
+  vector<int> JetVetoDecision(int lepindex);
   bool CRSelection(std::vector<int> tight,std::vector<int> loose);
 };
 

@@ -1,5 +1,8 @@
-regions = SignalRegion SingleEleCR DoubleEleCR SingleMuCR DoubleMuCR
+REGIONS=SignalRegion SingleEleCR SingleMuCR DoubleEleCR DoubleMuCR
 
-ROOT_FLAGS= -I$ROOTSYS/include -L$ROOTSYS/lib `root-config --cflags` `root-config --libs` -lFoam -lMathMore -Wno-deprecated
+.PHONY: $(REGIONS) test
 
-INCLUDE_SRC=-I$CMSSW_BASE/src/MonoZprimeJet/src/
+all: $(REGIONS)
+
+$(REGIONS):
+	@$(MAKE) -C $@

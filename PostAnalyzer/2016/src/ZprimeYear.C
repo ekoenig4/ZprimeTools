@@ -20,7 +20,7 @@ void ZprimeYear::fillHistos(int nhist,float event_weight) {
 void ZprimeYear::SetScalingHistos() {
   ZprimeAnalysis::SetScalingHistos();
 
-  if (sample.isW_or_ZJet()) {
+  if (isW_or_ZJet()) {
     //This is the root file with EWK Corrections
     TFile* f_kfactor = TFile::Open("RootFiles/kfactors.root");
 
@@ -121,7 +121,6 @@ ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,cons
       fileNumber++;
     }
   cout<<"Sample type: "<< sample.GetTypeName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
-  cout<<"isW_or_ZJets: "<<sample.isW_or_ZJet() << endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;
   Init(chain);

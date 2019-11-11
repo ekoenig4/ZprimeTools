@@ -36,7 +36,7 @@
 #include "TString.h"
 #include "vector"
 
-#include "ZprimeDataMC.h"
+#include "Dataset.h"
 #include "ScaleUncCollection.h"
 #include "ShapeUncCollection.h"
 
@@ -53,7 +53,7 @@ public:
 
   static const bool debug = false;
 
-  DataMC sample;
+  Dataset sample;
   
   struct TH1FCollection : public std::map<std::string,TH1F*> {
     float getBin(std::string name,float x) {
@@ -881,18 +881,23 @@ public:
   virtual void SetSF(float sf);
   virtual void ApplySF(float &event_weight);
 
+  virtual bool isW_or_ZJet();
   virtual bool inclusiveCut();
-  virtual vector<int> electron_veto_tightID(int jetCand,float elePtCut);
-  virtual vector<int> electron_veto_looseID(int jetCand,float elePtCut);
+  vector<int> electron_tightID(int jetCand,float elePtCut);
+  vector<int> electron_looseID(int jetCand,float elePtCut);
+  virtual bool electron_veto(int jetCand,float elePtCut);
   virtual bool eleTightID(int);
   virtual bool eleLooseID(int);
-  virtual vector<int> muon_veto_tightID(int jetCand,float muPtCut);
-  virtual vector<int> muon_veto_looseID(int jetCand,float muPtCut);
+  vector<int> muon_tightID(int jetCand,float muPtCut);
+  vector<int> muon_looseID(int jetCand,float muPtCut);
+  virtual bool muon_veto(int jetCand,float muPtCut);
   virtual bool muTightID(int);
   virtual bool muLooseID(int);
-  virtual vector<int> photon_veto_looseID(int jetCand,float phoPtCut);
+  vector<int> photon_looseID(int jetCand,float phoPtCut);
+  virtual bool photon_veto(int jetCand,float phoPtCut);
   virtual bool phoLooseID(int);
-  virtual vector<int> tau_veto_looseID(int jetCand,float tauPtCut);
+  vector<int> tau_looseID(int jetCand,float tauPtCut);
+  virtual bool tau_veto(int jetCand,float tauPtCut);
   virtual bool tauLooseID(int);
   virtual vector<int> JetVetoDecision();
   virtual bool jetSelectionID(int);

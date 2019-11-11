@@ -59,56 +59,48 @@ vector<int> ZprimeSingleCR::JetVetoDecision(int lepindex) {
   return jetindex;
 }
 
-vector<int> ZprimeSingleCR::electron_veto_looseID(int jet_index,float elePtCut) {
-  return ZprimeAnalysis::electron_veto_looseID(jet_index,elePtCut);
-}
-
-vector<int> ZprimeSingleCR::electron_veto_looseID(int jet_index,int lepindex,float elePtCut) {
-  return ZprimeAnalysis::electron_veto_looseID(jet_index,elePtCut);
-}
-
-vector<int> ZprimeSingleCR::muon_veto_looseID(int jet_index,float muPtCut) {
-  return ZprimeAnalysis::muon_veto_looseID(jet_index,muPtCut);
+bool ZprimeSingleCR::electron_veto(int jet_index,int lepindex,float elePtCut) {
+  return ZprimeAnalysis::electron_veto(jet_index,elePtCut);
 }
 
 //Veto failed if a muon is found that passes Loose Muon ID, Loose Muon Isolation, and muPtcut, and does not overlap the candidate electron and jet within dR of 0.5
-vector<int> ZprimeSingleCR::muon_veto_looseID(int jet_index, int lepindex, float muPtCut)
+bool ZprimeSingleCR::muon_veto(int jet_index, int lepindex, float muPtCut)
 {
   // cout << "Inside Muon Loose Veto" << endl;
   vector<int> mu_cands;
   mu_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::muon_veto_looseID(jet_index,muPtCut);
+  vector<int> tmpcands = muon_looseID(jet_index,muPtCut);
   for(int imu : tmpcands) {
     float dR_ele = deltaR(muEta->at(imu),muPhi->at(imu),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
     if ( dR_ele > Iso4Cut )
       mu_cands.push_back(imu);
   }
   
-  return mu_cands;
+  return mu_cands.size() == 0;
 }
 
-vector<int> ZprimeSingleCR::photon_veto_looseID(int jet_index,int lepindex,float phoPtCut) {
+bool ZprimeSingleCR::photon_veto(int jet_index,int lepindex,float phoPtCut) {
   vector<int> pho_cands; pho_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::photon_veto_looseID(jet_index,phoPtCut);
+  vector<int> tmpcands = photon_looseID(jet_index,phoPtCut);
   for (int ipho : tmpcands ) {
     float dR_ele = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
     if ( dR_ele > Iso5Cut )
       pho_cands.push_back(ipho);
   }
-  return pho_cands;
+  return pho_cands.size() == 0;
 }
 
-vector<int> ZprimeSingleCR::tau_veto_looseID(int jet_index,int lepindex,float tauPtCut) {
+bool ZprimeSingleCR::tau_veto(int jet_index,int lepindex,float tauPtCut) {
   vector<int> tau_cands; tau_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::tau_veto_looseID(jet_index,tauPtCut);
+  vector<int> tmpcands = tau_looseID(jet_index,tauPtCut);
   for (int itau : tmpcands ) {
     float dR_ele = deltaR(tauEta->at(itau),tauPhi->at(itau),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
     if ( dR_ele > Iso4Cut )
       tau_cands.push_back(itau);
   }
-  return tau_cands;
+  return tau_cands.size() == 0;
 }
 #endif

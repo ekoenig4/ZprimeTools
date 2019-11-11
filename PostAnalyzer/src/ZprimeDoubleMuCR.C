@@ -8,6 +8,11 @@
 
 using namespace std;
 
+void ZprimeDoubleCR::initVars() {
+  lepindex_leading = lepindex_subleading = -1;
+  dilepton_mass = dilepton_pt = -1;
+}
+
 void ZprimeDoubleCR::BookHistos(int i,string histname) {
   if (i == -1) {
     
@@ -54,6 +59,15 @@ bool ZprimeDoubleCR::CRSelection(vector<int> tightlist,vector<int> looselist) {
 	lep2.SetPtEtaPhiE(muPt->at(subleading),muEta->at(subleading),muPhi->at(subleading),muE->at(subleading));
 	lepindex_leading = leading;
 	lepindex_subleading = subleading;
+	TLorentzVector ll = lep1 + lep2;
+	dilepton_mass = ll.M();
+	dilepton_pt = ll.Pt();
+	
+	TLorentzVector met_4vec;
+	met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
+	TLorentzVector leptoMET_4vec = ll+met_4vec;
+	recoil = fabs(leptoMET_4vec.Pt());
+	recoilPhi = leptoMET_4vec.Phi();
 	
 	if ( muIso_combinedRelative < 0.25) 
 	  return true;
@@ -77,11 +91,11 @@ vector<int> ZprimeDoubleCR::JetVetoDecision(int leading, int subleading) {
   return jetindex;
 }
 
-vector<int> ZprimeDoubleCR::electron_veto_looseID(int jet_index, int leading, int subleading, float elePtCut) {
+bool ZprimeDoubleCR::electron_veto(int jet_index, int leading, int subleading, float elePtCut) {
   vector<int> ele_cands;
   ele_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::electron_veto_looseID(jet_index,elePtCut);
+  vector<int> tmpcands = electron_looseID(jet_index,elePtCut);
   for(int iele : tmpcands) {
     float dR_leading = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(eleSCEta->at(iele),eleSCPhi->at(iele),muEta->at(subleading),muPhi->at(subleading));
@@ -89,33 +103,37 @@ vector<int> ZprimeDoubleCR::electron_veto_looseID(int jet_index, int leading, in
       ele_cands.push_back(iele);
   }
   
-  return ele_cands;
+  return ele_cands.size() == 0;
 }
 
-vector<int> ZprimeDoubleCR::photon_veto_looseID(int jet_index,int leading,int subleading,float phoPtCut) {
+bool ZprimeDoubleCR::muon_veto(int jet_index,int leading,int subleading,float muPtCut) {
+  return ZprimeAnalysis::muon_veto(jet_index,muPtCut);
+}
+
+bool ZprimeDoubleCR::photon_veto(int jet_index,int leading,int subleading,float phoPtCut) {
   vector<int> pho_cands; pho_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::photon_veto_looseID(jet_index,phoPtCut);
+  vector<int> tmpcands = photon_looseID(jet_index,phoPtCut);
   for (int ipho : tmpcands ) {
     float dR_leading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(phoSCEta->at(ipho),phoSCPhi->at(ipho),muEta->at(subleading),muPhi->at(subleading));
     if ( dR_leading > Iso5Cut && dR_subleading > Iso5Cut )
       pho_cands.push_back(ipho);
   }
-  return pho_cands;
+  return pho_cands.size() == 0;
 }
 
-vector<int> ZprimeDoubleCR::tau_veto_looseID(int jet_index,int leading,int subleading,float tauPtCut) {
+bool ZprimeDoubleCR::tau_veto(int jet_index,int leading,int subleading,float tauPtCut) {
   vector<int> tau_cands; tau_cands.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::tau_veto_looseID(jet_index,tauPtCut);
+  vector<int> tmpcands = tau_looseID(jet_index,tauPtCut);
   for (int itau : tmpcands ) {
     float dR_leading = deltaR(tauEta->at(itau),tauPhi->at(itau),muEta->at(leading),muPhi->at(leading));
     float dR_subleading = deltaR(tauEta->at(itau),tauPhi->at(itau),muEta->at(subleading),muPhi->at(subleading));
     if ( dR_leading > Iso4Cut && dR_subleading > Iso4Cut )
       tau_cands.push_back(itau);
   }
-  return tau_cands;
+  return tau_cands.size() == 0;
 }
 
 #endif
