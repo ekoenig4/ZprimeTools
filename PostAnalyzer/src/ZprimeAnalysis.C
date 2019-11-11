@@ -36,12 +36,12 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     h_pileup = new TH1F("h_pileup","h_pileup;pileup",50,-2,2); h_pileup->Sumw2();
     h_genWeight = new TH1F("h_genWeight","h_genWeight;genWeight",50,-2,2); h_genWeight->Sumw2();
     h_sf = new TH1F("h_sf","h_sf;sf",50,-2,2); h_sf->Sumw2();
-    h_puTrueUnWeight = new TH1F("puTrueUnWeight","puTrue;true number of iteractions",100,0,100);h_puTrueUnWeight->Sumw2();
-    h_puTrueReWeight = new TH1F("puTrueReWeight","puTrue;true number of iteractions",100,0,100);h_puTrueReWeight->Sumw2();
     h_bosonPt = new TH1F("h_bosonPt","bosonPt; boson P_{T}",24,BosonPtBins); h_bosonPt->Sumw2();
   } else {
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2(); 
     h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx2[i]->Sumw2();
+    h_puTrueNoW[i] = new TH1F( ("puTrueNoW"+histname).c_str(),"puTrue Unweighted;true number of iteractions",100,0,100);h_puTrueNoW[i]->Sumw2();
+    h_puTrueReW[i] = new TH1F(("puTrueReW"+histname).c_str(),"puTrue Reweighted;true number of iteractions",100,0,100);h_puTrueReW[i]->Sumw2();
     h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
     h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
@@ -90,6 +90,8 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     h_genHT[nhist]->Fill(genHT,event_weight);
+    h_puTrueNoW[nhist]->Fill(puTrue->at(0),genWeight);
+    h_puTrueReW[nhist]->Fill(puTrue->at(0),genWeight*pileup);
   }
   h_eventWeight[nhist]->Fill(event_weight,event_weight);
   h_nVtx[nhist]->Fill(nVtx,event_weight);
@@ -261,8 +263,6 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   event_weight *= pileup * genWeight;
   h_pileup->Fill(pileup);
   h_genWeight->Fill(genWeight);
-  h_puTrueUnWeight->Fill(puTrue->at(0),genWeight);
-  h_puTrueReWeight->Fill(puTrue->at(0),pileup*genWeight);
 }
 
 bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }

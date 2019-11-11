@@ -118,7 +118,7 @@ public:
   float recoil,recoilPhi;
 
   /* Histograms */
-  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt,*h_puTrueReWeight,*h_puTrueUnWeight;
+  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt;
   /* MET Histograms */
   TH1F *h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto],*h_recoil[maxHisto],*h_recoilPhi[maxHisto];
   /* Jet Histograms */
@@ -131,7 +131,7 @@ public:
   TH1F *h_ChargedPt[maxHisto],*h_NeutralPt[maxHisto],*h_PhotonPt[maxHisto],*h_MiscPt[maxHisto];
   TH1F *h_ChPercPt[maxHisto],*h_NhPercPt[maxHisto],*h_GammaPercPt[maxHisto],*h_MiscPercPt[maxHisto];
   /* Event Histograms */
-  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_eventWeight[maxHisto],*h_genHT[maxHisto];
+  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_eventWeight[maxHisto],*h_genHT[maxHisto],*h_puTrueReW[maxHisto],*h_puTrueNoW[maxHisto];
 
   // Fixed size dimensions of array or collections stored in the TTree if any.
 
