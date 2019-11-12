@@ -1,0 +1,17 @@
+>>LHEWpT100to150
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0001/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0002/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0003/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0004/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0005/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT100-150/0006/
+
+>>LHEWpT250to400
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT250-400/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT250-400/0001/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT250-400/0002/
+
+>>LHEWpT400toInf
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT400-Inf/0000/
+

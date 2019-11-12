@@ -1,0 +1,14 @@
+>>LHEZpT50to150
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT50-150/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT50-150/0001/
+
+>>LHEZpT150to250
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT150-250/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT150-250/0001/
+
+>>LHEZpT250to400
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT250-400/0000/
+
+>>LHEZpT400toInf
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/ZJets_NLO/Z1JetsToNuNu_LHEZpT400-Inf/0000/
+
