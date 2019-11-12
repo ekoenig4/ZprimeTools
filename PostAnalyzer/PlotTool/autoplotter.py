@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from Parser import PlotParser as parser
-import Plot
+from PlotTool import parser
 from config import config
 import os
 from plotter import plotter

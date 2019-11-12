@@ -3,7 +3,7 @@ import os
 from sys import argv
 from Plot import datamc,GetRegion
 from Parser import PlotParser as parser
-from cfg_saveplot import config
+from config import config
 from plotter import getLegend,makeXaxis,makeYaxis,RatioStyle,getRatioLine,getCMSText
 
 gROOT.SetBatch(1)

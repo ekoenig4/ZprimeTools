@@ -1,11 +1,11 @@
 from ROOT import *
 from sys import argv, path
-import Plot as plot
+from PlotTool import *
 import os
 
 gROOT.SetBatch(1)
 
-samples = plot.datamc()
+samples = datamc()
     
 for variable in samples.args:          
     print "Plotting",variable

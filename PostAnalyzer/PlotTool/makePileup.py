@@ -2,7 +2,7 @@
 
 from ROOT import *
 from sys import argv,path
-import Plot as plot
+from PlotTool import *
 import os
 
 """
@@ -14,8 +14,8 @@ Usage: python ../PlotTool/makePileup.py
 
 gROOT.SetBatch(1)
 
-weightedMC = plot.datamc(show=0)
-unweightedMC = plot.datamc(show=0)
+weightedMC = datamc(show=0)
+unweightedMC = datamc(show=0)
 
 puTrueReWeighted = "puTrueReWeight_10";
 puTrueUnWeighted = "puTrueUnWeight_10";
@@ -110,7 +110,7 @@ pad2.SetBottomMargin(0.35);
 
 ######################################
 
-Ratio = plot.GetRatio(data_hs,weightedBKG)
+Ratio = GetRatio(data_hs,weightedBKG)
 rmin = 0.3; rmax = 1.7;
 Ratio.GetYaxis().SetRangeUser(rmin,rmax);
 Ratio.SetStats(0);

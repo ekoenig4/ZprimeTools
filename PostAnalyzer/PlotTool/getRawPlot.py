@@ -3,9 +3,7 @@
 from ROOT import *
 import sys
 import os
-from optparse import OptionParser
-from samplenames import samplenames
-import Plot as plot
+from PlotTool import *
 
 gROOT.SetBatch(1)
 

@@ -1,12 +1,12 @@
 from ROOT import *
 from sys import argv, path
-import Plot as plot
+from PlotTool import *
 import os
 import re
 
 gROOT.SetBatch(1)
 
-samples = plot.datamc(show=0)
+samples = datamc(show=0)
     
 for variable in samples.args:
     isGreater = None

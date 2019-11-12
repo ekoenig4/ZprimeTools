@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 from ROOT import *
-from sys import argv
-from sys import path
-from Plot import datamc,GetRatio
-from Parser import PlotParser as parser
+from sys import argv,path
+from PlotTool import *
 from os import system,getcwd,path,mkdir
-from cfg_saveplot import config
-from mcinfo import lumi as mc,version
+from config import config,lumi as mc,version
 from optparse import OptionParser
 
 gROOT.SetBatch(1)

@@ -1,16 +1,13 @@
 from ROOT import *
 import sys
 import os
-from Parser import PlotParser as parser
+from Parser import parser
 from samplenames import samplenames
 from array import array
 import mergeFiles as merge
 import changeBinning as binning
 from Process import Process
-
-def valid_directory(directory):
-    if not os.path.isdir(directory): raise ValueError("%s is not a valid directory" % directory)
-    return directory
+from utilities import *
 
 parser.add_argument("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
 parser.add_argument("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
@@ -22,34 +19,6 @@ parser.add_argument("-b","--binning",help="specify function for rebinning histog
 parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",default=False)
 parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
 parser.add_argument("-d","--directory",help="Specify directory to get post files from",type=valid_directory)
-
-def GetRegion():
-    region_pattern = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
-    RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
-
-    found = False
-    for region,pattern in zip(RegionName,region_pattern):
-        if os.path.isdir('.output/'):
-            if any( pattern in fname for fname in os.listdir('.output/') ): found = True; break
-        if any( pattern in fname for fname in os.listdir('.') ): found = True; break
-    if not found: return None
-    return region
-def GetMCxsec(filenames,xsecMap):
-    return { fname:xsecMap[fname] for fname in filenames }
-def IsSignal(signal):
-    return 'Mx' in signal and '_Mv' in signal
-def FindConfig():
-    wd,wf = os.path.split(__file__)
-    def updirectory(path): path += '/../'; return path
-    repo_path = os.path.realpath( updirectory(wd) )
-    def helper(path):
-        if any( directory == 'config' for directory in os.listdir(path) ): return os.path.realpath(path)
-        elif os.path.realpath(path) != repo_path: return helper( updirectory(path) )
-    config_path = helper('.')
-    if config_path == None: print 'year config directory was not found in current or parent directory'; exit(1)
-    else: sys.path.append(config_path)
-
-FindConfig()
 
 class datamc(object):
 

@@ -5,6 +5,8 @@ if len(argv) < 3 or len(argv) > 5:
     print "usage: ./PlotTool/addSample.py histoName x-axisTitle"
     exit()
 
+script_path = os.path.dirname( os.path.realpath(__file__) )
+
 def sortList(array):
     head = array[0]
     tail = array[-1]
@@ -37,7 +39,7 @@ if len(argv) >= 3:
         option = raw_input("Do you want to set " + histo + " X-Axis Title to " + str(title) + " (y/n).")
         if not (option == "y" or option == "Y"): print "Exiting.";exit()
     s.samplenames[histo] = title
-    with open("PlotTool/samplenames.py","w") as f:f.write("samplenames = "+str(s.samplenames)+"\n")
+    with open("%s/PlotTool/samplenames.py" % script_path,"w") as f:f.write("samplenames = "+str(s.samplenames)+"\n")
     # with open("PlotTool/samplenames.py","r") as f:
     #     text = f.readlines()
     #     for i in range(len(text)):

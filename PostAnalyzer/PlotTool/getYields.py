@@ -2,8 +2,7 @@
 
 from ROOT import *
 from sys import argv, path
-from Parser import PlotParser as parser
-import Plot as plot
+from PlotTool import *
 import os
 
 optionmap = {
@@ -148,7 +147,7 @@ if __name__ == "__main__":
     if args.raw_output: optionmap['raw-output'] = True
     binlist = [ int(ibin) for ibin in args.argv ]
     
-    samples = plot.datamc(show=False)
+    samples = datamc(show=False)
     samples.initiate('h_cutflow')
     hslist = []
     for name in samples.SampleList:

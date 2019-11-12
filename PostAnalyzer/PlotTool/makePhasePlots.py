@@ -3,7 +3,7 @@
 from ROOT import *
 from sys import argv
 from sys import path
-import Plot as plot
+from PlotTool import *
 import os
 
 """
@@ -14,12 +14,12 @@ Usage: python ../PlotTool/makePhasePlots.py variable_1 variable_2 variable_3 ...
 """
 
 gROOT.SetBatch(1)
-samples=plot.datamc()
+samples=datamc()
 for variable in samples.args:
     samples.initiate(variable)
     bkgPlot = samples.getSumOfBkg().Clone("Sum of Background")
     dataPlot = samples.histo['Data'].Clone("Data")
-    ratioPlot = plot.Get2DRatio(dataPlot,bkgPlot).Clone("Data/MC Ratio")
+    ratioPlot = Get2DRatio(dataPlot,bkgPlot).Clone("Data/MC Ratio")
             
     histos = [bkgPlot,dataPlot,ratioPlot]
     label = {}

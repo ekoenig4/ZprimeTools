@@ -2,7 +2,7 @@
 
 from ROOT import *
 from sys import argv,path
-import Plot as plot
+from PlotTool import *
 from mcinfo import lumi_by_era
 from collections import OrderedDict
 import os
@@ -72,7 +72,7 @@ def compareEra(variable,samples,eraLumi):
     c.SaveAs(directory+"/"+variable+".png")
 #################################################
         
-samples = plot.datamc(argv)
+samples = datamc(argv)
 eraLumi = OrderedDict(sorted(lumi_by_era[samples.region].items(),key=lambda t:t[0]))
 for variable in argv[1:]:
     samples.initiate(variable)
@@ -80,7 +80,7 @@ for variable in argv[1:]:
     for era,lumi in eraLumi.items():
         eraFile = TFile.Open("DataEra/"+samples.Data_FileNames[samples.region]+"_"+era+".root")
         if not any(eraFile.GetListOfKeys()): continue
-        samples = plot.datamc(argv,lumi=(lumi))
+        samples = datamc(argv,lumi=(lumi))
         samples.initiate(variable)
         print "Era",era,"lumi:",samples.lumi
         c = TCanvas("c", "canvas",800,800);
