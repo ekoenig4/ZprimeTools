@@ -36,7 +36,8 @@ make
 ./analyze
 ````
 
-The PostAnalyzer is broken into 4 different sections
+The PostAnalyzer uses the inc folder to hold header files, the src folder to hold source files, and the bin folder to hold object files.
+Starting from the top and moving down into the each year and region, the PostAnalzyer is broken into 4 sections
 
     ZprimeAnalysis:
 	Holds information about variables, methods, and histograms that are used and filled in the analysis
