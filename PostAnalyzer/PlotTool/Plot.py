@@ -43,7 +43,7 @@ def FindConfig():
     def updirectory(path): path += '/../'; return path
     repo_path = os.path.realpath( updirectory(wd) )
     def helper(path):
-        if any( directory == 'config' for directory in os.listdir(path) ): return path
+        if any( directory == 'config' for directory in os.listdir(path) ): return os.path.realpath(path)
         elif os.path.realpath(path) != repo_path: return helper( updirectory(path) )
     config_path = helper('.')
     if config_path == None: print 'year config directory was not found in current or parent directory'; exit(1)
@@ -63,16 +63,16 @@ class datamc(object):
             print 'Using %s to get files' % self.args.directory
             self.fileDir = self.args.directory
             os.chdir(self.fileDir)
-        import mcinfo as mc
-        self.version = mc.version
-        self.xsec = mc.xsec
+        import config
+        self.version = config.version
+        self.xsec = config.xsec
 
         self.variable = None
         self.varname = None
         
         #Luminosity
-        self.lumi_by_era = mc.lumi_by_era
-        self.lumi = (mc.lumi if (lumi == None) else lumi)
+        self.lumi_by_era = config.lumi_by_era
+        self.lumi = (config.lumi if (lumi == None) else lumi)
         if (self.args.lumi != None): self.lumi = self.args.lumi
 
         self.show = show
@@ -107,13 +107,13 @@ class datamc(object):
         self.MCList = ["WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
         self.processes["Data"] =    Process("Data",  [self.Data_FileName],None                                 ,  'data')
-        self.processes["WJets"] =   Process("WJets",  mc.WJets_FileNames,  GetMCxsec(mc.WJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kRed-10)
-        self.processes["ZJets"] =   Process("ZJets",  mc.ZJets_FileNames,  GetMCxsec(mc.ZJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kAzure+10)
-        self.processes["GJets"] =   Process("GJets",  mc.GJets_FileNames,  GetMCxsec(mc.GJets_FileNames,mc.xsec),  'bkg',lumi=self.lumi,color=kGray+2)
-        self.processes["DYJets"] =  Process("DYJets", mc.DYJets_FileNames, GetMCxsec(mc.DYJets_FileNames,mc.xsec), 'bkg',lumi=self.lumi,color=kTeal-9)
-        self.processes["TTJets"] =  Process("TTJets", mc.TTJets_FileNames, GetMCxsec(mc.TTJets_FileNames,mc.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
-        self.processes["DiBoson"] = Process("DiBoson",mc.DiBoson_FileNames,GetMCxsec(mc.DiBoson_FileNames,mc.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
-        self.processes["QCD"] =     Process("QCD",    mc.QCD_FileNames,    GetMCxsec(mc.QCD_FileNames,mc.xsec),    'bkg',lumi=self.lumi,color=kGray)
+        self.processes["WJets"] =   Process("WJets",  config.WJets_FileNames,  GetMCxsec(config.WJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kRed-10)
+        self.processes["ZJets"] =   Process("ZJets",  config.ZJets_FileNames,  GetMCxsec(config.ZJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kAzure+10)
+        self.processes["GJets"] =   Process("GJets",  config.GJets_FileNames,  GetMCxsec(config.GJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kGray+2)
+        self.processes["DYJets"] =  Process("DYJets", config.DYJets_FileNames, GetMCxsec(config.DYJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kTeal-9)
+        self.processes["TTJets"] =  Process("TTJets", config.TTJets_FileNames, GetMCxsec(config.TTJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
+        self.processes["DiBoson"] = Process("DiBoson",config.DiBoson_FileNames,GetMCxsec(config.DiBoson_FileNames,config.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
+        self.processes["QCD"] =     Process("QCD",    config.QCD_FileNames,    GetMCxsec(config.QCD_FileNames,config.xsec),    'bkg',lumi=self.lumi,color=kGray)
 
         if self.args.mc_solid:
             for name,process in self.processes.iteritems():
@@ -146,6 +146,7 @@ class datamc(object):
         if not os.path.isdir('.output/'): return
         def validfile(fname): return os.path.isfile(fname)
         mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
+        print mcfiles
         eralist = sorted(self.lumi_by_era.keys())
         datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
         datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]

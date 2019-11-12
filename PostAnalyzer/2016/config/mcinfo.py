@@ -10,17 +10,17 @@ lumi_by_era = {"SingleEleCR":{"B":8294,"C":4242,"D":4025,"E":3104,"F":7565,"G":8
                "DoubleEleCR":{"B":8294,"C":4242,"D":4025,"E":3104,"F":7565,"G":8410,"H":216},
                "SingleMuCR":{"B":8319,"C":4242,"D":4025,"E":3105,"F":7566,"G":8435,"H":216},
                "DoubleMuCR":{"B":8319,"C":4242,"D":4025,"E":3105,"F":7566,"G":8435,"H":216},
-               "SignalRegion":{"B":0,"C":0,"D":0,"E":0,"F":1892,"G":0,"H":0}}
+               "SignalRegion":{"F":1892}}
 
-WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWJets_MLM"]
+WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
 
 GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
 
-DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDY_MLM"]
+DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDYMLM"]
 
-TTJets_FileNames = ["postTTJets_MLM"]
+TTJets_FileNames = ["postTTJetsMLM"]
 
 DiBoson_FileNames = ["postWW","postWZ","postZZ"]
 
@@ -35,16 +35,16 @@ xsec = {
 'postZ1200to2500': 0.28633,
 'postZ2500toInf': 0.0006945,
 
-'postWJets_MLM': 50690,
+'postWMLM': 50690,
 'postW100to200': 1343,
 'postW200to400': 359.7,
 'postW400to600': 48.91,
 'postW600to800': 12.05,
-    'postW800to1200': 5.501,
+'postW800to1200': 5.501,
 'postW1200to2500': 1.329,
 'postW2500toInf': 0.03216,
 
-'postDY_MLM':4895,
+'postDYMLM':4895,
 'postDY100to200': 148,
 'postDY200to400': 40.94,
 'postDY400to600': 5.497,
@@ -59,7 +59,7 @@ xsec = {
 'postGJets400to600':132.5,
 'postGJets600toInf': 44.05,
 
-'postTTJets_MLM': 831.76,
+'postTTJetsMLM': 831.76,
 
 'postQCD100to200': 27500000,
 'postQCD200to300': 1735000,
