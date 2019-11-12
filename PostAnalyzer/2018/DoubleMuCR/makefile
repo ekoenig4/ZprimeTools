@@ -13,9 +13,7 @@ LIBRARY:=$(addprefix $(ROOT)$(BIN),ScaleUncCollection.o ShapeUncCollection.o Uti
 INCLUDE:=$(addprefix $(ROOT)$(INC),ZprimeCutConfig.h Dataset.h VariableBins.h ScaleUncCollection.h ShapeUncCollection.h Utilities.h)
 OBJECTS:=$(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)$(LEP).o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
 
-MKDIR=@mkdir -p $(@D)
-
-.PHONY:test clean condor_clean hadd
+.PHONY:test clean condor_clean hadd bin
 
 analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	@if [ ! -d RootFiles ]; then ln -s $(YEAR)RootFiles/; fi
@@ -33,6 +31,10 @@ $(ROOT)$(BIN)ZprimeAnalysis.o: $(ROOT)$(SRC)ZprimeAnalysis.C $(ROOT)$(INC)Zprime
 
 $(ROOT)$(BIN)%.o: $(ROOT)$(SRC)%.C $(ROOT)$(INC)%.h
 	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
+
+bin:
+	mkdir -p $(YEAR)$(BIN)
+	mkdir -p $(ROOT)$(BIN)
 
 test: analyze
 	./analyze
