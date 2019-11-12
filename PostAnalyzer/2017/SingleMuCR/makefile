@@ -13,6 +13,10 @@ LIBRARY:=$(addprefix $(ROOT)$(BIN),ScaleUncCollection.o ShapeUncCollection.o Uti
 INCLUDE:=$(addprefix $(ROOT)$(INC),ZprimeCutConfig.h Dataset.h VariableBins.h ScaleUncCollection.h ShapeUncCollection.h Utilities.h)
 OBJECTS:=$(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)$(LEP).o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
 
+MKDIR=@mkdir -p $(@D)
+
+.PHONY:test clean condor_clean hadd
+
 analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	@if [ ! -d RootFiles ]; then ln -s $(YEAR)RootFiles/; fi
 	@if [ ! -d PlotTool ]; then ln -s $(ROOT)PlotTool/; fi

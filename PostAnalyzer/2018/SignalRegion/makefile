@@ -10,7 +10,9 @@ LIBRARY:=$(addprefix $(ROOT)$(BIN),ScaleUncCollection.o ShapeUncCollection.o Uti
 INCLUDE:=$(addprefix $(ROOT)$(INC),ZprimeCutConfig.h Dataset.h VariableBins.h ScaleUncCollection.h ShapeUncCollection.h Utilities.h)
 OBJECTS:=$(YEAR)$(BIN)ZprimeYear.o $(ROOT)$(BIN)ZprimeAnalysis.o $(LIBRARY)
 
-.PHONY=test clean condor_clean
+MKDIR=@mkdir -p $(@D)
+
+.PHONY:test clean condor_clean hadd
 
 analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	@if [ ! -d RootFiles ]; then ln -s $(YEAR)RootFiles/; fi
@@ -18,12 +20,15 @@ analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) $< $(OBJECTS) -o $@
 
 $(YEAR)$(BIN)ZprimeYear.o: $(YEAR)$(SRC)ZprimeYear.C $(YEAR)$(INC)ZprimeYear.h $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE) $(YEAR)$(BIN)
+	$(MKDIR)
 	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) $(RFLAGS) -c $< -o $@
 
 $(ROOT)$(BIN)ZprimeAnalysis.o: $(ROOT)$(SRC)ZprimeAnalysis.C $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
+	$(MKDIR)
 	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
 
 $(ROOT)$(BIN)%.o: $(ROOT)$(SRC)%.C $(ROOT)$(INC)%.h
+	$(MKDIR)
 	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
 
 test: analyze
@@ -40,5 +45,5 @@ condor_submit:
 	./submit.py
 
 hadd:
-	./PlotTool/plotter.py
+	./PlotTool/plotter.py -s -1
 
