@@ -104,7 +104,7 @@ public:
   Cutflow *cutflow;
 
   /* Event Weight Variables */
-  float weight;
+  float weight,weight_nogen;
   float kfactor;
   float sf;
   float pileup;
@@ -914,6 +914,9 @@ public:
   virtual bool jetSelectionID(int);
   bool btagVeto();
   virtual float getCSV2Cut();
+
+  virtual void PFUncertainty(float event_weight);
+  virtual void QCDVariations(float event_weight);
 };
 
 #endif

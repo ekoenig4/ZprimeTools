@@ -1,5 +1,5 @@
 >>A
-/hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018A-run_102X_data2018_farmout/
+/hdfs/store/user/varuns/NTuples/Data/Run2018_102X_JECv19/EGamma/EGammaA_17Sep2018/
 
 >>B
 /hdfs/store/user/varuns/Run2018_17Sep2018_May2019/EGamma/crab_job_EGamma2018B/190528_233825/0000/
@@ -50,5 +50,4 @@
 
 >>D
 /hdfs/store/user/varuns/NTuples/Data/Run2018_102X_JECv19/EGamma/EGammaD_22Jan2019/
-# /hdfs/store/user/varuns/old-Nov2019-noJSON/Egamma2018D-run_102X_data2018_farmout/
 

@@ -12,7 +12,7 @@ options['parallel'] = True
 options['batchsize'] = 60
 # options['submit'] = False
 #----Submit---#
-submit('met',label='SingleMu_')
+submit('met',label='SingleMu_',filelist=True)
 submit('wjets')
 submit('zjets')
 submit('qcd')

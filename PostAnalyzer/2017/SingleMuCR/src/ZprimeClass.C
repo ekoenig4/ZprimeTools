@@ -154,10 +154,10 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      
 		      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 			cutflow->Fill("DeltaPhiCut",event_weight);
-			// QCDVariations(event_weight);
+			
+			QCDVariations(event_weight);
 			fillHistos(10,event_weight);
-
-			// PFUncertainty(event_weight); // 6 Histograms
+			PFUncertainty(event_weight); // 6 Histograms
 		      }
 		    }   
 		  }	
@@ -166,10 +166,9 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    }
 	  }
 	}
+	JetEnergyScale(weightNorm); // 2 Histograms
       }
     }
-
-    JetEnergyScale(weightNorm); // 2 Histograms
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -261,49 +260,43 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     //CR Variables
     lepindex = -1;
     recoil = -99;
-    
-    if (metFilters == 0 && inclusiveCut()) {
-      
-      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
 	
-	if(jetCand.size()>0) {
-	  //CR code
-	  //At least one of the one electrons passes the tight selection
-	  vector<int> mulist = muon_tightID(jetCand[0],muTightPtCut);
-	  vector<int> looseMus = muon_looseID(jetCand[0],muLoosePtCut);
+    if(jetCand.size()>0) {
+      //CR code
+      //At least one of the one electrons passes the tight selection
+      vector<int> mulist = muon_tightID(jetCand[0],muTightPtCut);
+      vector<int> looseMus = muon_looseID(jetCand[0],muLoosePtCut);
 	  
-	  if( CRSelection(mulist,looseMus) ) {
-	    if (!sample.isData) {
-	      event_weight *= getSF(lepindex);
-	    }
+      if( CRSelection(mulist,looseMus) ) {
+	if (!sample.isData) {
+	  event_weight *= getSF(lepindex);
+	}
 	    
-	    if (recoil > recoilCut) {
-	      bool eleVeto = electron_veto(jetCand[0],lepindex,eleLoosePtCut);
-	      bool phoVeto = photon_veto(jetCand[0],lepindex,phoLoosePtCut);
-	      bool tauVeto = tau_veto(jetCand[0],lepindex,tauLoosePtCut);
+	if (recoil > recoilCut) {
+	  bool eleVeto = electron_veto(jetCand[0],lepindex,eleLoosePtCut);
+	  bool phoVeto = photon_veto(jetCand[0],lepindex,phoLoosePtCut);
+	  bool tauVeto = tau_veto(jetCand[0],lepindex,tauLoosePtCut);
 	      
-	      if(eleVeto && phoVeto && tauVeto) {
-		Float_t dPhi_lepMET = deltaPhi(muPhi->at(lepindex),pfMETPhi);
-		Float_t lepMET_MT = getMt(muPt->at(lepindex),muPhi->at(lepindex),pfMET,pfMETPhi);
+	  if(eleVeto && phoVeto && tauVeto) {
+	    Float_t dPhi_lepMET = deltaPhi(muPhi->at(lepindex),pfMETPhi);
+	    Float_t lepMET_MT = getMt(muPt->at(lepindex),muPhi->at(lepindex),pfMET,pfMETPhi);
 		
-		if(lepMET_MT < lepMETMtCut) {
-		  float metcut = (fabs(pfMET-caloMET))/recoil;
+	    if(lepMET_MT < lepMETMtCut) {
+	      float metcut = (fabs(pfMET-caloMET))/recoil;
 		  
-		  if(metcut < metRatioCut) {
+	      if(metcut < metRatioCut) {
 		    
-		    if(btagVeto()) {
-		      vector<int> jetveto = JetVetoDecision(lepindex);
-		      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+		if(btagVeto()) {
+		  vector<int> jetveto = JetVetoDecision(lepindex);
+		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
 		      
-		      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
-			weight = event_weight;
-			if (unc == 1)  shapeUncs.fillUp(uncname);// up
-			if (unc == -1) shapeUncs.fillDn(uncname);// down
-		      }
-		    }   
-		  }	
-		}
-	      }
+		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		    weight = event_weight;
+		    if (unc == 1)  shapeUncs.fillUp(uncname);// up
+		    if (unc == -1) shapeUncs.fillDn(uncname);// down
+		  }
+		}   
+	      }	
 	    }
 	  }
 	}

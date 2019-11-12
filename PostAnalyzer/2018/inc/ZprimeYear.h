@@ -5,6 +5,10 @@
 
 class ZprimeYear : public virtual ZprimeAnalysis {
 public:
+
+  
+  vector<double>  *psWeight;
+  TBranch        *b_psWeight;   //!
   
   ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
   ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange);
@@ -26,6 +30,8 @@ public:
   virtual float getCSV2Cut();
   virtual bool getEleHEMVeto(float elePtCut);
   virtual bool getJetHEMVeto(float jetPtCut);
+
+  virtual void PSWeights(float event_weight);
 };
 
 #endif

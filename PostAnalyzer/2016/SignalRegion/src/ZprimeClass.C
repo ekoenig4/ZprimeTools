@@ -77,7 +77,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
       }
     }
 
-    // float weightNorm = event_weight;
+    float weightNorm = event_weight;
     jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
@@ -122,14 +122,17 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  
 		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 		    cutflow->Fill("DeltaPhiCut",event_weight);
-		    
+
+		    QCDVariations(event_weight);
 		    fillHistos(8,event_weight);
+		    PFUncertainty(event_weight);
 		  }
 		}   
 	      }	
 	    }
 	  }
-	}	    
+	}
+	JetEnergyScale(weightNorm);
       }
     }
     
@@ -215,37 +218,31 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     
     jetCand = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
-      
-    if ( (metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut() ) { 
-	
-      if ((HLTJet>>4&1 == 1) || (HLTJet>>5&1 == 1) || (HLTJet>>6&1 == 1) || (HLTJet>>8&1 == 1) || !sample.isData) {//Mono-jet triggers
 	  
-	if(jetCand.size()>0) {
+    if(jetCand.size()>0) {
 	    
-	  if (pfMET > recoilCut) {
-	    float metcut = (fabs(pfMET-caloMET))/pfMET;
+      if (pfMET > recoilCut) {
+	float metcut = (fabs(pfMET-caloMET))/pfMET;
 	      
-	    if(metcut < metRatioCut) {
+	if(metcut < metRatioCut) {
 	      
-	      bool noLeptonID = electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) && photon_veto(jetCand[0],phoLoosePtCut);
-	      if( noLeptonID ) {
+	  bool noLeptonID = electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) && photon_veto(jetCand[0],phoLoosePtCut);
+	  if( noLeptonID ) {
 		
-		if(btagVeto()) {
-		  vector<int> jetveto = JetVetoDecision();
-		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+	    if(btagVeto()) {
+	      vector<int> jetveto = JetVetoDecision();
+	      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
 		  
-		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
-		    weight = event_weight;
-		    if (unc == 1)  shapeUncs.fillUp(uncname);// up
-		    if (unc == -1) shapeUncs.fillDn(uncname);// down
-		  }
-		}   
-	      }	
-	    }
-	  }
-	}	    
+	      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		weight = event_weight;
+		if (unc == 1)  shapeUncs.fillUp(uncname);// up
+		if (unc == -1) shapeUncs.fillDn(uncname);// down
+	      }
+	    }   
+	  }	
+	}
       }
-    }
+    }	    
   }
 
   jetCand     .clear();

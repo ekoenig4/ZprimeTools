@@ -14,8 +14,8 @@
 using namespace std;
 class ZprimeClass : public ZprimeYear, public ZprimeDoubleCR {
 public :
-  static const int nHisto = 12;
-  static const int bHisto = 11;
+  static const int nHisto = 11;
+  static const int bHisto = 10;
   
   ZprimeClass(const char* inputFilename,const char* outputFilename,const char* fileRange) : ZprimeYear(inputFilename,outputFilename,fileRange) {
     BookHistos(outputFilename);

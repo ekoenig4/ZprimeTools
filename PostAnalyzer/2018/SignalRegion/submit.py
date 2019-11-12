@@ -13,7 +13,7 @@ options['batchsize'] = 60
 # options['submit'] = False
 #----Submit---#
 submit('signal',split=1)
-submit('met',sub='A')
+submit('met',sub='A',filelist=True)
 submit('wjets')
 submit('zjets')
 submit('qcd')

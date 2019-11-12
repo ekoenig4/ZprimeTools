@@ -20,7 +20,7 @@ using namespace std;
 int main(int argc, const char* argv[]) { 
   if (argc == 1) {
     printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT400To600/0000/";
+    argv[1] = "/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DYJets/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/0000/";
     argv[2] = "test.root";
     argv[3] = "5000";
     argv[4] = "100";
@@ -155,7 +155,11 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 
 			if( getEleHEMVeto(eleHEMVetoPtCut) ) {
 			  cutflow->Fill("eleHEMVeto",event_weight);
+
+			  QCDVariations(event_weight);
+			  PSWeights(weight_nogen);
 			  fillHistos(11,event_weight);
+			  PFUncertainty(event_weight);
 			}
 		      }
 		    }   
@@ -165,10 +169,9 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    }
 	  }
 	}
+	JetEnergyScale(weightNorm); // 2 Histograms
       }
     }
-
-    JetEnergyScale(weightNorm); // 2 Histograms
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -267,47 +270,41 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     lepindex_subleading = -1;
     dilepton_pt = dilepton_mass = recoil = -99;
 	
-    if (metFilters == 0 && inclusiveCut()) { 
-      
-      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
-	
-	if(jetCand.size()>0) {
-	  //CR code
-	  //At least one of the two muons passes the tight selection
-	  vector<int> mulist_leading = muon_tightID(jetCand[0],muTightPtCut);
-	  vector<int> mulist_subleading = muon_looseID(jetCand[0],muLoosePtCut);
-	  if ( CRSelection(mulist_leading,mulist_subleading) ) {
-	    if (!sample.isData) event_weight *= getSF(lepindex_leading,lepindex_subleading);
+    if(jetCand.size()>0) {
+      //CR code
+      //At least one of the two muons passes the tight selection
+      vector<int> mulist_leading = muon_tightID(jetCand[0],muTightPtCut);
+      vector<int> mulist_subleading = muon_looseID(jetCand[0],muLoosePtCut);
+      if ( CRSelection(mulist_leading,mulist_subleading) ) {
+	if (!sample.isData) event_weight *= getSF(lepindex_leading,lepindex_subleading);
 	      
-	    if (recoil > recoilCut) {
-	      //invariant mass of the two muons is betwen 60 and 120GeV
+	if (recoil > recoilCut) {
+	  //invariant mass of the two muons is betwen 60 and 120GeV
 		
-	      if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
-		bool eleVeto = electron_veto(jetCand[0],lepindex_leading,lepindex_subleading,eleLoosePtCut);
-		bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
-		// bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+	  if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
+	    bool eleVeto = electron_veto(jetCand[0],lepindex_leading,lepindex_subleading,eleLoosePtCut);
+	    bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
+	    // bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
-		if(eleVeto && phoVeto) {
-		  float metcut = (fabs(pfMET-caloMET))/recoil;
+	    if(eleVeto && phoVeto) {
+	      float metcut = (fabs(pfMET-caloMET))/recoil;
 		    
-		  if(metcut < metRatioCut) {
+	      if(metcut < metRatioCut) {
 		      
-		    if(btagVeto()) {
-		      vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
-		      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
+		if(btagVeto()) {
+		  vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
+		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 			
-		      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 			
-			if( getEleHEMVeto(eleHEMVetoPtCut) ) {
-			  weight = event_weight;
-			  if (unc == 1)  shapeUncs.fillUp(uncname);// up
-			  if (unc == -1) shapeUncs.fillDn(uncname);// down
-			}
-		      }
-		    }   
-		  }	
-		}
-	      }
+		    if( getEleHEMVeto(eleHEMVetoPtCut) ) {
+		      weight = event_weight;
+		      if (unc == 1)  shapeUncs.fillUp(uncname);// up
+		      if (unc == -1) shapeUncs.fillDn(uncname);// down
+		    }
+		  }
+		}   
+	      }	
 	    }
 	  }
 	}

@@ -12,7 +12,7 @@ options['parallel'] = True
 options['batchsize'] = 60
 # options['submit'] = False
 #----Submit---#
-submit('egamma',label='DoubleEle_')
+submit('egamma',label='DoubleEle_',filelist=True)
 submit('wjets')
 submit('zjets')
 submit('qcd')
