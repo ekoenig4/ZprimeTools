@@ -28,7 +28,7 @@ def findInputDirectories():
     def helper(path,check):
         realpath = os.path.realpath(path)
         check_path = os.path.join(realpath,check)
-        if os.path.isdir(check_path) and not os.path.islink(check_path): return os.path.relpath(check_path)
+        if os.path.isdir(check_path) and not os.path.islink(check_path): return os.path.realpath(check_path)
         elif realpath != repo_path: return helper( updirectory(realpath),check )
     for check in find_these:
         path = helper('.',check)

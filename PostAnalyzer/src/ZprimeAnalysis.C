@@ -47,7 +47,7 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
     h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
     h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
-    h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-4,4);h_pfMETPhi[i]->Sumw2();
+    h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-3.1516,3.1516);h_pfMETPhi[i]->Sumw2();
     h_recoil[i] = new TH1F(("recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
     h_recoilPhi[i] = new TH1F(("recoilPhi"+histname).c_str(), "recoilPhi",50,-4,4);h_recoilPhi[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
@@ -216,9 +216,9 @@ vector<int> ZprimeAnalysis::getJetCand(float jetPtCut, float jetEtaCut, float je
 
 float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   //Only look at first four jets (because that's what monojet analysis do)
-  int njets = jets.size() ? jets.size() <= 4 : 4;
   float minDPhiJetMET_first4 = TMath::Pi();
-  for (int ijet = 0; ijet < njets; ijet++) {
+  for (int ijet = 0; ijet < jets.size(); ijet++) {
+    if ( ijet >= 4 ) break;
     float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
     if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
   }
