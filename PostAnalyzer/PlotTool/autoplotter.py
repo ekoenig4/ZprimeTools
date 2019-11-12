@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from Parser import PlotParser as parser
-from cfg_saveplot import config
+import Plot
+from config import config
 import os
 from plotter import plotter
 

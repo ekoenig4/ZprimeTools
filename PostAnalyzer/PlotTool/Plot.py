@@ -146,7 +146,7 @@ class datamc(object):
         if not os.path.isdir('.output/'): return
         def validfile(fname): return os.path.isfile(fname)
         mcfiles = [ mcfname for mcfname in sorted(self.xsec.keys()) if not validfile(mcfname+'.root') ]
-        print mcfiles
+        
         eralist = sorted(self.lumi_by_era.keys())
         datafiles_v1 = [ '%s_%s' % (self.Data_FileName,era) for era in eralist if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]
         datafiles_v2 = [ '%s_%i' % (self.Data_FileName,i) for i,era in enumerate(eralist) if not validfile('%s_%s.root' % (self.Data_FileName,era)) ]

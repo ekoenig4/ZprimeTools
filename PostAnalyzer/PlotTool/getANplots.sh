@@ -16,8 +16,8 @@ run() {
     cd ../
 }
 
-# run SignalRegion
+run SignalRegion
 run SingleEleCR $singleleps
-# run SingleMuCR $singleleps
+run SingleMuCR $singleleps
 run DoubleEleCR $doubleleps
-# run DoubleMuCR $doubleleps
+run DoubleMuCR $doubleleps

@@ -18,9 +18,6 @@ analyze: $(SRC)ZprimeClass.C $(INC)ZprimeClass.h $(OBJECTS)
 	@if [ ! -d PlotTool ]; then ln -s $(ROOT)PlotTool/; fi
 	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) -I$(INC) $(RFLAGS) $(WARNINGS) $< $(OBJECTS) -o $@
 
-test: analyze
-	./analyze
-
 $(YEAR)$(BIN)ZprimeYear.o: $(YEAR)$(SRC)ZprimeYear.C $(YEAR)$(INC)ZprimeYear.h $(ROOT)$(INC)ZprimeAnalysis.h $(INCLUDE)
 	g++ -I$(ROOT)$(INC) -I$(YEAR)$(INC) $(RFLAGS) -c $< -o $@
 
@@ -32,3 +29,19 @@ $(ROOT)$(BIN)ZprimeAnalysis.o: $(ROOT)$(SRC)ZprimeAnalysis.C $(ROOT)$(INC)Zprime
 
 $(ROOT)$(BIN)%.o: $(ROOT)$(SRC)%.C $(ROOT)$(INC)%.h
 	g++ -I$(ROOT)$(INC) $(RFLAGS) -c $< -o $@
+
+test: analyze
+	./analyze
+
+clean:
+	rm post*.root
+
+condor_clean:
+	rm -r .output/
+	rm -r .status/
+
+condor_submit:
+	./submit.py
+
+hadd:
+	./PlotTool/plotter.py

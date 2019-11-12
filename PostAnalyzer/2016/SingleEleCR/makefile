@@ -42,3 +42,6 @@ condor_clean:
 
 condor_submit:
 	./submit.py
+
+hadd:
+	./PlotTool/plotter.py
