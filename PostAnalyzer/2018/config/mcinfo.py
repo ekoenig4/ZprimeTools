@@ -62,7 +62,7 @@ xsec = {
     
 "postTTJetsDiLept":5.436e+01,
 "postTTJetsSingleLeptFromT":1.091e+02,
-# "postTTJets_MLM":7.503e+02,
+# "postTTJetsMLM":7.503e+02,
     
 "postQCD100to200":2.366e+07,
 "postQCD200to300":1.549e+06,
@@ -92,7 +92,7 @@ xsec_2017 = {
 "postZ1200to2500":3.430e-01,
 "postZ2500toInf":5.146e-03,
     
-"postWJets_MLM":5.279e+04,
+"postWMLM":5.279e+04,
 "postW100to200":1.395e+03,
 "postW200to400":4.093e+02,
 "postW400to600":5.791e+01,
@@ -145,7 +145,7 @@ old_xsec = {
 'postZ1200to2500': 0.3419,
 'postZ2500toInf': 0.005146,
 
-'postWJets_MLM': 52940.0,
+'postWMLM': 52940.0,
 'postW100to200': 1395.0,
 'postW200to400': 407.9,
 'postW400to600': 57.48,
@@ -154,7 +154,7 @@ old_xsec = {
 'postW1200to2500': 1.074,
 'postW2500toInf': 0.008001,
 
-'postDY_MLM':4895,
+'postDYMLM':4895,
 'postDY70to100': '/DYJetsToLL_M-50_HT-70to100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
 'postDY100to200': 161.1,
 'postDY200to400': 48.66,
@@ -172,7 +172,7 @@ old_xsec = {
 
 'postTTJetsDiLept': 54.23,
 'postTTJetsSingleLeptFromT': 109.6,
-# 'postTTJets_MLM': 722.8,
+# 'postTTJetsMLM': 722.8,
 
 'postQCD100to200': 23700000.0,
 'postQCD200to300': 1547000.0,
