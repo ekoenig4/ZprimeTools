@@ -19,14 +19,18 @@ def IsNhisto(variable,tfile):
     dirname,ndir = GetDirname(variable)
     tdir = tfile.GetDirectory(dirname)
     if tdir == None: return False
-    return tdir.GetListOfKeys().Contains(variable)
+    isNhisto = tdir.GetListOfKeys().Contains(variable)
+    # tdir.Close()
+    return isNhisto
 def IsBranch(variable,tfile):
     dirname,ndir = GetDirname(variable,sub='trees')
     tdir = tfile.GetDirectory(dirname)
     if tdir == None: return False
     b_variable = variable.replace('_%s' % ndir,'')
     tree = tdir.Get('norm')
-    return tree.GetListOfBranches().Contains(b_variable)
+    isBranch = tree.GetListOfBranches().Contains(b_variable)
+    # tdir.Close()
+    return isBranch
 def GetBranch(b_template,b_variable,tree,weight,cut):
     b_template.Reset()
     b_name = 'template_%s_%s_%s' % (b_variable,tree.GetName(),weight)
@@ -38,7 +42,6 @@ def GetBranch(b_template,b_variable,tree,weight,cut):
     histo.SetDirectory(0)
     return histo
 def GetNuisanceList(tfile,dirname):
-    return {}
     tdir = tfile.GetDirectory(dirname)
     shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
     tree = tdir.Get('norm')
@@ -55,14 +58,15 @@ class SubProcess(object):
         self.xsec = xsec
         # self.tdir = None
         self.dirname = None
-        self.trees = {}
+        self.nuisances = {}
+        self.tree = None
         self.cutflow = 0
         self.init()
     def init(self):
+        self.nuisances = {}
         self.histo = None
         self.raw_total = 0
         self.scaled_total = 0
-        self.nuisances = {}
     def getCutflow(self):
         cutflow = GetTObject("h_cutflow",self.tfile)
         cutflow = cutflow.GetBinContent(1)
@@ -70,8 +74,12 @@ class SubProcess(object):
     def getGlobal(self,variable):
         self.histo = GetTObject(variable,self.tfile)
     def setDir(self,dirname):
+        # if self.tdir != None: self.tdir.Close()
         # self.tdir = self.tfile.Get(dirname)
         self.dirname = dirname
+    def setTree(self,treename):
+        if self.tree is None or treename != self.tree.GetName():
+            self.tree = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
     def getNhisto(self,variable):
         self.tfile.cd()
         hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
@@ -79,9 +87,9 @@ class SubProcess(object):
         self.histo = hs
     def getBranch(self,b_template,b_variable,treename,weight,cut):
         self.tfile.cd()
-        if not any(self.nuisances): self.nuisances = GetNuisanceList(self.tfile,self.dirname);
-        if treename not in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
-        self.histo = GetBranch(b_template,b_variable,self.trees[treename],weight,cut)
+        self.setTree(treename)
+        if self.tree.GetName() == "norm": self.nuisances = GetNuisanceList(self.tfile,self.dirname)
+        self.histo = GetBranch(b_template,b_variable,self.tree,weight,cut)
         self.histo.SetName('%s_%s' % (b_variable,self.filename))
         if 'post' in dir(b_template): b_template.post(self.histo)
     def fillRaw(self):
@@ -101,15 +109,11 @@ class SubProcess(object):
         self.tfile.cd()
         for variation in ('Up','Down'):
             if isScale:
-                treename = 'norm'
-                if not treename in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
-                tree = self.trees[treename]
-                hs_unc = GetBranch(b_template,b_variable,tree,nuisance+variation,cut)
+                self.setTree('norm')
+                hs_unc = GetBranch(b_template,b_variable,self.tree,nuisance+variation,cut)
             else:
-                treename = nuisance+variation
-                if not treename in self.trees: self.trees[treename] = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
-                tree = self.trees[treename]
-                hs_unc = GetBranch(b_template,b_variable,tree,'weight',cut)
+                self.setTree(nuisance+variation)
+                hs_unc = GetBranch(b_template,b_variable,self.tree,'weight',cut)
             hs_unc.SetName('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
             hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
@@ -196,7 +200,9 @@ class Process(object):
             self.setDir(dirname,ndir)
             self.variable = variable
         self.b_variable = variable.replace('_%s' % ndir,'')
-        for subprocess in self: subprocess.getBranch(self.b_template,self.b_variable,'norm','weight',cut)
+        for subprocess in self:
+            subprocess.getBranch(self.b_template,self.b_variable,'norm','weight',cut)
+            self.nuisances.update( subprocess.nuisances )
     def fillRaw(self):
         self.raw_total = 0
         for subprocess in self:
@@ -240,16 +246,16 @@ class Process(object):
         if not self.isBranch: return
         if nuisance not in self.nuisances:
             self.nuisances[nuisance] = {}
-        for subprocess in self:
-            subprocess.addUnc(nuisance,self.b_template,self.b_variable,self.cut)
+        for subprocess in self: subprocess.addUnc(nuisance,self.b_template,self.b_variable,self.cut)
         if self.proctype == 'signal': return
         for variation in ('Up','Down'):
-            histo = self.b_template
+            histo = self.b_template.Clone('%s_%s%s' % (self.name,nuisance,variation))
             histo.Reset()
             for subprocess in self:
-                histo.Add(subprocess.nuisances[nuisance][variation].Clone())
+                histo.Add(subprocess.nuisances[nuisance][variation])
                 subprocess.nuisances[nuisance].pop(variation)
-            self.nuisances[nuisance][variation] = histo.Clone( '%s_%s%s' % (self.name,nuisance,variation) )
+            histo.SetDirectory(0)
+            self.nuisances[nuisance][variation] = histo
     def removeUnc(self,nuisance):
         if nuisance not in self.nuisances: return
         if self.proctype == 'signal':
@@ -259,4 +265,3 @@ class Process(object):
         else:
             self.nuisances[nuisance].pop('Up')
             self.nuisances[nuisance].pop('Down')
-            
