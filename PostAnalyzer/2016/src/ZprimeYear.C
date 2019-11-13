@@ -79,6 +79,14 @@ bool ZprimeYear::muLooseID(int imu) {
   return (muIDbit->at(imu)>>0&1) == 1;
 }
 
+bool ZprimeYear::tauLooseID(int itau) {
+  return (tauIDbits->at(itau)>>0&1) == 1 && (tauIDbits->at(itau)>>13&1) == 1;
+}
+
+bool ZprimeYear::phoLooseID(int ipho) {
+  return true;
+}
+
 bool ZprimeYear::jetSelectionID(int ijet) {
   return jetPFLooseID->at(ijet)==1;
 }

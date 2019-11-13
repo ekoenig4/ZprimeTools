@@ -129,7 +129,7 @@ public:
   float recoil,recoilPhi;
 
   /* Histograms */
-  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt;
+  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt,*h_bosonPtwK;
   /* MET Histograms */
   TH1F *h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto],*h_recoil[maxHisto],*h_recoilPhi[maxHisto];
   /* Jet Histograms */
@@ -885,7 +885,7 @@ public:
 
   virtual float dPhiJetMETmin(vector<int>,float);
   virtual void SetBoson(int PID);
-  virtual float getKFactor(float bosonPt);
+  virtual float getKFactor(float bosonPt) = 0;
   virtual void SetKFactors(float bosonPt);
   virtual void ApplyKFactor(float &event_weight);
   virtual void ApplyPileup(float &event_weight);
@@ -897,23 +897,23 @@ public:
   vector<int> electron_tightID(int jetCand,float elePtCut);
   vector<int> electron_looseID(int jetCand,float elePtCut);
   virtual bool electron_veto(int jetCand,float elePtCut);
-  virtual bool eleTightID(int);
-  virtual bool eleLooseID(int);
+  virtual bool eleTightID(int) = 0;
+  virtual bool eleLooseID(int) = 0;
   vector<int> muon_tightID(int jetCand,float muPtCut);
   vector<int> muon_looseID(int jetCand,float muPtCut);
   virtual bool muon_veto(int jetCand,float muPtCut);
-  virtual bool muTightID(int);
-  virtual bool muLooseID(int);
+  virtual bool muTightID(int) = 0;
+  virtual bool muLooseID(int) = 0;
   vector<int> photon_looseID(int jetCand,float phoPtCut);
   virtual bool photon_veto(int jetCand,float phoPtCut);
-  virtual bool phoLooseID(int);
+  virtual bool phoLooseID(int) = 0;
   vector<int> tau_looseID(int jetCand,float tauPtCut);
   virtual bool tau_veto(int jetCand,float tauPtCut);
-  virtual bool tauLooseID(int);
+  virtual bool tauLooseID(int) = 0;
   virtual vector<int> JetVetoDecision();
-  virtual bool jetSelectionID(int);
+  virtual bool jetSelectionID(int) = 0;
   bool btagVeto();
-  virtual float getCSV2Cut();
+  virtual float getCSV2Cut() = 0;
 
   virtual void PFUncertainty(float event_weight);
   virtual void QCDVariations(float event_weight);

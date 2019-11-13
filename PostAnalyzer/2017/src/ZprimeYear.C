@@ -95,6 +95,10 @@ bool ZprimeYear::muLooseID(int imu) {
   return (muIDbit->at(imu)>>0&1) == 1;
 }
 
+bool ZprimeYear::phoLooseID(int ipho) {
+  return true;
+}
+
 bool ZprimeYear::tauLooseID(int itau) {
   unsigned int tauIDbit = tauIDbits->at(itau);
   return (tauIDbit>>0&1) == 1 && (tauIDbit>>13&1) == 1;

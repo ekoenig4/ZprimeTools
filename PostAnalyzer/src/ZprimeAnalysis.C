@@ -37,6 +37,7 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     h_genWeight = new TH1F("h_genWeight","h_genWeight;genWeight",50,-2,2); h_genWeight->Sumw2();
     h_sf = new TH1F("h_sf","h_sf;sf",50,-2,2); h_sf->Sumw2();
     h_bosonPt = new TH1F("h_bosonPt","bosonPt; boson P_{T}",24,BosonPtBins); h_bosonPt->Sumw2();
+    h_bosonPtwK = new TH1F("h_bosonPtwK","bosonPtwK; kfactor boson P_{T}",24,BosonPtBins); h_bosonPtwK->Sumw2();
   } else {
     h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2(); 
     h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx2[i]->Sumw2();
@@ -233,11 +234,10 @@ void ZprimeAnalysis::SetBoson(int PID) {
       SetKFactors(bosonPt);
 
       h_bosonPt->Fill(bosonPt,genWeight);
+      h_bosonPtwK->Fill(bosonPt,genWeight * kfactor);
     }
   }
 }
-
-float ZprimeAnalysis::getKFactor(float bosonPt) { return 1; }
 
 void ZprimeAnalysis::SetKFactors(float bosonPt) {
   kfactor = getKFactor(bosonPt);
@@ -465,8 +465,6 @@ vector<int> ZprimeAnalysis::JetVetoDecision() {
   return jetindex;
 }
 
-float ZprimeAnalysis::getCSV2Cut() { return -999; }
-
 bool ZprimeAnalysis::btagVeto() {
   bool btagVeto = true;
   for(int i = 0; i < nJet; i++)
@@ -474,15 +472,6 @@ bool ZprimeAnalysis::btagVeto() {
       btagVeto = false;
   return btagVeto;
 }
-
-
-bool ZprimeAnalysis::eleTightID(int iele)     { return true; }
-bool ZprimeAnalysis::eleLooseID(int iele)     { return true; }
-bool ZprimeAnalysis::muTightID(int imu)       { return true; }
-bool ZprimeAnalysis::muLooseID(int imu)       { return true; }
-bool ZprimeAnalysis::phoLooseID(int ipho)     { return true; }
-bool ZprimeAnalysis::tauLooseID(int itau)     { return true; }
-bool ZprimeAnalysis::jetSelectionID(int ijet) { return true; }
 
 ZprimeAnalysis::~ZprimeAnalysis()
 {

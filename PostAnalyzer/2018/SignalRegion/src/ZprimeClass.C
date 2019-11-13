@@ -240,7 +240,8 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 	      
 	if(metcut < metRatioCut) {
 	      
-	  bool noLeptonID = electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) && photon_veto(jetCand[0],phoLoosePtCut);
+	  bool noLeptonID = (electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) &&
+			     photon_veto(jetCand[0],phoLoosePtCut) && tau_veto(jetCand[0],tauLoosePtCut));
 	  if( noLeptonID ) {
 		
 	    if(btagVeto()) {

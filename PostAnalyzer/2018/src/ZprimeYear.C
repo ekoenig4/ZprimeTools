@@ -100,6 +100,10 @@ bool ZprimeYear::tauLooseID(int itau) {
   return (tauIDbit>>0&1) == 1 && (tauIDbit>>13&1) == 1;
 }
 
+bool ZprimeYear::phoLooseID(int ipho) {
+  return true;
+}
+
 bool ZprimeYear::jetSelectionID(int ijet) {
   return (jetID->at(ijet)>>0&1) == 1 && (jetPUFullID->at(ijet)&(1<<2));
 }
