@@ -105,13 +105,13 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  cutflow->Fill("GoodJet",event_weight);
 	  fillHistos(3,event_weight);
 	  
-	  if (pfMET > recoilCut) {
+	  if (pfMET > recoilCut) { // MET > 250
 	    cutflow->Fill("MetCut",event_weight);
 	    fillHistos(4,event_weight);
 	    float metcut = (fabs(pfMET-caloMET))/pfMET;
 	    h_metcut->Fill(metcut,event_weight);
 	    
-	    if(metcut < metRatioCut) {
+	    if(metcut < metRatioCut) { // metcut < 0.5
 	      cutflow->Fill("caloMETCut",event_weight);
 	      fillHistos(5,event_weight);
 
@@ -130,7 +130,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
 		  h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		  
-		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		  if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
 		    cutflow->Fill("DeltaPhiCut",event_weight);
 
 		    QCDVariations(event_weight);
@@ -258,10 +258,10 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     }	    
   }
 
+  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   jetCand     .clear();
   for (int cand : jetCandNorm) jetCand.push_back(cand);
   SetJetPFInfo(jetCand);
-  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   pfMET = pfMETNorm;
   pfMETPhi = pfMETPhiNorm;
   

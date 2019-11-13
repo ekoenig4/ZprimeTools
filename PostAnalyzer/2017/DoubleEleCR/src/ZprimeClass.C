@@ -70,8 +70,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     nentriesToCheck = maxEvents;
   nTotal = nentriesToCheck;
   Long64_t nbytes = 0, nb = 0;
-  cout<<"Running over "<<nTotal<<" events."<<endl;
-  //  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry+=4) {    
+  cout<<"Running over "<<nTotal<<" events."<<endl;   
   for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
@@ -93,9 +92,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
     fillHistos(0,genWeight);
-    for (int bit = 0; bit < 8; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
     
     if (metFilters == 0 && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
@@ -121,12 +117,12 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    cutflow->Fill("CRSelection",event_weight);
 	    fillHistos(4,event_weight);
 	      
-	    if (recoil > recoilCut) {
+	    if (recoil > recoilCut) { // recoil > 250
 	      cutflow->Fill("leptoMetCut",event_weight);
 	      fillHistos(5,event_weight);
 	      //invariant mass of the two electrons is betwen 60 and 120GeV
 		
-	      if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
+	      if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) { // 60 < Zmass < 120
 		cutflow->Fill("dileptonMassCut",event_weight);
 		fillHistos(6,event_weight);
 		bool muVeto = muon_veto(jetCand[0],lepindex_leading,lepindex_subleading,muLoosePtCut);
@@ -139,7 +135,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  float metcut = (fabs(pfMET-caloMET))/recoil;
 		  h_metcut->Fill(metcut,event_weight);
 		    
-		  if(metcut < metRatioCut) {
+		  if(metcut < metRatioCut) { // metcut < 0.5
 		    cutflow->Fill("caloMETCut",event_weight);
 		    fillHistos(8,event_weight);
 		      
@@ -150,7 +146,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 			
-		      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		      if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
 			cutflow->Fill("DeltaPhiCut",event_weight);
 			  
 			QCDVariations(event_weight);
@@ -306,10 +302,10 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     }
   }
     
+  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   jetCand     .clear();
   for (int cand : jetCandNorm) jetCand.push_back(cand);
   SetJetPFInfo(jetCand);
-  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   pfMET = pfMETNorm;
   pfMETPhi = pfMETPhiNorm;
 

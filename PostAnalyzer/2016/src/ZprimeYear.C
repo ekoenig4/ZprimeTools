@@ -13,7 +13,7 @@ void ZprimeYear::initVars() {
 void ZprimeYear::BookHistos(int i,string histname) {
   ZprimeAnalysis::BookHistos(i,histname);
   if (i == -1) {
-    h_metfilters = new TH1F("h_metfilters","metfilters",11,0.5,11.5); h_metFilters->Sumw2();
+    h_metfilters = new TH1F("h_metfilters","metfilters",11,0.5,11.5); h_metfilters->Sumw2();
   }
 }
 
@@ -123,7 +123,7 @@ bool ZprimeYear::muLooseID(int imu) {
 }
 
 bool ZprimeYear::tauLooseID(int itau) {
-  return taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i);
+  return true;//taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i);
 }
 
 bool ZprimeYear::phoLooseID(int ipho) {

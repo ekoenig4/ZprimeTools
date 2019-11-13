@@ -93,9 +93,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     jetCand   = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
-    for (int bit = 0; bit < 8; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
+    fillHistos(0,genWeight);
     
     if (metFilters == 0 && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
@@ -121,7 +119,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    cutflow->Fill("CRSelection",event_weight);
 	    fillHistos(4,event_weight);
 	    
-	    if (recoil > recoilCut) {
+	    if (recoil > recoilCut) { // recoil > 250
 	      cutflow->Fill("leptoMetCut",event_weight);
 	      fillHistos(5,event_weight);
 	      bool eleVeto = electron_veto(jetCand[0],lepindex,eleLoosePtCut);
@@ -135,13 +133,13 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		Float_t lepMET_MT = getMt(muPt->at(lepindex),muPhi->at(lepindex),pfMET,pfMETPhi);
 		h_lepMET_MT->Fill(lepMET_MT,event_weight);
 		
-		if(lepMET_MT < lepMETMtCut) {
+		if(lepMET_MT < lepMETMtCut) { // lepMET_Mt < 160
 		  cutflow->Fill("lepMETMt160",event_weight);
 		  fillHistos(7,event_weight);
 		  float metcut = (fabs(pfMET-caloMET))/recoil;
 		  h_metcut->Fill(metcut,event_weight);
 		  
-		  if(metcut < metRatioCut) {
+		  if(metcut < metRatioCut) { // metcut < 0.5
 		    cutflow->Fill("caloMETCut",event_weight);
 		    fillHistos(8,event_weight);
 		    
@@ -152,7 +150,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
 		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		      
-		      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
+		      if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
 			cutflow->Fill("DeltaPhiCut",event_weight);
 			
 			QCDVariations(event_weight);
@@ -304,10 +302,10 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     }
   }
     
+  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   jetCand     .clear();
   for (int cand : jetCandNorm) jetCand.push_back(cand);
   SetJetPFInfo(jetCand);
-  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   pfMET = pfMETNorm;
   pfMETPhi = pfMETPhiNorm;
 
