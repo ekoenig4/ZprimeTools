@@ -9,7 +9,7 @@ from CondorTools.SubmitDataset import submit,options
 options['year'] = '2017'
 options['region'] = 'WE'
 options['parallel'] = True
-options['batchsize'] = 60
+options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
 submit('egamma',label='SingleEle_',filelist=True)

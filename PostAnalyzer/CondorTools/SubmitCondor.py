@@ -12,7 +12,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 repo_path = os.path.realpath( updirectory(script_path) )
 cmssw_base = os.getenv("CMSSW_BASE")
 USERPROXY = "x509up_u23216"
-NFILE_PER_BATCH = 60
+NFILE_PER_BATCH = 30
 DoSubmit = True
 
 def ignore(path,fn):

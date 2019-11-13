@@ -9,15 +9,15 @@ from CondorTools.SubmitDataset import submit,options
 options['year'] = '2018'
 options['region'] = 'ZM'
 options['parallel'] = True
-options['batchsize'] = 60
+options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
 submit('met',label='DoubleMu_',filelist=True)
-# submit('wjets')
-# submit('zjets')
-# submit('qcd')
-# submit('ttjets')
-# submit('gjets')
-# submit('ewk')
-# submit('dyjets')
+submit('wjets')
+submit('zjets')
+submit('qcd')
+submit('ttjets')
+submit('gjets')
+submit('ewk')
+submit('dyjets')
 
