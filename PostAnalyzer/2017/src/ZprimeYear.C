@@ -58,9 +58,11 @@ void ZprimeYear::SetScalingHistos() {
   TFile *f_eleReconstrucSF_highpt=new TFile("RootFiles/egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root");
   TFile *f_eleIDeffSF_loose=new TFile("RootFiles/2017_ElectronLoose.root");
   TFile *f_eleIDeffSF_tight=new TFile("RootFiles/2017_ElectronTight.root");
+  TFile *f_eleTriggSF = new TFile("RootFiles/EleTriggSF.root");
   th2fmap["eleRecoSF_highpt"]=(TH2F*) f_eleReconstrucSF_highpt->Get("EGamma_SF2D");
   th2fmap["eleIDSF_loose"]=(TH2F*) f_eleIDeffSF_loose->Get("EGamma_SF2D");
   th2fmap["eleIDSF_tight"]=(TH2F*) f_eleIDeffSF_tight->Get("EGamma_SF2D");
+  th2fmap["eleTriggSF"] = (TH2F*) f_eleTriggSF->Get("EleTriggSF_abseta_pt");
 
   // Muon Scale Factors
   TFile *f_muSF_ISO = new TFile("RootFiles/RunBCDEF_SF_ISO.root");

@@ -22,7 +22,7 @@ int main(int argc, const char* argv[]) {
     printf("Running Test\n");
     argv[1] = "/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/DYJets/DYJetsToLL_HT400To600/0000/";
     argv[2] = "test.root";
-    argv[3] = "5000";
+    argv[3] = "-1";
     argv[4] = "100";
     argv[5] = "1-1";
     argc = 6;
