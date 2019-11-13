@@ -6,10 +6,10 @@ lumi = {"SingleEleCR":35900,
         "DoubleMuCR":35900,
         "SignalRegion":1892}
 
-lumi_by_era = {"SingleEleCR":{"B":8294,"C":4242,"D":4025,"E":3104,"F":7565,"G":8410,"H":216},
-               "DoubleEleCR":{"B":8294,"C":4242,"D":4025,"E":3104,"F":7565,"G":8410,"H":216},
-               "SingleMuCR":{"B":8319,"C":4242,"D":4025,"E":3105,"F":7566,"G":8435,"H":216},
-               "DoubleMuCR":{"B":8319,"C":4242,"D":4025,"E":3105,"F":7566,"G":8435,"H":216},
+lumi_by_era = {"SingleEleCR" :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":7576,"H":8651},
+               "DoubleEleCR" :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":7576,"H":8651},
+               "SingleMuCR"  :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":7576,"H":8651},
+               "DoubleMuCR"  :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":7576,"H":8651},
                "SignalRegion":{"F":1892}}
 
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"]

@@ -28,8 +28,8 @@ void ZprimeYear::fillHistos(int nhist,float event_weight) {
 }
 
 TH2F* ZprimeYear::MergeMuonSF(TH2F* bcdef,TH2F* gh) {
-  const float lumi_bcdef = 12609.751;
-  const float lumi_gh = 15931.028;
+  const float lumi_bcdef = 19695;
+  const float lumi_gh = 16226;
   bcdef->Scale(lumi_bcdef);
   gh->Scale(lumi_gh);
   bcdef->Add(gh);
