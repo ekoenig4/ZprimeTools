@@ -136,10 +136,10 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    if (getEleHEMVeto(eleHEMVetoPtCut)) {
 		      cutflow->Fill("EleHEMVeto",event_weight);
 
-		      // QCDVariations(event_weight);
-		      // PSWeights(weight_nogen);
+		      QCDVariations(event_weight);
+		      PSWeights(weight_nogen);
 		      fillHistos(9,event_weight);
-		      // PFUncertainty(event_weight);
+		      PFUncertainty(event_weight);
 		    }
 		  }
 		}   
@@ -147,7 +147,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    }
 	  }
 	}
-	// JetEnergyScale(weightNorm);
+	JetEnergyScale(weightNorm);
       }
     }
     
