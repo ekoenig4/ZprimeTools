@@ -9,16 +9,16 @@ from CondorTools.SubmitDataset import submit,options
 options['year'] = '2018'
 options['region'] = 'SR'
 options['parallel'] = True
-options['batchsize'] = 60
+options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
 # submit('signal',split=1)
-submit('met',sub='A',filelist=True)
+# submit('met',sub='A',filelist=True)
 # submit('wjets')
 # submit('zjets')
 # submit('qcd')
 # submit('ttjets')
-# submit('gjets')
-# submit('ewk')
-# submit('dyjets')
+submit('gjets')
+submit('ewk')
+submit('dyjets')
 

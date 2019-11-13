@@ -18,6 +18,16 @@ void ZprimeYear::fillHistos(int nhist,float event_weight) {
   ZprimeAnalysis::fillHistos(nhist,event_weight);
 }
 
+TH2F* ZprimeYear::MergeMuonSF(TH2F* bcdef,TH2F* gh) {
+  const float lumi_bcdef = 12609.751;
+  const float lumi_gh = 15931.028;
+  bcdef->Scale(lumi_bcdef);
+  gh->Scale(lumi_gh);
+  bcdef->Add(gh);
+  bcdef->Scale( 1.0/(lumi_bcdef + lumi_gh) );
+  return bcdef;
+}
+
 void ZprimeYear::SetScalingHistos() {
   ZprimeAnalysis::SetScalingHistos();
 
@@ -36,6 +46,30 @@ void ZprimeYear::SetScalingHistos() {
     th1fmap["LO_QCD"] = LO_QCD;
     th1fmap["NLO_QCD_EWK"] = NLO_QCD_EWK;
   }
+  // Electron Scale Factors
+  TFile *f_eleRecoSF_hightpt = new TFile("RootFiles/EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root");
+  TFile *f_eleIDeffSF_loose = new TFile("RootFiles/2016LegacyReReco_ElectronLoose.root");
+  TFile *f_eleIDeffSF_tight = new TFile("RootFiles/2016LegacyReReco_ElectronTight.root");
+  TFile *f_eleTriggSF = new TFile("RootFiles/EleTriggSF.root");
+  th2fmap["eleRecoSF_highpt"] = (TH2F*)f_eleRecoSF_hightpt->Get("EGamma_SF2D");
+  th2fmap["eleIDSF_loose"]=(TH2F*) f_eleIDeffSF_loose->Get("EGamma_SF2D");
+  th2fmap["eleIDSF_tight"]=(TH2F*) f_eleIDeffSF_tight->Get("EGamma_SF2D");
+  th2fmap["eleTriggSF"] = (TH2F*) f_eleTriggSF->Get("EleTriggSF_abseta_pt");
+
+  // Muon Scale Factors
+  TFile *f_muSF_ISO_1 = new TFile("RootFiles/RunBCDEF_SF_ISO.root");
+  TFile *f_muSF_ISO_2 = new TFile("RootFiles/RunGH_SF_ISO.root");
+  TFile *f_muSF_ID_1 = new TFile("RootFiles/RunBCDEF_SF_ID.root");
+  TFile *f_muSF_ID_2 = new TFile("RootFiles/RunGH_SF_ID.root");
+
+  th2fmap["tightMuSF_ISO"] = MergeMuonSF((TH2F*)f_muSF_ISO_1->Get("NUM_TightRelIso_DEN_TightIDandIPCut_eta_pt"),
+					 (TH2F*)f_muSF_ISO_2->Get("NUM_TightRelIso_DEN_TightIDandIPCut_eta_pt"));
+  th2fmap["looseMuSF_ISO"] = MergeMuonSF((TH2F*)f_muSF_ISO_1->Get("NUM_LooseRelIso_DEN_LooseID_eta_pt"),
+					 (TH2F*)f_muSF_ISO_2->Get("NUM_LooseRelIso_DEN_LooseID_eta_pt"));
+  th2fmap["tightMuSF_ID"] = MergeMuonSF((TH2F*)f_muSF_ID_1->Get("NUM_TightID_DEN_genTracks_eta_pt"),
+					(TH2F*)f_muSF_ID_2->Get("NUM_TightID_DEN_genTracks_eta_pt"));
+  th2fmap["looseMuSF_ID"] = MergeMuonSF((TH2F*)f_muSF_ID_1->Get("NUM_LooseID_DEN_genTracks_eta_pt"),
+					(TH2F*)f_muSF_ID_2->Get("NUM_LooseID_DEN_genTracks_eta_pt"));
 }
 
 float ZprimeYear::getKFactor(float bosonPt) {

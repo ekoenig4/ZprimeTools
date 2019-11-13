@@ -57,10 +57,10 @@ void ZprimeYear::SetScalingHistos() {
   // Muon Scale Factors
   TFile *f_muSF_ISO = new TFile("RootFiles/RunABCD_SF_ISO.root");
   TFile *f_muSF_ID = new TFile("RootFiles/RunABCD_SF_ID.root");
-  th2fmap["tightMuSF_ISO"] =  (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
-  th2fmap["looseMuSF_ISO"] =  (TH2F*)f_muSF_ISO->Get("NUM_LooseRelIso_DEN_LooseID_pt_abseta");	      
-  th2fmap["tightMuSF_ID"] =  (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_TrackerMuons_pt_abseta");	      
-  th2fmap["looseMuSF_ID"] =  (TH2F*)f_muSF_ID->Get("NUM_LooseID_DEN_TrackerMuons_pt_abseta");
+  th2fmap["tightMuSF_ISO_abseta"] =  (TH2F*)f_muSF_ISO->Get("NUM_TightRelIso_DEN_TightIDandIPCut_pt_abseta");
+  th2fmap["looseMuSF_ISO_abseta"] =  (TH2F*)f_muSF_ISO->Get("NUM_LooseRelIso_DEN_LooseID_pt_abseta");	      
+  th2fmap["tightMuSF_ID_abseta"] =  (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_TrackerMuons_pt_abseta");	      
+  th2fmap["looseMuSF_ID_abseta"] =  (TH2F*)f_muSF_ID->Get("NUM_LooseID_DEN_TrackerMuons_pt_abseta");
 }
 
 float ZprimeYear::getKFactor(float bosonPt) {

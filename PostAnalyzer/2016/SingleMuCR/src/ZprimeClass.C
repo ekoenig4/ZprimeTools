@@ -104,6 +104,10 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  vector<int> looseMus = muon_looseID(jetCand[0],muLoosePtCut);
 	  
 	  if( CRSelection(mulist,looseMus) ) {
+	    if ( !sample.isData ) {
+	      SetSF( getSF(lepindex) );
+	      ApplySF(event_weight);
+	    }
 	    cutflow->Fill("CRSelection",event_weight);
 	    fillHistos(4,event_weight);
 	    
@@ -254,6 +258,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
       vector<int> looseMus = muon_looseID(jetCand[0],muLoosePtCut);
 	  
       if( CRSelection(mulist,looseMus) ) {
+	if ( !sample.isData ) event_weight *= getSF(lepindex);
 	    
 	if (recoil > recoilCut) {
 	  bool eleVeto = electron_veto(jetCand[0],lepindex,eleLoosePtCut);

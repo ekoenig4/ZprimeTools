@@ -79,13 +79,25 @@ bool ZprimeDoubleCR::CRSelection(vector<int> tightlist,vector<int> looselist) {
 }
 
 float ZprimeDoubleCR::getSF(int leading,int subleading) {
-  float leading_pt = muPt->at(leading); float leading_eta = fabs(muEta->at(leading)); 
-  float subleading_pt = muPt->at(subleading); float subleading_eta = fabs(muEta->at(subleading)); 
+  float leading_pt = muPt->at(leading); float leading_eta = muEta->at(leading); 
+  float subleading_pt = muPt->at(subleading); float subleading_eta = muEta->at(subleading);
   
-  float tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",leading_pt,leading_eta);
-  float tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",leading_pt,leading_eta);
-  float looseMuISO_SF_corr = th2fmap.getBin("looseMuSF_ISO",subleading_pt,subleading_eta);
-  float looseMuID_SF_corr = th2fmap.getBin("looseMuSF_ID",subleading_pt,subleading_eta);
+  float tightMuISO_SF_corr;
+  float tightMuID_SF_corr; 
+  float looseMuISO_SF_corr;
+  float looseMuID_SF_corr;
+  
+  if ( th2fmap.contains("tightMuSF_ISO_abseta") ) {
+    tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO_abseta",leading_pt,fabs(leading_eta));
+    tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID_abseta",leading_pt,fabs(leading_eta));
+    looseMuISO_SF_corr = th2fmap.getBin("looseMuSF_ISO_abseta",subleading_pt,fabs(subleading_eta));
+    looseMuID_SF_corr = th2fmap.getBin("looseMuSF_ID_abseta",subleading_pt,fabs(subleading_eta));
+  } else {
+    tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",leading_pt,leading_eta);
+    tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",leading_pt,leading_eta);
+    looseMuISO_SF_corr = th2fmap.getBin("looseMuSF_ISO",subleading_pt,subleading_eta);
+    looseMuID_SF_corr = th2fmap.getBin("looseMuSF_ID",subleading_pt,subleading_eta);
+  }
   
   return tightMuISO_SF_corr*tightMuID_SF_corr*looseMuISO_SF_corr*looseMuID_SF_corr;
 }

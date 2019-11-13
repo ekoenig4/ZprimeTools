@@ -47,71 +47,13 @@ bool ZprimeSingleCR::CRSelection(vector<int> tight,vector<int> loose) {
   return false;
 }
 
-float EletriggerSF(float pt, float eta){
-  float sf = 1.0;
-  if(fabs(eta) >= 0.0   && fabs(eta) < 0.8){
-    if(pt < 40.0) sf = 0.75;
-    if(pt > 40.0 && pt < 50.0) sf = 0.92;
-    if(pt > 50.0 && pt < 60.0) sf = 0.95;
-    if(pt > 60.0 && pt < 70.0) sf = 0.96;
-    if(pt > 70.0 && pt < 80.0) sf = 0.96;
-    if(pt > 80.0 && pt < 90.0) sf = 0.97;
-    if(pt > 90.0 && pt < 100.) sf = 0.96;
-    if(pt > 100. && pt < 150.) sf = 0.97;
-    if(pt > 150. && pt < 200.) sf = 0.97;
-    if(pt > 200. && pt < 250.) sf = 0.98;
-    if(pt > 250) sf = 0.93;
-  }
-  if(fabs(eta) >= 0.8   && fabs(eta) < 1.5){
-    if(pt < 40.0) sf = 0.64;
-    if(pt > 40.0 && pt < 50.0) sf = 0.91;
-    if(pt > 50.0 && pt < 60.0) sf = 0.94;
-    if(pt > 60.0 && pt < 70.0) sf = 0.95;
-    if(pt > 70.0 && pt < 80.0) sf = 0.95;
-    if(pt > 80.0 && pt < 90.0) sf = 0.96;
-    if(pt > 90.0 && pt < 100.) sf = 0.96;
-    if(pt > 100. && pt < 150.) sf = 0.96;
-    if(pt > 150. && pt < 200.) sf = 0.96;
-    if(pt > 200. && pt < 250.) sf = 0.97;
-    if(pt > 250) sf = 1.0;
-  }
-    
-  if(fabs(eta) >= 1.5   && fabs(eta) < 2. ) {
-    if(pt < 40.0) sf = 0.63;
-    if(pt > 40.0 && pt < 50.0) sf = 0.91;
-    if(pt > 50.0 && pt < 60.0) sf = 0.94;
-    if(pt > 60.0 && pt < 70.0) sf = 0.95;
-    if(pt > 70.0 && pt < 80.0) sf = 0.95;
-    if(pt > 80.0 && pt < 90.0) sf = 0.95;
-    if(pt > 90.0 && pt < 100.) sf = 0.96;
-    if(pt > 100. && pt < 150.) sf = 0.96;
-    if(pt > 150. && pt < 200.) sf = 0.99;
-    if(pt > 200. && pt < 250.) sf = 0.97;
-    if(pt > 250) sf = 1.0;
-  }
-  if(fabs(eta) >= 2.) {
-    if(pt < 40.0) sf = 0.5;
-    if(pt > 40.0 && pt < 50.0) sf = 0.83;
-    if(pt > 50.0 && pt < 60.0) sf = 0.89;
-    if(pt > 60.0 && pt < 70.0) sf = 0.90;
-    if(pt > 70.0 && pt < 80.0) sf = 0.92;
-    if(pt > 80.0 && pt < 90.0) sf = 0.93;
-    if(pt > 90.0 && pt < 100.) sf = 0.94;
-    if(pt > 100. && pt < 150.) sf = 0.94;
-    if(pt > 150. && pt < 200.) sf = 0.96;
-    if(pt > 200. && pt < 250.) sf = 1.0;
-    if(pt > 250) sf = 1.0;
-  }
-  return sf;
-}
-
 float ZprimeSingleCR::getSF(int lepindex) {
   float eta = eleSCEta->at(lepindex); float pt = elePt->at(lepindex);
   float eleRecoSF_corr= th2fmap.getBin("eleRecoSF_highpt",eta,pt);
   // std::cout<<"eleRecoSF_corr =  "<< eleRecoSF_corr<<std::endl;
   float eleEffSF_corr= th2fmap.getBin("eleIDSF_tight",eta,pt);
   // std::cout<<"eleEffSF_corr =  "<< eleEffSF_corr<<std::endl;
-  float eleTriggSF = EletriggerSF(pt,eta);
+  float eleTriggSF = th2fmap.getBin("eleTriggSF",fabs(eta),pt);
 
   return eleRecoSF_corr * eleEffSF_corr * eleTriggSF;
 }

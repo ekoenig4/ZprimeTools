@@ -22,7 +22,7 @@ public:
   bool photon_veto(int jet_index,int lepindex,float phoPtCut);
   bool tau_veto(int jet_index,int lepindex,float tauPtCut);
   vector<int> JetVetoDecision(int lepindex);
-  float getSF(int lepindex);
+  virtual float getSF(int lepindex);
   bool CRSelection(std::vector<int> tight,std::vector<int> loose);
 };
 

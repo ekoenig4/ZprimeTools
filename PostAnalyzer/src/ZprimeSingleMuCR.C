@@ -49,11 +49,22 @@ bool ZprimeSingleCR::CRSelection(vector<int> tight,vector<int> loose) {
 }
 
 float ZprimeSingleCR::getSF(int lepindex) {
-  float eta = fabs(muEta->at(lepindex));
+  float eta = muEta->at(lepindex);
   float pt = muPt->at(lepindex);
+
+  float tightMuISO_SF_corr;
+  float tightMuID_SF_corr;
+    
+  if ( th2fmap.contains("tightMuSF_ISO_abseta") ) {
+    // Use abseta instead of eta
+    tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO_abseta",pt,fabs(eta));
+    tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID_abseta",pt,fabs(eta));
+  } else {
+    // Use eta
+    tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",pt,eta);
+    tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",pt,eta);
+  }
   
-  float tightMuISO_SF_corr = th2fmap.getBin("tightMuSF_ISO",pt,eta);
-  float tightMuID_SF_corr = th2fmap.getBin("tightMuSF_ID",pt,eta);
   
   return tightMuISO_SF_corr*tightMuID_SF_corr;
 }

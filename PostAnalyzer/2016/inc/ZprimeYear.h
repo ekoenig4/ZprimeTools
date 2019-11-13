@@ -24,6 +24,7 @@ public:
   virtual void fillHistos(int nhist,float event_weight);
   virtual void initVars();
   virtual void SetScalingHistos();
+  virtual TH2F* MergeMuonSF(TH2F*,TH2F*);
   virtual void Init(TTree* tree);
   virtual float getKFactor(float bosonPt);
   virtual void SetPFVectors(int jetCand);

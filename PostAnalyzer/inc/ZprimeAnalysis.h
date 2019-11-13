@@ -65,6 +65,7 @@ public:
   struct TH2FCollection : public std::map<std::string,TH2F*> {
     float getBin(std::string name,float x,float y) {
       TH2F* histo = (*this)[name];
+      if ( histo == NULL ) cout << name << " is null" << endl;
       int xbin,ybin;
       float xmax = histo->GetXaxis()->GetXmax(); float xmin = histo->GetXaxis()->GetXmin();
       float ymax = histo->GetYaxis()->GetXmax(); float ymin = histo->GetYaxis()->GetXmin();
@@ -78,6 +79,7 @@ public:
       
       return histo->GetBinContent( xbin,ybin );
     }
+    bool contains(std::string key) { return this->find(key) != this->end(); }
   } th2fmap;
   ScaleUncCollection scaleUncs;
   ShapeUncCollection shapeUncs;
