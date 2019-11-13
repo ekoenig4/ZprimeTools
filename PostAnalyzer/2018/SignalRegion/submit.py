@@ -12,12 +12,12 @@ options['parallel'] = True
 options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
-# submit('signal',split=1)
-# submit('met',sub='A',filelist=True)
-# submit('wjets')
-# submit('zjets')
-# submit('qcd')
-# submit('ttjets')
+submit('signal',split=1)
+submit('met',sub='A',filelist=True)
+submit('wjets')
+submit('zjets')
+submit('qcd')
+submit('ttjets')
 submit('gjets')
 submit('ewk')
 submit('dyjets')
