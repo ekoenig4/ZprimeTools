@@ -216,7 +216,9 @@ vector<int> ZprimeAnalysis::getJetCand(float jetPtCut, float jetEtaCut, float je
 
 float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   //Only look at first four jets (because that's what monojet analysis do)
-  int njets = jets.size() ? jets.size() < 4 : 4;
+  int njets = jets.size();
+  if (njets > 4) njets = 4;
+  
   float minDPhiJetMET_first4 = TMath::Pi();
   for (int ijet = 0; ijet < njets; ijet++) {
     float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
@@ -458,7 +460,8 @@ bool ZprimeAnalysis::tau_veto(int jet_index,float tauPtCut) {
 vector<int> ZprimeAnalysis::JetVetoDecision() {
   vector<int> jetindex; jetindex.clear();
   for(int i = 0; i < nJet; i++) {
-    if (jetPt->at(i) > jetVetoPtCut && fabs(jetEta->at(i)) < jetVetoEtaCut && jetSelectionID(i))
+    bool jetID = jetSelectionID(i);
+    if (jetPt->at(i) > jetVetoPtCut && fabs(jetEta->at(i)) < jetVetoEtaCut && jetID)
       jetindex.push_back(i);
   }
   return jetindex;

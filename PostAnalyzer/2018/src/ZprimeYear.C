@@ -107,7 +107,11 @@ bool ZprimeYear::phoLooseID(int ipho) {
 }
 
 bool ZprimeYear::jetSelectionID(int ijet) {
-  return (jetID->at(ijet)>>0&1) == 1 && (jetPUFullID->at(ijet)&(1<<2));
+  bool tightJetID = false;
+  bool loosePUID = false;
+  if ((*jetID)[ijet]>>0&1 == 1) tightJetID = true;
+  if((*jetPUFullID)[ijet]&(1<<2)) loosePUID=true;
+  return tightJetID && loosePUID;
 }
 
 float ZprimeYear::getCSV2Cut() { return bjetVetoCSVv2Cut_17; }

@@ -1,5 +1,7 @@
 from ROOT import *
 
+store = []
+
 def DataStyle(hs_data):
     hs_data.SetLineWidth(2)
     hs_data.SetLineColor(kWhite);

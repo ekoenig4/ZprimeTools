@@ -301,7 +301,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		    
 		  if(btagVeto()) {
 		    vector<int> jetveto = JetVetoDecision(lepindex);
-		    float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+		    float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		      
 		    if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 			  

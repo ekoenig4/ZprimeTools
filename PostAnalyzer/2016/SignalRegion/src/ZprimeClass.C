@@ -112,7 +112,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  cutflow->Fill("B-JetVeto",event_weight);
 		  fillHistos(7,event_weight);
 		  vector<int> jetveto = JetVetoDecision();
-		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		  h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 		  
 		  if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
@@ -226,7 +226,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		
 	    if(btagVeto()) {
 	      vector<int> jetveto = JetVetoDecision();
-	      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,pfMETPhi);
+	      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		  
 	      if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 		weight = event_weight;
