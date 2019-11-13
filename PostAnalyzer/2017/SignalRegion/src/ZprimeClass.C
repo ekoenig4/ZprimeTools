@@ -82,7 +82,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
       ApplyPileup(event_weight);
 
       if (isW_or_ZJet()) {
-	SetBoson(event_weight);
+	SetBoson(sample.PID);
 	ApplyKFactor(event_weight);
       }
     }

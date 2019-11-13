@@ -20,7 +20,7 @@ using namespace std;
 int main(int argc, const char* argv[]) { 
   if (argc == 1) {
     printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx1_Mv1000/";
+    argv[1] = "/hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/ZJets/ZJetsToNuNu_HT400-600/0000/";
     argv[2] = "test.root";
     argv[3] = "-1";
     argv[4] = "1000";
@@ -71,6 +71,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
   Long64_t nbytes = 0, nb = 0;
   cout<<"Running over "<<nTotal<<" events."<<endl;
   for (Long64_t jentry=0; jentry<nentriesToCheck; sample.isData ? jentry += 4 : jentry++) {
+    
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -82,7 +83,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
       ApplyPileup(event_weight);
 
       if (isW_or_ZJet()) {
-    	SetBoson(event_weight);
+    	SetBoson(sample.PID);
     	ApplyKFactor(event_weight);
       }
     }
@@ -135,10 +136,10 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    if (getEleHEMVeto(eleHEMVetoPtCut)) {
 		      cutflow->Fill("EleHEMVeto",event_weight);
 
-		      QCDVariations(event_weight);
-		      PSWeights(weight_nogen);
+		      // QCDVariations(event_weight);
+		      // PSWeights(weight_nogen);
 		      fillHistos(9,event_weight);
-		      PFUncertainty(event_weight);
+		      // PFUncertainty(event_weight);
 		    }
 		  }
 		}   
@@ -146,7 +147,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    }
 	  }
 	}
-	JetEnergyScale(weightNorm);
+	// JetEnergyScale(weightNorm);
       }
     }
     
