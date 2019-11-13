@@ -31,7 +31,6 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
   if (i == -1) {
     h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
     h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
-    h_metfilters = new TH1F("h_metfilters","metfilters",8,0.5,8.5); h_metfilters->Sumw2();
     h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,-2,2); h_kfactor->Sumw2();
     h_pileup = new TH1F("h_pileup","h_pileup;pileup",50,-2,2); h_pileup->Sumw2();
     h_genWeight = new TH1F("h_genWeight","h_genWeight;genWeight",50,-2,2); h_genWeight->Sumw2();
@@ -217,9 +216,9 @@ vector<int> ZprimeAnalysis::getJetCand(float jetPtCut, float jetEtaCut, float je
 
 float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   //Only look at first four jets (because that's what monojet analysis do)
+  int njets = jets.size() ? jets.size() < 4 : 4;
   float minDPhiJetMET_first4 = TMath::Pi();
-  for (int ijet = 0; ijet < jets.size(); ijet++) {
-    if ( ijet >= 4 ) break;
+  for (int ijet = 0; ijet < njets; ijet++) {
     float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
     if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
   }
@@ -521,7 +520,7 @@ void ZprimeAnalysis::PFUncertainty(float event_weight) {
   vector<float> j1PFConsPtNorm;
   vector<float> j1PFConsPtUnc;
 
-  float jetPtNorm = jetPt->at(jetCand[0]);
+  float jetPtNorm = j1pT;
   for(int i=0;i<j1PFConsPID.size();i++) {
     j1PFConsPtNorm.push_back(j1PFConsPt[i]);
     if ( abs(j1PFConsPID[i]) == 211 || abs(j1PFConsPID[i]) == 13 ) {
@@ -560,13 +559,13 @@ void ZprimeAnalysis::PFUncertainty(float event_weight) {
   for (int i = 0; i < 2; i++) {
     int variation = UncType[i];
     // Tracker
-    jetPt->at(jetCand[0]) = 0;
+    j1pT = 0;
     j1PFConsPt.clear();
     for (int j = 0; j < j1PFConsPID.size(); j++) {
       if ( ( abs(j1PFConsPID[j]) == 221 || abs(j1PFConsPID[j]) == 13 ) )
 	j1PFConsPt.push_back( j1PFConsPtNorm[j]*(1 + variation*j1PFConsPtUnc[j]) );
       else j1PFConsPt.push_back(j1PFConsPtNorm[j]);
-      jetPt->at(jetCand[0]) += j1PFConsPt[j];
+      j1pT += j1PFConsPt[j];
     }
     SetPtFrac();
     if (variation == 1)  shapeUncs.fillUp(uncname+"tracker");
@@ -574,13 +573,13 @@ void ZprimeAnalysis::PFUncertainty(float event_weight) {
     // cout << "\tTracker " << (variation == 1 ? "Up " : "Down ") << ChNemPtFrac << endl;
     
     // ECAL
-    jetPt->at(jetCand[0]) = 0;
+    j1pT = 0;
     j1PFConsPt.clear();
     for (int j = 0; j < j1PFConsPID.size(); j++) {
       if ( ( abs(j1PFConsPID[j]) == 22 || abs(j1PFConsPID[j]) == 11 ) ) 
 	j1PFConsPt.push_back( j1PFConsPtNorm[j]*(1 + variation*j1PFConsPtUnc[j]) );
       else j1PFConsPt.push_back(j1PFConsPtNorm[j]);
-      jetPt->at(jetCand[0]) += j1PFConsPt[j];
+      j1pT += j1PFConsPt[j];
     }
     SetPtFrac();
     if (variation == 1)  shapeUncs.fillUp(uncname+"ecal");
@@ -588,13 +587,13 @@ void ZprimeAnalysis::PFUncertainty(float event_weight) {
     // cout << "\tECAL " << (variation == 1 ? "Up " : "Down ") << ChNemPtFrac << endl;
     
     // HCAL
-    jetPt->at(jetCand[0]) = 0;
+    j1pT = 0;
     j1PFConsPt.clear();
     for (int j = 0; j < j1PFConsPID.size(); j++) {
       if ( ( abs(j1PFConsPID[j]) == 130 ) )
 	j1PFConsPt.push_back( j1PFConsPtNorm[j]*(1 + variation*j1PFConsPtUnc[j]) );
       else j1PFConsPt.push_back(j1PFConsPtNorm[j]);
-      jetPt->at(jetCand[0]) += j1PFConsPt[j];
+      j1pT += j1PFConsPt[j];
     }
     SetPtFrac();
     if (variation == 1)  shapeUncs.fillUp(uncname+"hcal");
@@ -602,7 +601,7 @@ void ZprimeAnalysis::PFUncertainty(float event_weight) {
     // cout << "\tHCAL " << (variation == 1 ? "Up " : "Down ") << ChNemPtFrac << endl;
   }
   
-  jetPt->at(jetCand[0]) = jetPtNorm;
+  j1pT = jetPtNorm;
   j1PFConsPt.clear();
   for (float consPt : j1PFConsPtNorm) j1PFConsPt.push_back(consPt);
   SetPtFrac();

@@ -12,10 +12,19 @@ void ZprimeYear::initVars() {
 
 void ZprimeYear::BookHistos(int i,string histname) {
   ZprimeAnalysis::BookHistos(i,histname);
+  if (i == -1) {
+    h_metfilters = new TH1F("h_metfilters","metfilters",11,0.5,11.5); h_metFilters->Sumw2();
+  }
 }
 
 void ZprimeYear::fillHistos(int nhist,float event_weight) {
   ZprimeAnalysis::fillHistos(nhist,event_weight);
+
+  if ( nhist == 0 ) {
+    for (int bit = 0; bit < 11; bit++)
+      if (metFilters >> bit & 1 == 1)
+	h_metfilters->Fill(bit + 1,event_weight);
+  }
 }
 
 TH2F* ZprimeYear::MergeMuonSF(TH2F* bcdef,TH2F* gh) {
@@ -114,7 +123,7 @@ bool ZprimeYear::muLooseID(int imu) {
 }
 
 bool ZprimeYear::tauLooseID(int itau) {
-  return (tauIDbits->at(itau)>>0&1) == 1 && (tauIDbits->at(itau)>>13&1) == 1;
+  return taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i);
 }
 
 bool ZprimeYear::phoLooseID(int ipho) {

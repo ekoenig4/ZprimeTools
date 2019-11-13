@@ -59,8 +59,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     nentriesToCheck = maxEvents;
   nTotal = nentriesToCheck;
   Long64_t nbytes = 0, nb = 0;
-  cout<<"Running over "<<nTotal<<" events."<<endl;
-  //  for (Long64_t jentry=0; jentry<nentriesToCheck;jentry+=4) {    
+  cout<<"Running over "<<nTotal<<" events."<<endl;  
   for (Long64_t jentry=0; jentry<nentriesToCheck;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
@@ -82,9 +81,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
     fillHistos(0,genWeight);
-    for (int bit = 0; bit < 11; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
     
     if ((metFilters==1536 && sample.isData) || (metFilters==0 && !sample.isData) && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
@@ -292,10 +288,10 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     }
   }
     
+  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   jetCand     .clear();
   for (int cand : jetCandNorm) jetCand.push_back(cand);
   SetJetPFInfo(jetCand);
-  for (int i = 0; i < jetPtNorm.size(); i++) jetPt->at(i) = jetPtNorm[i];
   pfMET = pfMETNorm;
   pfMETPhi = pfMETPhiNorm;
 
