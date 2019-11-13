@@ -102,8 +102,8 @@ def removeOldFiles(filekey,label):
     filekey = filekey.replace(".root","_")
     for fn in os.listdir(".output/"):
         if filekey in fn:
-            os.remove(".output/"+fn)
-
+            try: os.remove(".output/"+fn)
+            except: pass # file removed in parallel
     if not os.path.isdir(".status/"+label): os.mkdir(".status/"+label)
     for fn in os.listdir(".status/"+label): os.remove(".status/"+label+"/"+fn)
 
