@@ -1,7 +1,7 @@
 version="2017"
 
-lumi = {"SingleEleCR":23192,
-        "DoubleEleCR":23192,
+lumi = {"SingleEleCR":41486, #23192,
+        "DoubleEleCR":41486, #23192,
         "SingleMuCR":41486,
         "DoubleMuCR":41486,
         "SignalRegion":1198}
