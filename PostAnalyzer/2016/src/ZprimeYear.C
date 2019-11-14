@@ -102,6 +102,23 @@ void ZprimeYear::SetPFVectors(int jetCand) {
   }
 }
 
+bool ZprimeYear::MET_Filters() {
+  if ( sample.isData ) return metFilters == 1536;
+  else                 return metFilters == 0;
+}
+
+bool ZprimeYear::MET_Triggers() {
+  if ( !sample.isData ) return true;
+  else
+    return (HLTJet>>4&1) == 1 || (HLTJet>>5&1) == 1 || (HLTJet>>6&1) == 1 || (HLTJet>>8&1) == 1;
+}
+
+bool ZprimeYear::EGamma_Triggers() {
+  if ( !sample.isData ) return true;
+  else
+    return (HLTEleMuX>>4&1 == 1) || (HLTEleMuX>>38&1 == 1) || (HLTPho >>7&1 ==1);
+}
+
 bool ZprimeYear::eleTightID(int iele) {
   return (eleIDbit->at(iele)>>3&1) == 1;
 }
@@ -123,18 +140,21 @@ bool ZprimeYear::muLooseID(int imu) {
 }
 
 bool ZprimeYear::tauLooseID(int itau) {
-  return true;//taupfTausDiscriminationByDecayModeFinding->at(i) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(i);
+  return taupfTausDiscriminationByDecayModeFinding->at(itau) && tauByVLooseIsolationMVArun2v1DBoldDMwLT->at(itau);
 }
 
 bool ZprimeYear::phoLooseID(int ipho) {
-  return true;
+  return (phoIDbit->at(ipho)>>0&1) == 1;
 }
 
 bool ZprimeYear::jetSelectionID(int ijet) {
   return jetPFLooseID->at(ijet)==1;
 }
 
-float ZprimeYear::getCSV2Cut() { return bjetVetoCSVv2Cut_16; }
+bool ZprimeYear::btagSelectionID(int ijet) {
+  float btag = jetCSV2BJetTags->at(ijet);
+  return btag > bjetVetoCSVv2Cut_16;
+}
 
 ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange) {
   TChain *chain = new TChain("ggNtuplizer/EventTree");
@@ -459,6 +479,8 @@ void ZprimeYear::Init(TTree *tree) {
   tauLeadChargedHadron_dxy = 0;
   tauIDbits = 0;
   taubyIsolationMVArun2017v2DBoldDMwLTraw2017 = 0;
+  tauByVLooseIsolationMVArun2v1DBoldDMwLT = 0;
+  taupfTausDiscriminationByDecayModeFinding = 0;
   pdf = 0;
   pdfSystWeight = 0;
   nPU = 0;

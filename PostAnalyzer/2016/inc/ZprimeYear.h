@@ -12,12 +12,16 @@ public:
   vector<vector<double> > *JetsPFConsPhi;
   vector<vector<double> > *JetsPFConsEt;
   vector<vector<int> > *JetsPFConsPID;
+  vector<bool>    *taupfTausDiscriminationByDecayModeFinding;
+  vector<bool>    *tauByVLooseIsolationMVArun2v1DBoldDMwLT;
   TBranch        *b_jetPFLooseID; //!
   TBranch        *b_JetsPFConsPt;   //!
   TBranch        *b_JetsPFConsEta;   //!
   TBranch        *b_JetsPFConsPhi;   //!
   TBranch        *b_JetsPFConsEt;   //!
   TBranch        *b_JetsPFConsPID;   //!
+  TBranch        *b_taupfTausDiscriminationByDecayModeFinding;   //!
+  TBranch        *b_tauByVLooseIsolationMVArun2v1DBoldDMwLT;   //!
   
   ZprimeYear(const char * inputFilename,const char * outputFilename,const char * fileRange);
   virtual void BookHistos(int i,string histname);
@@ -35,7 +39,11 @@ public:
   virtual bool tauLooseID(int);
   virtual bool phoLooseID(int);
   virtual bool jetSelectionID(int);
-  virtual float getCSV2Cut();
+  virtual bool btagSelectionID(int);
+  virtual bool MET_Filters();
+  virtual bool MET_Triggers();
+  virtual bool EGamma_Triggers();
+  
 };
 
 #endif
