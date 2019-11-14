@@ -44,7 +44,7 @@ def autodirectory(args):
     directory = []
     date,time = str(datetime.now()).split()
     args.date = date.replace('-','')
-    from PlotTool.Plot import GetRegion
+    from PlotTool import GetRegion
     if args.year is None:
         from config import version
         args.year = version
