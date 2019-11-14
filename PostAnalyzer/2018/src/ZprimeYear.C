@@ -81,6 +81,22 @@ void ZprimeYear::SetPFVectors(int jetCand) {
   j1PFConsPID = jetConstPID->at(jetCand);
 }
 
+bool ZprimeYear::MET_Filters() {
+  return metFilters == 0;
+}
+
+bool ZprimeYear::MET_Triggers() {
+  if ( !sample.isData ) return true;
+  else
+    return (HLTMet>>7&1) == 1 || (HLTMet>>8&1) == 1 || (HLTMet>>10&1) == 1;
+}
+
+bool ZprimeYear::EGamma_Triggers() {
+  if ( !sample.isData ) return true;
+  else
+    return (HLTEleMuX>>5&1) == 1 || (HLTEleMuX>>6&1) == 1 || (HLTPho>>11&1) == 1;
+}
+
 bool ZprimeYear::eleTightID(int iele) {
   return (eleIDbit->at(iele)>>2&1) == 1;
 }
@@ -114,7 +130,10 @@ bool ZprimeYear::jetSelectionID(int ijet) {
   return tightJetID && loosePUID;
 }
 
-float ZprimeYear::getCSV2Cut() { return bjetVetoCSVv2Cut_17; }
+bool ZprimeYear::bjetSelectionID(int ijet) {
+  float bjet = jetDeepCSVTags_b->at(ijet) + jetDeepCSVTags_bb->at(ijet);
+  return bjet > bjetDeepCSVCut;
+}
 
 bool ZprimeYear::getJetHEMVeto(float jetPtCut){
 
@@ -669,6 +688,16 @@ void ZprimeYear::Init(TTree *tree) {
   fChain->SetBranchAddress("jetNChargedHad", &jetNChargedHad, &b_jetNChargedHad);
   fChain->SetBranchAddress("jetNNeutralHad", &jetNNeutralHad, &b_jetNNeutralHad);
   fChain->SetBranchAddress("jetCSV2BJetTags", &jetCSV2BJetTags, &b_jetCSV2BJetTags);
+  fChain->SetBranchAddress("jetDeepCSVTags_b", &jetDeepCSVTags_b, &b_jetDeepCSVTags_b);
+  fChain->SetBranchAddress("jetDeepCSVTags_bb", &jetDeepCSVTags_bb, &b_jetDeepCSVTags_bb);
+  fChain->SetBranchAddress("jetDeepCSVTags_c", &jetDeepCSVTags_c, &b_jetDeepCSVTags_c);
+  fChain->SetBranchAddress("jetDeepCSVTags_udsg", &jetDeepCSVTags_udsg, &b_jetDeepCSVTags_udsg);
+  fChain->SetBranchAddress("jetDeepFlavour_b", &jetDeepFlavour_b, &b_jetDeepFlavour_b);
+  fChain->SetBranchAddress("jetDeepFlavour_bb", &jetDeepFlavour_bb, &b_jetDeepFlavour_bb);
+  fChain->SetBranchAddress("jetDeepFlavour_lepb", &jetDeepFlavour_lepb, &b_jetDeepFlavour_lepb);
+  fChain->SetBranchAddress("jetDeepFlavour_c", &jetDeepFlavour_c, &b_jetDeepFlavour_c);
+  fChain->SetBranchAddress("jetDeepFlavour_uds", &jetDeepFlavour_uds, &b_jetDeepFlavour_uds);
+  fChain->SetBranchAddress("jetDeepFlavour_g", &jetDeepFlavour_g, &b_jetDeepFlavour_g);
   fChain->SetBranchAddress("jetetaWidth", &jetetaWidth, &b_jetetaWidth);
   fChain->SetBranchAddress("jetphiWidth", &jetphiWidth, &b_jetphiWidth);
   fChain->SetBranchAddress("jetConstPt", &jetConstPt, &b_jetConstPt);

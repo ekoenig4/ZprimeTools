@@ -28,7 +28,10 @@ public:
   virtual bool tauLooseID(int);
   virtual bool phoLooseID(int);
   virtual bool jetSelectionID(int);
-  virtual float getCSV2Cut();
+  virtual bool bjetSelectionID(int);
+  virtual bool MET_Filters();
+  virtual bool MET_Triggers();
+  virtual bool EGamma_Triggers();
   virtual bool getEleHEMVeto(float elePtCut);
   virtual bool getJetHEMVeto(float jetPtCut);
 
