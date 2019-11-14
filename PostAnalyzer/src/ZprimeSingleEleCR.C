@@ -58,10 +58,10 @@ float ZprimeSingleCR::getSF(int lepindex) {
   return eleRecoSF_corr * eleEffSF_corr * eleTriggSF;
 }
 
-vector<int> ZprimeSingleCR::JetVetoDecision(int lepindex) {
+vector<int> ZprimeSingleCR::jet_veto(int lepindex) {
   vector<int> jetindex; jetindex.clear();
 
-  vector<int> tmpcands = ZprimeAnalysis::JetVetoDecision();
+  vector<int> tmpcands = jet_looseID();
   for(int ijet : tmpcands ) {
     float dR_ele = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
     if( dR_ele > Iso4Cut )
@@ -113,5 +113,17 @@ bool ZprimeSingleCR::tau_veto(int jet_index,int lepindex,float tauPtCut) {
       tau_cands.push_back(itau);
   }
   return tau_cands.size() == 0;
+}
+
+bool ZprimeSingleCR::bjet_veto(int lepindex) {
+  vector<int> bjet_cands; bjet_cands.clear();
+
+  vector<int> tmpcands = bjet_looseID();
+  for (int ijet : tmpcands) {
+    float dR_ele = deltaR(jetEta->at(ijet),jetPhi->at(ijet),eleSCEta->at(lepindex),eleSCPhi->at(lepindex));
+    if ( dR_ele > Iso4Cut )
+      bjet_cands.push_back(ijet);
+  }
+  return bjet_cands.size() == 0;
 }
 #endif

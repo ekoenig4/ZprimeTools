@@ -19,7 +19,8 @@ public:
   bool muon_veto(int jet_index,int leading,int subleading,float muPtCut);
   bool photon_veto(int jet_index,int leading,int subleading,float phoPtCut);
   bool tau_veto(int jet_index,int leading,int subleading,float tauPtCut);
-  vector<int> JetVetoDecision(int leading,int subleading);
+  vector<int> jet_veto(int leading,int subleading);
+  bool bjet_veto(int leading,int subleading);
   bool CRSelection(std::vector<int> tight,std::vector<int> loose);
   float getSF(int leading,int subleading);
 };

@@ -208,7 +208,7 @@ vector<int> ZprimeAnalysis::getJetCand(float jetPtCut, float jetEtaCut, float je
     bool kinematic = (*jetPt)[p] > jetPtCut && (*jetNHF)[p] < jetNHFCut && (*jetCHF)[p] > jetCHFCut && fabs((*jetEta)[p])<jetEtaCut;
     bool jetID = jetSelectionID(p);
     if(kinematic && jetID) {
-	tmpCand.push_back(p);
+      tmpCand.push_back(p);
     }
   }
   return tmpCand;
@@ -423,10 +423,12 @@ vector<int> ZprimeAnalysis::photon_looseID(int jet_index,float phoPtCut) {
   vector<int> pho_cands; pho_cands.clear();
 
   for (int i = 0; i < nPho; i++) {
-    if ( fabs(phoSCEta->at(i)) < phoLooseEtaCut ){
-      if ( phoEt->at(i) > phoPtCut ) {
-	if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut )
-	  pho_cands.push_back(i);
+    if ( phoLooseID(i) ) {
+      if ( fabs(phoSCEta->at(i)) < phoLooseEtaCut ){
+	if ( phoEt->at(i) > phoPtCut ) {
+	  if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut )
+	    pho_cands.push_back(i);
+	}
       }
     }
   }
@@ -457,7 +459,7 @@ bool ZprimeAnalysis::tau_veto(int jet_index,float tauPtCut) {
   return tau_looseID(jet_index,tauPtCut).size() == 0;
 }
 
-vector<int> ZprimeAnalysis::JetVetoDecision() {
+vector<int> ZprimeAnalysis::jet_looseID() {
   vector<int> jetindex; jetindex.clear();
   for(int i = 0; i < nJet; i++) {
     bool jetID = jetSelectionID(i);
@@ -467,12 +469,25 @@ vector<int> ZprimeAnalysis::JetVetoDecision() {
   return jetindex;
 }
 
-bool ZprimeAnalysis::btagVeto() {
-  bool btagVeto = true;
-  for(int i = 0; i < nJet; i++)
-    if(jetPt->at(i) > bjetVetoPtCut && fabs(jetEta->at(i)) < bjetVetoEtaCut && jetCSV2BJetTags->at(i) > getCSV2Cut())
-      btagVeto = false;
-  return btagVeto;
+vector<int> ZprimeAnalysis::jet_veto() {
+  return jet_looseID();
+}
+
+vector<int> ZprimeAnalysis::bjet_looseID() {
+  vector<int> tmpcands; tmpcands.clear();
+  
+  for(int i = 0; i < nJet; i++) {
+    bool kinematics = jetPt->at(i) > bjetVetoPtCut && fabs(jetEta->at(i)) < bjetVetoEtaCut;
+    bool ID = jetSelectionID(i);
+    bool bjetged = bjetSelectionID(i);
+    if( kinematics && ID && bjetged )
+      tmpcands.push_back(i);
+  }
+  return tmpcands;
+}
+
+bool ZprimeAnalysis::bjet_veto() {
+  return bjet_looseID().size() == 0;
 }
 
 ZprimeAnalysis::~ZprimeAnalysis()

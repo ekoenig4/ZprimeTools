@@ -912,10 +912,12 @@ public:
   vector<int> tau_looseID(int jetCand,float tauPtCut);
   virtual bool tau_veto(int jetCand,float tauPtCut);
   virtual bool tauLooseID(int) = 0;
-  virtual vector<int> JetVetoDecision();
+  vector<int> jet_looseID();
+  virtual vector<int> jet_veto();
   virtual bool jetSelectionID(int) = 0;
-  bool btagVeto();
-  virtual float getCSV2Cut() = 0;
+  vector<int> bjet_looseID();
+  virtual bool bjet_veto();
+  virtual bool bjetSelectionID(int) = 0;
 
   virtual void PFUncertainty(float event_weight);
   virtual void QCDVariations(float event_weight);

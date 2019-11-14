@@ -21,7 +21,8 @@ public:
   bool muon_veto(int jet_index,int lepindex,float muPtCut);
   bool photon_veto(int jet_index,int lepindex,float phoPtCut);
   bool tau_veto(int jet_index,int lepindex,float tauPtCut);
-  vector<int> JetVetoDecision(int lepindex);
+  vector<int> jet_veto(int lepindex);
+  bool bjet_veto(int lepindex);
   virtual float getSF(int lepindex);
   bool CRSelection(std::vector<int> tight,std::vector<int> loose);
 };
