@@ -151,9 +151,9 @@ bool ZprimeYear::jetSelectionID(int ijet) {
   return jetPFLooseID->at(ijet)==1;
 }
 
-bool ZprimeYear::btagSelectionID(int ijet) {
-  float btag = jetCSV2BJetTags->at(ijet);
-  return btag > bjetVetoCSVv2Cut_16;
+bool ZprimeYear::bjetSelectionID(int ijet) {
+  float bjet = jetCSV2BJetTags->at(ijet);
+  return bjet > bjetVetoCSVv2Cut_16;
 }
 
 ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange) {

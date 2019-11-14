@@ -39,7 +39,7 @@ public:
   virtual bool tauLooseID(int);
   virtual bool phoLooseID(int);
   virtual bool jetSelectionID(int);
-  virtual bool btagSelectionID(int);
+  virtual bool bjetSelectionID(int);
   virtual bool MET_Filters();
   virtual bool MET_Triggers();
   virtual bool EGamma_Triggers();

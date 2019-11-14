@@ -127,7 +127,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    cutflow->Fill("caloMETCut",event_weight);
 		    fillHistos(8,event_weight);
 		      
-		    if(btag_veto(lepindex_leading,lepindex_subleading)) {
+		    if(bjet_veto(lepindex_leading,lepindex_subleading)) {
 		      cutflow->Fill("B-JetVeto",event_weight);
 		      fillHistos(9,event_weight);
 		      vector<int> jetveto = jet_veto(lepindex_leading,lepindex_subleading);
@@ -270,7 +270,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		    
 	      if(metcut < metRatioCut) {
 		      
-		if(btag_veto(lepindex_leading,lepindex_subleading)) {
+		if(bjet_veto(lepindex_leading,lepindex_subleading)) {
 		  vector<int> jetveto = jet_veto(lepindex_leading,lepindex_subleading);
 		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 			
