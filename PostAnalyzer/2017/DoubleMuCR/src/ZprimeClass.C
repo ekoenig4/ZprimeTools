@@ -93,11 +93,11 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     cutflow->Fill("Total Events",genWeight);
     fillHistos(0,genWeight);
     
-    if (metFilters == 0 && inclusiveCut()) { 
+    if (MET_Filters() && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
       fillHistos(1,event_weight);
       
-      if (HLTMet>>7&1 == 1 || HLTMet>>8&1 == 1 || HLTMet>>10&1 == 1 || !sample.isData) {
+      if (MET_Triggers()) {
 	cutflow->Fill("Trigger",event_weight);
 	fillHistos(2,event_weight);
 	
@@ -138,10 +138,10 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		    cutflow->Fill("caloMETCut",event_weight);
 		    fillHistos(8,event_weight);
 		      
-		    if(btagVeto()) {
+		    if(bjet_veto(lepindex_leading,lepindex_subleading)) {
 		      cutflow->Fill("B-JetVeto",event_weight);
 		      fillHistos(9,event_weight);
-		      vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
+		      vector<int> jetveto = jet_veto(lepindex_leading,lepindex_subleading);
 		      float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		      h_dphimin->Fill(minDPhiJetMET_first4,event_weight);
 			
@@ -281,8 +281,8 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		    
 	      if(metcut < metRatioCut) {
 		      
-		if(btagVeto()) {
-		  vector<int> jetveto = JetVetoDecision(lepindex_leading,lepindex_subleading);
+		if(bjet_veto(lepindex_leading,lepindex_subleading)) {
+		  vector<int> jetveto = jet_veto(lepindex_leading,lepindex_subleading);
 		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 			
 		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
