@@ -93,9 +93,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     jetCand   = getJetCand(jetCandPtCut,jetCandEtaCut,jetCandNHFCut,jetCandCHFCut);
     SetJetPFInfo(jetCand);
     cutflow->Fill("Total Events",genWeight);
-    for (int bit = 0; bit < 8; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
     
     if (MET_Filters() && inclusiveCut()) { 
       cutflow->Fill("metFilters",event_weight);
