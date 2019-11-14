@@ -19,11 +19,6 @@ void ZprimeYear::BookHistos(int i,string histname) {
 
 void ZprimeYear::fillHistos(int nhist,float event_weight) {
   ZprimeAnalysis::fillHistos(nhist,event_weight);
-  if ( nhist == 0 ) {
-    for (int bit = 0; bit < 8; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
-  }
 }
 
 void ZprimeYear::SetScalingHistos() {
@@ -90,6 +85,9 @@ void ZprimeYear::SetPFVectors(int jetCand) {
 }
 
 bool ZprimeYear::MET_Filters() {
+  for (int bit = 0; bit < 8; bit++)
+    if (metFilters >> bit & 1 == 1)
+      h_metfilters->Fill(bit + 1);
   return metFilters == 0;
 }
 

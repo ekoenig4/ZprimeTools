@@ -19,12 +19,6 @@ void ZprimeYear::BookHistos(int i,string histname) {
 
 void ZprimeYear::fillHistos(int nhist,float event_weight) {
   ZprimeAnalysis::fillHistos(nhist,event_weight);
-
-  if ( nhist == 0 ) {
-    for (int bit = 0; bit < 11; bit++)
-      if (metFilters >> bit & 1 == 1)
-	h_metfilters->Fill(bit + 1,event_weight);
-  }
 }
 
 TH2F* ZprimeYear::MergeMuonSF(TH2F* bcdef,TH2F* gh) {
@@ -103,6 +97,9 @@ void ZprimeYear::SetPFVectors(int jetCand) {
 }
 
 bool ZprimeYear::MET_Filters() {
+  for (int bit = 0; bit < 11; bit++)
+    if (metFilters >> bit & 1 == 1)
+      h_metfilters->Fill(bit + 1);
   if ( sample.isData ) return metFilters == 1536;
   else                 return metFilters == 0;
 }
