@@ -17,31 +17,6 @@
 
 using namespace std;
 
-int main(int argc, const char* argv[]) { 
-  if (argc == 1) {
-    printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/varuns/NTuples/monoZprime_2016_80X/MonoZprime_Mx10_Mv1000/";
-    argv[2] = "test.root";
-    argv[3] = "-1";
-    argv[4] = "100";
-    argv[5] = "-1";
-  }
-  Long64_t maxEvents = atof(argv[3]);
-  if (maxEvents < -1LL) {
-    cout<<"Please enter a valid value for maxEvents (parameter 3)."<<endl;
-    return 1;
-  }
-  int reportEvery = atof(argv[4]);
-  if (reportEvery < 1) {
-    cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
-    return 1;
-  }
-  //const char* file2 = argv[2];
-  ZprimeClass t(argv[1],argv[2],argv[5]);
-  t.Loop(maxEvents,reportEvery);
-  return 0;
-}
-
 void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
   Long64_t nentries = fChain->GetEntries();

@@ -5,6 +5,7 @@
 
 class ZprimeYear : public virtual ZprimeAnalysis {
 public:
+  static const std::string SRDATA;
 
   vector<bool>   *jetPFLooseID;
   vector<vector<double> > *JetsPFConsPt;
@@ -23,7 +24,12 @@ public:
   TBranch        *b_taupfTausDiscriminationByDecayModeFinding;   //!
   TBranch        *b_tauByVLooseIsolationMVArun2v1DBoldDMwLT;   //!
   
+  ZprimeYear(const char* inputFilename,const char* outputFilename,int nfiles);
+  ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
   ZprimeYear(const char * inputFilename,const char * outputFilename,const char * fileRange);
+  int getNfiles(TChain *chain,TString path,int nfiles);
+  int getFilesByNumber(TChain *chain,TString path,const char* fileRange);
+  int getFilesByList(TChain *chain,TString path,vector<const char*> filelist);
   virtual void BookHistos(int i,string histname);
   virtual void fillHistos(int nhist,float event_weight);
   virtual void initVars();

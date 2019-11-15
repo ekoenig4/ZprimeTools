@@ -17,6 +17,11 @@ public :
   static const int nHisto = 11;
   static const int bHisto = 10;
   
+  ZprimeClass(const char* file1,const char* file2,int nfiles) : ZprimeYear(file1,file2,nfiles) {
+    BookHistos(file2); };
+  ZprimeClass(const char* inputFilename,const char* outputFilename,std::vector<const char*> filelist) : ZprimeYear(inputFilename,outputFilename,filelist) {
+    BookHistos(outputFilename);
+  }
   ZprimeClass(const char* file1,const char* file2,const char* fileRange) : ZprimeYear(file1,file2,fileRange)
   { BookHistos(file2); };
   void     Loop(Long64_t maxEvents, int reportEvery);

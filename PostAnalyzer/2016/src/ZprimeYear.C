@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const string ZprimeYear::SRDATA = "F";
+
 void ZprimeYear::initVars() {
   ZprimeAnalysis::initVars();
 }
@@ -153,9 +155,34 @@ bool ZprimeYear::bjetSelectionID(int ijet) {
   return bjet > bjetVetoCSVv2Cut_16;
 }
 
-ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange) {
-  TChain *chain = new TChain("ggNtuplizer/EventTree");
-  TString path = inputFilename;
+int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
+  TSystemDirectory sourceDir("hi",path);
+  TList* fileList = sourceDir.GetListOfFiles();
+  TIter nextlist(fileList);
+  TSystemFile* filename;
+  int inFile=0;
+  while ((filename = (TSystemFile*)nextlist()) && inFile < nfiles)
+    {
+      //Debug
+      if (debug) {
+	cout<<"file path found: "<<(path+filename->GetName())<<endl;
+	cout<<"name: "<<(filename->GetName())<<endl;
+	cout<<"fileNumber: "<<inFile<<endl;
+      }
+      
+      TString dataset = ".root";
+      TString  FullPathInputFile = (path+filename->GetName());
+      if ( !FullPathInputFile.EndsWith(dataset) ) continue;
+      if (debug)
+	cout<<"Adding FullPathInputFile to chain:"<<FullPathInputFile<<endl<<endl;
+      chain->Add(FullPathInputFile);
+      inFile++;
+      
+    }
+  return inFile;
+}
+
+int ZprimeYear::getFilesByNumber(TChain *chain,TString path,const char* fileRange) {
   TSystemDirectory sourceDir("hi",path);
   TList* fileList = sourceDir.GetListOfFiles();
   TIter nextlist(fileList);
@@ -163,7 +190,6 @@ ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,cons
   int fileNumber = 0;
   int maxFiles = -1;
   int inFile=0;
-  sample.setInfo(string(inputFilename));
   while ((filename = (TSystemFile*)nextlist()) && fileNumber >  maxFiles)
     {
       //Debug
@@ -172,7 +198,7 @@ ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,cons
 	cout<<"name: "<<(filename->GetName())<<endl;
 	cout<<"fileNumber: "<<fileNumber<<endl;
       }
-
+      
       TString dataset = ".root";
       TString  FullPathInputFile = (path+filename->GetName());
       TString name = filename->GetName();
@@ -191,6 +217,60 @@ ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,cons
 	}
       fileNumber++;
     }
+  return inFile;
+}
+
+int ZprimeYear::getFilesByList(TChain *chain,TString path,vector<const char*> filelist) {
+  int inFile=0;
+  TSystemFile* filename;
+  for (const char* fname : filelist) {
+    filename = new TSystemFile(fname,path);
+    TString FullPathInputFile = (path+filename->GetName());
+    if (debug) {
+      cout<<"file path found: "<<FullPathInputFile<<endl;
+      cout<<"name:"<<filename->GetName()<<endl;
+      cout<<"fileNumber"<<inFile<<endl;
+      cout <<"Adding FullPathInputFile to chain:"<<FullPathInputFile<<endl<<endl;
+    }
+    chain->Add(FullPathInputFile);
+    inFile++;
+  }
+  return inFile;
+}
+
+
+ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,int nfiles) {
+  TChain *chain = new TChain("ggNtuplizer/EventTree");
+  TString path = inputFilename;
+  sample.setInfo(string(inputFilename));
+  int inFile = getNfiles(chain,path,nfiles);
+  cout<<"Sample type: "<< sample.GetTypeName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<inFile<<" files added."<<endl;
+  cout<<"Initializing chain."<<endl;
+  Init(chain);
+}
+
+ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) {
+  TChain *chain = new TChain("ggNtuplizer/EventTree");
+  TString path = inputFilename;
+  sample.setInfo(string(inputFilename));
+  int inFile = 0;
+  if ( filelist.size() == 0 )
+    inFile = getFilesByNumber(chain,path,"-1");
+  else
+    inFile = getFilesByList(chain,path,filelist);
+  cout<<"Sample type: "<< sample.GetTypeName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<inFile<<" files added."<<endl;
+  cout<<"Initializing chain."<<endl;
+  Init(chain);
+}
+
+ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange) 
+{
+  TChain *chain = new TChain("ggNtuplizer/EventTree");
+  TString path = inputFilename;
+  sample.setInfo(string(inputFilename));
+  int inFile = getFilesByNumber(chain,path,fileRange);
   cout<<"Sample type: "<< sample.GetTypeName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
   cout<<inFile<<" files added."<<endl;
   cout<<"Initializing chain."<<endl;
