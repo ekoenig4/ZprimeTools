@@ -5,13 +5,15 @@
 
 class ZprimeYear : public virtual ZprimeAnalysis {
 public:
-
+  static const std::string SRDATA;
   
   vector<double>  *psWeight;
   TBranch        *b_psWeight;   //!
-  
+
+  ZprimeYear(const char* inputFilename,const char* outputFilename,int nfiles);
   ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
   ZprimeYear(const char* inputFilename,const char* outputFilename,const char* fileRange);
+  int getNfiles(TChain *chain,TString path,int nfiles);
   int getFilesByNumber(TChain *chain,TString path,const char* fileRange);
   int getFilesByList(TChain *chain,TString path,vector<const char*> filelist);
   virtual void BookHistos(int i,string histname);

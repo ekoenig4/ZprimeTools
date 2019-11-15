@@ -17,43 +17,6 @@
 
 using namespace std;
 
-int main(int argc, const char* argv[]) { 
-  if (argc == 1) {
-    printf("Running Test\n");
-    argv[1] = "/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DYJets/DYJetsToLL_M-50_HT-400to600_TuneCP5_PSweights_13TeV-madgraphMLM-pythia8/0000/";
-    argv[2] = "test.root";
-    argv[3] = "5000";
-    argv[4] = "100";
-    argv[5] = "1-1";
-    argc = 6;
-  }
-  const char* inputFilename = argv[1];
-  const char* outputFilename = argv[2];
-  Long64_t maxEvents = atof(argv[3]);
-  if (maxEvents < -1LL)
-    {
-      cout<<"Please enter a valid value for maxEvents (parameter 3)."<<endl;
-      return 1;
-    }
-  int reportEvery = atof(argv[4]);
-  if (reportEvery < 1)
-    {
-      cout<<"Please enter a valid value for reportEvery (parameter 4)."<<endl;
-      return 1;
-    }
-  if ( !TFile( (string(inputFilename) + string(argv[5])).c_str() ).IsZombie() ) {
-    vector<const char*>filelist;
-    for (int i = 5; i < argc; i++) filelist.push_back( argv[i] );
-    ZprimeClass t(inputFilename,outputFilename,filelist);
-    t.Loop(maxEvents,reportEvery);
-  } else {
-    const char* fileRange = argv[5];
-    ZprimeClass t(inputFilename,outputFilename,fileRange);
-    t.Loop(maxEvents,reportEvery);
-  }
-  return 0;
-}
-
 void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
   if (fChain == 0) return;
 

@@ -14,6 +14,9 @@ class ZprimeClass : public virtual ZprimeYear {
 public:
   static const int nHisto = 10;
   static const int bHisto = 9;
+  
+  ZprimeClass(const char* file1,const char* file2,int nfiles) : ZprimeYear(file1,file2,nfiles) {
+    BookHistos(file2); };
   ZprimeClass(const char* inputFilename,const char* outputFilename,const char* fileRange) : ZprimeYear(inputFilename,outputFilename,fileRange) {
     BookHistos(outputFilename);
   }
