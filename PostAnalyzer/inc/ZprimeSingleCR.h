@@ -5,7 +5,7 @@
 
 class ZprimeSingleCR : public virtual ZprimeAnalysis {
 public:
-
+  static const std::string REGION;
   int lepindex;
   TLorentzVector lep;
   float lepton_pt;

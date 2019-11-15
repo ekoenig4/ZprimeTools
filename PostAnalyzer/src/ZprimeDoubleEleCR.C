@@ -8,6 +8,8 @@
 
 using namespace std;
 
+const string ZprimeDoubleCR::REGION = "DoubleEleCR";
+
 void ZprimeDoubleCR::initVars() {
   lepindex_leading = lepindex_subleading = -1;
   dilepton_mass = dilepton_pt = -1;

@@ -11,6 +11,8 @@
 
 using namespace std;
 
+const string ZprimeAnalysis::REGION = "SignalRegion";
+
 void ZprimeAnalysis::SetScalingHistos() {
   //This is the PU histogram obtained from Nick's recipe
   TFile *weights = TFile::Open("RootFiles/PU_Central.root");
@@ -494,6 +496,7 @@ ZprimeAnalysis::~ZprimeAnalysis()
 {
   if (!fChain) return;
   delete fChain->GetCurrentFile();
+  cout << "Writing to: " << output->GetName() << endl;
   output->cd();
   output->Write();
   output->Close();

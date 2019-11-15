@@ -44,6 +44,7 @@ using namespace std;
 
 class ZprimeAnalysis {
 public:
+  static const std::string REGION;
   TTree *fChain;
   Int_t  fCurrent;
 

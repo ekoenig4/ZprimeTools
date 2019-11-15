@@ -8,6 +8,8 @@
 
 using namespace std;
 
+const string ZprimeSingleCR::REGION = "SingleMuCR";
+
 void ZprimeSingleCR::initVars() {
   lepindex = lepton_pt = -1;
 }

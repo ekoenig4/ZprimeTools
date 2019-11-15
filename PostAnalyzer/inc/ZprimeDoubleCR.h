@@ -5,7 +5,7 @@
 
 class ZprimeDoubleCR : public virtual ZprimeAnalysis {
 public:
-
+  static const std::string REGION;
   int lepindex_leading, lepindex_subleading;
   float dilepton_mass,dilepton_pt;
   TLorentzVector lep1,lep2;
