@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const string ZprimeYear::SRDATA = "B";
+
 void ZprimeYear::initVars() {
   ZprimeAnalysis::initVars();
 }
@@ -137,6 +139,33 @@ bool ZprimeYear::bjetSelectionID(int ijet) {
   return bjet > bjetDeepCSVCut;
 }
 
+
+int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
+  TSystemDirectory sourceDir("hi",path);
+  TList* fileList = sourceDir.GetListOfFiles();
+  TIter nextlist(fileList);
+  TSystemFile* filename;
+  int inFile=0;
+  while ((filename = (TSystemFile*)nextlist()) && inFile < nfiles)
+    {
+      //Debug
+      if (debug) {
+	cout<<"file path found: "<<(path+filename->GetName())<<endl;
+	cout<<"name: "<<(filename->GetName())<<endl;
+	cout<<"fileNumber: "<<inFile<<endl;
+      }
+      
+      TString dataset = ".root";
+      TString  FullPathInputFile = (path+filename->GetName());
+      if (debug)
+	cout<<"Adding FullPathInputFile to chain:"<<FullPathInputFile<<endl<<endl;
+      chain->Add(FullPathInputFile);
+      inFile++;
+      
+    }
+  return inFile;
+}
+
 int ZprimeYear::getFilesByNumber(TChain *chain,TString path,const char* fileRange) {
   TSystemDirectory sourceDir("hi",path);
   TList* fileList = sourceDir.GetListOfFiles();
@@ -191,6 +220,18 @@ int ZprimeYear::getFilesByList(TChain *chain,TString path,vector<const char*> fi
     inFile++;
   }
   return inFile;
+}
+
+
+ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,int nfiles) {
+  TChain *chain = new TChain("phoJetNtuplizer/eventTree");
+  TString path = inputFilename;
+  sample.setInfo(string(inputFilename));
+  int inFile = getNfiles(chain,path,nfiles);
+  cout<<"Sample type: "<< sample.GetTypeName() << (sample.isInclusive ? " Inclusive" : " not Inclusive") <<endl;
+  cout<<inFile<<" files added."<<endl;
+  cout<<"Initializing chain."<<endl;
+  Init(chain);
 }
 
 ZprimeYear::ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist) {
