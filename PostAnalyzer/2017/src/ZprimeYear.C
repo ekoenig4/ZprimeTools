@@ -157,6 +157,7 @@ int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
       
       TString dataset = ".root";
       TString  FullPathInputFile = (path+filename->GetName());
+      if ( !FullPathInputFile.EndsWith(dataset) ) continue;
       if (debug)
 	cout<<"Adding FullPathInputFile to chain:"<<FullPathInputFile<<endl<<endl;
       chain->Add(FullPathInputFile);
