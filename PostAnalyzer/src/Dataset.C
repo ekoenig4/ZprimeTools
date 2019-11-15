@@ -24,8 +24,9 @@ const std::string Dataset::datalist[] = {"egamma","met","signal","zjets","wjets"
 const std::map<std::string,Type> Dataset::typemap = {
   {"egamma",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"wjets",WJets},{"dyjets",DYJets},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
 };
+Dataset::SubsetList Dataset::dataset;
 
-Dataset::Dataset() {
+Dataset::SubsetList::SubsetList() {
   string ntuples;
   string ntuple_path1 = "ntuples/";
   string ntuple_path2 = "../datasets/ntuples/";
@@ -44,7 +45,7 @@ Dataset::Dataset() {
   }
 }
 
-void Dataset::addDataset(string path,string filename) {
+void Dataset::SubsetList::addDataset(string path,string filename) {
   ifstream infile( (path+filename).c_str() );
   if (!infile.is_open()) {
     cout << "Unable to read " << path+filename << endl;
@@ -64,7 +65,17 @@ void Dataset::addDataset(string path,string filename) {
       }
     }
   }
-  dataset[data] = subset;
+  (*this)[data] = subset;
+}
+
+Dataset::Dataset() {
+  type = nType;
+  region = nRegion;
+  year = 0;
+  isInclusive = false;
+  isData = false;
+  isSignal = false;
+  PID = 0;
 }
 
 void Dataset::setTypeInfo(string path) {
