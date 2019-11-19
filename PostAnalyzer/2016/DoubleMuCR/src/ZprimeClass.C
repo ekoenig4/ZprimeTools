@@ -69,8 +69,8 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  fillHistos(3,event_weight);
 	  //CR code
 	  //At least one of the two muons passes the tight selection
-	  vector<int> mulist_leading = muon_tightID(jetCand[0],muTightPtCut);
-	  vector<int> mulist_subleading = muon_looseID(jetCand[0],muLoosePtCut);
+	  vector<int> mulist_leading = muon_tightID(jetindex,muTightPtCut);
+	  vector<int> mulist_subleading = muon_looseID(jetindex,muLoosePtCut);
 	  if ( CRSelection(mulist_leading,mulist_subleading) ) {
 	    if ( !sample.isData ) {
 	      SetSF( getSF(lepindex_leading,lepindex_subleading) );
@@ -87,9 +87,9 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
 		cutflow->Fill("dileptonMassCut",event_weight);
 		fillHistos(6,event_weight);
-		bool eleVeto = electron_veto(jetCand[0],lepindex_leading,lepindex_subleading,eleLoosePtCut);
-		bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
-		// bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+		bool eleVeto = electron_veto(jetindex,lepindex_leading,lepindex_subleading,eleLoosePtCut);
+		bool phoVeto = photon_veto(jetindex,lepindex_leading,lepindex_subleading,phoLoosePtCut);
+		// bool tauVeto = tau_veto(jetindex,lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 		if(eleVeto && phoVeto) {
 		  cutflow->Fill("LeptonVeto",event_weight);
@@ -226,8 +226,8 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     if(jetCand.size()>0) {
       //CR code
       //At least one of the two muons passes the tight selection
-      vector<int> mulist_leading = muon_tightID(jetCand[0],muTightPtCut);
-      vector<int> mulist_subleading = muon_looseID(jetCand[0],muLoosePtCut);
+      vector<int> mulist_leading = muon_tightID(jetindex,muTightPtCut);
+      vector<int> mulist_subleading = muon_looseID(jetindex,muLoosePtCut);
       if ( CRSelection(mulist_leading,mulist_subleading) ) {
 	if ( !sample.isData ) event_weight *= getSF(lepindex_leading,lepindex_subleading);
 	      
@@ -235,9 +235,9 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 	  //invariant mass of the two muons is betwen 60 and 120GeV
 		
 	  if(dilepton_mass > diLeptonMassCutLow && dilepton_mass < diLeptonMassCutHigh) {
-	    bool eleVeto = electron_veto(jetCand[0],lepindex_leading,lepindex_subleading,eleLoosePtCut);
-	    bool phoVeto = photon_veto(jetCand[0],lepindex_leading,lepindex_subleading,phoLoosePtCut);
-	    // bool tauVeto = tau_veto(jetCand[0],lepindex_leading,lepindex_subleading,tauLoosePtCut);
+	    bool eleVeto = electron_veto(jetindex,lepindex_leading,lepindex_subleading,eleLoosePtCut);
+	    bool phoVeto = photon_veto(jetindex,lepindex_leading,lepindex_subleading,phoLoosePtCut);
+	    // bool tauVeto = tau_veto(jetindex,lepindex_leading,lepindex_subleading,tauLoosePtCut);
 		  
 	    if(eleVeto && phoVeto) {
 	      float metcut = (fabs(pfMET-caloMET))/recoil;

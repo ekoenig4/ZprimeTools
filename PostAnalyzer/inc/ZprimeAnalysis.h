@@ -116,6 +116,7 @@ public:
   float bosonPt;
 
   /* Selected Jet Variables */
+  int jetindex;
   vector<int> jetCand;
   vector<float> j1PFConsEt;
   vector<float>j1PFConsPt;
@@ -132,20 +133,25 @@ public:
   float recoil,recoilPhi;
 
   /* Histograms */
-  TH1F *h_metcut,*h_lepMET_MT,*h_dphimin,*h_metfilters,*h_kfactor,*h_pileup,*h_genWeight,*h_sf,*h_bosonPt,*h_bosonPtwK;
-  /* MET Histograms */
-  TH1F *h_pfMETall[maxHisto],*h_pfMET200[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto],*h_recoil[maxHisto],*h_recoilPhi[maxHisto];
-  /* Jet Histograms */
-  TH1F *h_nJets[maxHisto];
-  TH1F *h_j1pT[maxHisto],*h_j1Eta[maxHisto],*h_j1Phi[maxHisto],*h_j1etaWidth[maxHisto],*h_j1phiWidth[maxHisto],*h_j1CHF[maxHisto],*h_j1NHF[maxHisto],*h_j1ChMult[maxHisto],*h_j1NhMult[maxHisto],*h_j1Mt[maxHisto];
-  /* PF Jet Histograms */
-  TH1F *h_Pt123Fraction[maxHisto],*h_Pt123[maxHisto],*h_ChNemPtFrac[maxHisto],*h_ChNemPt[maxHisto],*h_ChNemPt123[maxHisto];
-  TH1F *h_j1TotPFCands[maxHisto], *h_j1ChPFCands[maxHisto], *h_j1NeutPFCands[maxHisto], *h_j1GammaPFCands[maxHisto],*h_j1MiscPFCands[maxHisto];
-  TH1F *h_ChPercCons[maxHisto],*h_NhPercCons[maxHisto],*h_GammaPercCons[maxHisto],*h_MiscPercCons[maxHisto];
-  TH1F *h_ChargedPt[maxHisto],*h_NeutralPt[maxHisto],*h_PhotonPt[maxHisto],*h_MiscPt[maxHisto];
-  TH1F *h_ChPercPt[maxHisto],*h_NhPercPt[maxHisto],*h_GammaPercPt[maxHisto],*h_MiscPercPt[maxHisto];
-  /* Event Histograms */
-  TH1F *h_nVtx[maxHisto],*h_nVtx2[maxHisto],*h_eventWeight[maxHisto],*h_genHT[maxHisto],*h_puTrueReW[maxHisto],*h_puTrueNoW[maxHisto];
+  TH1F *h_metcut,*h_dphimin,*h_metfilters;
+  // Event Info       
+  TH1F *h_nVtx[maxHisto],*h_eventWeight[maxHisto],*h_kfactor[maxHisto],*h_pileup[maxHisto],*h_genWeight[maxHisto],*h_sf[maxHisto];          
+  // MC Info          
+  TH1F *h_puTrueNoW[maxHisto],*h_puTrueReW[maxHisto],*h_genHT[maxHisto],*h_bosonPt[maxHisto],*h_bosonPtwK[maxHisto];      
+  // MET Info         
+  TH1F *h_pfMETall[maxHisto],*h_pfMET[maxHisto],*h_pfMETPhi[maxHisto],*h_recoil[maxHisto],*h_recoilall[maxHisto],*h_recoilPhi[maxHisto];      
+  // Jet Info         
+  TH1F *h_nJets[maxHisto],*h_j1pT[maxHisto],*h_j1Eta[maxHisto],*h_j1Phi[maxHisto],*h_j1etaWidth[maxHisto],*h_j1phiWidth[maxHisto],*h_j1CHF[maxHisto],*h_j1NHF[maxHisto],*h_j1ChMult[maxHisto],*h_j1NhMult[maxHisto],*h_j1Mt[maxHisto];
+  // PF Jet Info      
+  TH1F *h_Pt123[maxHisto],*h_Pt123Fraction[maxHisto],*h_ChNemPt[maxHisto],*h_ChNemPt123[maxHisto],*h_ChNemPtFrac[maxHisto],*h_TotPFCands[maxHisto];
+  // Charged Info     
+  TH1F *h_ChPFCands[maxHisto],*h_ChPercCons[maxHisto],*h_ChargedPFPt[maxHisto],*h_ChPercPFPt[maxHisto];
+  // Neutral Info     
+  TH1F *h_NhPFCands[maxHisto],*h_NhPercCons[maxHisto],*h_NhPFPt[maxHisto],*h_NhPercPFPt[maxHisto];
+  // Gamma Info       
+  TH1F *h_GammaPFCands[maxHisto],*h_GammaPercCons[maxHisto],*h_PhotonPFPt[maxHisto],*h_GammaPercPFPt[maxHisto];  
+  // Misc Info        
+  TH1F *h_MiscPFCands[maxHisto],*h_MiscPercCons[maxHisto],*h_MiscPFPt[maxHisto],*h_MiscPercPFPt[maxHisto]; 
 
   // Fixed size dimensions of array or collections stored in the TTree if any.
 

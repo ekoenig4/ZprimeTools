@@ -19,29 +19,30 @@ void ZprimeDoubleCR::BookHistos(int i,string histname) {
   if (i == -1) {
     
   } else {
-    h_leadingLeptonPt[i] = new TH1F(("h_leadingLeptonPt"+histname).c_str(),"h_leadingLeptonPt",24,LeadingLeptonPtBins);h_leadingLeptonPt[i]->Sumw2();
-    h_leadingLeptonEta[i] = new TH1F(("h_leadingLeptonEta"+histname).c_str(),"h_leadingLeptonEta",30,-3.0,3.0);h_leadingLeptonEta[i]->Sumw2();
-    h_leadingLeptonPhi[i] = new TH1F(("h_leadingLeptonPhi"+histname).c_str(),"h_leadingLeptonPhi",30,-3.1416,3.1416);h_leadingLeptonPhi[i]->Sumw2();
-    h_subleadingLeptonPt[i] = new TH1F(("h_subleadingLeptonPt"+histname).c_str(),"h_subleadingLeptonPt",25,subLeadingLeptonPtBins);h_subleadingLeptonPt[i]->Sumw2();
-    h_subleadingLeptonEta[i] = new TH1F(("h_subleadingLeptonEta"+histname).c_str(),"h_subleadingLeptonEta",30,-3.0,3.0);h_subleadingLeptonEta[i]->Sumw2();
-    h_subleadingLeptonPhi[i] = new TH1F(("h_subleadingLeptonPhi"+histname).c_str(),"h_subleadingLeptonPhi",30,-3.1416,3.1416);h_subleadingLeptonPhi[i]->Sumw2();
-    h_dileptonPt[i] = new TH1F(("h_dileptonPt"+histname).c_str(),"h_dileptonPt",30,0.,1500.);h_dileptonPt[i]->Sumw2();
-    h_dileptonM[i] = new TH1F(("h_dileptonM"+histname).c_str(),"h_dileptonM",24,60.,120.);h_dileptonM[i]->Sumw2();
+    auto Name = [histname](string name) { return (name + histname); };
+    
+    h_leadingLeptonPt[i]     = MakeTH1F(new TH1F(Name("leadingLeptonPt").c_str()    ,"leadingLeptonPt;Leading Lepton P_{T} (GeV)"       ,nLeadingLeptonPtBins,LeadingLeptonPtBins));   
+    h_leadingLeptonEta[i]    = MakeTH1F(new TH1F(Name("leadingLeptonEta").c_str()   ,"leadingLeptonEta;Leading Lepton #eta"             ,nEtaBins,lEta,uEta));              
+    h_leadingLeptonPhi[i]    = MakeTH1F(new TH1F(Name("leadingLeptonPhi").c_str()   ,"leadingLeptonPhi;Leading Lepton #phi"             ,nPhiBins,lPhi,uPhi));        
+    h_subleadingLeptonPt[i]  = MakeTH1F(new TH1F(Name("subleadingLeptonPt").c_str() ,"subleadingLeptonPt;Subleading Lepton P_{T} (GeV)" ,nSubLeadingLeptonPtBins,subLeadingLeptonPtBins));
+    h_subleadingLeptonEta[i] = MakeTH1F(new TH1F(Name("subleadingLeptonEta").c_str(),"subleadingLeptonEta;Subleading Lepton #eta"       ,nEtaBins,lEta,uEta));              
+    h_subleadingLeptonPhi[i] = MakeTH1F(new TH1F(Name("subleadingLeptonPhi").c_str(),"subleadingLeptonPhi;Subleading Lepton #phi"       ,nPhiBins,lPhi,uPhi));        
+    h_dileptonPt[i]          = MakeTH1F(new TH1F(Name("dileptonPt").c_str()         ,"dileptonPt;Z P_{T} (GeV)"                         ,30,0.,1500.));              
+    h_dileptonM[i]           = MakeTH1F(new TH1F(Name("dileptonM").c_str()          ,"dileptonM;Z Mass (GeV)"                           ,24,60.,120.));              
   }
 }
 
 void ZprimeDoubleCR::fillHistos(int nhist,float event_weight) {
   if(lepindex_leading >= 0 && lepindex_subleading >= 0){ 
-    h_leadingLeptonPt[nhist]->Fill(elePt->at(lepindex_leading),event_weight);
-    h_leadingLeptonEta[nhist]->Fill(eleEta->at(lepindex_leading),event_weight);
-    h_leadingLeptonPhi[nhist]->Fill(elePhi->at(lepindex_leading),event_weight);
-    h_subleadingLeptonPt[nhist]->Fill(elePt->at(lepindex_subleading),event_weight);
+    h_leadingLeptonPt[nhist]    ->Fill(elePt->at(lepindex_leading),event_weight);
+    h_leadingLeptonEta[nhist]   ->Fill(eleEta->at(lepindex_leading),event_weight);
+    h_leadingLeptonPhi[nhist]   ->Fill(elePhi->at(lepindex_leading),event_weight);
+    h_subleadingLeptonPt[nhist] ->Fill(elePt->at(lepindex_subleading),event_weight);
     h_subleadingLeptonEta[nhist]->Fill(eleEta->at(lepindex_subleading),event_weight);
-    h_subleadingLeptonPhi[nhist]->Fill(elePhi->at(lepindex_subleading),event_weight);    
-  }
-  if(dilepton_pt >= 0 && dilepton_mass >= 0){  
-    h_dileptonPt[nhist]->Fill(dilepton_pt,event_weight);
-    h_dileptonM[nhist]->Fill(dilepton_mass,event_weight);
+    h_subleadingLeptonPhi[nhist]->Fill(elePhi->at(lepindex_subleading),event_weight);
+    
+    h_dileptonPt[nhist]         ->Fill(dilepton_pt,event_weight);
+    h_dileptonM[nhist]          ->Fill(dilepton_mass,event_weight);
   }
 }
 

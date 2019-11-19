@@ -70,8 +70,8 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  fillHistos(3,event_weight);
 	  //CR code
 	  //At least one of the one electrons passes the tight selection
-	  vector<int> elelist = electron_tightID(jetCand[0],eleTightPtCut);
-	  vector<int> looseEles = electron_looseID(jetCand[0],eleLoosePtCut);
+	  vector<int> elelist = electron_tightID(jetindex,eleTightPtCut);
+	  vector<int> looseEles = electron_looseID(jetindex,eleLoosePtCut);
 	  
 	  if( CRSelection(elelist,looseEles) ) {
 	    if (!sample.isData) {
@@ -84,9 +84,9 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	    if (recoil > recoilCut) {
 	      cutflow->Fill("leptoMetCut",event_weight);
 	      fillHistos(5,event_weight);
-	      bool muVeto = muon_veto(jetCand[0],lepindex,muLoosePtCut);
-	      bool phoVeto = photon_veto(jetCand[0],lepindex,phoLoosePtCut);
-	      bool tauVeto = tau_veto(jetCand[0],lepindex,tauLoosePtCut);
+	      bool muVeto = muon_veto(jetindex,lepindex,muLoosePtCut);
+	      bool phoVeto = photon_veto(jetindex,lepindex,phoLoosePtCut);
+	      bool tauVeto = tau_veto(jetindex,lepindex,tauLoosePtCut);
 	      
 	      if(muVeto && phoVeto && tauVeto) {
 		cutflow->Fill("LeptonVeto",event_weight);
@@ -238,16 +238,16 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     if(jetCand.size()>0) {
       //CR code
       //At least one of the one electrons passes the tight selection
-      vector<int> elelist = electron_tightID(jetCand[0],eleTightPtCut);
-      vector<int> looseEles = electron_looseID(jetCand[0],eleLoosePtCut);
+      vector<int> elelist = electron_tightID(jetindex,eleTightPtCut);
+      vector<int> looseEles = electron_looseID(jetindex,eleLoosePtCut);
 	  
       if( CRSelection(elelist,looseEles) ) {
 	if (!sample.isData) event_weight *= getSF(lepindex);
 	    
 	if (recoil > recoilCut) {
-	  bool muVeto = muon_veto(jetCand[0],lepindex,muLoosePtCut);
-	  bool phoVeto = photon_veto(jetCand[0],lepindex,phoLoosePtCut);
-	  bool tauVeto = tau_veto(jetCand[0],lepindex,tauLoosePtCut);
+	  bool muVeto = muon_veto(jetindex,lepindex,muLoosePtCut);
+	  bool phoVeto = photon_veto(jetindex,lepindex,phoLoosePtCut);
+	  bool tauVeto = tau_veto(jetindex,lepindex,tauLoosePtCut);
 	      
 	  if(muVeto && phoVeto && tauVeto) {
 	    Float_t lepMET_MT = getMt(elePt->at(lepindex),elePhi->at(lepindex),pfMET,pfMETPhi);

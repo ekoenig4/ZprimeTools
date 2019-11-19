@@ -78,7 +78,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	      cutflow->Fill("caloMETCut",event_weight);
 	      fillHistos(5,event_weight);
 
-	      bool noLeptonID = electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) && photon_veto(jetCand[0],phoLoosePtCut);
+	      bool noLeptonID = electron_veto(jetindex,eleLoosePtCut) && muon_veto(jetindex,muLoosePtCut) && photon_veto(jetindex,phoLoosePtCut);
 	      if( noLeptonID )  {
 		cutflow->Fill("LeptonIDs",event_weight);
 		fillHistos(6,event_weight);
@@ -196,7 +196,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 	      
 	if(metcut < metRatioCut) {
 	      
-	  bool noLeptonID = electron_veto(jetCand[0],eleLoosePtCut) && muon_veto(jetCand[0],muLoosePtCut) && photon_veto(jetCand[0],phoLoosePtCut);
+	  bool noLeptonID = electron_veto(jetindex,eleLoosePtCut) && muon_veto(jetindex,muLoosePtCut) && photon_veto(jetindex,phoLoosePtCut);
 	  if( noLeptonID ) {
 		
 	    if(bjet_veto()) {

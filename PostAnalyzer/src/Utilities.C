@@ -67,4 +67,9 @@ bool fileSelection(string filename,string fileRange)
   return false;
 }
 
+TH1F* MakeTH1F(TH1F* temp) {
+  temp->Sumw2();
+  return temp;
+}
+
 #endif
