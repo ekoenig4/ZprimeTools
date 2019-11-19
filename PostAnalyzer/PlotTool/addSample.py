@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import os
 from sys import argv
 if len(argv) < 3 or len(argv) > 5:
     print "usage: ./PlotTool/addSample.py histoName x-axisTitle"
@@ -32,14 +32,14 @@ if len(argv) >= 3:
 
     option = raw_input("Setting " + histo + " X-Axis Title to " + str(title) + " (y/n).")
     if not (option == "y" or option == "Y" or option == ""): print "Exiting.";exit()
-    import samplenames as s
-    if histo in s.samplenames:
-        print histo+":"+str(s.samplenames[histo])+". Already Exists."
-        if title == s.samplenames[histo]: print "Exiting.";exit()
+    from PlotTool import samplenames
+    if histo in samplenames:
+        print histo+":"+str(samplenames[histo])+". Already Exists."
+        if title == samplenames[histo]: print "Exiting.";exit()
         option = raw_input("Do you want to set " + histo + " X-Axis Title to " + str(title) + " (y/n).")
         if not (option == "y" or option == "Y"): print "Exiting.";exit()
-    s.samplenames[histo] = title
-    with open("%s/PlotTool/samplenames.py" % script_path,"w") as f:f.write("samplenames = "+str(s.samplenames)+"\n")
+    samplenames[histo] = title
+    with open("%s/PlotTool/samplenames.py" % script_path,"w") as f:f.write("samplenames = "+str(samplenames)+"\n")
     # with open("PlotTool/samplenames.py","r") as f:
     #     text = f.readlines()
     #     for i in range(len(text)):

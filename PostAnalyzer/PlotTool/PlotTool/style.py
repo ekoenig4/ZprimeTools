@@ -14,7 +14,7 @@ def DataStyle(hs_data):
     hs_data.GetYaxis().SetLabelOffset(999);
     hs_data.SetLineColor(kBlack);
     hs_data.SetMarkerStyle(20);
-    hs_data.SetMarkerSize(0.9);
+    hs_data.SetMarkerSize(1);
 ###################################################################
     
 def MCStyle(hs_mc,color):
@@ -64,7 +64,7 @@ def RatioStyle(ratio,rymin,rymax):
     ratio.SetStats(0);
     ratio.GetYaxis().CenterTitle();
     ratio.SetMarkerStyle(20);
-    ratio.SetMarkerSize(0.7);
+    ratio.SetMarkerSize(1);
     ratio.GetYaxis().SetLabelSize(0.14);
     ratio.GetYaxis().SetTitleSize(0.12);
     ratio.GetYaxis().SetLabelFont(42);
