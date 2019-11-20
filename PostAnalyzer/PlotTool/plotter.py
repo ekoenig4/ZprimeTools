@@ -79,7 +79,7 @@ def plotVariable(samples,variable):
 
     #################################################
 
-    leg = getLegend(0.62,0.60,0.86,0.887173);
+    leg = getLegend(); #0.62,0.60,0.86,0.887173
     leg.AddEntry(data.histo,"Data","lp");
     if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)
 
