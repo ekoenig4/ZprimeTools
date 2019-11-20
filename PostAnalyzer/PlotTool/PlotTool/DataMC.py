@@ -38,6 +38,7 @@ class datamc(object):
 
         self.variable = None
         self.varname = None
+        self.cut = ''
         
         #Luminosity
         self.lumi_by_era = config.lumi_by_era
@@ -140,9 +141,10 @@ class datamc(object):
                 print prompt % ( ntemp.format(signal.name),itemp.format( '%.6g' % signal.scaled_total ) )
         for sample in sorted(self.MCList,key=lambda sample: self.processes[sample].scaled_total,reverse=True):
             process = self.processes[sample]
-            print prompt % ( ntemp.format(sample),itemp.format( '%.6g' % process.scaled_total ) ),'| %.4g%%' % (100*process.scaled_total/self.BkgIntegral)
-        ratio = self.processes['Data'].raw_total/self.BkgIntegral
-        print '            %s: %s' % (ntemp.format('data/mc'),itemp.format('%.6g' % ratio))
+            percent = ("%.4g%%" % (100*process.scaled_total/self.BkgIntegral)) if self.BkgIntegral != 0 else 'Nan'
+            print prompt % ( ntemp.format(sample),itemp.format( '%.6g' % process.scaled_total ) ),'| %s' % (percent)
+        ratio = ('%.6g' % (self.processes['Data'].raw_total/self.BkgIntegral)) if self.BkgIntegral != 0 else 'Nan'
+        print '            %s: %s' % (ntemp.format('data/mc'),itemp.format(ratio))
     ###############################################################################################################
 
     def getBinning(self):

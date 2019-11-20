@@ -31,113 +31,137 @@ void ZprimeAnalysis::initTree(TTree* tree) {
 
 void ZprimeAnalysis::BookHistos(int i,string histname) {
   if (i == -1) {
-    h_metcut  = new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2);h_metcut->Sumw2();
-    h_dphimin = new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2);h_dphimin->Sumw2();
-    h_kfactor = new TH1F("h_kfactor","h_kfactor;kfactor",50,-2,2); h_kfactor->Sumw2();
-    h_pileup = new TH1F("h_pileup","h_pileup;pileup",50,-2,2); h_pileup->Sumw2();
-    h_genWeight = new TH1F("h_genWeight","h_genWeight;genWeight",50,-2,2); h_genWeight->Sumw2();
-    h_sf = new TH1F("h_sf","h_sf;sf",50,-2,2); h_sf->Sumw2();
-    h_bosonPt = new TH1F("h_bosonPt","bosonPt; boson P_{T}",24,BosonPtBins); h_bosonPt->Sumw2();
-    h_bosonPtwK = new TH1F("h_bosonPtwK","bosonPtwK; kfactor boson P_{T}",24,BosonPtBins); h_bosonPtwK->Sumw2();
+    h_metcut  = MakeTH1F(new TH1F("h_metcut","h_metcut; |pfMET-caloMET|/pfMET", 50,0,1.2));
+    h_dphimin = MakeTH1F(new TH1F("h_dphimin","h_dphimin; Minimum dPhiJetMET",50,0,3.2));
   } else {
-    h_nVtx[i] = new TH1F(("nVtx"+histname).c_str(),"nVtx;nVtx",70,0,70);h_nVtx[i]->Sumw2(); 
-    h_nVtx2[i] = new TH1F(("nVtx2"+histname).c_str(),"nVtx;nVtx",40,0,80);h_nVtx2[i]->Sumw2();
-    h_puTrueNoW[i] = new TH1F( ("puTrueNoW"+histname).c_str(),"puTrue Unweighted;true number of iteractions",100,0,100);h_puTrueNoW[i]->Sumw2();
-    h_puTrueReW[i] = new TH1F(("puTrueReW"+histname).c_str(),"puTrue Reweighted;true number of iteractions",100,0,100);h_puTrueReW[i]->Sumw2();
-    h_eventWeight[i] = new TH1F(("eventWeight"+histname).c_str(),"eventWeight",50,0,2); h_eventWeight[i]->Sumw2();
-    h_genHT[i] = new TH1F(("genHT"+histname).c_str(),"genHT;genHT",100,0,2500);h_genHT[i]->Sumw2();
-    h_pfMETall[i] =  new TH1F(("pfMETall"+histname).c_str(), "pfMET",50,0,2000);h_pfMETall[i] ->Sumw2(); 
-    h_pfMET200[i] = new TH1F(("pfMET200"+histname).c_str(), "pfMET",50,170,1500);h_pfMET200[i] ->Sumw2(); 
-    h_pfMET[i] = new TH1F(("pfMET"+histname).c_str(), "E_{T}^{miss} (GeV)",44,MetBins);h_pfMET[i] ->Sumw2();
-    h_pfMETPhi[i] = new TH1F(("pfMETPhi"+histname).c_str(), "pfMETPhi",50,-3.1516,3.1516);h_pfMETPhi[i]->Sumw2();
-    h_recoil[i] = new TH1F(("recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
-    h_recoilPhi[i] = new TH1F(("recoilPhi"+histname).c_str(), "recoilPhi",50,-4,4);h_recoilPhi[i]->Sumw2();
-    h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
-    h_j1pT[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 53,PtBins);h_j1pT[i]->Sumw2();
-    h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
-    h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
-    h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();
-    h_j1phiWidth[i] = new TH1F(("j1phiWidth"+histname).c_str(),"j1phiWidth; #phi width of Leading Jet", 50, 0,0.5);h_j1phiWidth[i]->Sumw2();
-    h_j1CHF[i] = new TH1F(("j1CHF"+histname).c_str(),"j1CHF;Charged Hadron Energy Fraction in Leading Jet",50,0,1.1);h_j1CHF[i]->Sumw2(); 
-    h_j1NHF[i] = new TH1F(("j1NHF"+histname).c_str(),"j1NHF;Neutral Hadron Energy Fraction in Leading Jet",50,0,1.1);h_j1NHF[i]->Sumw2(); 
-    h_j1ChMult[i] = new TH1F(("j1ChMult"+histname).c_str(),"j1ChMult;Charged Mult of Leading Jet",25,0,50);h_j1ChMult[i]->Sumw2();
-    h_j1NhMult[i] = new TH1F(("j1NhMult"+histname).c_str(),"j1NhMult;Neutral Mult of Leading Jet",25,0,50);h_j1NhMult[i]->Sumw2(); 
-    h_j1Mt[i]  = new TH1F(("j1Mt"+histname).c_str(), "j1Mt;M_{T} of Leading Jet (GeV)", 50,MtBins);h_j1Mt[i]->Sumw2(); 
-    h_j1TotPFCands[i] = new TH1F(("j1TotPFCands"+histname).c_str(),"j1TotPFCands;# of all PF candidates in Leading Jet",25,0,50);h_j1TotPFCands[i]->Sumw2();
-    h_j1ChPFCands[i] = new TH1F(("j1ChPFCands"+histname).c_str(),"j1ChPFCands;# of PF charged hadrons in Leading Jet",25,0,50);h_j1ChPFCands[i]->Sumw2();
-    h_j1NeutPFCands[i] = new TH1F(("j1NeutPFCands"+histname).c_str(),"j1NeutPFCands;# of PF neutral hadrons in Leading Jet",15,0,15);h_j1NeutPFCands[i]->Sumw2();
-    h_j1GammaPFCands[i] = new TH1F(("j1GammaPFCands"+histname).c_str(),"j1GammaPFCands;# of PF gammas in Leading Jet",20,0,40);h_j1GammaPFCands[i]->Sumw2();
-    h_j1MiscPFCands[i] = new TH1F(("j1MiscPFCands"+histname).c_str(),"j1MiscPFCands;# of PF gammas in Leading Jet",20,0,40);h_j1MiscPFCands[i]->Sumw2();
-    h_Pt123[i] = new TH1F(("Pt123"+histname).c_str(),"Pt123;P_{T} sum carried by 3 leading daughters of the Pencil Jet",58,Pt123Bins);h_Pt123[i]->Sumw2();
-    h_Pt123Fraction[i]= new TH1F(("Pt123Fraction"+histname).c_str(), "Pt123Fraction;P_{T} fraction carried by 3 leading daughters of the Pencil Jet" ,50,0,1);h_Pt123Fraction[i]->Sumw2(); 
-    h_ChNemPtFrac[i] = new TH1F(("ChNemPtFrac"+histname).c_str(),"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction",50,0,1.1);h_ChNemPtFrac[i]->Sumw2();
-    h_ChNemPt[i]  = new TH1F(("ChNemPt"+histname).c_str(), "ChNemPt;Ch + NEM Leading Jet P_{T} (GeV)", 58,Pt123Bins);h_ChNemPt[i]->Sumw2();
-    h_ChNemPt123[i] = new TH1F(("ChNemPt123"+histname).c_str(),"ChNemPt123;Ch + NEM P^{123}_{T} (GeV)",58,Pt123Bins);h_ChNemPt123[i]->Sumw2();
-    h_ChPercCons[i] = new TH1F(("ChPercCons"+histname).c_str(),"ChPercCons;Charged Hadron Constituent Percent",50,0,1.1);h_ChPercCons[i]->Sumw2();
-    h_NhPercCons[i] = new TH1F(("NhPercCons"+histname).c_str(),"NhPercCons;Neutral Hadron Constituent Percent",50,0,1.1);h_NhPercCons[i]->Sumw2();
-    h_GammaPercCons[i] = new TH1F(("GammaPercCons"+histname).c_str(),"GammaPercCons;Photon Constituent Percent",50,0,1.1);h_GammaPercCons[i]->Sumw2();
-    h_MiscPercCons[i] = new TH1F(("MiscPercCons"+histname).c_str(),"MiscPercCons;Misc Constituent Percent",50,0,1.1);h_MiscPercCons[i]->Sumw2();
-    h_ChargedPt[i] = new TH1F(("ChargedPt"+histname).c_str(),"ChargedPt;Charged Constituent P_{T}",58,Pt123Bins);h_ChargedPt[i]->Sumw2();
-    h_NeutralPt[i] = new TH1F(("NeutralPt"+histname).c_str(),"NeutralPt;Neutral Constituent P_{T}",58,Pt123Bins);h_NeutralPt[i]->Sumw2();
-    h_PhotonPt[i] = new TH1F(("PhotonPt"+histname).c_str(),"PhotonPt;Photon Constituent P_{T}",58,Pt123Bins);h_PhotonPt[i]->Sumw2();
-    h_MiscPt[i] = new TH1F(("MiscPt"+histname).c_str(),"MiscPt;Misc Constituent P_{T}",58,Pt123Bins);h_MiscPt[i]->Sumw2();
-    h_ChPercPt[i] = new TH1F(("ChPercPt"+histname).c_str(), "ChPercPt; Charged Constituent P_{T} Percentage" ,50,0,1.1);h_ChPercPt[i]->Sumw2();
-    h_NhPercPt[i] = new TH1F(("NhPercPt"+histname).c_str(), "NhPercPt; Nharged Constituent P_{T} Percentage" ,50,0,1.1);h_NhPercPt[i]->Sumw2();
-    h_GammaPercPt[i] = new TH1F(("GammaPercPt"+histname).c_str(), "GammaPercPt; Gamma Constituent P_{T} Percentage" ,50,0,1.1);h_GammaPercPt[i]->Sumw2();
-    h_MiscPercPt[i] = new TH1F(("MiscPercPt"+histname).c_str(), "MiscPercPt; Misc Constituent P_{T} Percentage" ,50,0,1.1);h_MiscPercPt[i]->Sumw2();
+    auto Name = [histname](string name) { return name+histname; };
+    // Event Info
+    h_nVtx[i]           = MakeTH1F(new TH1F(Name("nVtx").c_str()         ,"nVtx;nVtx"                                              ,40,0,80));
+    h_eventWeight[i]    = MakeTH1F(new TH1F(Name("eventWeight").c_str()  ,"eventWeight;Event Weight"                               ,50,0,2));
+    h_kfactor[i]        = MakeTH1F(new TH1F(Name("kfactor").c_str()      ,"kfactor;kfactor"                                        ,50,-2,2));
+    h_pileup[i]         = MakeTH1F(new TH1F(Name("pileup").c_str()       ,"pileup;pileup"                                          ,50,-2,2));
+    h_genWeight[i]      = MakeTH1F(new TH1F(Name("genWeight").c_str()    ,"genWeight;genWeight"                                    ,50,-2,2));
+    h_sf[i]             = MakeTH1F(new TH1F(Name("scaleFactor").c_str()  ,"scaleFactor;Scale Factor"                               ,50,-2,2));
+    // MC Info
+    h_puTrueNoW[i]      = MakeTH1F(new TH1F(Name("puTrueNoW").c_str()    ,"puTrue Unweighted;unweighted true number of iteractions",100,0,100));
+    h_puTrueReW[i]      = MakeTH1F(new TH1F(Name("puTrueReW").c_str()    ,"puTrue Reweighted;reweighted true number of iteractions",100,0,100));
+    h_genHT[i]          = MakeTH1F(new TH1F(Name("genHT").c_str()        ,"genHT;genHT"                                            ,100,0,2500));
+    h_bosonPt[i]        = MakeTH1F(new TH1F(Name("bosonPt").c_str()      ,"bosonPt; boson P_{T}"                                   ,nBosonPtBins,BosonPtBins));
+    h_bosonPtwK[i]      = MakeTH1F(new TH1F(Name("bosonPtwK").c_str()    ,"bosonPtwK; kfactor boson P_{T}"                         ,nBosonPtBins,BosonPtBins));
+    // MET Info
+    h_pfMETall[i]       = MakeTH1F(new TH1F(Name("pfMETall").c_str()     ,"pfMETall;E_{T}^{miss} (GeV)"                            ,50,0,2000)); 
+    h_pfMET[i]          = MakeTH1F(new TH1F(Name("pfMET").c_str()        ,"pfMET;E_{T}^{miss} (GeV)"                               ,nMetBins,MetBins));
+    h_pfMETPhi[i]       = MakeTH1F(new TH1F(Name("pfMETPhi").c_str()     ,"pfMETPhi;pfMET #phi"                                    ,nPhiBins,lPhi,uPhi));
+    h_recoilall[i]      = MakeTH1F(new TH1F(Name("recoilall").c_str()    ,"recoilall;Recoil (GeV)"                                 ,50,0,2000));
+    h_recoil[i]         = MakeTH1F(new TH1F(Name("recoil").c_str()       ,"recoil;Recoil (GeV)"                                    ,nMetBins,MetBins));
+    h_recoilPhi[i]      = MakeTH1F(new TH1F(Name("recoilPhi").c_str()    ,"recoilPhi;Recoil #phi"                                  ,nPhiBins,lPhi,uPhi));
+    // Jet Info
+    h_nJets[i]          = MakeTH1F(new TH1F(Name("nJets").c_str()        ,"nJets;Number of Jets"                                   ,21,-0.5,20.5));
+    h_j1pT[i]           = MakeTH1F(new TH1F(Name("j1pT").c_str()         ,"j1pT;p_{T} of Leading Jet (GeV)"                        ,nPtBins,PtBins));
+    h_j1Eta[i]          = MakeTH1F(new TH1F(Name("j1Eta").c_str()        ,"j1Eta; #eta of Leading Jet"                             ,nEtaBins,lEta,uEta));
+    h_j1Phi[i]          = MakeTH1F(new TH1F(Name("j1Phi").c_str()        ,"j1Phi; #phi of Leading Jet"                             ,nPhiBins,lPhi,uPhi));
+    h_j1etaWidth[i]     = MakeTH1F(new TH1F(Name("j1etaWidth").c_str()   ,"j1etaWidth; #eta width of Leading Jet"                  ,50,0,0.25));
+    h_j1phiWidth[i]     = MakeTH1F(new TH1F(Name("j1phiWidth").c_str()   ,"j1phiWidth; #phi width of Leading Jet"                  ,50, 0,0.5));
+    h_j1CHF[i]          = MakeTH1F(new TH1F(Name("j1CHF").c_str()        ,"j1CHF;Charged Hadron Energy Fraction in Leading Jet"    ,50,0,1.1));
+    h_j1NHF[i]          = MakeTH1F(new TH1F(Name("j1NHF").c_str()        ,"j1NHF;Neutral Hadron Energy Fraction in Leading Jet"    ,50,0,1.1)); 
+    h_j1ChMult[i]       = MakeTH1F(new TH1F(Name("j1ChMult").c_str()     ,"j1ChMult;Charged Multiplicity of Leading Jet"           ,25,0,50));
+    h_j1NhMult[i]       = MakeTH1F(new TH1F(Name("j1NhMult").c_str()     ,"j1NhMult;Neutral Multiplicity of Leading Jet"           ,25,0,50)); 
+    h_j1Mt[i]           = MakeTH1F(new TH1F(Name("j1Mt").c_str()         ,"j1Mt;M_{T} of Leading Jet (GeV)"                        ,nMtBins,MtBins));
+    // PF Jet Info
+    h_Pt123[i]          = MakeTH1F(new TH1F(Name("Pt123").c_str()        ,"Pt123;P_{T}^{123}"                                      ,nPt123Bins,Pt123Bins));
+    h_Pt123Fraction[i]  = MakeTH1F(new TH1F(Name("Pt123Fraction").c_str(),"Pt123Fraction;P_{T}^{123} Fraction"                     ,50,0,1)); 
+    h_ChNemPt[i]        = MakeTH1F(new TH1F(Name("ChNemPt").c_str()      ,"ChNemPt;Ch + NEM Leading Jet P_{T} (GeV)"               ,nPt123Bins,Pt123Bins));
+    h_ChNemPt123[i]     = MakeTH1F(new TH1F(Name("ChNemPt123").c_str()   ,"ChNemPt123;Ch + NEM P^{123}_{T} (GeV)"                  ,nPt123Bins,Pt123Bins));
+    h_ChNemPtFrac[i]    = MakeTH1F(new TH1F(Name("ChNemPtFrac").c_str()  ,"ChNemPtFrac;Ch + NEM P_{T}^{123} Fraction"              ,50,0,1.1));
+    h_TotPFCands[i]     = MakeTH1F(new TH1F(Name("TotPFCands").c_str()   ,"TotPFCands;# of all PF candidates in Leading Jet"       ,nCandBins,lCand,uCand));
+    // Charged Info
+    h_ChPFCands[i]      = MakeTH1F(new TH1F(Name("ChPFCands").c_str()    ,"ChPFCands;# of PF charged hadrons in Leading Jet"       ,nCandBins,lCand,uCand));
+    h_ChPercCons[i]     = MakeTH1F(new TH1F(Name("ChPercCons").c_str()   ,"ChPercCons;Charged Hadron Constituent Percent"          ,50,0,1.1));
+    h_ChargedPFPt[i]    = MakeTH1F(new TH1F(Name("ChPFPt").c_str()       ,"ChPFPt;Charged Constituent P_{T}"                       ,nPt123Bins,Pt123Bins));
+    h_ChPercPFPt[i]     = MakeTH1F(new TH1F(Name("ChPercPFPt").c_str()   ,"ChPercPFPt; Charged Constituent P_{T} Percentage"       ,50,0,1.1));
+    // Neutral Info
+    h_NhPFCands[i]      = MakeTH1F(new TH1F(Name("NhPFCands").c_str()    ,"NeutPFCands;# of PF neutral hadrons in Leading Jet"     ,nCandBins,lCand,uCand));
+    h_NhPercCons[i]     = MakeTH1F(new TH1F(Name("NhPercCons").c_str()   ,"NhPercCons;Neutral Hadron Constituent Percent"          ,50,0,1.1));
+    h_NhPFPt[i]         = MakeTH1F(new TH1F(Name("NhPFPt").c_str()       ,"NhPFPt;Neutral Constituent P_{T}"                       ,nPt123Bins,Pt123Bins));
+    h_NhPercPFPt[i]     = MakeTH1F(new TH1F(Name("NhPercPFPt").c_str()   ,"NhPercPFPt; Nharged Constituent P_{T} Percentage"       ,50,0,1.1));
+    // Gamma Info
+    h_GammaPFCands[i]   = MakeTH1F(new TH1F(Name("GammaPFCands").c_str() ,"GammaPFCands;# of PF gammas in Leading Jet"             ,nCandBins,lCand,uCand));
+    h_GammaPercCons[i]  = MakeTH1F(new TH1F(Name("GammaPercCons").c_str(),"GammaPercCons;Photon Constituent Percent"               ,50,0,1.1));
+    h_PhotonPFPt[i]     = MakeTH1F(new TH1F(Name("GammaPFPt").c_str()    ,"GammaPFPt;Photon Constituent P_{T}"                     ,nPt123Bins,Pt123Bins));
+    h_GammaPercPFPt[i]  = MakeTH1F(new TH1F(Name("GammaPercPFPt").c_str(),"GammaPercPFPt; Gamma Constituent P_{T} Percentage"      ,50,0,1.1));
+    // Misc Info
+    h_MiscPFCands[i]    = MakeTH1F(new TH1F(Name("MiscPFCands").c_str()  ,"MiscPFCands;# of PF gammas in Leading Jet"              ,nCandBins,lCand,uCand));
+    h_MiscPercCons[i]   = MakeTH1F(new TH1F(Name("MiscPercCons").c_str() ,"MiscPercCons;Misc Constituent Percent"                  ,50,0,1.1));
+    h_MiscPFPt[i]       = MakeTH1F(new TH1F(Name("MiscPFPt").c_str()     ,"MiscPFPt;Misc Constituent P_{T}"                        ,nPt123Bins,Pt123Bins));
+    h_MiscPercPFPt[i]   = MakeTH1F(new TH1F(Name("MiscPercPFPt").c_str() ,"MiscPercPFPt; Misc Constituent P_{T} Percentage"        ,50,0,1.1));
   }
 }
 
 void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
-    h_genHT[nhist]->Fill(genHT,event_weight);
-    h_puTrueNoW[nhist]->Fill(puTrue->at(0),genWeight);
-    h_puTrueReW[nhist]->Fill(puTrue->at(0),genWeight*pileup);
+    // MC Info          ;
+    h_puTrueNoW[nhist]  ->Fill(puTrue->at(0),genWeight);
+    h_puTrueReW[nhist]  ->Fill(puTrue->at(0),genWeight*pileup);
+    h_genHT[nhist]      ->Fill(genHT,event_weight);
+    h_bosonPt[nhist]    ->Fill(bosonPt,genWeight);
+    h_bosonPtwK[nhist]  ->Fill(bosonPt,genWeight * kfactor);
   }
-  h_eventWeight[nhist]->Fill(event_weight,event_weight);
-  h_nVtx[nhist]->Fill(nVtx,event_weight);
-  h_nVtx2[nhist]->Fill(nVtx,event_weight);
-  h_pfMETall[nhist]->Fill(pfMET,event_weight);
-  h_pfMET200[nhist]->Fill(pfMET,event_weight);
-  h_pfMET[nhist]->Fill(pfMET,event_weight);
-  h_pfMETPhi[nhist]->Fill(pfMETPhi,event_weight);
-  h_recoil[nhist]->Fill(recoil,event_weight);
-  h_recoilPhi[nhist]->Fill(recoilPhi,event_weight);
-  h_nJets[nhist]->Fill(nJet,event_weight);
-  if (jetCand.size() > 0) {
-    h_j1pT[nhist]->Fill(j1pT,event_weight);
-    h_j1Eta[nhist]->Fill(jetEta->at(jetCand[0]),event_weight);
-    h_j1Phi[nhist]->Fill(jetPhi->at(jetCand[0]),event_weight);
-    h_j1etaWidth[nhist]->Fill(jetetaWidth->at(jetCand[0]),event_weight);
-    h_j1phiWidth[nhist]->Fill(jetphiWidth->at(jetCand[0]),event_weight);
-    h_j1CHF[nhist]->Fill(jetCHF->at(jetCand[0]),event_weight);
-    h_j1NHF[nhist]->Fill(jetNHF->at(jetCand[0]),event_weight);
-    h_j1ChMult[nhist]->Fill(jetNChargedHad->at(jetCand[0]),event_weight);
-    h_j1NhMult[nhist]->Fill(jetNNeutralHad->at(jetCand[0]),event_weight);
-    h_j1Mt[nhist]->Fill(jetMt->at(jetCand[0]),event_weight);
-    h_j1TotPFCands[nhist]->Fill(TotalPFCands,event_weight);
-    h_j1ChPFCands[nhist]->Fill(ChargedPFCands,event_weight);
-    h_j1NeutPFCands[nhist]->Fill(NeutralPFCands,event_weight);
-    h_j1GammaPFCands[nhist]->Fill(GammaPFCands,event_weight);
-    h_j1MiscPFCands[nhist]->Fill(MiscPFCands,event_weight);
-    h_Pt123[nhist]->Fill(Pt123,event_weight);
+
+  if ( jetindex != -1 ) {
+    // Event Info       
+    h_nVtx[nhist]         ->Fill(nVtx,event_weight);   
+    h_eventWeight[nhist]  ->Fill(event_weight,event_weight);
+    h_kfactor[nhist]      ->Fill(kfactor,event_weight);
+    h_pileup[nhist]       ->Fill(pileup,event_weight);
+    h_genWeight[nhist]    ->Fill(genWeight,event_weight);
+    h_sf[nhist]           ->Fill(sf,event_weight);
+    // MET Info         ;
+    h_pfMETall[nhist]     ->Fill(pfMET,event_weight);
+    h_pfMET[nhist]        ->Fill(pfMET,event_weight);
+    h_pfMETPhi[nhist]     ->Fill(pfMETPhi,event_weight);
+    h_recoil[nhist]       ->Fill(recoil,event_weight);
+    h_recoilall[nhist]    ->Fill(recoil,event_weight);
+    h_recoilPhi[nhist]    ->Fill(recoilPhi,event_weight);
+    // Jet Info         ;
+    h_nJets[nhist]        ->Fill(nJet,event_weight);
+    h_j1pT[nhist]         ->Fill(j1pT,event_weight);
+    h_j1Eta[nhist]        ->Fill(jetEta->at(jetindex),event_weight);
+    h_j1Phi[nhist]        ->Fill(jetPhi->at(jetindex),event_weight);
+    h_j1etaWidth[nhist]   ->Fill(jetetaWidth->at(jetindex),event_weight);
+    h_j1phiWidth[nhist]   ->Fill(jetphiWidth->at(jetindex),event_weight);
+    h_j1CHF[nhist]        ->Fill(jetCHF->at(jetindex),event_weight);
+    h_j1NHF[nhist]        ->Fill(jetNHF->at(jetindex),event_weight);
+    h_j1ChMult[nhist]     ->Fill(jetNChargedHad->at(jetindex),event_weight);
+    h_j1NhMult[nhist]     ->Fill(jetNNeutralHad->at(jetindex),event_weight);
+    h_j1Mt[nhist]         ->Fill(jetMt->at(jetindex),event_weight);
+    // PF Jet Info      ;
+    h_Pt123[nhist]        ->Fill(Pt123,event_weight);
     h_Pt123Fraction[nhist]->Fill(Pt123Fraction,event_weight);
-    h_ChNemPtFrac[nhist]->Fill(ChNemPtFrac,event_weight);
-    h_ChNemPt[nhist]->Fill(ChNemPt,event_weight);
-    h_ChNemPt123[nhist]->Fill(ChNemPt123,event_weight);
-    h_ChPercCons[nhist]->Fill(ChargedPFCands/(float)TotalPFCands,event_weight);
-    h_NhPercCons[nhist]->Fill(NeutralPFCands/(float)TotalPFCands,event_weight);
-    h_GammaPercCons[nhist]->Fill(GammaPFCands/(float)TotalPFCands,event_weight);
-    h_MiscPercCons[nhist]->Fill(MiscPFCands/(float)TotalPFCands,event_weight);
-    h_ChargedPt[nhist]->Fill(pfHadronPt[0],event_weight);
-    h_NeutralPt[nhist]->Fill(pfHadronPt[1],event_weight);
-    h_PhotonPt[nhist]->Fill(pfHadronPt[2],event_weight);
-    h_MiscPt[nhist]->Fill(pfHadronPt[3],event_weight);
-    h_ChPercPt[nhist]->Fill( pfHadronPt[0]/j1pT ,event_weight);
-    h_NhPercPt[nhist]->Fill( pfHadronPt[1]/j1pT ,event_weight);
-    h_GammaPercPt[nhist]->Fill( pfHadronPt[2]/j1pT ,event_weight);
-    h_MiscPercPt[nhist]->Fill( pfHadronPt[3]/j1pT ,event_weight);
+    h_ChNemPt[nhist]      ->Fill(ChNemPt,event_weight);
+    h_ChNemPt123[nhist]   ->Fill(ChNemPt123,event_weight);
+    h_ChNemPtFrac[nhist]  ->Fill(ChNemPtFrac,event_weight);
+    h_TotPFCands[nhist]   ->Fill(TotalPFCands,event_weight);
+    // PF Charged Info     ;
+    h_ChPFCands[nhist]    ->Fill(ChargedPFCands,event_weight);
+    h_ChPercCons[nhist]   ->Fill(ChargedPFCands/(float)TotalPFCands,event_weight);
+    h_ChargedPFPt[nhist]  ->Fill(pfHadronPt[0],event_weight);
+    h_ChPercPFPt[nhist]   ->Fill(pfHadronPt[0]/j1pT,event_weight);
+    // PF Neutral Info     ;
+    h_NhPFCands[nhist]    ->Fill(NeutralPFCands,event_weight);                     
+    h_NhPercCons[nhist]   ->Fill(NeutralPFCands/(float)TotalPFCands,event_weight); 
+    h_NhPFPt[nhist]       ->Fill(pfHadronPt[1],event_weight);                      
+    h_NhPercPFPt[nhist]   ->Fill(pfHadronPt[1]/j1pT,event_weight);                 
+    // PF Gamma Info       ;
+    h_GammaPFCands[nhist] ->Fill(GammaPFCands,event_weight);                     
+    h_GammaPercCons[nhist]->Fill(GammaPFCands/(float)TotalPFCands,event_weight); 
+    h_PhotonPFPt[nhist]   ->Fill(pfHadronPt[2],event_weight);                      
+    h_GammaPercPFPt[nhist]->Fill(pfHadronPt[2]/j1pT,event_weight);                 
+    // PF Misc Info        ;
+    h_MiscPFCands[nhist]  ->Fill(MiscPFCands,event_weight);                     
+    h_MiscPercCons[nhist] ->Fill(MiscPFCands/(float)TotalPFCands,event_weight); 
+    h_MiscPFPt[nhist]     ->Fill(pfHadronPt[3],event_weight);                      
+    h_MiscPercPFPt[nhist] ->Fill(pfHadronPt[3]/j1pT,event_weight);
   }
 }
 
@@ -175,9 +199,9 @@ void ZprimeAnalysis::SetPtFrac() {
 
 void ZprimeAnalysis::SetJetPFInfo(vector<int> jetCands) {
   if (jetCands.size() == 0) return;
-  int jetCand = jetCands[0];
-  j1pT = jetPt->at(jetCand);
-  SetPFVectors(jetCand);
+  jetindex = jetCands[0];
+  j1pT = jetPt->at(jetindex);
+  SetPFVectors(jetindex);
 
   TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = 0;
   for (int PID : j1PFConsPID) {
@@ -235,9 +259,6 @@ void ZprimeAnalysis::SetBoson(int PID) {
     if((*mcPID)[i] == PID && (mcStatusFlag->at(i)>>2&1) == 1){
       bosonPt = (*mcPt)[i];
       SetKFactors(bosonPt);
-
-      h_bosonPt->Fill(bosonPt,genWeight);
-      h_bosonPtwK->Fill(bosonPt,genWeight * kfactor);
     }
   }
 }
@@ -247,7 +268,6 @@ void ZprimeAnalysis::SetKFactors(float bosonPt) {
 }
 
 void ZprimeAnalysis::ApplyKFactor(float &event_weight) {
-  h_kfactor->Fill(kfactor);
   event_weight *= kfactor;
   weight_nogen *= kfactor;
 }
@@ -257,7 +277,6 @@ void ZprimeAnalysis::SetSF(float sf) {
 }
 
 void ZprimeAnalysis::ApplySF(float &event_weight) {
-  h_sf->Fill(sf);
   event_weight *= sf;
   weight_nogen *= sf;
 }
@@ -269,8 +288,6 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
   event_weight *= pileup * genWeight;
   weight_nogen *= pileup;
-  h_pileup->Fill(pileup);
-  h_genWeight->Fill(genWeight);
 }
 
 bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }
@@ -282,6 +299,7 @@ bool ZprimeAnalysis::inclusiveCut() {
 }
 
 void ZprimeAnalysis::initVars() {
+  jetindex = -1;
   jetCand     .clear();
   j1PFConsPt  .clear();
   j1PFConsEta .clear();

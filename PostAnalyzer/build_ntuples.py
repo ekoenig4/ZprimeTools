@@ -18,6 +18,11 @@ def fullpath(path):
             if os.path.isdir(dir_path): helper(dir_path,dirs)
     helper(path,dirs)
     return dirs
+
+def getSub(sub):
+    from re import compile
+    pattern = compile(r'Mx\d*_Mv\d*')
+    return pattern.findall(sub)[0]
     
 def build_dataset(data,path):
     data = data.lower()
@@ -27,13 +32,11 @@ def build_dataset(data,path):
     with open("ntuples/%s.txt" % data,"w") as f:
         for sub in sublist:
             sub_path = os.path.join(path,sub)
-            sub = sub.split("_")
-            if len(sub) > 1: sub = sub[1]
-            else:            sub = sub[0]
-            sub = sub.replace("HT","").replace("To","to").replace("-","to").replace("Incl","MLM")
+            sub = getSub(sub)
+            dirlist = fullpath(sub_path)
+            if not any(dirlist): print "Nothing in %s" % sub_path; continue
             print '>>%s' % sub
             f.write(">>%s\n" % sub)
-            dirlist = fullpath(sub_path)
             for directory in dirlist:
                 print directory
                 f.write("%s/\n" % directory)

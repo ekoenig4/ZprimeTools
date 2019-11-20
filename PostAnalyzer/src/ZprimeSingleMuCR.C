@@ -16,18 +16,19 @@ void ZprimeSingleCR::initVars() {
 
 void ZprimeSingleCR::BookHistos(int i,string histname) {
   if (i == -1) {
-    h_lepMET_MT = new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400);h_lepMET_MT->Sumw2();
+    h_lepMET_MT = MakeTH1F(new TH1F("h_lepMET_MT","h_lepMET_MT; transverse mass of the lepton-Emiss system",40,0,400));
   } else {
-    h_LeptonPt[i] = new TH1F(("h_LeptonPt"+histname).c_str(),"h_LeptonPt",24,LeptonPtBins);h_LeptonPt[i]->Sumw2();
-    h_LeptonEta[i] = new TH1F(("h_LeptonEta"+histname).c_str(),"h_LeptonEta",30,-3.0,3.0);h_LeptonEta[i]->Sumw2();
-    h_LeptonPhi[i] = new TH1F(("h_LeptonPhi"+histname).c_str(),"h_LeptonPhi",30,-3.1416,3.1416);h_LeptonPhi[i]->Sumw2();
+    auto Name = [histname](string name) { return (name+histname); };
+    h_LeptonPt[i]  = MakeTH1F(new TH1F(Name("LeptonPt").c_str() ,"LeptonPt;Lepton P_{T}" ,nLeadingLeptonPtBins,LeadingLeptonPtBins));
+    h_LeptonEta[i] = MakeTH1F(new TH1F(Name("LeptonEta").c_str(),"LeptonEta;Lepton #eta" ,nEtaBins,lEta,uEta));
+    h_LeptonPhi[i] = MakeTH1F(new TH1F(Name("LeptonPhi").c_str(),"LeptonPhi;Lepton #phi" ,nPhiBins,lPhi,uPhi));
   }
 }
 
 void ZprimeSingleCR::fillHistos(int nhist,float event_weight) {
   //CR Histograms
   if(lepindex >= 0){ 
-    h_LeptonPt[nhist]->Fill(muPt->at(lepindex),event_weight);
+    h_LeptonPt[nhist] ->Fill(muPt->at(lepindex),event_weight);
     h_LeptonEta[nhist]->Fill(muEta->at(lepindex),event_weight);
     h_LeptonPhi[nhist]->Fill(muPhi->at(lepindex),event_weight);
   }

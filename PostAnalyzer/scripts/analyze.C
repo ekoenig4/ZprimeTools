@@ -54,7 +54,7 @@ int run_mc_test(string inputdir,const char* argv[]) {
   argv[3] = "5000";
   argv[4] = "100";
   argv[5] = "1";
-  run(6,argv);
+  return run(6,argv);
 }
 
 int run_data_test(string inputdir,const char* argv[]) {
@@ -64,15 +64,29 @@ int run_data_test(string inputdir,const char* argv[]) {
   argv[3] = "5000";
   argv[4] = "100";
   argv[5] = "1";
-  run(6,argv);
+  return run(6,argv);
 }
+
+int run_signal_test(string inputdir,const char* argv[]) {
+  cout << "Running Signal test in: " << inputdir << endl;
+  argv[1] = inputdir.c_str();
+  argv[2] = "test_signal.root";
+  argv[3] = "5000";
+  argv[4] = "100";
+  argv[5] = "-1";
+  return run(6,argv);
+}
+
 
 int setup_test(int argc, const char* argv[]) {
   Dataset dataset;
   string mcdir,datadir;
+  string signaldir = "None";
   if ( ZprimeClass::REGION == "SignalRegion" ) {
     mcdir = dataset.getDirlist("zjets","400to600")[0];
     datadir = dataset.getDirlist("met",ZprimeClass::SRDATA)[0];
+    if ( dataset.getSubset("signal").size() != 0 )
+      signaldir = dataset.getDirlist("signal","Mx1_Mv1000")[0];
   } else if ( ZprimeClass::REGION == "SingleEleCR" || ZprimeClass::REGION == "SingleMuCR" ) {
     mcdir = dataset.getDirlist("wjets","400to600")[0];
     if ( ZprimeClass::REGION == "SingleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
@@ -84,6 +98,8 @@ int setup_test(int argc, const char* argv[]) {
   }
   int mc = run_mc_test(mcdir,argv);
   int data = run_data_test(datadir,argv);
+  int signal = 0;
+  if ( signaldir != "None" ) signal = run_signal_test(signaldir,argv);
   return mc + data;
 }
 

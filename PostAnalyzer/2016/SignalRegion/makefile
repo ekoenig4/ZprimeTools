@@ -45,7 +45,7 @@ condor_clean:
 	rm -r .output/
 	rm -r .status/
 
-condor_submit:
+condor_submit: analyze
 	./submit.py
 
 hadd:
