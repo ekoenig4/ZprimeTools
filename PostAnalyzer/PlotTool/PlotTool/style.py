@@ -37,7 +37,7 @@ def fillStack(samples,hs_datamc):
     for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 
-def getLegend(xmin,ymin,xmax,ymax):
+def getLegend(xmin=0.75,ymin=0.5,xmax=0.95,ymax=0.887173):
     leg = TLegend(xmin,ymin,xmax,ymax,"")
     leg.SetFillColor(kWhite);
     leg.SetFillStyle(0);
@@ -46,20 +46,31 @@ def getLegend(xmin,ymin,xmax,ymax):
 ###################################################################
 
 def getCMSText(lumi,year):
-    texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi));
+    texS = TLatex(0.62,0.907173,("%s (13 TeV, %s)" % (lumi,year)));#VS
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+year+")");
+    texS1 = TLatex(0.15,0.837173,"#bf{CMS} #it{Preliminary}"); 
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
     texS1.Draw();
+    
+    # texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi));
+    # texS.SetNDC();
+    # texS.SetTextFont(42);
+    # texS.SetTextSize(0.040);
+    # texS.Draw();
+    # texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+year+")");
+    # texS1.SetNDC();
+    # texS1.SetTextFont(42);
+    # texS1.SetTextSize(0.040);
+    # texS1.Draw();
     return texS,texS1
 ###################################################################
 
-def RatioStyle(ratio,rymin,rymax):
+def RatioStyle(ratio,rymin=0.65,rymax=1.35):
     ratio.GetYaxis().SetRangeUser(rymin,rymax);
     ratio.SetStats(0);
     ratio.GetYaxis().CenterTitle();

@@ -79,7 +79,7 @@ def plotVariable(samples,variable):
 
     #################################################
 
-    leg = getLegend(0.62,0.60,0.86,0.887173);
+    leg = getLegend(); #0.62,0.60,0.86,0.887173
     leg.AddEntry(data.histo,"Data","lp");
     if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)
 
@@ -112,7 +112,7 @@ def plotVariable(samples,variable):
 
     Ratio = GetRatio(data.histo,hs_datamc.GetStack().Last())
 
-    rymin = 0.3; rymax = 1.7
+    rymin = 0.65; rymax = 1.35
     RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("pex0");
     
