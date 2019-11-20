@@ -5,7 +5,7 @@ from Parser import parser
 from samplenames import samplenames
 from array import array
 import mergeFiles as merge
-import changeBinning as binning
+from changeBinning import binninglist
 from Process import Process
 from utilities import *
 
@@ -148,21 +148,12 @@ class datamc(object):
     ###############################################################################################################
 
     def getBinning(self):
-        hs = None
         if self.args.binning == None: return None
-        elif 'perc' in self.args.binning:
-            nbins = self.args.binning.replace('perc','')
-            hs = binning.percentBinning(nbins=int(nbins))
-            if hs != None: self.varname += 'perc'+nbins
-        elif 'incl'  in self.args.binning:
-            nbins = self.args.binning.replace('incl','')
-            hs = binning.inclusiveBinning(nbins=int(nbins))
-            if hs != None: self.varname += 'incl'+nbins
-        elif 'incu' in self.args.binning:
-            nbins = self.args.binning.replace('incu','')
-            hs = binning.inclusiveCutBinning(nbins=int(nbins),cut=self.cut)
-            if hs != None: self.varname += 'incu'+nbins
-        return hs
+        for label,binning in binninglist.iteritems():
+            if label in self.args.binning:
+                self.varname += self.args.binning
+                return binning(self.args.binning,self) 
+        return None
     ###############################################################################################################
             
     def initiate(self,variable):

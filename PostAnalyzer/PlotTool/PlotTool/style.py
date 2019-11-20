@@ -71,6 +71,7 @@ def getCMSText(lumi,year):
 ###################################################################
 
 def RatioStyle(ratio,rymin=0.65,rymax=1.35):
+    gPad.SetGridy();
     ratio.GetYaxis().SetRangeUser(rymin,rymax);
     ratio.SetStats(0);
     ratio.GetYaxis().CenterTitle();
@@ -81,7 +82,7 @@ def RatioStyle(ratio,rymin=0.65,rymax=1.35):
     ratio.GetYaxis().SetLabelFont(42);
     ratio.GetYaxis().SetTitleFont(42);
     ratio.GetYaxis().SetTitleOffset(0.25);
-    ratio.GetYaxis().SetNdivisions(100);
+    ratio.GetYaxis().SetNdivisions(4);
     ratio.GetYaxis().SetTickLength(0.05);
     
     ratio.GetXaxis().SetLabelSize(0.15);
@@ -138,5 +139,6 @@ def makeYaxis(ymin,ymax,xmin,ndiv,name=None):
     yaxis.SetTitleFont(42);
     yaxis.SetTitleSize(0.12);
     yaxis.SetTitleOffset(0.35);
+    yaxis.SetNdivisions(4)
     return yaxis
 ###################################################################

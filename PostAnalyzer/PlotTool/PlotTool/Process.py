@@ -39,10 +39,9 @@ def GetBranch(b_template,b_variable,tree,weight,cut):
     if not tree.GetListOfBranches().Contains(weight): weight = 'weight'
     if cut == '': tree.Draw('%s>>%s' % (b_variable,b_name),weight,'goff')
     else:         tree.Draw('%s>>%s' % (b_variable,b_name),'%s*(%s%s)' % (weight,b_variable,cut),'goff')
-    histo.SetDirectory(0)
+    
     return histo
 def GetNuisanceList(tfile,dirname):
-    return {}
     tdir = tfile.GetDirectory(dirname)
     shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
     tree = tdir.Get('norm')
@@ -84,7 +83,6 @@ class SubProcess(object):
     def getNhisto(self,variable):
         self.tfile.cd()
         hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
-        hs.SetDirectory(0)
         self.histo = hs
     def getBranch(self,b_template,b_variable,treename,weight,cut):
         self.tfile.cd()
@@ -255,7 +253,7 @@ class Process(object):
             for subprocess in self:
                 histo.Add(subprocess.nuisances[nuisance][variation])
                 subprocess.nuisances[nuisance].pop(variation)
-            histo.SetDirectory(0)
+            
             self.nuisances[nuisance][variation] = histo
     def removeUnc(self,nuisance):
         if nuisance not in self.nuisances: return

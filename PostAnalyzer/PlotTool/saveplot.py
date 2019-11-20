@@ -5,7 +5,6 @@ from sys import argv,path
 from PlotTool import *
 from os import system,getcwd,path,mkdir
 from config import config,lumi as mc,version
-from optparse import OptionParser
 
 gROOT.SetBatch(1)
 
@@ -73,6 +72,8 @@ def saveplot(variable):
     if '<' in variable: cut = '<'+variable.split('<')[-1]
     varname = variable.replace('>','+').replace('<','-')
     variable = variable.replace(cut,'')
+    
+    exit()
     rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,version) ,'recreate')
     Uncertainty = config['Uncertainty']
     lumi = max( lumi for region,lumi in mc.items() )
