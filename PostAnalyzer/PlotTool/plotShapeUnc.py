@@ -6,7 +6,7 @@ from config import config
 
 gROOT.SetBatch(1)
 
-out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
+out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots%s/"
 
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname

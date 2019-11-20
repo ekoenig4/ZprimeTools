@@ -170,7 +170,7 @@ yaxis.SetTitleOffset(0.35);
 yaxis.Draw("SAME");
 
 dir = os.getcwd().split("/")[-1]
-file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+weightedMC.version+"/"+dir+"Plots_EWK/"
+file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots"+weightedMC.version+"/"+dir+"Plots_EWK/"
 #print file_path
 directory=os.path.join(os.path.dirname(file_path),"")
 if not os.path.exists(directory):

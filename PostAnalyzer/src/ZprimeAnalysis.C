@@ -53,7 +53,7 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     h_recoil[i] = new TH1F(("recoil"+histname).c_str(), "Recoil (GeV)",44,MetBins);h_recoil[i] ->Sumw2();
     h_recoilPhi[i] = new TH1F(("recoilPhi"+histname).c_str(), "recoilPhi",50,-4,4);h_recoilPhi[i]->Sumw2();
     h_nJets[i]   = new TH1F(("nJets"+histname).c_str(), "nJets;Number of Jets", 50, 0, 100);h_nJets[i]->Sumw2();
-    h_j1pT[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 48,PtBins);h_j1pT[i]->Sumw2();
+    h_j1pT[i]  = new TH1F(("j1pT"+histname).c_str(), "j1pT;p_{T} of Leading Jet (GeV)", 53,PtBins);h_j1pT[i]->Sumw2();
     h_j1Eta[i] = new TH1F(("j1Eta"+histname).c_str(), "j1Eta; #eta of Leading Jet", 50, -3.0, 3.0);h_j1Eta[i]->Sumw2();
     h_j1Phi[i] = new TH1F(("j1Phi"+histname).c_str(), "j1Phi; #phi of Leading Jet", 50, -3.0, 3.0);h_j1Phi[i]->Sumw2();
     h_j1etaWidth[i] = new TH1F(("j1etaWidth"+histname).c_str(),"j1etaWidth; #eta width of Leading Jet", 50,0,0.25);h_j1etaWidth[i] ->Sumw2();

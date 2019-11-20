@@ -40,7 +40,7 @@ for variable in samples.args:
         canvas.Write()
         
         dir = os.getcwd().split("/")[-1]
-        file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots2018/"+dir+"Plots_EWK/"
+        file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots2018/"+dir+"Plots_EWK/"
         #print file_path
         sub = "phase"
         directory=os.path.join(os.path.dirname(file_path),sub)

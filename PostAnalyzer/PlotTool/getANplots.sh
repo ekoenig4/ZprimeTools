@@ -1,7 +1,6 @@
 #!/bin/sh
 
-extraction='-b incl20 --nhist ChNemPtFrac'
-nvariables='ChNemPtFrac ChNemPt ChNemPt123 recoil nJets j1pT j1Eta j1Phi nVtx'
+nvariables='recoil nJets j1pT j1Eta j1Phi nVtx'
 singleleps='h_LeptonPt h_LeptonEta'
 doubleleps='h_dileptonM h_dileptonPt h_leadingLeptonPt h_leadingLeptonEta h_subleadingLeptonEta h_subleadingLeptonPt'
 
@@ -12,7 +11,6 @@ run() {
     shift 1
     pwd
     python PlotTool/autoplotter.py $options --nhist $nvariables $@
-    python PlotTool/autoplotter.py $options $extraction
     cd ../
 }
 

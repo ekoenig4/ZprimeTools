@@ -76,13 +76,13 @@ class datamc(object):
         self.MCList = ["WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
         self.processes["Data"] =    Process("Data",  [self.Data_FileName],None                                 ,  'data')
-        self.processes["WJets"] =   Process("WJets",  config.WJets_FileNames,  GetMCxsec(config.WJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kRed-10)
-        self.processes["ZJets"] =   Process("ZJets",  config.ZJets_FileNames,  GetMCxsec(config.ZJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kAzure+10)
-        self.processes["GJets"] =   Process("GJets",  config.GJets_FileNames,  GetMCxsec(config.GJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kGray+2)
-        self.processes["DYJets"] =  Process("DYJets", config.DYJets_FileNames, GetMCxsec(config.DYJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kTeal-9)
-        self.processes["TTJets"] =  Process("TTJets", config.TTJets_FileNames, GetMCxsec(config.TTJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
-        self.processes["DiBoson"] = Process("DiBoson",config.DiBoson_FileNames,GetMCxsec(config.DiBoson_FileNames,config.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
-        self.processes["QCD"] =     Process("QCD",    config.QCD_FileNames,    GetMCxsec(config.QCD_FileNames,config.xsec),    'bkg',lumi=self.lumi,color=kGray)
+        self.processes["WJets"] =   Process("WJets",  config.WJets_FileNames,  GetMCxsec(config.WJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kOrange-2)
+        self.processes["ZJets"] =   Process("ZJets",  config.ZJets_FileNames,  GetMCxsec(config.ZJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=9)
+        self.processes["GJets"] =   Process("GJets",  config.GJets_FileNames,  GetMCxsec(config.GJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=46)
+        self.processes["DYJets"] =  Process("DYJets", config.DYJets_FileNames, GetMCxsec(config.DYJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=7)
+        self.processes["TTJets"] =  Process("TTJets", config.TTJets_FileNames, GetMCxsec(config.TTJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kSpring-9)
+        self.processes["DiBoson"] = Process("DiBoson",config.DiBoson_FileNames,GetMCxsec(config.DiBoson_FileNames,config.xsec),'bkg',lumi=self.lumi,color=kMagenta-7)
+        self.processes["QCD"] =     Process("QCD",    config.QCD_FileNames,    GetMCxsec(config.QCD_FileNames,config.xsec),    'bkg',lumi=self.lumi,color=41)
 
         if self.args.mc_solid:
             for name,process in self.processes.iteritems():
