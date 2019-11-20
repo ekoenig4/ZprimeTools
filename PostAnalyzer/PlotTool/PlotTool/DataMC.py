@@ -158,6 +158,10 @@ class datamc(object):
             nbins = self.args.binning.replace('incl','')
             hs = binning.inclusiveBinning(nbins=int(nbins))
             if hs != None: self.varname += 'incl'+nbins
+        elif 'incu' in self.args.binning:
+            nbins = self.args.binning.replace('incu','')
+            hs = binning.inclusiveCutBinning(nbins=int(nbins),cut=self.cut)
+            if hs != None: self.varname += 'incu'+nbins
         return hs
     ###############################################################################################################
             

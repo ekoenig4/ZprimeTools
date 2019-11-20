@@ -1,4 +1,4 @@
-from ROOT import *
+from ROOT import TH1F
 from array import array
 
 def percentBinning(nbins=20):
@@ -20,4 +20,14 @@ def inclusiveBinning(nbins=50):
         overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
         hs.SetBinContent(nbins,overflow)
     hs.post = AddOverflow
+    return hs
+
+def inclusiveCutBinning(nbins=20,cut='>0.5'):
+    hs = inclusiveBinning(nbins)
+    if '>' in cut:
+        lim = float(cut.replace('>',''))
+        bmin = hs.GetXaxis().FindBin(lim); bmax = hs.GetNbinsX()
+
+    binlist = array('d',[ hs.GetXaxis().GetBinLowEdge(ibin) for ibin in range(bmin,bmax+2) ])
+    hs = hs.Rebin(len(binlist)-1,'treevar',binlist)
     return hs
