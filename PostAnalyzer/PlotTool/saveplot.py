@@ -72,8 +72,6 @@ def saveplot(variable):
     if '<' in variable: cut = '<'+variable.split('<')[-1]
     varname = variable.replace('>','+').replace('<','-')
     variable = variable.replace(cut,'')
-    
-    exit()
     rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,version) ,'recreate')
     Uncertainty = config['Uncertainty']
     lumi = max( lumi for region,lumi in mc.items() )
@@ -90,7 +88,8 @@ def saveplot(variable):
         sumOfBkg = norm.getSumOfBkg()
         sumOfBkg.SetName('sumOfBkg')
         sumOfBkg.Write()
-        data_obs = norm.getSumOfBkg()
+        if region == 'SignalRegion/': data_obs = norm.getSumOfBkg()
+        else:                         data_obs = norm.processes['Data'].histo
         data_obs.SetName('data_obs')
         data_obs.Write()
         for sample in norm.SampleList:

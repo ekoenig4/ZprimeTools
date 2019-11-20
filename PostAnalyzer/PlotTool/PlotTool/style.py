@@ -1,6 +1,29 @@
 from ROOT import *
 
 store = []
+boundaries = []
+def GetUsery(ndcy):
+    gPad.Update(); #this is necessary!
+    return ndcy*(gPad.GetY2()-gPad.GetY1()) + gPad.GetY1();
+def GetUserx(ndcx):
+    gPad.Update(); #this is necessary!
+    return ndcx*(gPad.GetX2()-gPad.GetX1()) + gPad.GetX1();
+def GetNDCy(usery):
+    gPad.Update(); #this is necessary!
+    return (usery - gPad.GetY1())/(gPad.GetY2()-gPad.GetY1());
+def GetNDCx(userx):
+    gPad.Update(); #this is necessary!
+    return (userx - gPad.GetX1())/(gPad.GetX2()-gPad.GetX1());
+class Box:
+    def __init__(self,ndcx1,ndcy1,ndcx2,ndcy2):
+        self.ndcx1 = ndcx1
+        self.ndcx2 = ndcx2
+        self.ndcy1 = ndcy1
+        self.ndcy2 = ndcy2
+    def userx1(self): return GetUserx(self.ndcx1)
+    def userx2(self): return GetUserx(self.ndcx2)
+    def usery1(self): return pow(10,GetUsery(self.ndcy1))
+    def usery2(self): return pow(10,GetUsery(self.ndcy2))
 
 def DataStyle(hs_data):
     hs_data.SetLineWidth(2)
@@ -37,11 +60,13 @@ def fillStack(samples,hs_datamc):
     for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 
-def getLegend(xmin=0.75,ymin=0.5,xmax=0.95,ymax=0.887173):
+def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
     leg = TLegend(xmin,ymin,xmax,ymax,"")
+    boundaries.append( Box(xmin,ymin,xmax,ymax) )
     leg.SetFillColor(kWhite);
     leg.SetFillStyle(0);
     leg.SetTextSize(0.025);
+    store.append(leg)
     return leg
 ###################################################################
 
@@ -56,17 +81,8 @@ def getCMSText(lumi,year):
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
     texS1.Draw();
-    
-    # texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi));
-    # texS.SetNDC();
-    # texS.SetTextFont(42);
-    # texS.SetTextSize(0.040);
-    # texS.Draw();
-    # texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+year+")");
-    # texS1.SetNDC();
-    # texS1.SetTextFont(42);
-    # texS1.SetTextSize(0.040);
-    # texS1.Draw();
+    store.append(texS)
+    store.append(texS1)
     return texS,texS1
 ###################################################################
 
@@ -97,15 +113,30 @@ def getRatioLine(xmin,xmax):
     line = TLine(xmin, 1.,xmax, 1.);
     line.SetLineStyle(8);
     line.SetLineColor(kBlack);
+    store.append(line)
     return line
 ###################################################################
 
-def StackStyle(hs_stack,ymin,ymax):
-    hs_stack.SetMinimum(ymin);
-    hs_stack.SetMaximum(ymax);
+def StackStyle(hs_stack,ymin=None,ymax=None):
     hs_stack.GetYaxis().SetTitle("Events");
     hs_stack.GetYaxis().SetTitleOffset(1.5);
     hs_stack.SetTitle("");
+    hs_stack.SetMinimum(0.1)
+    def checkbin(x,y,box):
+        if x > box.userx1() and x < box.userx2() and y > box.usery1():
+            # print '%f < %f < %f && %f > %f' % (box.userx1(),x,box.userx2(),y,box.usery1())
+            return y/box.usery1()
+        return 1;
+    hs = hs_stack
+    if type(hs) == THStack: hs = hs.GetStack().Last()
+    scale = 1
+    ymin = hs.GetMinimum()
+    ymax = hs.GetMaximum()
+    for box in boundaries:
+        for ibin in range(1,hs.GetNbinsX()+1):
+            scale = max(scale,checkbin(hs.GetBinCenter(ibin),hs[ibin],box))
+    ymax *= scale*pow(10,1.2)
+    hs_stack.SetMaximum(ymax)
 ###################################################################
 
 def makeXaxis(xmin,xmax,ymin,ndiv,name=None):

@@ -1,5 +1,7 @@
 from ROOT import TH1F
 from array import array
+import numpy as np
+def linspace(xmin,xmax,nx): return list(np.linspace(xmin,xmax,nx+1))
 
 def percentBinning(arg,sample):
     nbins = int(arg.replace('perc',''))
@@ -37,16 +39,22 @@ def inclusiveCutBinning(arg,sample):
     return hs
 
 def customBinV1(arg,sample):
-    from numpy import linspace
-    bins = array('d',list(linspace(0,0.2,2)) + list(linspace(0.2,0.7,10)) + list(linspace(0.7,1.0,12)));
+    bins = array('d',linspace(0,0.2,2)+ linspace(0.2,0.7,10) + linspace(0.7,1.0,12));
     hs = TH1F("treevar","",len(bins)-1,bins)
     hs.post = AddOverflow
     return hs
 
+def customBinV2(arg,sample):
+    bins = linspace(0,1,35)
+    del bins[1:4]
+    bins = array('d',bins)
+    hs = TH1F('treevar','',len(bins)-1,bins)
+    hs.post = AddOverflow
+    return hs
+    
+
 def gradualBinning(arg,sample):
-    import numpy as np
-    def linspace(xmin,xmax,nx): return list(np.linspace(xmin,xmax,nx+1))
-    bins = array('d',linspace(0,0.2,2)+linspace(0.2,0.4,4)+linspace(0.4,0.6,6)+linspace(0.6,0.8,8)+linspace(0.8,1.0,10))
+    bins = array('d',linspace(0,0.2,2)+linspace(0.2,0.4,6)+linspace(0.4,0.6,7)+linspace(0.6,0.8,8)+linspace(0.8,1.0,9))
     hs = TH1F('treevar','',len(bins)-1,bins)
     hs.post = AddOverflow
     return hs
@@ -56,5 +64,6 @@ binninglist = {
     'incl':inclusiveBinning,
     'incu':inclusiveCutBinning,
     'cuv1':customBinV1,
-    'grad':gradualBinning
+    'grad':gradualBinning,
+    'cuv2':customBinV2
 }
