@@ -29,7 +29,7 @@ def inclusiveBinning(arg,sample):
 def inclusiveCutBinning(arg,sample):
     nbins = arg.replace('incu','')
     cut = sample.cut
-    hs = inclusiveBinning(nbins)
+    hs = inclusiveBinning(nbins,sample)
     if '>' in cut:
         lim = float(cut.replace('>',''))
         bmin = hs.GetXaxis().FindBin(lim); bmax = hs.GetNbinsX()

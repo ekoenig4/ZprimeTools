@@ -133,6 +133,8 @@ def saveplot(variable):
     year_hs.SetBinContent(1,int(norm.version))
     year_hs.Write()
     var_hs = TH1F("variable",variable+';'+norm.name,1,0,1)
+    var_hs = sumOfBkg.Clone('variable')
+    var_hs.Reset(); var_hs.SetTitle(variable); var_hs.GetXaxis().SetTitle(norm.name);
     var_hs.Write()
     rfile.Close()
 ################################################################################
