@@ -68,6 +68,10 @@ void ZprimeYear::SetScalingHistos() {
   th2fmap["looseMuSF_ISO_abseta"] = (TH2F*)f_muSF_ISO->Get("NUM_LooseRelIso_DEN_LooseID_pt_abseta");
   th2fmap["tightMuSF_ID_abseta"] = (TH2F*)f_muSF_ID->Get("NUM_TightID_DEN_genTracks_pt_abseta");
   th2fmap["looseMuSF_ID_abseta"] = (TH2F*)f_muSF_ID->Get("NUM_LooseID_DEN_genTracks_pt_abseta");
+
+  // Photon Scale Factors
+  TFile *f_phoIDeffSF_tight = new TFile("RootFiles/2018_PhotonsTight.root");
+  th2fmap["phoIDSF_tight"]=(TH2F*)f_phoIDeffSF_tight->Get("EGamma_SF2D");
 }
 
 float ZprimeYear::getKFactor(float bosonPt) {
@@ -121,8 +125,12 @@ bool ZprimeYear::muLooseID(int imu) {
   return (muIDbit->at(imu)>>0&1) == 1;
 }
 
+bool ZprimeYear::phoTightID(int ipho) {
+  return (phoEleVeto->at(ipho) && (phoIDbit->at(ipho)>>1&1) == 1);
+}
+
 bool ZprimeYear::phoLooseID(int ipho) {
-  return (phoIDbit->at(ipho)>>0&1) == 1;
+  return (phoEleVeto->at(ipho) && (phoIDbit->at(ipho)>>0&1) == 1);
 }
 
 bool ZprimeYear::tauLooseID(int itau) {

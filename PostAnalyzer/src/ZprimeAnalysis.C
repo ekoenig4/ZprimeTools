@@ -439,6 +439,23 @@ bool ZprimeAnalysis::muon_veto(int jet_index,float muPtCut) {
   return muon_looseID(jet_index,muPtCut).size() == 0;
 }
 
+vector<int> ZprimeAnalysis::photon_tightID(int jet_index,float phoPtCut) {
+  vector<int> pho_cands; pho_cands.clear();
+
+  for (int i = 0; i < nPho; i++) {
+    if ( phoTightID(i) ) {
+      if ( fabs(phoSCEta->at(i) < phoTightEtaCut ) ) {
+	if ( phoEt->at(i) > phoPtCut ) {
+	  if ( deltaR(phoSCEta->at(i),phoSCPhi->at(i),jetEta->at(jet_index),jetPhi->at(jet_index)) > Iso5Cut ) {
+	    pho_cands.push_back(i);
+	  }
+	}
+      }
+    }
+  }
+  return pho_cands;
+}
+
 vector<int> ZprimeAnalysis::photon_looseID(int jet_index,float phoPtCut) {
   vector<int> pho_cands; pho_cands.clear();
 
@@ -659,12 +676,13 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
      dK_NLO_mix  29  30 
   */
   string uncnames[7] = {"QCD_Scale","QCD_Shape","QCD_Proc","NNLO_EWK","NNLO_Miss","NNLO_Sud","QCD_EWK_Mix"};
+  bool isW_or_Z_or_G = sample.type == WJets || sample.type == ZJets || sample.type == DYJets || sample.type == GJets;
   // Initializing
   if ( !scaleUncs.contains(uncnames[0]) ) {
     string hnames[7] = {"d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","d2kappa_EW","d3kappa_EW","dK_NLO_mix"};
     TFile* file = NULL;
     string prefix = "";
-    if (isW_or_ZJet()) {
+    if (isW_or_Z_or_G) {
       if (sample.type == WJets) {
 	file = TFile::Open("RootFiles/WJets_NLO_EWK.root");
 	prefix = "evj_pTV_";
@@ -674,6 +692,9 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
       } else if (sample.type == DYJets) {
 	file = TFile::Open("RootFiles/DYJets_NLO_EWK.root");
 	prefix = "eej_pTV_";
+      } else if (sample.type == GJets) {
+	file = TFile::Open("RootFiles/GJets_NLO_EWK.root");
+	prefix = "vvj_pTV_";
       }
       th1fmap["K_NLO_QCD"] = (TH1F*)file->Get( (prefix+"K_NLO").c_str() );
       th1fmap["K_EW"]      = (TH1F*)file->Get( (prefix+"kappa_EW").c_str() );
@@ -682,7 +703,7 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
     for (int i = 0; i < 7; i++) {
       string name = uncnames[i];
       TH1F* histo = NULL;
-      if (isW_or_ZJet()) histo = (TH1F*)file->Get( (prefix+hnames[i]).c_str() );
+      if (isW_or_Z_or_G) histo = (TH1F*)file->Get( (prefix+hnames[i]).c_str() );
       scaleUncs.addUnc(name,histo);
     }
   }
@@ -692,7 +713,7 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
     float weightUp = event_weight;
     float weightDn = event_weight;
     
-    if (isW_or_ZJet()) {
+    if (isW_or_Z_or_G) {
       float unc = scaleUncs.getBin(name,bosonPt);
       float k_qcd = th1fmap.getBin("K_NLO_QCD",bosonPt);
       float k_ewk = th1fmap.getBin("K_EW",bosonPt);

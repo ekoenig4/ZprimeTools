@@ -59,6 +59,7 @@ public:
   struct TH1FCollection : public std::map<std::string,TH1F*> {
     float getBin(std::string name,float x) {
       TH1F* histo = (*this)[name];
+      if ( histo == NULL ) cout << name << " is null" << endl;
       return histo->GetBinContent( histo->GetXaxis()->FindBin(x) );
     }
   } th1fmap;
@@ -913,8 +914,10 @@ public:
   virtual bool muon_veto(int jetCand,float muPtCut);
   virtual bool muTightID(int) = 0;
   virtual bool muLooseID(int) = 0;
+  vector<int> photon_tightID(int jetCand,float phoPtCut);
   vector<int> photon_looseID(int jetCand,float phoPtCut);
   virtual bool photon_veto(int jetCand,float phoPtCut);
+  virtual bool phoTightID(int) = 0;
   virtual bool phoLooseID(int) = 0;
   vector<int> tau_looseID(int jetCand,float tauPtCut);
   virtual bool tau_veto(int jetCand,float tauPtCut);

@@ -44,6 +44,9 @@ const float muTightEtaCut = 2.4;
 const float muLoosePtCut = 10;
 const float muLooseEtaCut = 2.4;
 
+const float phoTightPtCut = 25.0;
+const float phoTightEtaCut = 1.4442;
+
 const float phoLoosePtCut = 15;
 const float phoLooseEtaCut = 2.4;
 
@@ -60,6 +63,9 @@ const float pfMET50Cut = 50;
 
 /* Single Muon CR Floating Cuts */
 const float lepMETMtCut = 160;
+
+/* Gamma CR Floating Cuts */
+const float phoPt175Cut = 175;
 
 /* Double Lepton CR Floating Cuts */
 const float diLeptonMassCutLow = 60;

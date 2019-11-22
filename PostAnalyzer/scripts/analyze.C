@@ -95,6 +95,9 @@ int setup_test(int argc, const char* argv[]) {
     mcdir = dataset.getDirlist("dyjets","400to600")[0];
     if ( ZprimeClass::REGION == "DoubleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
     if ( ZprimeClass::REGION == "DoubleMuCR"  ) datadir = dataset.getSubset("met").begin()->second[0];
+  } else if ( ZprimeClass::REGION == "GammaCR" ) {
+    mcdir = dataset.getDirlist("gjets","400to600")[0];
+    datadir = dataset.getSubset("egamma").begin()->second[0];
   }
   int mc = run_mc_test(mcdir,argv);
   int data = run_data_test(datadir,argv);
