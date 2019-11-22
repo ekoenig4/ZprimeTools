@@ -28,6 +28,7 @@ public:
   virtual bool muTightID(int);
   virtual bool muLooseID(int);
   virtual bool tauLooseID(int);
+  virtual bool phoTightID(int);
   virtual bool phoLooseID(int);
   virtual bool jetSelectionID(int);
   virtual bool bjetSelectionID(int);
