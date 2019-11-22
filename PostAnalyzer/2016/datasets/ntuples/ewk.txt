@@ -1,8 +1,0 @@
->>WW
-/hdfs/store/user/uhussain/Zprime_Ntuples_May2018/WW_TuneCUETP8M1_13TeV-pythia8/crab_WW/180528_145942/0000/
-
->>WZ
-/hdfs/store/user/uhussain/Zprime_Ntuples_May2018/WZ_TuneCUETP8M1_13TeV-pythia8/crab_WZ/180528_145957/0000/
-
->>ZZ
-/hdfs/store/user/uhussain/Zprime_Ntuples_May2018/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ/180528_150012/0000/
