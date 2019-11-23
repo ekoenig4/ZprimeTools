@@ -35,7 +35,7 @@
 /hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx10_Mv10000/
 
 >>Mx50_Mv10
-/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx50_Mv10_TuneCP5_13TeV_madgraph/
+/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx50_Mv10_TuneCP5_13TeV_madgraph/crab_job_MonoZprime_V_Mx50_Mv10/191008_003511/0000/
 
 >>Mx50_Mv50
 /hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx50_Mv50/
@@ -65,7 +65,7 @@
 /hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx150_Mv500/
 
 >>Mx150_Mv1000
-/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx150_Mv1000_TuneCP5_13TeV_madgraph/
+/hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx150_Mv1000_TuneCP5_13TeV_madgraph/crab_job_MonoZprime_V_Mx150_Mv1000/191008_003259/0000/
 
 >>Mx150_Mv10000
 /hdfs/store/user/varuns/monoZprimeMC2018/MonoZprime_V_Mx150_Mv10000/

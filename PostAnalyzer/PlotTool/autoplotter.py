@@ -10,5 +10,13 @@ args = parser.parse_args()
 region = os.getcwd().split('/')[-1]+'/'
 nhist = config['regions'][region]
 variables = args.argv
-variables += [ '%s_%s' % (variable,int(nhist)) for variable in args.nhist ]
+
+def getVariable(variable,nhist):
+    cut = ''
+    if '+' in variable: cut = '+'+variable.split('+')[-1]
+    if '-' in variable: cut = '-'+variable.split('-')[-1]
+    varname = variable.replace('>','+').replace('<','-')
+    variable = variable.replace(cut,'')
+    return variable+'_'+nhist+cut.replace('+','>').replace('-','<')
+variables += [ getVariable(variable,nhist) for variable in args.nhist ]
 plotter(variables)

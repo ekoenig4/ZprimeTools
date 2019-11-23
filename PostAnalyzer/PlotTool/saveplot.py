@@ -24,7 +24,7 @@ def GetZWLinking(rfile):
     keylist = [ key.GetName().replace('WJets','ZWlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
     wjet_norm = gDirectory.Get('WJets')
     zjet_norm = gDirectory.Get('ZJets')
-    lhistos['ZWlink'] = GetRatio(wjet_norm,zjet_norm).Clone('ZWlink')
+    lhistos['ZWlink'] = GetRatio(zjet_norm,wjet_norm).Clone('ZWlink')
     for key in keylist:
         wkey = '%s_WJets' % key; zkey = '%s_ZJets' % key
         wjet_unc = gDirectory.Get(key.replace('ZWlink','WJets'))

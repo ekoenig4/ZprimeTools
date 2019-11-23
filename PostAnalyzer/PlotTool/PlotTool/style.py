@@ -15,16 +15,44 @@ def GetNDCx(userx):
     gPad.Update(); #this is necessary!
     return (userx - gPad.GetX1())/(gPad.GetX2()-gPad.GetX1());
 class Box:
-    def __init__(self,ndcx1,ndcy1,ndcx2,ndcy2):
-        self.ndcx1 = ndcx1
-        self.ndcx2 = ndcx2
-        self.ndcy1 = ndcy1
-        self.ndcy2 = ndcy2
-    def userx1(self): return GetUserx(self.ndcx1)
-    def userx2(self): return GetUserx(self.ndcx2)
-    def usery1(self): return pow(10,GetUsery(self.ndcy1))
-    def usery2(self): return pow(10,GetUsery(self.ndcy2))
+    def __init__(self,xmin=None,ymin=None,xmax=None,ymax=None,x=None,y=None,w=None,h=None):
+        if xmin is not None: self.x1 = xmin;
+        if xmax is not None: self.x2 = xmax;
+        if ymin is not None: self.y1 = ymin;
+        if ymax is not None: self.y2 = ymax;
 
+        if x is not None and w is not None:
+            self.x1 = x + w/2.0
+            self.x2 = x - w/2.0
+        if y is not None and h is not None:
+            self.y1 = y + h/2.0
+            self.y2 = y - h/2.0
+    def userx1(self): return GetUserx(self.x1)
+    def userx2(self): return GetUserx(self.x2)
+    def usery1(self): return GetUsery(self.y1)
+    def usery2(self): return GetUsery(self.y2)
+    def userlogy1(self): return pow(10,self.usery1())
+    def userlogy2(self): return pow(10,self.usery2())
+    def __str__(self): return '(%f,%f) - (%f,%f)' % (self.x1,self.y1,self.x2,self.y2)
+
+def SetYBounds(histos):
+    nbins = histos[0].GetNbinsX()
+    xaxis = histos[0].GetXaxis()
+    min_array = [ min(hs[ibin] for hs in histos) for ibin in range(1,nbins+1) ]
+    max_array = [ max(hs[ibin] for hs in histos) for ibin in range(1,nbins+1) ]
+    
+    for ibin,(ymin,ymax) in enumerate(zip(min_array,max_array)):
+        xval = xaxis.GetBinCenter(ibin)
+        for box in boundaries:
+            if box.userx1() < xval and xval < box.userx2():
+                tmp = ymax/box.usery1()
+                scale = max(scale,tmp)
+
+    min_y = min(min_array)
+    max_y = max(max_array)
+    for hs in histos:
+        hs.GetYaxis().SetRangeUser(0.8*min_y,scale*max_y)
+    
 def DataStyle(hs_data):
     hs_data.SetLineWidth(2)
     hs_data.SetLineColor(kWhite);
@@ -71,18 +99,24 @@ def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
 ###################################################################
 
 def getCMSText(lumi,year):
-    texS = TLatex(0.62,0.907173,("%s (13 TeV, %s)" % (lumi,year)));#VS
+    global boundaries
+    x1,y1 = 0.62,0.907173
+    texS = TLatex(x1,y1,("%s (13 TeV, %s)" % (lumi,year)));#VS
     texS.SetNDC();
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.15,0.837173,"#bf{CMS} #it{Preliminary}"); 
+    box1 = Box(x=x1,y=y1,w=texS.GetXsize(),h=texS.GetYsize())
+
+    x2,y2 = 0.15,0.837173
+    texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}"); 
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
     texS1.Draw();
-    store.append(texS)
-    store.append(texS1)
+    box2 = Box(x=x2,y=y2,w=texS1.GetXsize(),h=texS1.GetYsize())
+
+    boundaries += [box1,box2]
     return texS,texS1
 ###################################################################
 
@@ -171,5 +205,6 @@ def makeYaxis(ymin,ymax,xmin,ndiv,name=None):
     yaxis.SetTitleSize(0.12);
     yaxis.SetTitleOffset(0.35);
     yaxis.SetNdivisions(4)
+    yaxis.CenterTitle()
     return yaxis
 ###################################################################
