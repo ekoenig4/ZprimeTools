@@ -122,7 +122,7 @@ bool ZprimeYear::muLooseID(int imu) {
 }
 
 bool ZprimeYear::phoLooseID(int ipho) {
-  return (phoIDbit->at(ipho)>>0&1) == 1;
+  return (phoIDbit->at(ipho)>>0&1) == 1 && phoEleVeto->at(ipho);
 }
 
 bool ZprimeYear::tauLooseID(int itau) {
