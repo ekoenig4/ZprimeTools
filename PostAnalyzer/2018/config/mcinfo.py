@@ -12,13 +12,13 @@ lumi_by_era = {"SingleEleCR":{"A":14024,"B":7061,"C":6895,"D":31720},
                "DoubleMuCR":{"A":14024,"B":7061,"C":6895,"D":31720},
                "SignalRegion":{"A":3506}}
 
-WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW2500toInf"]
+WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
 
 GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
 
-DYJets_FileNames = ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200"]
+DYJets_FileNames = ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"]
 
 TTJets_FileNames = ["postTTJetsDiLept"];#"postTTJets_MLM"
 

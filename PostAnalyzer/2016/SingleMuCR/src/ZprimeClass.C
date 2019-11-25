@@ -102,7 +102,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		  h_metcut->Fill(metcut,event_weight);
 		  
 		  if(metcut < metRatioCut) { // metcut < 0.5
-		    cutflow->Fill("caloMET Cut",event_weight);
+		    cutflow->Fill("caloMETCut",event_weight);
 		    fillHistos(8,event_weight);
 		    
 		    if(bjet_veto(lepindex)) {
