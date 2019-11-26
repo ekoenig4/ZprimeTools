@@ -135,8 +135,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	JetEnergyScale(weightNorm);
       }
     }
-
-    JetEnergyScale(weightNorm); // 2 Histograms
     
     if (jentry%reportEvery == 0)
       cout<<"Finished entry "<<jentry<<"/"<<(nentriesToCheck-1)<<endl;
@@ -228,7 +226,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
     //CR Variables
     lepindex = -1;
     recoil = -99;
-	
+        
     if(jetCand.size()>0) {
       //CR code
       //At least one of the one electrons passes the tight selection
@@ -236,9 +234,7 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
       vector<int> looseMus = muon_looseID(jetindex,muLoosePtCut);
 	  
       if( CRSelection(mulist,looseMus) ) {
-	if (!sample.isData) {
-	  event_weight *= getSF(lepindex);
-	}
+	if (!sample.isData) event_weight *= getSF(lepindex);
 	    
 	if (recoil > recoilCut) {
 	  bool eleVeto = electron_veto(jetindex,lepindex,eleLoosePtCut);
@@ -260,7 +256,6 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		      
 		  if(minDPhiJetMET_first4 > dPhiJetMETCut) {
 
-			
 		    if( getEleHEMVeto(eleHEMVetoPtCut) ) {
 		      weight = event_weight;
 		      if (unc == 1)  shapeUncs.fillUp(uncname);// up
