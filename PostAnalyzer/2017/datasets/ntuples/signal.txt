@@ -25,6 +25,9 @@
 >>Mx1_Mv10000
 /hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2017/Signal_Fall17_Nov2019/MonoZprime_V_Mx1_Mv10000_TuneCP5_13TeV_madgraph/crab_job_Mx1_Mv10000/191118_183448/0000/
 
+>>Mx10_Mv10
+/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2017/Signal_Fall17_Nov2019/MonoZprime_V_Mx10_Mv10_TuneCP5_13TeV_madgraph/crab_job_Mx10_Mv10/191118_183047/0000/
+
 >>Mx10_Mv15
 /hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2017/Signal_Fall17_Nov2019/MonoZprime_V_Mx10_Mv15_TuneCP5_13TeV_madgraph/crab_job_Mx10_Mv15/191118_183111/0000/
 
