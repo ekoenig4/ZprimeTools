@@ -228,6 +228,7 @@ class Process(object):
         self.histo = None
         self.raw_total = 0
         self.scaled_total = 0
+        self.nuisances = {}
         
         self.isGlobal = False
         self.isNhisto = False
@@ -264,3 +265,27 @@ class Process(object):
         else:
             self.nuisances[nuisance].pop('Up')
             self.nuisances[nuisance].pop('Down')
+    def fullUnc(self):
+        if not self.isBranch: return
+        if self.proctype != 'bkg': return
+        up = self.b_template.Clone('%s_totalUp' % self.name)
+        dn = self.b_template.Clone('%s_totanDown' % self.name)
+        norm = self.histo
+        for ibin in range(1,self.b_template.GetNbinsX()+1):
+            up[ibin] = 0; dn[ibin] = 0;
+            for nuisance in self.nuisances:
+                if norm[ibin] == 0: continue
+                tmpUp = abs(norm[ibin] - self.nuisances[nuisance]['Up'][ibin])/norm[ibin]
+                tmpDn = abs(norm[ibin] - self.nuisances[nuisance]['Down'][ibin])/norm[ibin]
+                if tmpUp == tmpDn: continue
+                binUp = max(tmpUp,tmpDn)
+                binDn = min(tmpUp,tmpDn)
+
+                up[ibin] = up[ibin] + binUp**2
+                dn[ibin] = dn[ibin] + binDn**2
+            up[ibin] = norm[ibin]*(1+TMath.Sqrt(up[ibin]))
+            dn[ibin] = norm[ibin]*(1-TMath.Sqrt(dn[ibin]))
+        self.nuisances['Total'] = {'Up':up,'Down':dn}
+                
+                    
+                

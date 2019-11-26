@@ -114,8 +114,13 @@ def plotVariable(samples,variable):
 
     rymin = 0.65; rymax = 1.35
     RatioStyle(Ratio,rymin,rymax)
-    Ratio.Draw("pex0");
-    
+    Ratio.Draw("A");
+
+    if any( samples.nuisances ):
+        uncband = samples.getUncBand()
+        UncBandStyle(uncband)
+        uncband.Draw('2same')
+    Ratio.Draw('pex0same')
     line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");
 

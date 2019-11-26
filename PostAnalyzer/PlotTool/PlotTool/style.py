@@ -79,6 +79,12 @@ def MCStyle(hs_mc,color):
     hs_mc.SetFillColor(color);
 ###################################################################
 
+def UncBandStyle(uncband):
+    uncband.SetTitle("")
+    uncband.SetFillStyle(3144)
+    uncband.SetFillColor(kGray+2)
+###################################################################
+
 def fillStack(samples,hs_datamc):
     order = [ process for name,process in samples.processes.iteritems() if process.proctype == 'bkg' ]
     if (samples.name == "Cutflow"):
