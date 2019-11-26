@@ -342,7 +342,7 @@ class datamc(object):
     ###############################################################################################################
 
     def getUncBand(self):
-        if 'Total' not in self.nuisances: self.fullUnc(show=True)
+        if 'Total' not in self.nuisances: self.fullUnc(show=False)
         data = self.processes['Data'].histo
         bkgUp = self.nuisances['Total']['Up']
         bkgDn = self.nuisances['Total']['Down']
