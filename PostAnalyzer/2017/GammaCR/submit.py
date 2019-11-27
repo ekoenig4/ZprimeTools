@@ -12,12 +12,12 @@ options['parallel'] = True
 options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
-submit('egamma',label='Gamma_',filelist=True)
-submit('wjets')
-submit('zjets')
-submit('qcd')
-submit('ttjets')
-submit('gjets')
-submit('ewk')
-submit('dyjets')
+submit('singlepho',label='Gamma_',filelist=True)
+# submit('wjets')
+# submit('zjets')
+# submit('qcd')
+# submit('ttjets')
+# submit('gjets')
+# submit('ewk')
+# submit('dyjets')
 

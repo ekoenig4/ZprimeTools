@@ -20,9 +20,7 @@ def fullpath(path):
     return dirs
 
 def getSub(sub):
-    from re import compile
-    pattern = compile(r'Mx\d*_Mv\d*')
-    return pattern.findall(sub)[0]
+    return sub.split('2017')[-1]
     
 def build_dataset(data,path):
     data = data.lower()
@@ -44,5 +42,4 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    if data == 'monoZprimeMC2018':
-        build_dataset(data,os.path.join(directory,data))
+    build_dataset(data,os.path.join(directory,data))

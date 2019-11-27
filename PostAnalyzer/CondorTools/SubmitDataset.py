@@ -3,7 +3,7 @@ import sys
 from multiprocessing import Process
 import SubmitCondor
 from dataset import getDataset
-labelmap = { 'dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','ttjets':'TTJets','wjets':'W','zjets':'Z','met':'METdata_','egamma':'EGdata_','signal':'' }
+labelmap = { 'dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','ttjets':'TTJets','wjets':'W','zjets':'Z','met':'METdata_','egamma':'EGdata_','singleele':'SEdata_','singlepho':'SPdata_','signal':'' }
 
 options = {
     'year':None,
