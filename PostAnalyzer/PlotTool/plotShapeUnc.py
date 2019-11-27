@@ -243,7 +243,7 @@ def runRegion(args):
     print 'Running for %s' % nvariable
     sample.initiate(nvariable)
    
-    variations = variations[6:] 
+    variations = variations 
     if sample.region == 'SignalRegion':
         for uncname in variations: plotSRUnc(sample,uncname)
     else:

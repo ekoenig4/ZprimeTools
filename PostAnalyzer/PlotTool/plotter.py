@@ -62,13 +62,9 @@ def plotVariable(samples,variable):
     ymin_s=pow(10,-6);ymax_s=pow(10,2.5);
     ymin = 0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*ymin_s
     ymax = hs_datamc.GetMaximum()*ymax_s
-    if samples.args.mc_solid:
-        hs_bkg = hs_datamc.GetStack().Last()
-        hs_bkg.Draw("hist")
-        StackStyle(hs_bkg,ymin,ymax)
-    else:
-        hs_datamc.Draw("hist")
-        StackStyle(hs_datamc,ymin,ymax)
+    hs_bkg = hs_datamc.GetStack().Last()
+    if samples.args.mc_solid:hs_bkg.Draw("hist")
+    else:                    hs_datamc.Draw("hist")
         
     data.histo.Draw('pex0same')
     
@@ -101,6 +97,10 @@ def plotVariable(samples,variable):
     texLumi.Draw();
     texCMS.Draw();
 
+    
+    if samples.args.mc_solid:StackStyle(hs_bkg)
+    else:                    StackStyle(hs_datamc)
+
     c.cd();
     pad2 = TPad("pad2","pad2",0.01,0.01,0.99,0.25);
     pad2.Draw(); pad2.cd();
@@ -110,12 +110,17 @@ def plotVariable(samples,variable):
 
     ######################################
 
-    Ratio = GetRatio(data.histo,hs_datamc.GetStack().Last())
+    Ratio = GetRatio(data.histo,hs_bkg)
 
     rymin = 0.65; rymax = 1.35
     RatioStyle(Ratio,rymin,rymax)
-    Ratio.Draw("pex0");
-    
+    Ratio.Draw("A");
+
+    if any( samples.nuisances ):
+        uncband = samples.getUncBand()
+        UncBandStyle(uncband)
+        uncband.Draw('2same')
+    Ratio.Draw('pex0same')
     line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");
 
@@ -133,7 +138,7 @@ def plotVariable(samples,variable):
     xaxis = makeXaxis(xmin,xmax,rymin,510,name=xname);
     xaxis.Draw("SAME");
 
-    if (samples.name == "Cutflow"): XaxisCutflowStyle(xaxis,hs_datamc)
+    if (samples.name == "Cutflow"): XaxisCutflowStyle(xaxis,hs_bkg)
       
 
     yaxis = makeYaxis(rymin,rymax,xmin,6,name="Data/MC");

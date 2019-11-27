@@ -1,7 +1,10 @@
-from ROOT import *
+from ROOT import TH1F
 from array import array
+import numpy as np
+def linspace(xmin,xmax,nx): return list(np.linspace(xmin,xmax,nx+1))
 
-def percentBinning(nbins=20):
+def percentBinning(arg,sample):
+    nbins = int(arg.replace('perc',''))
     if nbins == 10:
         bins = array('f',[0, 0.33487558364868164, 0.4118022918701172, 0.4752994775772095, 0.5325630903244019, 0.5877697467803955, 0.6420815587043762, 0.6980608105659485, 0.7570456862449646, 0.8272378444671631, 1.1] )
     elif nbins == 20:
@@ -12,12 +15,55 @@ def percentBinning(nbins=20):
         bins = array('f',[0, 0.23924162983894348, 0.2809852957725525, 0.31024056673049927, 0.3348769545555115, 0.3565257787704468, 0.3758702874183655, 0.39489343762397766, 0.41180410981178284, 0.4283630847930908, 0.44431108236312866, 0.46008819341659546, 0.4752994775772095, 0.4898572564125061, 0.5040220022201538, 0.5183907747268677, 0.5325657725334167, 0.5464531183242798, 0.5604209899902344, 0.5741685628890991, 0.5877729058265686, 0.6011970639228821, 0.614918053150177, 0.6285155415534973, 0.6420839428901672, 0.655813992023468, 0.6698312163352966, 0.6839112043380737, 0.698074460029602, 0.7122794389724731, 0.7268199920654297, 0.7416467070579529, 0.7570573091506958, 0.7729695439338684, 0.7896040081977844, 0.8075507879257202, 0.827260434627533, 0.8487527966499329, 0.8742923140525818, 0.9082523584365845, 1.1] )
     else: return None
     return TH1F('treevar','',nbins,bins)
-
-def inclusiveBinning(nbins=50):
+def AddOverflow(hs):
+    nbins = hs.GetNbinsX()
+    overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
+    hs.SetBinContent(nbins,overflow)
+    return
+def inclusiveBinning(arg,sample):
+    nbins = int(arg.replace('incl',''))
     hs = TH1F('treevar','',nbins,0,1)
-    def AddOverflow(hs):
-        nbins = hs.GetNbinsX()
-        overflow = hs.GetBinContent(nbins) + hs.GetBinContent(nbins+1)
-        hs.SetBinContent(nbins,overflow)
     hs.post = AddOverflow
     return hs
+
+def inclusiveCutBinning(arg,sample):
+    nbins = arg.replace('incu','')
+    cut = sample.cut
+    hs = inclusiveBinning(nbins,sample)
+    if '>' in cut:
+        lim = float(cut.replace('>',''))
+        bmin = hs.GetXaxis().FindBin(lim); bmax = hs.GetNbinsX()
+
+    binlist = array('d',[ hs.GetXaxis().GetBinLowEdge(ibin) for ibin in range(bmin,bmax+2) ])
+    hs = hs.Rebin(len(binlist)-1,'treevar',binlist)
+    return hs
+
+def customBinV1(arg,sample):
+    bins = array('d',linspace(0,0.2,2)+ linspace(0.2,0.7,10) + linspace(0.7,1.0,12));
+    hs = TH1F("treevar","",len(bins)-1,bins)
+    hs.post = AddOverflow
+    return hs
+
+def customBinV2(arg,sample):
+    bins = linspace(0,1,35)
+    del bins[1:4]
+    bins = array('d',bins)
+    hs = TH1F('treevar','',len(bins)-1,bins)
+    hs.post = AddOverflow
+    return hs
+    
+
+def gradualBinning(arg,sample):
+    bins = array('d',linspace(0,0.2,2)+linspace(0.2,0.4,6)+linspace(0.4,0.6,7)+linspace(0.6,0.8,8)+linspace(0.8,1.0,9))
+    hs = TH1F('treevar','',len(bins)-1,bins)
+    hs.post = AddOverflow
+    return hs
+    
+binninglist = {
+    'perc':percentBinning,
+    'incl':inclusiveBinning,
+    'incu':inclusiveCutBinning,
+    'cuv1':customBinV1,
+    'grad':gradualBinning,
+    'cuv2':customBinV2
+}

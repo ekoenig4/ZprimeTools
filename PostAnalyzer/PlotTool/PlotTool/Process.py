@@ -39,10 +39,9 @@ def GetBranch(b_template,b_variable,tree,weight,cut):
     if not tree.GetListOfBranches().Contains(weight): weight = 'weight'
     if cut == '': tree.Draw('%s>>%s' % (b_variable,b_name),weight,'goff')
     else:         tree.Draw('%s>>%s' % (b_variable,b_name),'%s*(%s%s)' % (weight,b_variable,cut),'goff')
-    histo.SetDirectory(0)
+    
     return histo
 def GetNuisanceList(tfile,dirname):
-    return {}
     tdir = tfile.GetDirectory(dirname)
     shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
     tree = tdir.Get('norm')
@@ -84,7 +83,6 @@ class SubProcess(object):
     def getNhisto(self,variable):
         self.tfile.cd()
         hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
-        hs.SetDirectory(0)
         self.histo = hs
     def getBranch(self,b_template,b_variable,treename,weight,cut):
         self.tfile.cd()
@@ -230,6 +228,7 @@ class Process(object):
         self.histo = None
         self.raw_total = 0
         self.scaled_total = 0
+        self.nuisances = {}
         
         self.isGlobal = False
         self.isNhisto = False
@@ -255,7 +254,7 @@ class Process(object):
             for subprocess in self:
                 histo.Add(subprocess.nuisances[nuisance][variation])
                 subprocess.nuisances[nuisance].pop(variation)
-            histo.SetDirectory(0)
+            
             self.nuisances[nuisance][variation] = histo
     def removeUnc(self,nuisance):
         if nuisance not in self.nuisances: return
@@ -266,3 +265,27 @@ class Process(object):
         else:
             self.nuisances[nuisance].pop('Up')
             self.nuisances[nuisance].pop('Down')
+    def fullUnc(self):
+        if not self.isBranch: return
+        if self.proctype != 'bkg': return
+        up = self.b_template.Clone('%s_totalUp' % self.name)
+        dn = self.b_template.Clone('%s_totanDown' % self.name)
+        norm = self.histo
+        for ibin in range(1,self.b_template.GetNbinsX()+1):
+            up[ibin] = 0; dn[ibin] = 0;
+            for nuisance in self.nuisances:
+                if norm[ibin] == 0: continue
+                tmpUp = abs(norm[ibin] - self.nuisances[nuisance]['Up'][ibin])/norm[ibin]
+                tmpDn = abs(norm[ibin] - self.nuisances[nuisance]['Down'][ibin])/norm[ibin]
+                if tmpUp == tmpDn: continue
+                binUp = max(tmpUp,tmpDn)
+                binDn = min(tmpUp,tmpDn)
+
+                up[ibin] = up[ibin] + binUp**2
+                dn[ibin] = dn[ibin] + binDn**2
+            up[ibin] = norm[ibin]*(1+TMath.Sqrt(up[ibin]))
+            dn[ibin] = norm[ibin]*(1-TMath.Sqrt(dn[ibin]))
+        self.nuisances['Total'] = {'Up':up,'Down':dn}
+                
+                    
+                

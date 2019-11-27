@@ -5,7 +5,6 @@ from sys import argv,path
 from PlotTool import *
 from os import system,getcwd,path,mkdir
 from config import config,lumi as mc,version
-from optparse import OptionParser
 
 gROOT.SetBatch(1)
 
@@ -25,7 +24,7 @@ def GetZWLinking(rfile):
     keylist = [ key.GetName().replace('WJets','ZWlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
     wjet_norm = gDirectory.Get('WJets')
     zjet_norm = gDirectory.Get('ZJets')
-    lhistos['ZWlink'] = GetRatio(wjet_norm,zjet_norm).Clone('ZWlink')
+    lhistos['ZWlink'] = GetRatio(zjet_norm,wjet_norm).Clone('ZWlink')
     for key in keylist:
         wkey = '%s_WJets' % key; zkey = '%s_ZJets' % key
         wjet_unc = gDirectory.Get(key.replace('ZWlink','WJets'))
@@ -89,7 +88,8 @@ def saveplot(variable):
         sumOfBkg = norm.getSumOfBkg()
         sumOfBkg.SetName('sumOfBkg')
         sumOfBkg.Write()
-        data_obs = norm.getSumOfBkg()
+        if region == 'SignalRegion/': data_obs = norm.getSumOfBkg()
+        else:                         data_obs = norm.processes['Data'].histo
         data_obs.SetName('data_obs')
         data_obs.Write()
         for sample in norm.SampleList:
@@ -133,6 +133,8 @@ def saveplot(variable):
     year_hs.SetBinContent(1,int(norm.version))
     year_hs.Write()
     var_hs = TH1F("variable",variable+';'+norm.name,1,0,1)
+    var_hs = sumOfBkg.Clone('variable')
+    var_hs.Reset(); var_hs.SetTitle(variable); var_hs.GetXaxis().SetTitle(norm.name);
     var_hs.Write()
     rfile.Close()
 ################################################################################

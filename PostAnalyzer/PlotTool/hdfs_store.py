@@ -7,12 +7,17 @@ hdfs_base = '/hdfs/store/user/ekoenig/MonoZprimeJet/PostFiles/'
 
 valid_years = ['2016','2017','2018']
 valid_regions = ['SignalRegion','SingleEleCR','SingleMuCR','DoubleEleCR','DoubleMuCR']
-    
+
+options = {
+  "confirm":False
+}
+
+def confirm_all(): options["confirm"] = True; return option["confirm"]    
+def valid_ans(ans): return ans == 'y' or ans == 'Y' or options["confirm"]
 def valid_hdfs(directory):
     if not os.path.isdir(hdfs_base): raise ValueError("%s is not a valid hdfs base" % hdfs_base)
     subdirectories = directory.split('/')
     def build_directory(directory):
-        def valid_ans(ans): return ans == 'y' or ans == 'Y'
         if not os.path.isdir(directory):
             ans = raw_input("%s not found, do you want to make it (y/Y)? " % directory)
             if valid_ans(ans): os.mkdir(directory)
