@@ -1,6 +1,6 @@
 config = {
     'year':2017,
-    'regions':{'SignalRegion/':'8','DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'11','SingleMuCR/':'10'},
+    'regions':{'SignalRegion/':'8','DoubleEleCR/':'10','DoubleMuCR/':'10','SingleEleCR/':'11','SingleMuCR/':'10','GammaCR/':'10'},
     'Uncertainty':{
         'PFU': [ # ID is relative to the regions basic histogram number
             # 'PFU_tracker',

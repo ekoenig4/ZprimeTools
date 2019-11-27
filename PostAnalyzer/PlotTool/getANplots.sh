@@ -3,6 +3,7 @@
 nvariables='recoil nJets j1pT j1Eta j1Phi nVtx'
 singleleps='LeptonPt LeptonEta'
 doubleleps='dileptonM dileptonPt leadingLeptonPt leadingLeptonEta subleadingLeptonEta subleadingLeptonPt'
+gamma='PhotonEt PhotonEta'
 
 options=$@
 
@@ -19,3 +20,4 @@ run SingleEleCR $singleleps
 run SingleMuCR $singleleps
 run DoubleEleCR $doubleleps
 run DoubleMuCR $doubleleps
+run GammaCR $gamma

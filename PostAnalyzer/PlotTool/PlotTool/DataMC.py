@@ -68,8 +68,9 @@ class datamc(object):
         SingleMuData_FileNames = "postSingleMu";
         DoubleEleData_FileNames = "postDoubleEle";
         DoubleMuData_FileNames = "postDoubleMu";
+        GammaData_FileNames = "postGamma";
 
-        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEleCR":SingleEleData_FileNames,"SingleMuCR":SingleMuData_FileNames,"DoubleEleCR":DoubleEleData_FileNames,"DoubleMuCR":DoubleMuData_FileNames}
+        self.Data_FileNames = {"SignalRegion":SignalData_FileNames,"SingleEleCR":SingleEleData_FileNames,"SingleMuCR":SingleMuData_FileNames,"DoubleEleCR":DoubleEleData_FileNames,"DoubleMuCR":DoubleMuData_FileNames,"GammaCR":GammaData_FileNames}
         
         self.Data_FileName = self.Data_FileNames[self.region]
         #List of Sample Files
