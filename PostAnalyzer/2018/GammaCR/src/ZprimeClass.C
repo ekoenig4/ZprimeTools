@@ -111,10 +111,16 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 		      
 		      if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
 			cutflow->Fill("DeltaPhiCut",event_weight);
-
-			QCDVariations(event_weight);
 			fillHistos(10,event_weight);
-			PFUncertainty(event_weight);
+
+			if ( getEleHEMVeto(eleHEMVetoPtCut ) ) {
+			  cutflow->Fill("EleHEMVeto",event_weight);
+			  
+			  QCDVariations(event_weight);
+			  fillHistos(11,event_weight);
+			  PFUncertainty(event_weight);
+			
+			}
 		      }
 		    }
 		  }
@@ -138,7 +144,7 @@ void ZprimeClass::BookHistos(const char* outputFilename) {
   output = new TFile(outputFilename, "RECREATE");
   output->cd();
 
-  cutflow = new Cutflow( {"Total Events","metFilters","Trigger","GoodJet","CRSelection","phoPt175","leptoMetCut","LeptonVeto","caloMETCut","B-JetVeto","DeltaPhiCut"});
+  cutflow = new Cutflow( {"Total Events","metFilters","Trigger","GoodJet","CRSelection","phoPt175","leptoMetCut","LeptonVeto","caloMETCut","B-JetVeto","DeltaPhiCut","EleHEMVeto"});
 
   BookHistos(-1,"");
   for(int i = 0; i<nHisto; i++) {
@@ -248,9 +254,12 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
 		  float minDPhiJetMET_first4 = dPhiJetMETmin(jetveto,recoilPhi);
 		      
 		  if(minDPhiJetMET_first4 > dPhiJetMETCut) { // min(dPhi) > 0.5
-		    weight = event_weight;
-		    if (unc == 1)  shapeUncs.fillUp(uncname);// up
-		    if (unc == -1) shapeUncs.fillDn(uncname);// down
+		    
+		    if ( getEleHEMVeto(eleHEMVetoPtCut ) ) {
+		      weight = event_weight;
+		      if (unc == 1)  shapeUncs.fillUp(uncname);// up
+		      if (unc == -1) shapeUncs.fillDn(uncname);// down
+		    }
 		  }
 		}   
 	      }	

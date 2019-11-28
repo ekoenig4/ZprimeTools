@@ -6,7 +6,7 @@ repo = '%s/src/ZprimeTools/PostAnalyzer/' % cmssw
 sys.path.append(repo)
 
 from CondorTools.SubmitDataset import submit,options
-options['year'] = '2017'
+options['year'] = '2018'
 options['region'] = 'GA'
 options['parallel'] = True
 options['batchsize'] = 100
