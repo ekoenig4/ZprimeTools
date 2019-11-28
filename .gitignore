@@ -6,4 +6,4 @@ nohup.out
 .output
 post*.root
 test
-Systematics
+SystematicsOutput/
