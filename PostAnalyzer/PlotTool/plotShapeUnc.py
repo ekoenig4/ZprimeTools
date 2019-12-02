@@ -7,7 +7,16 @@ from config import config
 gROOT.SetBatch(1)
 
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
-
+def SaveCanvas(c,sample,uncname):
+    nhist = config['regions'][sample.region+'/']
+    variable = sample.variable.replace('_%s' % nhist,'')
+    varname = sample.varname.replace('_%s' % nhist,'')
+    outdir = out_dir % sample.version
+    outdir = "%s/%sPlots_EWK/UncertaintyPlots/%s"  % (outdir,sample.region,variable)
+    if not os.path.isdir(outdir): os.mkdir(outdir)
+    
+    outname = "%s_%s" % (uncname,varname)
+    c.SaveAs( "%s/%s.png" % (outdir,outname) )
 def plotCRUnc(sample,uncname):
     print 'Fetching %s' % uncname
     sample.addUnc(uncname)
@@ -35,7 +44,7 @@ def plotCRUnc(sample,uncname):
     pad1.SetBottomMargin(0.);
 
     ymax = max( h.GetMaximum() for h in (norm,up,dn) ) * pow(10,2.5)
-    ymin = ymax * pow(10,-6)
+    ymin = 0.05
 
     for h in (up,dn): h.SetLineStyle(2)
     for h in (norm,up,dn):
@@ -107,13 +116,8 @@ def plotCRUnc(sample,uncname):
 
     yaxis = makeYaxis(rymin,rymax,xmin,6,name="syst./cent.");
     yaxis.Draw("SAME");
-    
-    outdir = out_dir % sample.version
-    outdir = "%s/%sPlots_EWK/UncertaintyPlots/"  % (outdir,sample.region)
-    if not os.path.isdir(outdir): os.mkdir(outdir)
-    
-    outname = "%s_%s" % (uncname,sample.varname)
-    c.SaveAs( "%s/%s.png" % (outdir,outname) )
+
+    SaveCanvas(c,sample,uncname)
     sample.removeUnc(uncname)
     
 def plotSRUnc(sample,uncname):
@@ -148,7 +152,7 @@ def plotSRUnc(sample,uncname):
     pad1.SetBottomMargin(0.);
 
     ymax = max( h.GetMaximum() for h in (z_norm,w_norm,z_up,z_dn,w_up,w_dn) ) * pow(10,2.5)
-    ymin = ymax * pow(10,-6)
+    ymin = 0.05
 
     z_norm.SetLineColor(kRed)
     for h in (z_up,z_dn): h.SetLineStyle(2); h.SetLineColor(kRed)
@@ -224,19 +228,19 @@ def plotSRUnc(sample,uncname):
 
     yaxis = makeYaxis(rymin,rymax,xmin,6,name="syst./cent.");
     yaxis.Draw("SAME");
-    
-    outdir = out_dir % sample.version
-    outdir = "%s/%sPlots_EWK/UncertaintyPlots/"  % (outdir,sample.region)
-    if not os.path.isdir(outdir): os.mkdir(outdir)
-    
-    outname = "%s_%s" % (uncname,sample.varname)
-    c.SaveAs( "%s/%s.png" % (outdir,outname) )
+
+    SaveCanvas(c,sample,uncname)
     sample.removeUnc(uncname)
 
 def runRegion(args):
     sample = datamc()
     variable = args.argv[0]
-    nvariable = '%s_%s' % (variable, config['regions'][sample.region+'/'])
+    cut = ''
+    if '>' in variable: cut = '>'+variable.split('>')[-1]
+    if '<' in variable: cut = '<'+variable.split('<')[-1]
+    varname = variable.replace('>','+').replace('<','-')
+    variable = variable.replace(cut,'')
+    nvariable = variable+'_'+config['regions'][sample.region+'/']+cut
     variations = []
     for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
 

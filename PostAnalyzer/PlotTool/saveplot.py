@@ -15,7 +15,7 @@ def printVars(obj):
 
 outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
-dir = {"SignalRegion/":"sr","DoubleEleCR/":"ee","DoubleMuCR/":"mm","SingleEleCR/":"e","SingleMuCR/":"m"}
+dir = {"SignalRegion/":"sr","DoubleEleCR/":"ze","DoubleMuCR/":"zm","SingleEleCR/":"we","SingleMuCR/":"wm"}
 
 def GetZWLinking(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
@@ -39,8 +39,8 @@ def GetZWLinking(rfile):
 def GetTransferFactors(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
     tfactors = {'ZJets':{},'WJets':{}}
-    varmap = {'ZJets':{'sample':'DYJets','regions':['ee','mm']},
-              'WJets':{'sample':'WJets' ,'regions':['e','m']}}
+    varmap = {'ZJets':{'sample':'DYJets','regions':['ze','zm']},
+              'WJets':{'sample':'WJets' ,'regions':['we','wm']}}
     for sample,transfer in tfactors.items():
         rfile.cd(); rfile.cd('sr')
         sr = { key.GetName():rfile.Get('sr/%s' % key.GetName()).Clone() for key in gDirectory.GetListOfKeys()
@@ -54,7 +54,7 @@ def GetTransferFactors(rfile):
             for key in cr:
                 cr_hs = cr[key]
                 sr_hs = sr[key]
-                thistos[key] = GetRatio(cr_hs,sr_hs).Clone(key)
+                thistos[key] = GetRatio(sr_hs,cr_hs).Clone(key)
             transfer[region] = thistos
     # Write transfer factor histograms to systematic file
     for sample,transfer in tfactors.iteritems():
@@ -77,8 +77,8 @@ def saveplot(variable):
     lumi = max( lumi for region,lumi in mc.items() )
     for region,nhisto in config['regions'].items():
         rfile.cd()
-        if variable == 'recoil' and region == 'SignalRegion/': variable = 'pfMET'
-        elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'recoil'
+        # if variable == 'recoil' and region == 'SignalRegion/': variable = 'pfMET'
+        # elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'recoil'
         var = variable+'_'+nhisto+cut
         print region,var
         directory = rfile.mkdir(dir[region])

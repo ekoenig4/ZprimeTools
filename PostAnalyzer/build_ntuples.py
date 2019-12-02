@@ -44,5 +44,4 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    if data == 'monoZprimeMC2018':
-        build_dataset(data,os.path.join(directory,data))
+    build_dataset(data,os.path.join(directory,data))
