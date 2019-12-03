@@ -16,7 +16,7 @@ class Dataset {
   };
   static SubsetList dataset;
 public:
-  static const std::string datalist[10];
+  static const std::string datalist[12];
   static const std::map<std::string,Type> typemap;
 
   Type type;

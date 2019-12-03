@@ -1,3 +1,6 @@
+>>B
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017B/0000/
+
 >>C
 /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017C/0000/
 /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017C/0001/
@@ -27,4 +30,10 @@
 /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017E/0006/
 /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017E/0007/
 /hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017E/0008/
+
+>>F
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017F/0000/
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017F/0001/
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017F/0002/
+/hdfs/store/user/varuns/NTuples/Data/Run2017_31Mar2018_JECv32/SinglePho/SinglePho2017F/0003/
 

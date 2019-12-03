@@ -20,9 +20,9 @@ bool contains(string str,string delim) {
   return strstr(str.c_str(),delim.c_str()) != NULL;
 }
 
-const std::string Dataset::datalist[] = {"egamma","met","signal","zjets","wjets","dyjets","gjets","ttjets","ewk","qcd"};
+const std::string Dataset::datalist[] = {"egamma","met","singleele","singlepho","signal","zjets","wjets","dyjets","gjets","ttjets","ewk","qcd"};
 const std::map<std::string,Type> Dataset::typemap = {
-  {"egamma",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"wjets",WJets},{"dyjets",DYJets},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
+  {"egamma",Data},{"met",Data},{"singleele",Data},{"singlepho",Data},{"signal",Signal},{"zjets",ZJets},{"wjets",WJets},{"dyjets",DYJets},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
 };
 Dataset::SubsetList Dataset::dataset;
 

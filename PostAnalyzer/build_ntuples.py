@@ -42,4 +42,5 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    build_dataset(data,os.path.join(directory,data))
+    if 'SinglePho' in data:
+        build_dataset(data,os.path.join(directory,data))
