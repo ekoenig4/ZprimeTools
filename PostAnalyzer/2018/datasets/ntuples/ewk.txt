@@ -1,19 +1,19 @@
 >>WW
 /hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WW/0000/
 
->>WWto2L2Nu
+>>WWTo2L2Nu
 /hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WWTo2L2Nu/0000/
 
->>WWtoLNuQQ
+>>WWTo4Q
+/hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WWTo4Q/0000/
+
+>>WWToLNuQQ
 /hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WWToLNuQQ/0000/
 /hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WWToLNuQQ/0001/
 
-
->>WWto4Q
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DiBoson/WWTo4Q_NNPDF31_TuneCP5_13TeV-powheg-pythia8/0000/
-
 >>WZ
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DiBoson/WZ_TuneCP5_13TeV-pythia8/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/WZ/0000/
 
 >>ZZ
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/DiBoson/ZZ_TuneCP5_13TeV-pythia8/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/EWK/ZZ/0000/
+
