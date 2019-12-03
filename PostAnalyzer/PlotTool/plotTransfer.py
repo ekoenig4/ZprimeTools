@@ -89,21 +89,19 @@ def plotSR_ZW(z_sample,w_sample):
     pad1.SetBorderMode(0);
     # pad1.SetBottomMargin(0.);
 
-    xaxis,yaxis = zwlink_norm.GetXaxis(),zwlink_unc.GetYaxis()
-    xaxis.Draw();yaxis.Draw()
-    zwlink_unc.Draw("2Asame")
-    UncBandStyle(zwlink_unc)
     zwlink_norm.Draw("pex0same")
     zwlink_norm.SetLineWidth(2)
     zwlink_norm.SetLineColor(kBlack);
     zwlink_norm.SetMarkerStyle(20);
     zwlink_norm.SetMarkerSize(1);
     zwlink_norm.SetTitle("")
-    yaxis.SetTitle("Ratio_{%s/%s}" % (zjetinfo['label'],wjetinfo['label']))
-    yaxis.CenterTitle()
-    yaxis.SetTitleOffset(1.3)
-    xaxis.SetTitle(z_sample.name)
-    xaxis.SetTitleOffset(1.2)
+    zwlink_norm.GetYaxis().SetTitle("Ratio_{%s/%s}" % (zjetinfo['label'],wjetinfo['label']))
+    zwlink_norm.GetYaxis().CenterTitle()
+    zwlink_norm.GetYaxis().SetTitleOffset(1.3)
+    zwlink_norm.GetXaxis().SetTitle(z_sample.name)
+    zwlink_norm.GetXaxis().SetTitleOffset(1.2)
+    zwlink_norm.SetMinimum(0.3)
+    zwlink_norm.SetMaximum(2.6)
 
     texCMS,texLumi = getCMSText(lumi_label,year)
     for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
@@ -111,8 +109,8 @@ def plotSR_ZW(z_sample,w_sample):
     leg.AddEntry(zwlink_norm,"Transfer Factor (Stat Uncert)","p")
     leg.Draw()
 
-    SetBounds([zwlink_norm])
-
+    # SetBounds([zwlink_norm])
+    
     variable,binning = re.split('_\d*',varname)
     outdir = out_dir % (year,variable)
     if not os.path.isdir(outdir): os.mkdir(outdir)
@@ -175,7 +173,12 @@ def plotCR_ZW(z_sample,w_sample):
 
     texLumi,texCMS = getCMSText(lumi_label,year)
 
-    SetBounds([zwlink_mc,zwlink_data])
+    if z_sample.region == 'DoubleEleCR':
+        zwlink_mc.SetMinimum(0.03)
+        zwlink_mc.SetMaximum(0.13)
+    else:
+        zwlink_mc.SetMinimum(0.01)
+        zwlink_mc.SetMaximum(0.12)
     ###############################################
 
     c.cd();
@@ -263,14 +266,25 @@ def plotCR_TF(sr_sample,cr_sample,boson):
     tf_norm.GetXaxis().SetTitle(sr_sample.name)
     tf_norm.GetXaxis().SetTitleOffset(1.2)
 
+    if cr_sample.region == 'SingleEleCR':
+        tf_norm.SetMinimum(1.1)
+        tf_norm.SetMaximum(8)
+    elif cr_sample.region == 'SingleMuCR':
+        tf_norm.SetMinimum(0.7)
+        tf_norm.SetMaximum(5)
+    elif cr_sample.region == 'DoubleEleCR':
+        tf_norm.SetMinimum(15)
+        tf_norm.SetMaximum(40)
+    else:
+        tf_norm.SetMinimum(15)
+        tf_norm.SetMaximum(28)
+
     texCMS,texLumi = getCMSText(lumi_label,year)
     for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
     leg = getLegend(xmin=0.5,xmax=0.7)
     leg.AddEntry(tf_norm,"Transfer Factor (Stat Uncert)","p")
     leg.Draw()
-
-    SetBounds([tf_norm])
-    
+        
     variable,binning = re.split('_\d*',varname)
     outdir = out_dir % (year,variable)
     if not os.path.isdir(outdir): os.mkdir(outdir)
