@@ -242,7 +242,7 @@ class Process(object):
         self.fillRaw()
         self.scale()
         if self.proctype != 'signal': self.combine()
-    def addUnc(self,nuisance):
+    def addUnc(self,nuisance,show=False):
         if not self.isBranch: return
         if nuisance not in self.nuisances:
             self.nuisances[nuisance] = {}
@@ -256,6 +256,10 @@ class Process(object):
                 subprocess.nuisances[nuisance].pop(variation)
             
             self.nuisances[nuisance][variation] = histo
+        if not show or self.scaled_total == 0: return
+	varup = self.nuisances[nuisance]['Up'].Integral()/self.scaled_total
+        vardn = self.nuisances[nuisance]['Down'].Integral()/self.scaled_total
+        print '{0:<20}'.format('%s %s' % (nuisance,self.name))+'+%f/-%f' % (varup,vardn)
     def removeUnc(self,nuisance):
         if nuisance not in self.nuisances: return
         if self.proctype == 'signal':
@@ -269,22 +273,22 @@ class Process(object):
         if not self.isBranch: return
         if self.proctype != 'bkg': return
         up = self.b_template.Clone('%s_totalUp' % self.name)
-        dn = self.b_template.Clone('%s_totanDown' % self.name)
+        dn = self.b_template.Clone('%s_totalDown' % self.name)
         norm = self.histo
+        unclist = [ nuisance for nuisance in self.nuisances if 'Up' in self.nuisances[nuisance]]
         for ibin in range(1,self.b_template.GetNbinsX()+1):
             up[ibin] = 0; dn[ibin] = 0;
-            for nuisance in self.nuisances:
+            for nuisance in unclist:
                 if norm[ibin] == 0: continue
-                tmpUp = abs(norm[ibin] - self.nuisances[nuisance]['Up'][ibin])/norm[ibin]
-                tmpDn = abs(norm[ibin] - self.nuisances[nuisance]['Down'][ibin])/norm[ibin]
+                tmpUp = self.nuisances[nuisance]['Up'][ibin]
+                tmpDn = self.nuisances[nuisance]['Down'][ibin]
                 if tmpUp == tmpDn: continue
-                binUp = max(tmpUp,tmpDn)
-                binDn = min(tmpUp,tmpDn)
+                binUp = max(tmpUp,tmpDn); binDn = min(tmpUp,tmpDn)
 
-                up[ibin] = up[ibin] + binUp**2
-                dn[ibin] = dn[ibin] + binDn**2
-            up[ibin] = norm[ibin]*(1+TMath.Sqrt(up[ibin]))
-            dn[ibin] = norm[ibin]*(1-TMath.Sqrt(dn[ibin]))
+                up[ibin] = up[ibin] + (norm[ibin] - binUp)**2
+                dn[ibin] = dn[ibin] + (norm[ibin] - binDn)**2
+            up[ibin] = norm[ibin] + TMath.Sqrt(up[ibin])
+            dn[ibin] = norm[ibin] - TMath.Sqrt(dn[ibin])
         self.nuisances['Total'] = {'Up':up,'Down':dn}
                 
                     

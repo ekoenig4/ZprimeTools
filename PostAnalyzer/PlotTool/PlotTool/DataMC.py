@@ -290,13 +290,7 @@ class datamc(object):
         if show: print nuisance
         for name,process in self.processes.iteritems():
             if process.proctype == 'data': continue
-            process.addUnc(nuisance)
-
-	    if not show: continue
-	    if process.scaled_total != 0:
-	        varup = process.nuisances[nuisance]['Up'].Integral()/process.scaled_total
-        	vardn = process.nuisances[nuisance]['Down'].Integral()/process.scaled_total
-           	print '{0:<10}'.format(name)+'+%f/-%f' % (varup,vardn)
+            process.addUnc(nuisance,show=show)
     ###############################################################################################################
 
     def removeUnc(self,nuisance):

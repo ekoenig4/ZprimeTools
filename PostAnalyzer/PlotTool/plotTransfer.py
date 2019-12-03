@@ -29,6 +29,26 @@ processMap = {
     },
 }
 
+def SetBounds(hslist):
+    binlist = range(1,hslist[0].GetNbinsX()+1)
+    maxY = max( max( hs[ibin] for hs in hslist ) for ibin in binlist )
+    minY = min( min( hs[ibin] for hs in hslist if hs[ibin] != 0 ) for ibin in binlist )
+
+    hslist[0].SetMinimum(minY*0.8)
+    hslist[0].SetMaximum(maxY*1.2)
+def GetZWUncertainty(norm,zjets,wjets,unclist):
+    for v_info in (zjets,wjets):
+        for unc in unclist: v_info.addUnc(unc)
+        v_info.fullUnc()
+    nbins = norm.GetNbinsX()+1
+    up,dn = norm.Clone(),norm.Clone()
+    for ibin in range(1,nbins):
+        percUp = TMath.Sqrt(sum( (1-vjets.nuisances['Total']['Up'][ibin]/vjets.histo[ibin])**2 for vjets in (zjets,wjets) ))
+        percDn = TMath.Sqrt(sum( (1-vjets.nuisances['Total']['Down'][ibin]/vjets.histo[ibin])**2 for vjets in (zjets,wjets) ))
+        up[ibin] = norm[ibin]*(1+percUp)
+        dn[ibin] = norm[ibin]*(1-percDn)
+    return GetUncBand(up,dn)
+    
 def plotSR_ZW(z_sample,w_sample):
     zjetinfo=processMap[z_sample.region]['Z']
     wjetinfo=processMap[w_sample.region]['W']
@@ -44,6 +64,15 @@ def plotSR_ZW(z_sample,w_sample):
     wjets_norm = wjets.histo
 
     zwlink_norm = GetRatio(zjets_norm,wjets_norm)
+    unclist = [
+            "QCD_Scale",
+            "QCD_Shape",
+            "QCD_Proc",
+            "NNLO_EWK",
+            "NNLO_Miss",
+            "NNLO_Sud",
+            "QCD_EWK_Mix"]
+    zwlink_unc= GetZWUncertainty(zwlink_norm,zjets,wjets,unclist)
 
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
@@ -52,34 +81,36 @@ def plotSR_ZW(z_sample,w_sample):
     #c.SetLogy();
     #c.cd();
     
-    pad1 = TPad("pad1","pad1",0.01,0.05,0.99,0.99);
+    pad1 = TPad("pad1","pad1",0.01,0.01,0.99,0.99);
     pad1.Draw(); pad1.cd();
     # pad1.SetLogy();
     pad1.SetFillColor(0);
     pad1.SetFrameBorderMode(0);
     pad1.SetBorderMode(0);
-    pad1.SetLeftMargin(0.15)
     # pad1.SetBottomMargin(0.);
 
+    zwlink_norm.Draw("pex0same")
     zwlink_norm.SetLineWidth(2)
     zwlink_norm.SetLineColor(kBlack);
     zwlink_norm.SetMarkerStyle(20);
     zwlink_norm.SetMarkerSize(1);
-    zwlink_norm.Draw("pex0")
     zwlink_norm.SetTitle("")
     zwlink_norm.GetYaxis().SetTitle("Ratio_{%s/%s}" % (zjetinfo['label'],wjetinfo['label']))
     zwlink_norm.GetYaxis().CenterTitle()
-    zwlink_norm.GetYaxis().SetTitleOffset(1.8)
+    zwlink_norm.GetYaxis().SetTitleOffset(1.3)
     zwlink_norm.GetXaxis().SetTitle(z_sample.name)
     zwlink_norm.GetXaxis().SetTitleOffset(1.2)
+    zwlink_norm.SetMinimum(0.3)
+    zwlink_norm.SetMaximum(2.6)
 
-    texS,texS1 = getCMSText(lumi_label,year)
+    texCMS,texLumi = getCMSText(lumi_label,year)
+    for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
     leg = getLegend(xmin=0.5,xmax=0.7)
     leg.AddEntry(zwlink_norm,"Transfer Factor (Stat Uncert)","p")
     leg.Draw()
 
-    SetYBounds([zwlink_norm])
-
+    # SetBounds([zwlink_norm])
+    
     variable,binning = re.split('_\d*',varname)
     outdir = out_dir % (year,variable)
     if not os.path.isdir(outdir): os.mkdir(outdir)
@@ -142,7 +173,12 @@ def plotCR_ZW(z_sample,w_sample):
 
     texLumi,texCMS = getCMSText(lumi_label,year)
 
-    SetYBounds([zwlink_mc,zwlink_data])
+    if z_sample.region == 'DoubleEleCR':
+        zwlink_mc.SetMinimum(0.03)
+        zwlink_mc.SetMaximum(0.13)
+    else:
+        zwlink_mc.SetMinimum(0.01)
+        zwlink_mc.SetMaximum(0.12)
     ###############################################
 
     c.cd();
@@ -216,7 +252,6 @@ def plotCR_TF(sr_sample,cr_sample,boson):
     pad1.SetFillColor(0);
     pad1.SetFrameBorderMode(0);
     pad1.SetBorderMode(0);
-    pad1.SetLeftMargin(0.15)
     # pad1.SetBottomMargin(0.);
 
     tf_norm.SetLineWidth(2)
@@ -227,17 +262,29 @@ def plotCR_TF(sr_sample,cr_sample,boson):
     tf_norm.SetTitle("")
     tf_norm.GetYaxis().SetTitle("Ratio_{%s/%s}" % (srinfo['label'],crinfo['label']))
     tf_norm.GetYaxis().CenterTitle()
-    tf_norm.GetYaxis().SetTitleOffset(1.8)
+    tf_norm.GetYaxis().SetTitleOffset(1.3)
     tf_norm.GetXaxis().SetTitle(sr_sample.name)
     tf_norm.GetXaxis().SetTitleOffset(1.2)
 
-    texS,texS1 = getCMSText(lumi_label,year)
+    if cr_sample.region == 'SingleEleCR':
+        tf_norm.SetMinimum(1.1)
+        tf_norm.SetMaximum(8)
+    elif cr_sample.region == 'SingleMuCR':
+        tf_norm.SetMinimum(0.7)
+        tf_norm.SetMaximum(5)
+    elif cr_sample.region == 'DoubleEleCR':
+        tf_norm.SetMinimum(15)
+        tf_norm.SetMaximum(40)
+    else:
+        tf_norm.SetMinimum(15)
+        tf_norm.SetMaximum(28)
+
+    texCMS,texLumi = getCMSText(lumi_label,year)
+    for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
     leg = getLegend(xmin=0.5,xmax=0.7)
     leg.AddEntry(tf_norm,"Transfer Factor (Stat Uncert)","p")
     leg.Draw()
-
-    SetYBounds([tf_norm])
-    
+        
     variable,binning = re.split('_\d*',varname)
     outdir = out_dir % (year,variable)
     if not os.path.isdir(outdir): os.mkdir(outdir)
