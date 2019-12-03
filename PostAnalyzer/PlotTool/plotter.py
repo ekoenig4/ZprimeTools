@@ -82,13 +82,7 @@ def plotVariable(samples,variable):
     if samples.args.mc_solid:
         leg.AddEntry(hs_bkg,"Background","f")
     else:
-        leg.AddEntry(samples.processes['WJets'].histo  ,"W#rightarrowl#nu","f");
-        leg.AddEntry(samples.processes['DYJets'].histo ,"Z#rightarrow ll","F"); 
-        leg.AddEntry(samples.processes['DiBoson'].histo,"WW/WZ/ZZ","F");
-        leg.AddEntry(samples.processes['QCD'].histo    ,"QCD","F");
-        leg.AddEntry(samples.processes['TTJets'].histo , "Top Quark", "F"); 
-        leg.AddEntry(samples.processes['GJets'].histo  ,"#gamma+jets", "F"); 
-        leg.AddEntry(samples.processes['ZJets'].histo  ,"Z#rightarrow#nu#nu","F");
+        for mc in samples.MCList: leg.AddEntry(samples.processes[mc].histo,samples.processes[mc].leg,'f')
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"

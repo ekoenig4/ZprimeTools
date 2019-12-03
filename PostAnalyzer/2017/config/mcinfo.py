@@ -14,6 +14,8 @@ lumi_by_era = {"SingleEleCR":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
                "GammaCR":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
                "SignalRegion":{"B":1198}}
 
+region_masks = {"GammaCR":["GJets","QCD","WJets"]}
+
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];

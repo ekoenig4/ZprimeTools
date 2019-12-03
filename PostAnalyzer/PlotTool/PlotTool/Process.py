@@ -117,9 +117,11 @@ class SubProcess(object):
             hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
 class Process(object):
-    def __init__(self,name,filenames,xsecs,proctype,lumi=1,color = None):
+    def __init__(self,name,filenames,xsecs,proctype,leg=None,lumi=1,color = None):
         ValidProctype(proctype)
         self.name = name
+        self.leg = leg
+        if self.leg is None: self.leg = self.name
         self.filenames = [ filename for filename in filenames ]
         self.xsecs = xsecs
         self.proctype = proctype
