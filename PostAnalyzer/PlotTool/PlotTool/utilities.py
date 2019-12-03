@@ -6,7 +6,7 @@ def valid_directory(directory):
     return directory
 
 def GetRegion():
-    region_pattern = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle_","postDoubleMu"]
+    region_pattern = ["postMETdata","postSingleEle","postSingleMu","postDoubleEle","postDoubleMu"]
     RegionName = ["SignalRegion","SingleEleCR","SingleMuCR","DoubleEleCR","DoubleMuCR"]
 
     found = False

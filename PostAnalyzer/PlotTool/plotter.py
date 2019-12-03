@@ -82,13 +82,7 @@ def plotVariable(samples,variable):
     if samples.args.mc_solid:
         leg.AddEntry(hs_bkg,"Background","f")
     else:
-        leg.AddEntry(samples.processes['WJets'].histo  ,"W#rightarrowl#nu","f");
-        leg.AddEntry(samples.processes['DYJets'].histo ,"Z#rightarrow ll","F"); 
-        leg.AddEntry(samples.processes['DiBoson'].histo,"WW/WZ/ZZ","F");
-        leg.AddEntry(samples.processes['QCD'].histo    ,"QCD","F");
-        leg.AddEntry(samples.processes['TTJets'].histo , "Top Quark", "F"); 
-        leg.AddEntry(samples.processes['GJets'].histo  ,"#gamma+jets", "F"); 
-        leg.AddEntry(samples.processes['ZJets'].histo  ,"Z#rightarrow#nu#nu","F");
+        for mc in samples.MCList: leg.AddEntry(samples.processes[mc].histo,samples.processes[mc].leg,'f')
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
@@ -116,10 +110,10 @@ def plotVariable(samples,variable):
     RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("A");
 
-    if any( samples.nuisances ):
-        uncband = samples.getUncBand()
-        UncBandStyle(uncband)
-        uncband.Draw('2same')
+    # if any( samples.nuisances ):
+    #     uncband = samples.getUncBand()
+    #     UncBandStyle(uncband)
+    #     uncband.Draw('2same')
     Ratio.Draw('pex0same')
     line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");
@@ -145,7 +139,7 @@ def plotVariable(samples,variable):
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.args.allHisto):sub = "all"

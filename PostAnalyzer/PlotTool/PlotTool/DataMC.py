@@ -131,13 +131,20 @@ class datamc(object):
         self.MCList = ["WJets","ZJets","GJets","DYJets","TTJets","DiBoson","QCD"]
 
         self.processes["Data"] =    Process("Data",  [self.Data_FileName],None                                 ,  'data')
-        self.processes["WJets"] =   Process("WJets",  config.WJets_FileNames,  GetMCxsec(config.WJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kRed-10)
-        self.processes["ZJets"] =   Process("ZJets",  config.ZJets_FileNames,  GetMCxsec(config.ZJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kAzure+10)
-        self.processes["GJets"] =   Process("GJets",  config.GJets_FileNames,  GetMCxsec(config.GJets_FileNames,config.xsec),  'bkg',lumi=self.lumi,color=kGray+2)
-        self.processes["DYJets"] =  Process("DYJets", config.DYJets_FileNames, GetMCxsec(config.DYJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kTeal-9)
-        self.processes["TTJets"] =  Process("TTJets", config.TTJets_FileNames, GetMCxsec(config.TTJets_FileNames,config.xsec), 'bkg',lumi=self.lumi,color=kOrange-2)
-        self.processes["DiBoson"] = Process("DiBoson",config.DiBoson_FileNames,GetMCxsec(config.DiBoson_FileNames,config.xsec),'bkg',lumi=self.lumi,color=kCyan-10)
-        self.processes["QCD"] =     Process("QCD",    config.QCD_FileNames,    GetMCxsec(config.QCD_FileNames,config.xsec),    'bkg',lumi=self.lumi,color=kGray)
+        self.processes["WJets"] =   Process("WJets",  config.WJets_FileNames,  GetMCxsec(config.WJets_FileNames,config.xsec),  'bkg',leg="W#rightarrowl#nu",  lumi=self.lumi,color=kRed-10)
+        self.processes["ZJets"] =   Process("ZJets",  config.ZJets_FileNames,  GetMCxsec(config.ZJets_FileNames,config.xsec),  'bkg',leg="Z#rightarrow#nu#nu",lumi=self.lumi,color=kAzure+10)
+        self.processes["GJets"] =   Process("GJets",  config.GJets_FileNames,  GetMCxsec(config.GJets_FileNames,config.xsec),  'bkg',leg="#gamma+jets",       lumi=self.lumi,color=kGray+2)
+        self.processes["DYJets"] =  Process("DYJets", config.DYJets_FileNames, GetMCxsec(config.DYJets_FileNames,config.xsec), 'bkg',leg="Z#rightarrow ll",   lumi=self.lumi,color=kTeal-9)
+        self.processes["TTJets"] =  Process("TTJets", config.TTJets_FileNames, GetMCxsec(config.TTJets_FileNames,config.xsec), 'bkg',leg="Top Quark",         lumi=self.lumi,color=kOrange-2)
+        self.processes["DiBoson"] = Process("DiBoson",config.DiBoson_FileNames,GetMCxsec(config.DiBoson_FileNames,config.xsec),'bkg',leg="WW/WZ/ZZ",          lumi=self.lumi,color=kCyan-10)
+        self.processes["QCD"] =     Process("QCD",    config.QCD_FileNames,    GetMCxsec(config.QCD_FileNames,config.xsec),    'bkg',leg="QCD",               lumi=self.lumi,color=kGray)
+
+        if self.region in config.region_masks:
+            to_remove = [ sample for sample in self.MCList if sample not in config.region_masks[self.region] ]
+            for sample in to_remove:
+                self.SampleList.remove(sample)
+                self.MCList.remove(sample)
+                self.processes.pop(sample)
 
         if self.args.mc_solid:
             for name,process in self.processes.iteritems():
@@ -349,4 +356,19 @@ class datamc(object):
         uncband = GetUncBand(ratio_up,ratio_dn)
         
         return uncband
+    ###############################################################################################################
+    
+    def __add__(self,other):
+        # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
+        from copy import deepcopy
+        new = deepcopy(self)
+        samplelist = new.processes.keys()
+        for sample in other.processes.keys():
+            if sample not in samplelist: samplelist.append(sample)
+        for sample in samplelist:
+            if sample in new.processes and sample in other.processes:
+                new.processes[sample].add(other.processes[sample])
+            if sample not in new.processes and sample in other.processes:
+                new.processes[sample] = deepcopy(other.processes)
+        return new
 ######################################################################    

@@ -117,9 +117,11 @@ class SubProcess(object):
             hs_unc.Scale(self.scaling)
             info[variation] = hs_unc
 class Process(object):
-    def __init__(self,name,filenames,xsecs,proctype,lumi=1,color = None):
+    def __init__(self,name,filenames,xsecs,proctype,leg=None,lumi=1,color = None):
         ValidProctype(proctype)
         self.name = name
+        self.leg = leg
+        if self.leg is None: self.leg = self.name
         self.filenames = [ filename for filename in filenames ]
         self.xsecs = xsecs
         self.proctype = proctype
@@ -290,6 +292,10 @@ class Process(object):
             up[ibin] = norm[ibin] + TMath.Sqrt(up[ibin])
             dn[ibin] = norm[ibin] - TMath.Sqrt(dn[ibin])
         self.nuisances['Total'] = {'Up':up,'Down':dn}
-                
-                    
-                
+    def add(self,other):
+        if self.name != other.name: raise ValueError("%s is not %s" % (self.name,other.name))
+        # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
+        self.histo.Add(other.histo)
+        self.raw_total += other.raw_total
+        self.scaled_total += self.scaled_total
+        # self.subprocess.update(other.subprocesses)
