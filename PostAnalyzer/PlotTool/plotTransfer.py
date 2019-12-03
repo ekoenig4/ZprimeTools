@@ -29,6 +29,8 @@ processMap = {
     },
 }
 
+fixedYaxis=False
+
 def SetBounds(hslist):
     binlist = range(1,hslist[0].GetNbinsX()+1)
     maxY = max( max( hs[ibin] for hs in hslist ) for ibin in binlist )
@@ -100,8 +102,10 @@ def plotSR_ZW(z_sample,w_sample):
     zwlink_norm.GetYaxis().SetTitleOffset(1.3)
     zwlink_norm.GetXaxis().SetTitle(z_sample.name)
     zwlink_norm.GetXaxis().SetTitleOffset(1.2)
-    zwlink_norm.SetMinimum(0.3)
-    zwlink_norm.SetMaximum(2.6)
+
+    if fixedYaxis:
+        zwlink_norm.SetMinimum(0.3)
+        zwlink_norm.SetMaximum(2.6)
 
     texCMS,texLumi = getCMSText(lumi_label,year)
     for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
@@ -173,12 +177,13 @@ def plotCR_ZW(z_sample,w_sample):
 
     texLumi,texCMS = getCMSText(lumi_label,year)
 
-    if z_sample.region == 'DoubleEleCR':
-        zwlink_mc.SetMinimum(0.03)
-        zwlink_mc.SetMaximum(0.13)
-    else:
-        zwlink_mc.SetMinimum(0.01)
-        zwlink_mc.SetMaximum(0.12)
+    if fixedYaxis:
+        if z_sample.region == 'DoubleEleCR':
+            zwlink_mc.SetMinimum(0.03)
+            zwlink_mc.SetMaximum(0.13)
+        else:
+            zwlink_mc.SetMinimum(0.01)
+            zwlink_mc.SetMaximum(0.12)
     ###############################################
 
     c.cd();
@@ -266,18 +271,19 @@ def plotCR_TF(sr_sample,cr_sample,boson):
     tf_norm.GetXaxis().SetTitle(sr_sample.name)
     tf_norm.GetXaxis().SetTitleOffset(1.2)
 
-    if cr_sample.region == 'SingleEleCR':
-        tf_norm.SetMinimum(1.1)
-        tf_norm.SetMaximum(8)
-    elif cr_sample.region == 'SingleMuCR':
-        tf_norm.SetMinimum(0.7)
-        tf_norm.SetMaximum(5)
-    elif cr_sample.region == 'DoubleEleCR':
-        tf_norm.SetMinimum(15)
-        tf_norm.SetMaximum(40)
-    else:
-        tf_norm.SetMinimum(15)
-        tf_norm.SetMaximum(28)
+    if fixedYaxis:
+        if cr_sample.region == 'SingleEleCR':
+            tf_norm.SetMinimum(1.1)
+            tf_norm.SetMaximum(8)
+        elif cr_sample.region == 'SingleMuCR':
+            tf_norm.SetMinimum(0.7)
+            tf_norm.SetMaximum(5)
+        elif cr_sample.region == 'DoubleEleCR':
+            tf_norm.SetMinimum(15)
+            tf_norm.SetMaximum(40)
+        else:
+            tf_norm.SetMinimum(15)
+            tf_norm.SetMaximum(28)
 
     texCMS,texLumi = getCMSText(lumi_label,year)
     for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
