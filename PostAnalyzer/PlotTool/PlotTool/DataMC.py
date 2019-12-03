@@ -350,4 +350,19 @@ class datamc(object):
         uncband = GetUncBand(ratio_up,ratio_dn)
         
         return uncband
+    ###############################################################################################################
+    
+    def __add__(self,other):
+        # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
+        from copy import deepcopy
+        new = deepcopy(self)
+        samplelist = new.processes.keys()
+        for sample in other.processes.keys():
+            if sample not in samplelist: samplelist.append(sample)
+        for sample in samplelist:
+            if sample in new.processes and sample in other.processes:
+                new.processes[sample].add(other.processes[sample])
+            if sample not in new.processes and sample in other.processes:
+                new.processes[sample] = deepcopy(other.processes)
+        return new
 ######################################################################    

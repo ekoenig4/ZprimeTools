@@ -290,6 +290,10 @@ class Process(object):
             up[ibin] = norm[ibin] + TMath.Sqrt(up[ibin])
             dn[ibin] = norm[ibin] - TMath.Sqrt(dn[ibin])
         self.nuisances['Total'] = {'Up':up,'Down':dn}
-                
-                    
-                
+    def add(self,other):
+        if self.name != other.name: raise ValueError("%s is not %s" % (self.name,other.name))
+        # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
+        self.histo.Add(other.histo)
+        self.raw_total += other.raw_total
+        self.scaled_total += self.scaled_total
+        # self.subprocess.update(other.subprocesses)

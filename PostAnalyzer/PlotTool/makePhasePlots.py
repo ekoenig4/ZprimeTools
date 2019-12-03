@@ -8,7 +8,7 @@ import os
 
 """
 Creates phase plots for 2D histograms
-example https://www.hep.wisc.edu/~ekoenig4/MonoZprimeJet/Plots2018/SingleEleCRPlots_EWK/phase/data_h_LeptonEtaPhi_10.png
+example https://www.hep.wisc.edu/~ekoenig4/MonoJet/Plots2018/SingleEleCRPlots_EWK/phase/data_h_LeptonEtaPhi_10.png
 Directions: In region directior with valid root files
 Usage: python ../PlotTool/makePhasePlots.py variable_1 variable_2 variable_3 ...
 """
