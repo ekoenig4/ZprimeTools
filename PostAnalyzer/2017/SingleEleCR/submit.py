@@ -5,7 +5,7 @@ cmssw = os.getenv("CMSSW_BASE")
 repo = '%s/src/ZprimeTools/PostAnalyzer/' % cmssw
 sys.path.append(repo)
 
-from CondorTools.SubmitDataset import submit,options
+from CondorTools.SubmitDataset import submit,options,mclist
 options['year'] = '2017'
 options['region'] = 'WE'
 options['parallel'] = True
@@ -13,11 +13,5 @@ options['batchsize'] = 100
 # options['submit'] = False
 #----Submit---#
 submit('singleele',label='SingleEle_',filelist=True)
-submit('wjets')
-submit('zjets')
-submit('qcd')
-submit('ttjets')
-submit('gjets')
-submit('ewk')
-submit('dyjets')
+for mc in mclist: submit(mc)
 

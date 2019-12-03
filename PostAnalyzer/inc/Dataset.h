@@ -16,7 +16,7 @@ class Dataset {
   };
   static SubsetList dataset;
 public:
-  static const std::string datalist[12];
+  static const std::string datalist[16];
   static const std::map<std::string,Type> typemap;
 
   Type type;
@@ -33,6 +33,14 @@ public:
   void setInfo(std::string path);
   void setTypeInfo(std::string path);
   static inline Subset getSubset(std::string data) { return dataset[data]; }
+  static inline bool contains(std::string data) { return dataset.find(data) != dataset.end(); }
+  static inline bool contains(std::string data,std::string subset) {
+    if (Dataset::contains(data)) {
+      auto subsetmap = Dataset::getSubset(data);
+      return subsetmap.find(subset) != subsetmap.end();
+    }
+    return false;
+  }
   static inline std::vector<std::string> getDirlist(std::string data,std::string subset) { return dataset[data][subset]; }
   inline const char* GetTypeName() { return TypeName[type]; }
   inline const char* GetRegionName() { return RegionName[region]; }

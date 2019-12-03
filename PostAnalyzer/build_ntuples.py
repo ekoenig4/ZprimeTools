@@ -20,10 +20,15 @@ def fullpath(path):
     return dirs
 
 def getSub(sub):
+    prefix = ''
+    if re.search('\w+1Jets',sub): prefix = '1j'
+    if re.search('\w+2Jets',sub): prefix = '2j'
+    htbinv2 = re.findall('\d+To.*$',sub)
+    if any(htbinv2): return prefix+htbinv2[0].replace('To','to')
     htbin = re.findall('\d+-.*$',sub)
-    if any(htbin): return htbin[0]
+    if any(htbin): return prefix+htbin[0].replace('-','to')
     subtype = re.sub('^\w[^_]+_','',sub)
-    if any(subtype): return subtype
+    if any(subtype): return prefix+subtype
     return sub
     
 def build_dataset(data,path):

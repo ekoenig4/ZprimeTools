@@ -81,28 +81,39 @@ int run_signal_test(string inputdir,const char* argv[]) {
 int setup_test(int argc, const char* argv[]) {
   Dataset dataset;
   string mcdir,datadir;
-  string signaldir = "None";
   if ( ZprimeClass::REGION == "SignalRegion" ) {
     mcdir = dataset.getDirlist("zjets","400to600")[0];
     datadir = dataset.getDirlist("met",ZprimeClass::SRDATA)[0];
-    if ( dataset.getSubset("signal").size() != 0 )
-      signaldir = dataset.getDirlist("signal","Mx1_Mv1000")[0];
   } else if ( ZprimeClass::REGION == "SingleEleCR" || ZprimeClass::REGION == "SingleMuCR" ) {
     mcdir = dataset.getDirlist("wjets","400to600")[0];
-    if ( ZprimeClass::REGION == "SingleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
+    if ( ZprimeClass::REGION == "SingleEleCR" ) {
+      if (dataset.contains("singleele"))
+	datadir = dataset.getSubset("singleele").begin()->second[0];
+      else
+	datadir = dataset.getSubset("egamma").begin()->second[0];
+    }
     if ( ZprimeClass::REGION == "SingleMuCR"  ) datadir = dataset.getSubset("met").begin()->second[0];
   } else if ( ZprimeClass::REGION == "DoubleEleCR" || ZprimeClass::REGION == "DoubleMuCR" ) {
     mcdir = dataset.getDirlist("dyjets","400to600")[0];
-    if ( ZprimeClass::REGION == "DoubleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
+    if ( ZprimeClass::REGION == "DoubleEleCR" ) {
+      if (dataset.contains("singleele"))
+	datadir = dataset.getSubset("singleele").begin()->second[0];
+      else
+	datadir = dataset.getSubset("egamma").begin()->second[0];
+    }
     if ( ZprimeClass::REGION == "DoubleMuCR"  ) datadir = dataset.getSubset("met").begin()->second[0];
   } else if ( ZprimeClass::REGION == "GammaCR" ) {
-    mcdir = dataset.getDirlist("gjets","400to600")[0];
-    datadir = dataset.getSubset("egamma").begin()->second[0];
+    auto dirlist = dataset.getDirlist("gjets","400to600");
+    cout << dirlist.size() << endl;
+    for (auto dir : dirlist) cout << dir << endl;
+    mcdir = dirlist[0];
+    if (dataset.contains("singlepho"))
+      datadir = dataset.getSubset("singlepho").begin()->second[0];
+    else
+      datadir = dataset.getSubset("egamma").begin()->second[0];
   }
   int mc = run_mc_test(mcdir,argv);
   int data = run_data_test(datadir,argv);
-  int signal = 0;
-  if ( signaldir != "None" ) signal = run_signal_test(signaldir,argv);
   return mc + data;
 }
 

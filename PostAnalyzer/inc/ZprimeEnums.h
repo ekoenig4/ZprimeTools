@@ -1,8 +1,8 @@
 #ifndef ZprimeEnums_h
 #define ZprimeEnums_h
 
-enum Type {Data,Signal,WJets,ZJets,DYJets,QCD,TTJets,GJets,EWK,nType};
-static const char * TypeName[] = {"Data","Signal","WJets","ZJets","DYJets","QCD","TTJets","GJets","EWK"};
+enum Type {Data,Signal,WJets,ZJets,DYJets,QCD,ST,TTJets,GJets,EWK,nType};
+static const char * TypeName[] = {"Data","Signal","WJets","ZJets","DYJets","QCD","ST","TTJets","GJets","EWK"};
 
 enum Region{SR,WE,WM,ZE,ZM,nRegion};
 static const char * RegionName[] = {"SignalRegion","SingleElectron","SingleMuon","DoubleElectron","DoubleMuon"};

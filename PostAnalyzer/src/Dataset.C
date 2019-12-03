@@ -16,13 +16,15 @@ bool isDir(const string &s)
   return (stat (s.c_str(), &buffer) == 0);
 }
 
-bool contains(string str,string delim) {
+bool contains_substr(string str,string delim) {
   return strstr(str.c_str(),delim.c_str()) != NULL;
 }
 
-const std::string Dataset::datalist[] = {"egamma","met","singleele","singlepho","signal","zjets","wjets","dyjets","gjets","ttjets","ewk","qcd"};
+const std::string Dataset::datalist[] = {"egamma","met","singleele","singlepho","signal","zjets_nlo","zjets","wjets_nlo","wjets","dyjets_nlo","dyjets","gjets","st","ttjets","ewk","qcd"};
 const std::map<std::string,Type> Dataset::typemap = {
-  {"egamma",Data},{"met",Data},{"singleele",Data},{"singlepho",Data},{"signal",Signal},{"zjets",ZJets},{"wjets",WJets},{"dyjets",DYJets},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
+  {"egamma",Data},{"met",Data},{"singleele",Data},{"singlepho",Data},{"signal",Signal},{"zjets_nlo",ZJets},{"zjets",ZJets},
+  {"wjets_nlo",WJets},{"wjets",WJets},{"dyjets_nlo",DYJets},{"dyjets",DYJets},
+  {"qcd",QCD},{"st",ST},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
 };
 Dataset::SubsetList Dataset::dataset;
 
@@ -39,7 +41,7 @@ Dataset::SubsetList::SubsetList() {
   TSystemFile* file;
   while ( (file = (TSystemFile*)fileiter()) ) {
     string filename = (string)file->GetName();
-    if ( contains(filename,".txt") ) {
+    if ( contains_substr(filename,".txt") ) {
       addDataset(ntuples,filename);
     }
   }
@@ -55,8 +57,8 @@ void Dataset::SubsetList::addDataset(string path,string filename) {
   string line;
   Subset subset; string subname;
   while ( infile >> line ) {
-    if ( contains(line,"#") ) continue;
-    if ( contains(line,">>") ) {
+    if ( contains_substr(line,"#") ) continue;
+    if ( contains_substr(line,">>") ) {
       subname = line.erase(0,2);
       subset[subname] = vector<string>();
     } else {
@@ -83,10 +85,10 @@ void Dataset::setTypeInfo(string path) {
     Subset subset = dataset[data];
     for (auto& sub : subset) {
       for (string directory : sub.second) {
-	if ( contains(path,directory) ) {
+	if ( contains_substr(path,directory) ) {
 	  type = typemap.find(data)->second;
 	  if ( type == WJets || type == DYJets ) {
-	    isInclusive = contains(sub.first,"MLM");
+	    isInclusive = contains_substr(sub.first,"MLM");
 	  } else {
 	    isInclusive = false;
 	  }
