@@ -20,7 +20,11 @@ def fullpath(path):
     return dirs
 
 def getSub(sub):
-    return sub.split('2017')[-1]
+    htbin = re.findall('\d+-.*$',sub)
+    if any(htbin): return htbin[0]
+    subtype = re.sub('^\w[^_]+_','',sub)
+    if any(subtype): return subtype
+    return sub
     
 def build_dataset(data,path):
     data = data.lower()
@@ -42,5 +46,4 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    if 'SinglePho' in data:
-        build_dataset(data,os.path.join(directory,data))
+    build_dataset(data,os.path.join(directory,data))

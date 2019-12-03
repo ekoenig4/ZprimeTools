@@ -3,22 +3,23 @@ import os
 import datetime
 from argparse import ArgumentParser
 
-hdfs_base = '/hdfs/store/user/ekoenig/MonoZprimeJet/PostFiles/'
+hdfs_base = '/hdfs/store/user/ekoenig/MonoJet/PostFiles/'
 
 valid_years = ['2016','2017','2018']
-valid_regions = ['SignalRegion','SingleEleCR','SingleMuCR','DoubleEleCR','DoubleMuCR']
+valid_regions = ['SignalRegion','SingleEleCR','SingleMuCR','DoubleEleCR','DoubleMuCR','GammaCR']
 
 options = {
-  "confirm":False
+  "confirm":True
 }
 
 def confirm_all(): options["confirm"] = True; return option["confirm"]    
-def valid_ans(ans): return ans == 'y' or ans == 'Y' or options["confirm"]
+def valid_ans(ans): return ans == 'y' or ans == 'Y'
 def valid_hdfs(directory):
     if not os.path.isdir(hdfs_base): raise ValueError("%s is not a valid hdfs base" % hdfs_base)
     subdirectories = directory.split('/')
     def build_directory(directory):
         if not os.path.isdir(directory):
+            if options['confirm']: os.mkdir(directory); return
             ans = raw_input("%s not found, do you want to make it (y/Y)? " % directory)
             if valid_ans(ans): os.mkdir(directory)
             else: print 'Exiting'; exit()
