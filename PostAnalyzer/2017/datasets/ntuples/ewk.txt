@@ -1,13 +1,13 @@
 >>WW
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/EWK/WW/0000/
 
->>WWto2L2Nu
+>>WWTo2L2Nu
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/EWK/WWTo2L2Nu/0000/
 
->>WWto4Q
+>>WWTo4Q
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/EWK/WWTo4Q/0000/
 
->>WWtoLNuQQ
+>>WWToLNuQQ
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_102X_JECv32/EWK/WWToLNuQQ/0000/
 
 >>WZ

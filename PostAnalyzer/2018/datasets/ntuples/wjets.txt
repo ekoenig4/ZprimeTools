@@ -30,13 +30,3 @@
 >>2500toInf
 /hdfs/store/user/varuns/NTuples/MC/MC2018_RunIIAutumn18_102X_JECv19/WJets/WJetsToLNu_HT2500-Inf/0000/
 
->>MLM
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0000/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0001/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0002/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0003/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0004/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0005/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0006/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0007/
-/hdfs/store/user/ekoenig/MonoZprimeJet/NTuples/2018/MC2018_Autumn18_June2019/WJets/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/0008/
