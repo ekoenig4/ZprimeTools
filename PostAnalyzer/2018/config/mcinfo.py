@@ -12,6 +12,8 @@ lumi_by_era = {"SingleEleCR":{"A":14024,"B":7061,"C":6895,"D":31720},
                "DoubleMuCR":{"A":14024,"B":7061,"C":6895,"D":31720},
                "SignalRegion":{"A":3506}}
 
+region_masks = {}
+
 WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];

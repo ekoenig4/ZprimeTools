@@ -6,7 +6,7 @@ from config import config
 
 gROOT.SetBatch(1)
 
-out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots%s/"
+out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
 def SaveCanvas(c,sample,uncname):
     nhist = config['regions'][sample.region+'/']
     variable = sample.variable.replace('_%s' % nhist,'')

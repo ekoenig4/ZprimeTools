@@ -10,7 +10,7 @@ import copy
 gROOT.SetBatch(1)
 # gROOT.SetBatch(0)
 
-out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoJet/Plots%s/TransferFactors/%s/"
+out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/TransferFactors/%s/"
 processMap = {
     "SignalRegion": {
         "Z":{"proc":"ZJets","label":"Z(#nu#nu)",'text':'nn'},
