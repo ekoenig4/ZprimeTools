@@ -6,7 +6,7 @@ from samplenames import samplenames
 from array import array
 import mergeFiles as merge
 from changeBinning import binninglist
-from Process import Process
+from Process import Process,Nuisance
 from utilities import *
 
 parser.add_argument("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
@@ -19,60 +19,6 @@ parser.add_argument("-b","--binning",help="specify function for rebinning histog
 parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",default=False)
 parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
 parser.add_argument("-d","--directory",help="Specify directory to get post files from",type=valid_directory)
-            
-def GetRatio(hs_num,hs_den):
-    nbins = hs_num.GetNbinsX();  
-    Ratio = hs_num.Clone("Ratio");
-    last = hs_den.Clone("last");
-    # for ibin in range(1,nbins+1):
-    #     stackcontent = last.GetBinContent(ibin);
-    #     stackerror = last.GetBinError(ibin);
-    #     datacontent = hs_num.GetBinContent(ibin);
-    #     dataerror = hs_num.GetBinError(ibin);
-    #     # print "bin: "+str(ibin)+"stackcontent: "+str(stackcontent)+" and data content: "+str(datacontent)
-    #     ratiocontent=0;
-    #     if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-    #     error=0;
-    #     if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-    #     else: error = 2.07
-    #     # print "bin: "+str(ibin)+" ratio content: "+str(ratiocontent)+" and error: "+str(error);
-    #     Ratio.SetBinContent(ibin,ratiocontent);
-    #     Ratio.SetBinError(ibin,error);
-    Ratio.Divide(last)
-    return Ratio
-#######################################
-def Get2DRatio(hs_num,hs_den):
-    xbins = hs_num.GetNbinsX()
-    ybins = hs_num.GetNbinsY()
-    Ratio = hs_num.Clone("Ratio")
-    last = hs_den.Clone("last")
-    for xbin in range(1,xbins+1):
-        for ybin in range(1,ybins+1):
-            stackcontent = last.GetBinContent(xbin,ybin)
-            stackerror = last.GetBinError(xbin,ybin)
-            datacontent = hs_num.GetBinContent(xbin,ybin)
-            dataerror = hs_num.GetBinError(xbin,ybin)
-            ratiocontent = 0
-            if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
-            error=0;
-            if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
-            else: error = 2.07
-            Ratio.SetBinContent(xbin,ybin,ratiocontent)
-            Ratio.SetBinError(xbin,ybin,error)
-    return Ratio
-########################################
-def GetUncBand(up,dn):
-    xbins = up.GetNbinsX()
-    x = []; y = []; ex = []; ey = []
-    nbins = 0
-    for ibin in range(1,xbins+1):
-        if up.GetBinContent(ibin) == 0 and dn.GetBinContent(ibin) == 0: continue
-        x.append(up.GetBinCenter(ibin))
-        ex.append(up.GetBinWidth(ibin)/2)
-        y.append((up.GetBinContent(ibin)+dn.GetBinContent(ibin))/2)
-        ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
-        nbins += 1
-    return TGraphErrors(nbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
 
 class datamc(object):
 
@@ -213,7 +159,7 @@ class datamc(object):
         for label,binning in binninglist.iteritems():
             if label in self.args.binning:
                 self.varname += self.args.binning
-                return binning(self.args.binning,self) 
+                return binning(self.args.binning,self,'%s_%s' % (self.region,self.variable)) 
         return None
     ###############################################################################################################
             
@@ -243,7 +189,8 @@ class datamc(object):
             if process.proctype != 'bkg': continue
             if sumOfBkg is None: sumOfBkg = process.histo.Clone('SumOfBkg')
             else:                sumOfBkg.Add(process.histo)
-        return sumOfBkg
+        self.sumOfBkg = sumOfBkg
+        return self.sumOfBkg
     ###############################################################################################################
 
     def getSignalInfo(self,scale=1):
@@ -307,54 +254,33 @@ class datamc(object):
             process.removeUnc(nuisance)
     ###############################################################################################################
 
-    def fullUnc(self,unclist=None,show=None):
-        if unclist == None:
-            for nuisance in self.nuisances: self.addUnc(nuisance,show=show)
+    def fullUnc(self,unclist=None,stat=True,show=None):
+        if unclist is None: unclist = self.nuisances.keys()
         for name,process in self.processes.iteritems():
-            if process.proctype == 'data': continue
-            process.fullUnc()
-            if 'Total' in process.nuisances:
-                temp = process.nuisances['Total']['Up']
-
-        up = temp.Clone('totalUp'); dn = temp.Clone('totalDown')
+            for unc in unclist:
+                if unc not in process.nuisances: process.addUnc(unc)
+            process.fullUnc(stat=stat)
         norm = self.getSumOfBkg()
-        for ibin in range(1,up.GetNbinsX()+1):
-            up[ibin] = 0; dn[ibin] = 0
-            for name,process in self.processes.iteritems():
-                if process.proctype != 'bkg': continue
-                if norm[ibin] == 0: continue
-                tmpUp = abs(process.histo[ibin] - process.nuisances['Total']['Up'][ibin])
-                tmpDn = abs(process.histo[ibin] - process.nuisances['Total']['Down'][ibin])
-                if tmpUp == tmpDn: continue
-                binUp = max(tmpUp,tmpDn)
-                binDn = min(tmpUp,tmpDn)
-                # print ibin,name,process.nuisances['Total']['Down'][ibin],process.nuisances['Total']['Up'][ibin]
-                # print ibin,name,binDn,process.histo[ibin],binUp
-                up[ibin] = up[ibin] + binUp**2
-                # print dn[ibin],'->',
-                dn[ibin] = dn[ibin] + binDn**2
-                # print dn[ibin]
-            rUp = TMath.Sqrt(up[ibin]); rDn = TMath.Sqrt(dn[ibin])
-            # print dn[ibin],up[ibin]
-            up[ibin] = norm[ibin] + rUp
-            dn[ibin] = norm[ibin] - rDn
-            # print '- %f | %f | + %f' % (dn[ibin],norm[ibin],up[ibin])
-        self.nuisances['Total'] = {'Up':up,'Down':dn}
+        up = norm.Clone('TotalUp'); dn = norm.Clone('TotalDown'); up.Reset(); dn.Reset()
+        nbins = norm.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            up[ibin] = sum( process.nuisances['Total'].up[ibin]**2 for _,process in self.processes.iteritems() if process.proctype == 'bkg' )
+            dn[ibin] = sum( process.nuisances['Total'].dn[ibin]**2 for _,process in self.processes.iteritems() if process.proctype == 'bkg' )
+            if stat:
+                staterr = sum( process.histo.GetBinError(ibin) for _,process in self.processes.iteritems() if process.proctype == 'bkg' )
+                up[ibin] += staterr; dn[ibin] += staterr
+            up[ibin] = TMath.Sqrt(up[ibin])
+            dn[ibin] = TMath.Sqrt(dn[ibin])
+        self.nuisances['Total'] = Nuisance('Total',up,dn)
     ###############################################################################################################
 
     def getUncBand(self):
-        if 'Total' not in self.nuisances: self.fullUnc(show=False)
+        if 'Total' not in self.nuisances: self.fullUnc(stat=True,show=False)
         data = self.processes['Data'].histo
-        bkgUp = self.nuisances['Total']['Up']
-        bkgDn = self.nuisances['Total']['Down']
-        # for ibin in range(1,data.GetNbinsX()+1):
-        #     if bkgDn[ibin] != 0: print ibin,data[ibin],bkgDn[ibin],data[ibin]/bkgDn[ibin]
-        #     if bkgUp[ibin] != 0: print ibin,data[ibin],bkgUp[ibin],data[ibin]/bkgUp[ibin]
+        bkgUp,bkgDn = self.nuisances['Total'].GetHistos(self.sumOfBkg)
         ratio_up = GetRatio(data,bkgUp)
         ratio_dn = GetRatio(data,bkgDn)
-        
-        uncband = GetUncBand(ratio_up,ratio_dn)
-        
+        uncband = GetUncBand(ratio_up,ratio_dn,norm=1)
         return uncband
     ###############################################################################################################
     

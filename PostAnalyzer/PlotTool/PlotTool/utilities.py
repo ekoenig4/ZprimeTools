@@ -1,6 +1,47 @@
 import os
 import sys
-
+from array import array
+            
+def GetRatio(hs_num,hs_den):
+    nbins = hs_num.GetNbinsX();
+    ratio = hs_num.Clone()
+    ratio.Divide(hs_den)
+    return ratio
+#######################################
+def Get2DRatio(hs_num,hs_den):
+    xbins = hs_num.GetNbinsX()
+    ybins = hs_num.GetNbinsY()
+    Ratio = hs_num.Clone("Ratio")
+    last = hs_den.Clone("last")
+    for xbin in range(1,xbins+1):
+        for ybin in range(1,ybins+1):
+            stackcontent = last.GetBinContent(xbin,ybin)
+            stackerror = last.GetBinError(xbin,ybin)
+            datacontent = hs_num.GetBinContent(xbin,ybin)
+            dataerror = hs_num.GetBinError(xbin,ybin)
+            ratiocontent = 0
+            if(datacontent!=0 and stackcontent != 0):ratiocontent = ( datacontent) / stackcontent
+            error=0;
+            if(datacontent!=0 and stackcontent != 0): error = ratiocontent*((dataerror/datacontent)**2 + (stackerror/stackcontent)**2)**(0.5)
+            else: error = 2.07
+            Ratio.SetBinContent(xbin,ybin,ratiocontent)
+            Ratio.SetBinError(xbin,ybin,error)
+    return Ratio
+########################################
+def GetUncBand(up,dn,norm=None):
+    xbins = up.GetNbinsX()
+    x = []; y = []; ex = []; ey = []
+    nbins = 0
+    for ibin in range(1,xbins+1):
+        if up.GetBinContent(ibin) == 0 and dn.GetBinContent(ibin) == 0: continue
+        x.append(up.GetBinCenter(ibin))
+        ex.append(up.GetBinWidth(ibin)/2)
+        if norm is None: y.append((up.GetBinContent(ibin)+dn.GetBinContent(ibin))/2)
+        else:            y.append(norm)
+        ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
+        nbins += 1
+    from ROOT import TGraphErrors
+    return TGraphErrors(nbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
 def valid_directory(directory):
     if not os.path.isdir(directory): raise ValueError("%s is not a valid directory" % directory)
     return directory

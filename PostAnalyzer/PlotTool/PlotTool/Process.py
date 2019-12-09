@@ -31,15 +31,11 @@ def IsBranch(variable,tfile):
     isBranch = tree.GetListOfBranches().Contains(b_variable)
     # tdir.Close()
     return isBranch
-def GetBranch(b_template,b_variable,tree,weight,cut):
-    b_template.Reset()
-    b_name = 'template_%s_%s_%s' % (b_variable,tree.GetName(),weight)
-    histo = b_template.Clone(b_name)
-    histo.SetDirectory(gDirectory)
+def GetBranch(b_template,b_name,b_variable,tree,weight,cut):
+    histo = b_template.Clone(b_name); histo.Reset()
     if not tree.GetListOfBranches().Contains(weight): weight = 'weight'
     if cut == '': tree.Draw('%s>>%s' % (b_variable,b_name),weight,'goff')
     else:         tree.Draw('%s>>%s' % (b_variable,b_name),'%s*(%s%s)' % (weight,b_variable,cut),'goff')
-    
     return histo
 def GetNuisanceList(tfile,dirname):
     tdir = tfile.GetDirectory(dirname)
@@ -49,7 +45,30 @@ def GetNuisanceList(tfile,dirname):
     nuisances = {}
     for shape in shapelist: nuisances[shape] = {type:'shape'}
     for scale in scalelist: nuisances[scale] = {type:'scale'}
+    nuisances['Stat'] = True
     return nuisances
+class Nuisance(object):
+    def __init__(self,name,up,dn,norm=None):
+        self.name = name
+        self.up,self.dn = up,dn
+        if norm is None: return
+        nbins = norm.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            diffUp = norm[ibin] - up[ibin]; diffDn = norm[ibin] - dn[ibin]
+            self.up[ibin] = abs(max(diffUp,diffDn))
+            self.dn[ibin] = abs(min(diffUp,diffDn))
+    def Integral(self,norm):
+        nbins = norm.GetNbinsX()
+        intUp = sum( norm[ibin] + self.up[ibin] for ibin in range(1,nbins+1) )
+        intDn = sum( norm[ibin] - self.dn[ibin] for ibin in range(1,nbins+1) )
+        return intUp,intDn
+    def GetHistos(self,norm):
+        up = self.up.Clone(); dn = self.dn.Clone()
+        nbins = norm.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            up[ibin] = norm[ibin] + self.up[ibin]
+            dn[ibin] = norm[ibin] - self.dn[ibin]
+        return up,dn
 class SubProcess(object):
     def __init__(self,name,filename,tfile,xsec):
         self.name = name
@@ -82,14 +101,15 @@ class SubProcess(object):
             self.tree = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
     def getNhisto(self,variable):
         self.tfile.cd()
+        self.b_variable = variable
         hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
         self.histo = hs
     def getBranch(self,b_template,b_variable,treename,weight,cut):
         self.tfile.cd()
         self.setTree(treename)
+        self.b_variable = b_variable
         if self.tree.GetName() == "norm": self.nuisances = GetNuisanceList(self.tfile,self.dirname)
-        self.histo = GetBranch(b_template,b_variable,self.tree,weight,cut)
-        self.histo.SetName('%s_%s' % (b_variable,self.filename))
+        self.histo = GetBranch(b_template,'%s_%s' % (b_variable,self.filename),b_variable,self.tree,weight,cut)
         if 'post' in dir(b_template): b_template.post(self.histo)
     def fillRaw(self):
         self.raw_total = self.histo.Integral()
@@ -99,25 +119,40 @@ class SubProcess(object):
         self.scaling = (1./self.cutflow) * self.xsec * lumi
         self.histo.Scale(self.scaling)
         self.scaled_total = self.histo.Integral()
+        self.addStat()
+    def addStat(self):
+        self.tfile.cd()
+        up = self.histo.Clone('%s_%s_StatUp' % (self.b_variable,self.filename)); up.Reset()
+        dn = self.histo.Clone('%s_%s_StatDn' % (self.b_variable,self.filename)); dn.Reset()
+        nbins = self.histo.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            up[ibin] = self.histo.GetBinError(ibin)
+            dn[ibin] = self.histo.GetBinError(ibin)
+        self.nuisances['Stat'] = Nuisance('Stat',up,dn)
     def addUnc(self,nuisance,b_template,b_variable,cut):
         if nuisance not in self.nuisances:
-            self.nuisances[nuisance] = {'Up':self.histo,'Down':self.histo}
+            up = self.histo.Clone('%s_%s_%sUp'% (b_variable,self.filename,nuisance) )
+            dn = self.histo.Clone('%s_%s_%sDown'% (b_variable,self.filename,nuisance) )
+            self.nuisances[nuisance] = Nuisance(nuisance,up,dn,self.histo)
             return
+        if type(self.nuisances[nuisance]) == Nuisance: return
         info = self.nuisances[nuisance]
         isScale = info[type] == 'scale'
         self.tfile.cd()
+        tmpmap = {}
         for variation in ('Up','Down'):
+            b_name = '%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation)
             if isScale:
                 self.setTree('norm')
-                hs_unc = GetBranch(b_template,b_variable,self.tree,nuisance+variation,cut)
+                hs_unc = GetBranch(b_template,b_name,b_variable,self.tree,nuisance+variation,cut)
             else:
                 self.setTree(nuisance+variation)
-                hs_unc = GetBranch(b_template,b_variable,self.tree,'weight',cut)
-            hs_unc.SetName('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
+                hs_unc = GetBranch(b_template,b_name,b_variable,self.tree,'weight',cut)
             hs_unc.Scale(self.scaling)
-            info[variation] = hs_unc
+            tmpmap[variation] = hs_unc
+        self.nuisances[nuisance] = Nuisance(nuisance,tmpmap['Up'],tmpmap['Down'],self.histo)
 class Process(object):
-    def __init__(self,name,filenames,xsecs,proctype,leg=None,lumi=1,color = None):
+    def __init__(self,name,filenames,xsecs,proctype,leg=None,lumi=1,color=None):
         ValidProctype(proctype)
         self.name = name
         self.leg = leg
@@ -187,13 +222,11 @@ class Process(object):
         tfile = iter(self).next().tfile
         dirname,_ = GetDirname(variable)
         tdir = tfile.Get(dirname)
-        if 'jetPt' in variable:    variable = variable.replace('jetPt','j1pT')
-        if 'recoil' in variable: variable = variable.replace('recoil','pfMET')
-        self.b_template = tdir.Get(variable)
+        self.b_template = tdir.Get(variable).Clone('%s_%s_temp' % (self.name,variable))
     def getBranch(self,variable,b_template,cut):
         self.isBranch = True
         if b_template == None: self.getFileTemplate(variable);
-        else: self.b_template = b_template
+        elif self.b_template != b_template: self.b_template = b_template
         self.cut = cut
         
         dirname,ndir = GetDirname(variable,sub='trees')
@@ -250,48 +283,40 @@ class Process(object):
             self.nuisances[nuisance] = {}
         for subprocess in self: subprocess.addUnc(nuisance,self.b_template,self.b_variable,self.cut)
         if self.proctype == 'signal': return
-        for variation in ('Up','Down'):
-            histo = self.b_template.Clone('%s_%s%s' % (self.name,nuisance,variation))
-            histo.Reset()
-            for subprocess in self:
-                histo.Add(subprocess.nuisances[nuisance][variation])
-                subprocess.nuisances[nuisance].pop(variation)
-            
-            self.nuisances[nuisance][variation] = histo
+        nbins = self.histo.GetNbinsX()
+        up = self.histo.Clone('%s_%s_%sUp' % (self.b_variable,self.name,nuisance))
+        dn = self.histo.Clone('%s_%s_%sDown' % (self.b_variable,self.name,nuisance))
+        for ibin in range(1,nbins+1):
+            up[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].up[ibin]**2 for subprocess in self ) )
+            dn[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].dn[ibin]**2 for subprocess in self ) )
+        self.nuisances[nuisance] = Nuisance(nuisance,up,dn)
         if not show or self.scaled_total == 0: return
-	varup = self.nuisances[nuisance]['Up'].Integral()/self.scaled_total
-        vardn = self.nuisances[nuisance]['Down'].Integral()/self.scaled_total
+        intUp,intDn = self.nuisances[nuisance].Integral(self.histo)
+	varup = intUp/self.scaled_total
+        vardn = intDn/self.scaled_total
         print '{0:<20}'.format('%s %s' % (nuisance,self.name))+'+%f/-%f' % (varup,vardn)
     def removeUnc(self,nuisance):
         if nuisance not in self.nuisances: return
         if self.proctype == 'signal':
             for subprocess in self:
-                subprocess.nuisances[nuisance].pop('Up')
-                subprocess.nuisances[nuisance].pop('Down')
+                subprocess.nuisances.pop(nuisance)
         else:
-            self.nuisances[nuisance].pop('Up')
-            self.nuisances[nuisance].pop('Down')
-    def fullUnc(self):
+            self.nuisances.pop(nuisance)
+    def fullUnc(self,unclist=None,stat=True,show=False):
         if not self.isBranch: return
         if self.proctype != 'bkg': return
-        up = self.b_template.Clone('%s_totalUp' % self.name)
-        dn = self.b_template.Clone('%s_totalDown' % self.name)
+        if unclist is None: unclist = self.nuisances.keys()
+        if not stat and 'Stat' in unclist: unclist.remove('Stat')
+        elif stat: unclist.append('Stat')
+        for nuisance in unclist: self.addUnc(nuisance,show=show)
+        up = self.b_template.Clone('%s_TotalUp' % self.name);  up.Reset()
+        dn = self.b_template.Clone('%s_TotalDown' % self.name); dn.Reset()
         norm = self.histo
-        unclist = [ nuisance for nuisance in self.nuisances if 'Up' in self.nuisances[nuisance]]
-        for ibin in range(1,self.b_template.GetNbinsX()+1):
-            up[ibin] = 0; dn[ibin] = 0;
-            for nuisance in unclist:
-                if norm[ibin] == 0: continue
-                tmpUp = self.nuisances[nuisance]['Up'][ibin]
-                tmpDn = self.nuisances[nuisance]['Down'][ibin]
-                if tmpUp == tmpDn: continue
-                binUp = max(tmpUp,tmpDn); binDn = min(tmpUp,tmpDn)
-
-                up[ibin] = up[ibin] + (norm[ibin] - binUp)**2
-                dn[ibin] = dn[ibin] + (norm[ibin] - binDn)**2
-            up[ibin] = norm[ibin] + TMath.Sqrt(up[ibin])
-            dn[ibin] = norm[ibin] - TMath.Sqrt(dn[ibin])
-        self.nuisances['Total'] = {'Up':up,'Down':dn}
+        for ibin in range(1,norm.GetNbinsX()+1):
+            if norm[ibin] == 0: continue
+            up[ibin] = norm[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].up[ibin]/norm[ibin])**2 for nuisance in unclist) )
+            dn[ibin] = norm[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].dn[ibin]/norm[ibin])**2 for nuisance in unclist) )
+        self.nuisances['Total'] = Nuisance('Total',up,dn)
     def add(self,other):
         if self.name != other.name: raise ValueError("%s is not %s" % (self.name,other.name))
         # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))

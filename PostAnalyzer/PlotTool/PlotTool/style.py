@@ -81,8 +81,9 @@ def MCStyle(hs_mc,color):
 
 def UncBandStyle(uncband):
     uncband.SetTitle("")
-    uncband.SetFillStyle(3144)
-    uncband.SetFillColor(kGray+2)
+    # uncband.SetFillStyle(3144)
+    uncband.SetFillStyle(2001)
+    uncband.SetFillColor(kGray+1)
 ###################################################################
 
 def fillStack(samples,hs_datamc):

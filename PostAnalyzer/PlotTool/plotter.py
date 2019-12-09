@@ -110,10 +110,10 @@ def plotVariable(samples,variable):
     RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("A");
 
-    # if any( samples.nuisances ):
-    #     uncband = samples.getUncBand()
-    #     UncBandStyle(uncband)
-    #     uncband.Draw('2same')
+    if any( samples.nuisances ):
+        uncband = samples.getUncBand()
+        UncBandStyle(uncband)
+        uncband.Draw('2same')
     Ratio.Draw('pex0same')
     line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");

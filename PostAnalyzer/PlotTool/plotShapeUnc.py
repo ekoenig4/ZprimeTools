@@ -18,14 +18,11 @@ def SaveCanvas(c,sample,uncname):
     outname = "%s_%s" % (uncname,varname)
     c.SaveAs( "%s/%s.png" % (outdir,outname) )
 def plotCRUnc(sample,uncname):
-    print 'Fetching %s' % uncname
-    sample.addUnc(uncname)
     if 'Single' in sample.region: process = 'WJets'
     if 'Double' in sample.region: process = 'DYJets'
 
     norm = sample.processes[process].histo.Clone('norm')
-    up   = sample.processes[process].nuisances[uncname]['Up'].Clone('up')
-    dn   = sample.processes[process].nuisances[uncname]['Down'].Clone('dn')
+    up,dn = sample.processes[process].nuisances[uncname].GetHistos(norm)
 
     r_up = up.Clone('ratio_up'); r_up.Divide(norm)
     r_dn = dn.Clone('ratio_dn'); r_dn.Divide(norm)
@@ -118,19 +115,15 @@ def plotCRUnc(sample,uncname):
     yaxis.Draw("SAME");
 
     SaveCanvas(c,sample,uncname)
-    sample.removeUnc(uncname)
     
 def plotSRUnc(sample,uncname):
     print 'Fetching %s' % uncname
-    sample.addUnc(uncname)
     z_norm = sample.processes['ZJets'].histo.Clone('z_norm')
     w_norm = sample.processes['WJets'].histo.Clone('w_norm')
 
-    z_up = sample.processes['ZJets'].nuisances[uncname]['Up'].Clone('z_up')
-    z_dn = sample.processes['ZJets'].nuisances[uncname]['Down'].Clone('z_dn')
+    z_up,z_dn = sample.processes['ZJets'].nuisances[uncname].GetHistos(z_norm)
 
-    w_up = sample.processes['WJets'].nuisances[uncname]['Up'].Clone('w_up')
-    w_dn = sample.processes['WJets'].nuisances[uncname]['Down'].Clone('w_dn')
+    w_up,w_dn = sample.processes['WJets'].nuisances[uncname].GetHistos(w_norm)
 
     z_r_up = z_up.Clone('ratio_up'); z_r_up.Divide(z_norm)
     z_r_dn = z_dn.Clone('ratio_dn'); z_r_dn.Divide(z_norm)
@@ -230,7 +223,6 @@ def plotSRUnc(sample,uncname):
     yaxis.Draw("SAME");
 
     SaveCanvas(c,sample,uncname)
-    sample.removeUnc(uncname)
 
 def runRegion(args):
     sample = datamc()
@@ -246,6 +238,9 @@ def runRegion(args):
 
     print 'Running for %s' % nvariable
     sample.initiate(nvariable)
+    for uncname in variations:
+        print 'Fetching %s' % uncname
+        sample.addUnc(uncname)
    
     variations = variations 
     if sample.region == 'SignalRegion':

@@ -35,25 +35,67 @@ processMap = {
         "Z":{"proc":"ZJets","label":"Z(ll)",'text':'ll'},
     },
 }
-
-def SetBounds(hslist):
-    binlist = range(1,hslist[0].GetNbinsX()+1)
-    maxY = max( max( hs[ibin] for hs in hslist ) for ibin in binlist )
-    minY = min( min( hs[ibin] for hs in hslist if hs[ibin] != 0 ) for ibin in binlist )
-
-    hslist[0].SetMinimum(minY*0.8)
-    hslist[0].SetMaximum(maxY*1.2)
-def GetAVUncertainty(norm,ajets,vjets,unclist):
-    for v_info in (ajets,vjets):
-        for unc in unclist: v_info.addUnc(unc)
-        v_info.fullUnc()
+def FixedRatio(num,den):
+    ratio = GetRatio(num,den)
+    for ibin in range(1,num.GetNbinsX()+1):
+        if den[ibin] == 0 or num[ibin] == 0: continue
+        rv = num[ibin]/den[ibin];
+        re = rv*TMath.Sqrt(sum( (hs.GetBinError(ibin)/hs.GetBinContent(ibin))**2 for hs in (num,den)))
+        ratio.SetBinError(ibin,re)
+    return ratio
+def SetBounds(hs,a_region,v_region):
+    gPad.Update()
+    ymin,ymax = gPad.GetUymin(),gPad.GetUymax()
+    hs.SetMinimum(ymin*0.8)
+    hs.SetMaximum(ymax*1.2)
+    # return	
+    if a_region == 'SignalRegion' and v_region == 'SignalRegion':
+        hs.SetMinimum(0.3); hs.SetMaximum(2.6)
+    if a_region == 'DoubleEleCR' and v_region == 'SingleEleCR':
+        hs.SetMinimum(0.015); hs.SetMaximum(0.135)
+    if a_region == 'DoubleMuCR' and v_region == 'SingleMuCR':
+        hs.SetMinimum(0.01); hs.SetMaximum(0.12)
+    if a_region == 'SignalRegion' and v_region == 'SingleEleCR':
+        hs.SetMinimum(0); hs.SetMaximum(8)
+    if a_region == 'SignalRegion' and v_region == 'SingleMuCR':
+        hs.SetMinimum(0); hs.SetMaximum(5)
+    if a_region == 'SignalRegion' and v_region == 'DoubleEleCR':
+        hs.SetMinimum(17); hs.SetMaximum(40)
+    if a_region == 'SignalRegion' and v_region == 'DoubleMuCR':
+        hs.SetMinimum(15); hs.SetMaximum(28)
+    if a_region == 'DoubleLepCR' and v_region == 'SingleLepCR':
+        hs.SetMinimum(0.05); hs.SetMaximum(0.12)
+def GetAVUncertainty(norm,ajets,vjets):
+    unclist = [
+            "QCD_Scale",
+            "QCD_Shape",
+            "QCD_Proc",
+            "NNLO_EWK",
+            "NNLO_Miss",
+            "NNLO_Sud",
+            "QCD_EWK_Mix"]
+    class Info: pass
+    ajets_info,vjets_info = Info(),Info()
+    if type(ajets) == Process and type(vjets) == Process:
+        for v_info in (ajets,vjets):
+            for unc in unclist: v_info.addUnc(unc)
+            v_info.fullUnc()
+        ajets_info.norm = ajets.histo
+        ajets_info.unc = ajets.nuisances['Total']
+        vjets_info.norm = vjets.histo
+        vjets_info.unc = vjets.nuisances['Total']
+    elif type(ajets) == datamc and type(vjets) == datamc:
+        for v_info in (ajets,vjets): v_info.fullUnc(unclist=unclist)
+        ajets_info.norm = ajets.getSumOfBkg()
+        ajets_info.unc = ajets.nuisances['Total']
+        vjets_info.norm = vjets.getSumOfBkg()
+        vjets_info.unc = vjets.nuisances['Total']
     nbins = norm.GetNbinsX()+1
-    up,dn = norm.Clone(),norm.Clone()
-    for ibin in range(1,nbins):
-        percUp = TMath.Sqrt(sum( (1-vjets.nuisances['Total']['Up'][ibin]/vjets.histo[ibin])**2 for vjets in (ajets,vjets) ))
-        percDn = TMath.Sqrt(sum( (1-vjets.nuisances['Total']['Down'][ibin]/vjets.histo[ibin])**2 for vjets in (ajets,vjets) ))
-        up.SetBinContent(ibin,norm[ibin]*(1+percUp))
-        dn.SetBinContent(ibin,norm[ibin]*(1-percDn))
+    up,dn = norm.Clone(),norm.Clone(); up.Reset(); dn.Reset()
+    for ibin in range(1,nbins+1):
+        if norm[ibin] == 0: continue
+        up[ibin] = norm[ibin] * (1 + TMath.Sqrt( sum( (info.unc.up[ibin]/info.norm[ibin])**2 for info in (ajets_info,vjets_info) if info.norm[ibin] != 0) ))
+        dn[ibin] = norm[ibin] * (1 - TMath.Sqrt( sum( (info.unc.dn[ibin]/info.norm[ibin])**2 for info in (ajets_info,vjets_info) if info.norm[ibin] != 0) ))
     return GetUncBand(up,dn)
     
 def plotAVTF(a_sample,v_sample,aboson,vboson):
@@ -70,16 +112,8 @@ def plotAVTF(a_sample,v_sample,aboson,vboson):
     ajets_norm = ajets.histo
     vjets_norm = vjets.histo
 
-    avlink_norm = GetRatio(ajets_norm,vjets_norm)
-    # unclist = [
-    #         "QCD_Scale",
-    #         "QCD_Shape",
-    #         "QCD_Proc",
-    #         "NNLO_EWK",
-    #         "NNLO_Miss",
-    #         "NNLO_Sud",
-    #         "QCD_EWK_Mix"]
-    # avlink_unc= GetAVUncertainty(avlink_norm,ajets,vjets,unclist)
+    avlink_norm = FixedRatio(ajets_norm,vjets_norm)
+    avlink_unc= GetAVUncertainty(avlink_norm,ajets,vjets)
 
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
@@ -96,31 +130,27 @@ def plotAVTF(a_sample,v_sample,aboson,vboson):
     pad1.SetBorderMode(0);
     # pad1.SetBottomMargin(0.);
 
+    avlink_unc.Draw("a2same")
     avlink_norm.Draw("pex0same")
+    UncBandStyle(avlink_unc)
     avlink_norm.SetLineWidth(2)
     avlink_norm.SetLineColor(kBlack);
     avlink_norm.SetMarkerStyle(20);
     avlink_norm.SetMarkerSize(1);
     avlink_norm.SetTitle("")
-    avlink_norm.GetYaxis().SetTitle("Ratio_{%s/%s}" % (ajetinfo['label'],vjetinfo['label']))
-    avlink_norm.GetYaxis().CenterTitle()
-    avlink_norm.GetYaxis().SetTitleOffset(1.3)
-    avlink_norm.GetXaxis().SetTitle(a_sample.name)
-    avlink_norm.GetXaxis().SetTitleOffset(1.2)
-    
-    gPad.Update()
-    ymin,ymax = gPad.GetUymin(),gPad.GetUymax()
-    print ymin,ymax
-    avlink_norm.SetMinimum(ymin*0.8)
-    avlink_norm.SetMaximum(ymax*1.2)
+    avlink_unc.GetYaxis().SetTitle("Ratio_{%s/%s}" % (ajetinfo['label'],vjetinfo['label']))
+    avlink_unc.GetYaxis().CenterTitle()
+    avlink_unc.GetYaxis().SetTitleOffset(1.3)
+    avlink_unc.GetXaxis().SetTitle(a_sample.name)
+    avlink_unc.GetXaxis().SetTitleOffset(1.2)
+
+    SetBounds(avlink_unc,a_sample.region,v_sample.region)
 
     texCMS,texLumi = getCMSText(lumi_label,year)
     for tex in (texCMS,texLumi): tex.SetTextSize(0.03)
     leg = getLegend(xmin=0.5,xmax=0.7)
     leg.AddEntry(avlink_norm,"Transfer Factor (Stat Uncert)","p")
     leg.Draw()
-
-    # SetBounds([zwlink_norm])
     
     variable,binning = re.split('_\d*',varname)
     outdir = out_dir % (year,variable)
@@ -147,8 +177,9 @@ def plotAVTF_ratio(a_sample,v_sample,aboson,vboson):
     ajets_data_norm = ajets_data.histo
     vjets_data_norm = vjets_data.histo
 
-    avlink_mc = GetRatio(ajets_mc_norm,vjets_mc_norm)
-    avlink_data = GetRatio(ajets_data_norm,vjets_data_norm)
+    avlink_mc = FixedRatio(ajets_mc_norm,vjets_mc_norm)
+    avlink_unc= GetAVUncertainty(avlink_mc,a_sample,v_sample)
+    avlink_data = FixedRatio(ajets_data_norm,vjets_data_norm)
 
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
@@ -164,23 +195,21 @@ def plotAVTF_ratio(a_sample,v_sample,aboson,vboson):
     pad1.SetBottomMargin(0.);
 
     DataStyle(avlink_data)
+    UncBandStyle(avlink_unc)
 
-    avlink_mc.Draw("hist")
+    avlink_unc.Draw("a2same")
+    avlink_mc.Draw("histsame")
     avlink_data.Draw("psame")
     
-    avlink_mc.SetTitle("")
-    avlink_mc.GetYaxis().SetTitle("Ratio_{%s/%s}" % (ajetinfo['label'],vjetinfo['label']))
-    avlink_mc.GetYaxis().CenterTitle()
-    # avlink_mc.GetYaxis().SetTitleOffset(1.8)
-    avlink_mc.GetXaxis().SetTitle("");
-    avlink_mc.GetXaxis().SetTickLength(0);
-    avlink_mc.GetXaxis().SetLabelOffset(999);
-
-    gPad.Update()
-    ymin,ymax = gPad.GetUymin(),gPad.GetUymax()
-    print ymin,ymax
-    avlink_mc.SetMinimum(ymin*0.8)
-    avlink_mc.SetMaximum(ymax*1.2)
+    avlink_unc.SetTitle("")
+    avlink_unc.GetYaxis().SetTitle("Ratio_{%s/%s}" % (ajetinfo['label'],vjetinfo['label']))
+    avlink_unc.GetYaxis().CenterTitle()
+    # avlink_unc.GetYaxis().SetTitleOffset(1.8)
+    avlink_unc.GetXaxis().SetTitle("");
+    avlink_unc.GetXaxis().SetTickLength(0);
+    avlink_unc.GetXaxis().SetLabelOffset(999);
+    
+    SetBounds(avlink_unc,a_sample.region,v_sample.region)
 
     ##############################
     leg = getLegend(xmin=0.5,xmax=0.7)
@@ -197,7 +226,7 @@ def plotAVTF_ratio(a_sample,v_sample,aboson,vboson):
     pad2.SetTopMargin(0);
     pad2.SetBottomMargin(0.35);
 
-    Ratio = GetRatio(avlink_data,avlink_mc)
+    Ratio = FixedRatio(avlink_data,avlink_mc)
 
     rymin = 0.65; rymax = 1.35
     RatioStyle(Ratio,rymin,rymax)
@@ -256,15 +285,15 @@ def plotTransfer(variable,samplemap):
     plotAVTF(samplemap["SignalRegion/"],samplemap["SignalRegion/"],"Z","W")
 
     
-    samplemap["DoubleLepCR/"] = samplemap["DoubleEleCR/"] + samplemap["DoubleMuCR/"]; samplemap["DoubleLepCR/"].region = "DoubleLepCR"
-    samplemap["SingleLepCR/"] = samplemap["SingleEleCR/"] + samplemap["SingleMuCR/"]; samplemap["SingleLepCR/"].region = "SingleLepCR"
+    # samplemap["DoubleLepCR/"] = samplemap["DoubleEleCR/"] + samplemap["DoubleMuCR/"]; samplemap["DoubleLepCR/"].region = "DoubleLepCR"
+    # samplemap["SingleLepCR/"] = samplemap["SingleEleCR/"] + samplemap["SingleMuCR/"]; samplemap["SingleLepCR/"].region = "SingleLepCR"
 
     print "Electron ZW TF"
     plotAVTF_ratio(samplemap["DoubleEleCR/"],samplemap["SingleEleCR/"],"Z","W")
     print "Muon ZW TF"
     plotAVTF_ratio(samplemap["DoubleMuCR/"],samplemap["SingleMuCR/"],"Z","W")
-    print "CR ZW TF"
-    plotAVTF_ratio(samplemap["DoubleLepCR/"],samplemap["SingleLepCR/"],"Z","W")
+    # print "CR ZW TF"
+    # plotAVTF_ratio(samplemap["DoubleLepCR/"],samplemap["SingleLepCR/"],"Z","W")
     
 
 def runAll(args):
