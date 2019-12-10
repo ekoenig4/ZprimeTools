@@ -20,9 +20,17 @@ def fullpath(path):
     return dirs
 
 def getSub(sub):
-    from re import compile
-    pattern = compile(r'Mx\d*_Mv\d*')
-    return pattern.findall(sub)[0]
+    htbin = re.findall('\d+to\d+',sub)
+    if any(htbin): return htbin[0]
+    htbin = re.findall('\d+toInf',sub)
+    if any(htbin): return htbin[0]
+    htbin = re.findall('\d+To\d+',sub)
+    if any(htbin): return htbin[0].replace('To','to')
+    htbin = re.findall('\d+ToInf',sub)
+    if any(htbin): return htbin[0].replace('To','to')
+    htbin = re.findall('MLM',sub)
+    if any(htbin): return htbin[0]
+    return sub
     
 def build_dataset(data,path):
     data = data.lower()
@@ -44,4 +52,5 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    build_dataset(data,os.path.join(directory,data))
+    if 'DYJets' in data or 'WJets' in data or 'ZJets' in data:
+        build_dataset(data,os.path.join(directory,data))

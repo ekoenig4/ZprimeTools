@@ -24,7 +24,7 @@ def output(string,redirect=False):
 def findInputDirectories():
     # search current directory and parent directories for input directories
     directories = []
-    find_these = ['RootFiles','datasets/ntuples']
+    find_these = ['RootFiles','ntuples']
     def helper(path,check):
         realpath = os.path.realpath(path)
         check_path = os.path.join(realpath,check)
