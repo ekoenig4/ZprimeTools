@@ -36,6 +36,8 @@ public:
   virtual bool EGamma_Triggers();
   virtual bool getEleHEMVeto(float elePtCut);
   virtual bool getJetHEMVeto(float jetPtCut);
+
+  virtual void PSWeights(float nogen);
 };
 
 #endif

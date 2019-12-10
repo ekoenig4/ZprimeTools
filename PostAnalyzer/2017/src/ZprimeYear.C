@@ -139,6 +139,42 @@ bool ZprimeYear::bjetSelectionID(int ijet) {
   return bjet > bjetDeepCSVCut;
 }
 
+void ZprimeYear::PSWeights(float event_weight) {
+  string pswlist[22] = { "isrRed", "fsrRed", "isrDef","fsrDef","isrCon","fsrCon",      
+			  "fsr_G2GG_muR","fsr_G2QQ_muR","fsr_Q2QG_muR","fsr_X2XG_muR",
+			  "fsr_G2GG_cNS","fsr_G2QQ_cNS","fsr_Q2QG_cNS","fsr_X2XG_cNS",
+			  "isr_G2GG_muR","isr_G2QQ_muR","isr_Q2QG_muR","isr_X2XG_muR",
+			  "isr_G2GG_cNS","isr_G2QQ_cNS","isr_Q2QG_cNS","isr_X2XG_cNS"  };
+  if ( !scaleUncs.contains("PSW_"+pswlist[0]) ) {
+    TFile* file = TFile::Open("RootFiles/PSW_2018_SF.root");
+    string prefix = "";
+    if (isW_or_ZJet()) {
+      if (sample.type == WJets) prefix = "WJets";
+      else if (sample.type == ZJets) prefix = "ZJets";
+      else if (sample.type == DYJets) prefix = "DYJets";
+    }
+    for (string psw : pswlist) {
+      scaleUncs.addUnc("PSW_"+psw,NULL);
+      if (isW_or_ZJet()) {
+	string path = prefix+"/"+prefix+"_PSW_"+psw;
+	th1fmap[psw+"Up"] = (TH1F*)file->Get( (path+"Up").c_str() );
+	th1fmap[psw+"Down"] = (TH1F*)file->Get( (path+"Down").c_str() );
+      }
+    }
+  }
+
+  for (string psw : pswlist) {
+    float weightUp = event_weight;
+    float weightDn = event_weight;
+    if (isW_or_ZJet()) {
+      float uncUp = th1fmap.getBin(psw+"Up",ChNemPtFrac);
+      float uncDn = th1fmap.getBin(psw+"Down",ChNemPtFrac);
+      weightUp *= uncUp;
+      weightDn *= uncDn;
+    }
+    scaleUncs.setUnc("PSW_"+psw,weightUp,weightDn);
+  }
+}
 
 int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
   TSystemDirectory sourceDir("hi",path);
