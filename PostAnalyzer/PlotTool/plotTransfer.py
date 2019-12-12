@@ -272,14 +272,14 @@ def plotTransfer(variable,samplemap):
         samplemap[region].initiate(var)
 
     print "ZJet Muon CR TF"
-    plotAVTF(samplemap["SignalRegion/"],samplemap["DoubleMuCR/"],"Z","Z")
+    plotAVTF(samplemap["DoubleMuCR/"],samplemap["SignalRegion/"],"Z","Z")
     print "ZJet Electron CR TF"
-    plotAVTF(samplemap["SignalRegion/"],samplemap["DoubleEleCR/"],"Z","Z")
+    plotAVTF(samplemap["DoubleEleCR/"],samplemap["SignalRegion/"],"Z","Z")
 
     print "WJet Muon CR TF"
-    plotAVTF(samplemap["SignalRegion/"],samplemap["SingleMuCR/"],"W","W")
+    plotAVTF(samplemap["SingleMuCR/"],samplemap["SignalRegion/"],"W","W")
     print "WJet Electron CR TF"
-    plotAVTF(samplemap["SignalRegion/"],samplemap["SingleEleCR/"],"W","W")
+    plotAVTF(samplemap["SingleEleCR/"],samplemap["SignalRegion/"],"W","W")
 
     print "SR ZW TF"
     plotAVTF(samplemap["SignalRegion/"],samplemap["SignalRegion/"],"Z","W")
@@ -298,7 +298,7 @@ def plotTransfer(variable,samplemap):
 
 def runAll(args):
     scale_lumi = max(lumimap.values())
-    samplemap = { region:datamc(fileDir=region,show=0,lumi=scale_lumi) for region in config['regions'] }
+    samplemap = { region:Region(fileDir=region,show=0,lumi=scale_lumi) for region in config['regions'] }
     for variable in args.argv: plotTransfer(variable,samplemap)
 
 if __name__ == "__main__":

@@ -76,13 +76,13 @@ void ZprimeClass::BookHistos(const char* outputFilename) {
 			 {20,21},{22,23},{24,25},{26,27},
 			 {28,29},{30,31},{32,33},{34,35},
 			 {36,37},{38,39},{40,41},{42,43}};
-  h_psWeights["norm"] = new TH1F("norm","",40,0,1.05);
+  h_psWeights["norm"] = new TH1F("norm","",15,0,1.1);
   for (int i = 0 ; i < 22; i++) {
     string psw = tmp[i];
     pswlist[i] = psw;
     pswmap[psw] = make_pair(tmpindex[i][0],tmpindex[i][1]);
     for (string var : {"Up","Down"}) {
-      h_psWeights[psw+var] = new TH1F((psw+var).c_str(),"",40,0,1.05);
+      h_psWeights[psw+var] = new TH1F((psw+var).c_str(),"",15,0,1.1);
     }
   }
 }

@@ -31,8 +31,6 @@ public:
   virtual bool MET_Filters();
   virtual bool MET_Triggers();
   virtual bool EGamma_Triggers();
-
-  virtual void PSWeights(float nogen);
 };
 
 #endif

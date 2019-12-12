@@ -158,11 +158,10 @@ def getRatioLine(xmin,xmax):
     return line
 ###################################################################
 
-def StackStyle(hs_stack,ymin=None,ymax=None):
-    hs_stack.GetYaxis().SetTitle("Events");
+def StackStyle(hs_stack,ymin=None,ymax=None,scaleWidth=False):
+    hs_stack.GetYaxis().SetTitle("Events" if not scaleWidth else "Events / Bin");
     hs_stack.GetYaxis().SetTitleOffset(1.5);
     hs_stack.SetTitle("");
-    hs_stack.SetMinimum(0.1)
     def checkbin(x,y,box):
         if x > box.userx1() and x < box.userx2() and y > box.usery1():
             # print '%f < %f < %f && %f > %f' % (box.userx1(),x,box.userx2(),y,box.usery1())
@@ -171,13 +170,15 @@ def StackStyle(hs_stack,ymin=None,ymax=None):
     hs = hs_stack
     if type(hs) == THStack: hs = hs.GetStack().Last()
     scale = 1
-    ymin = hs.GetMinimum()
-    ymax = hs.GetMaximum()
+    ymax = max( hs[ibin] for ibin in range(1,hs.GetNbinsX()+1) if hs[ibin] != 0 )
     for box in boundaries:
         for ibin in range(1,hs.GetNbinsX()+1):
             scale = max(scale,checkbin(hs.GetBinCenter(ibin),hs[ibin],box))
-    ymax *= scale*pow(10,1.2)
+    ymax *= scale*pow(10,2.5)
+    ymin = pow(10,-2)
+    
     hs_stack.SetMaximum(ymax)
+    hs_stack.SetMinimum(ymin)
 ###################################################################
 
 def makeXaxis(xmin,xmax,ymin,ndiv,name=None):

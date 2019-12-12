@@ -147,7 +147,7 @@ if __name__ == "__main__":
     if args.raw_output: optionmap['raw-output'] = True
     binlist = [ int(ibin) for ibin in args.argv ]
     
-    samples = datamc(show=False)
+    samples = Region(show=False)
     samples.initiate('h_cutflow')
     hslist = []
     for name in samples.SampleList:

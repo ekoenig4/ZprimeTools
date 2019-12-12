@@ -1,6 +1,6 @@
 from PlotTool import *
 
-samples = datamc()
+samples = Region()
 
 samples.initiate("ChNemPtFrac_8")
 

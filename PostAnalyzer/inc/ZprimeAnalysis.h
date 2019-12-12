@@ -928,6 +928,7 @@ public:
 
   virtual void PFUncertainty(float event_weight);
   virtual void QCDVariations(float event_weight);
+  virtual void PSWeights(float weight_nogen);
 };
 
 #endif

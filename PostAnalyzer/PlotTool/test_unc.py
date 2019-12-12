@@ -2,7 +2,7 @@ from ROOT import *
 from PlotTool import *
 from config import config
 
-sample = datamc(show=False)
+sample = Region(show=False)
 
 sample.processes = {'test':Process("test",["test_mc"],{"test_mc":1},"bkg",lumi=100000,color=kGray)}
 sample.SampleList = ['test']

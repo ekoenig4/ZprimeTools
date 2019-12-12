@@ -6,7 +6,7 @@ import re
 
 gROOT.SetBatch(1)
 
-samples = datamc(show=0)
+samples = Region(show=0)
     
 for variable in samples.args:
     isGreater = None

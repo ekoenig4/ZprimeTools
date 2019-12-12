@@ -82,7 +82,7 @@ def saveplot(variable):
         var = variable+'_'+nhisto+cut
         print region,var
         directory = rfile.mkdir(dir[region])
-        norm = datamc(fileDir=region,lumi=lumi,show=False)
+        norm = Region(fileDir=region,lumi=lumi,show=False)
         norm.initiate(var)
         directory.cd()
         sumOfBkg = norm.getSumOfBkg()

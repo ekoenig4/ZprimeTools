@@ -14,7 +14,7 @@ Usage: python ../PlotTool/makePhasePlots.py variable_1 variable_2 variable_3 ...
 """
 
 gROOT.SetBatch(1)
-samples=datamc()
+samples=Region()
 for variable in samples.args:
     samples.initiate(variable)
     bkgPlot = samples.getSumOfBkg().Clone("Sum of Background")

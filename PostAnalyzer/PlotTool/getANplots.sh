@@ -1,6 +1,6 @@
 #!/bin/sh
 
-extraction1='-b incu40 --nhist ChNemPtFrac+0.5'
+extraction1='-b incu40 --nhist ChNemPtFrac -c "ChNemPtFrac>0.5"'
 extraction2='-b incl40 --nhist ChNemPtFrac'
 nvariables='ChNemPtFrac ChNemPt ChNemPt123 recoil nJets j1pT j1Eta j1Phi nVtx'
 singleleps='LeptonPt LeptonEta'

@@ -14,8 +14,8 @@ Usage: python ../PlotTool/makePileup.py
 
 gROOT.SetBatch(1)
 
-weightedMC = datamc(show=0)
-unweightedMC = datamc(show=0)
+weightedMC = Region(show=0)
+unweightedMC = Region(show=0)
 
 puTrueReWeighted = "puTrueReWeight_10";
 puTrueUnWeighted = "puTrueUnWeight_10";

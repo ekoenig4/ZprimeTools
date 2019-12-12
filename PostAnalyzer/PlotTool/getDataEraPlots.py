@@ -53,7 +53,7 @@ def compareEra(variable,samples,eraLumi):
     texS.SetTextFont(42);
     texS.SetTextSize(0.040);
     texS.Draw();
-    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.version+ ")");
+    texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+samples.year+ ")");
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040);
@@ -62,7 +62,7 @@ def compareEra(variable,samples,eraLumi):
     ###############################################
     
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/DataEra/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.year+"/"+dir+"Plots_EWK/DataEra/"
     #print file_path
     directory=os.path.join(os.path.dirname(file_path),"")
     if not os.path.exists(directory):
@@ -72,7 +72,7 @@ def compareEra(variable,samples,eraLumi):
     c.SaveAs(directory+"/"+variable+".png")
 #################################################
         
-samples = datamc(argv)
+samples = Region(argv)
 eraLumi = OrderedDict(sorted(lumi_by_era[samples.region].items(),key=lambda t:t[0]))
 for variable in argv[1:]:
     samples.initiate(variable)
@@ -80,7 +80,7 @@ for variable in argv[1:]:
     for era,lumi in eraLumi.items():
         eraFile = TFile.Open("DataEra/"+samples.Data_FileNames[samples.region]+"_"+era+".root")
         if not any(eraFile.GetListOfKeys()): continue
-        samples = datamc(argv,lumi=(lumi))
+        samples = Region(argv,lumi=(lumi))
         samples.initiate(variable)
         print "Era",era,"lumi:",samples.lumi
         c = TCanvas("c", "canvas",800,800);
@@ -142,13 +142,13 @@ for variable in argv[1:]:
         
         eraVariable.Draw('pex0same')
         
-        if samples.signal != None:samples.histo[samples.signal[0]].Draw("HIST SAME")
+        if hasattr(samples,'signal'):samples.histo[samples.signal[0]].Draw("HIST SAME")
         
         #################################################
         
         leg = TLegend(0.62,0.60,0.86,0.887173,"");
         leg.AddEntry(eraVariable,"Data "+era+" Era","lp");
-        if (samples.signal != None): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
+        if (hasattr(samples,'signal')): leg.AddEntry(samples.histo[samples.signal[0]], samples.signal[0])   
         leg.AddEntry(samples.histo['WJets'],"W#rightarrowl#nu","f");
         leg.AddEntry(samples.histo['DYJets'],"Z#rightarrow ll","F"); 
         leg.AddEntry(samples.histo['DiBoson'],"WW/WZ/ZZ","F");
@@ -271,7 +271,7 @@ for variable in argv[1:]:
         yaxis.Draw("SAME");
         
         dir = os.getcwd().split("/")[-1]
-        file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/DataEra/"
+        file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.year+"/"+dir+"Plots_EWK/DataEra/"
         #print file_path
         directory=os.path.join(os.path.dirname(file_path),era)
         if not os.path.exists(directory):

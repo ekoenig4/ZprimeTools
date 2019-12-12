@@ -2,7 +2,11 @@ import os
 import sys
 from subprocess import Popen,PIPE,STDOUT
 from time import sleep
+from Parser import parser
 import re
+
+parser.add_argument("--single",help="hadd files using a single thread, instead of multiple",action="store_true",default=False)
+parser.add_argument("--nohadd",help="does not try to hadd files together",action="store_true",default=False)
 
 def progress(current,total,prompt):
     percent = 100 * (total - current)/float(total)

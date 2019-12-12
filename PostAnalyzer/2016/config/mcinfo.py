@@ -1,3 +1,5 @@
+from ROOT import *
+
 version="2016"
 
 lumi = {"SingleEleCR":35900,
@@ -12,21 +14,34 @@ lumi_by_era = {"SingleEleCR" :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":
                "DoubleMuCR"  :{"B":5750,"C":2573,"D":4242,"E":4025,"F":3105,"G":7576,"H":8651},
                "SignalRegion":{"F":1892}}
 
-region_masks = {}
-
-WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"]
-
-ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
-
-GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
-
-DYJets_FileNames = ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDYMLM"]
-
-TTJets_FileNames = ["postTTJetsMLM"]
-
-DiBoson_FileNames = ["postWW","postWZ","postZZ"]
-
-QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
+mclist = ["ZJets","WJets","DYJets","GJets","TTJets","DiBoson","QCD"]
+filemap = {
+    "ZJets":  ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"],
+    "WJets":  ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"],
+    "DYJets": ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDYMLM"],
+    "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
+    "TTJets": ["postTTJetsMLM"],
+    "DiBoson":["postWW","postWZ","postZZ"],
+    "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
+}
+legmap = {
+    "ZJets"  :"Z#rightarrow#nu#nu",  
+    "WJets"  :"W#rightarrowl#nu",     
+    "DYJets" :"Z#rightarrow ll",   
+    "GJets"  :"#gamma+jets",  
+    "TTJets" :"Top Quark",         
+    "DiBoson":"WW/WZ/ZZ",          
+    "QCD"    :"QCD"
+}
+colmap = {
+    "ZJets"  :kAzure+10,  
+    "WJets"  :kRed-10,
+    "DYJets" :kTeal-9,  
+    "GJets"  :kGray+2,  
+    "TTJets" :kOrange-2,
+    "DiBoson":kCyan-10, 
+    "QCD"    :kGray
+}
 
 xsec = {
 'postZ100to200': 280.5,

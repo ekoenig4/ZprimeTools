@@ -121,9 +121,9 @@ def plotSRUnc(sample,uncname):
     z_norm = sample.processes['ZJets'].histo.Clone('z_norm')
     w_norm = sample.processes['WJets'].histo.Clone('w_norm')
 
-    z_up,z_dn = sample.processes['ZJets'].nuisances[uncname].GetHistos(z_norm)
+    z_up,z_dn = sample.processes['ZJets'].nuisances[uncname].GetHistos()
 
-    w_up,w_dn = sample.processes['WJets'].nuisances[uncname].GetHistos(w_norm)
+    w_up,w_dn = sample.processes['WJets'].nuisances[uncname].GetHistos()
 
     z_r_up = z_up.Clone('ratio_up'); z_r_up.Divide(z_norm)
     z_r_dn = z_dn.Clone('ratio_dn'); z_r_dn.Divide(z_norm)
@@ -225,7 +225,7 @@ def plotSRUnc(sample,uncname):
     SaveCanvas(c,sample,uncname)
 
 def runRegion(args):
-    sample = datamc()
+    sample = Region()
     variable = args.argv[0]
     cut = ''
     if '>' in variable: cut = '>'+variable.split('>')[-1]
@@ -233,16 +233,15 @@ def runRegion(args):
     varname = variable.replace('>','+').replace('<','-')
     variable = variable.replace(cut,'')
     nvariable = variable+'_'+config['regions'][sample.region+'/']+cut
-    variations = []
-    for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
+    variations = ['PSW_isrDef','PSW_fsrDef']
+    # for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
 
     print 'Running for %s' % nvariable
     sample.initiate(nvariable)
     for uncname in variations:
         print 'Fetching %s' % uncname
         sample.addUnc(uncname)
-   
-    variations = variations 
+    
     if sample.region == 'SignalRegion':
         for uncname in variations: plotSRUnc(sample,uncname)
     else:

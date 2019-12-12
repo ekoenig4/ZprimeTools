@@ -73,3 +73,9 @@ def FindConfig():
     config_path = helper('.')
     if config_path == None: print 'year config directory was not found in current or parent directory'; exit(1)
     else: sys.path.append(config_path)
+
+def GetDirname(variable,sub=None):
+    ndir = variable.split('_')[-1]
+    dirname = 'ZprimeJet_%s' % ndir
+    if sub != None: dirname += '/%s' % sub
+    return dirname,ndir

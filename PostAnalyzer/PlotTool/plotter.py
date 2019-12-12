@@ -59,16 +59,13 @@ def plotVariable(samples,variable):
 
     hs_datamc = THStack("hs_datamc","Data/MC comparison");
     fillStack(samples,hs_datamc)
-    ymin_s=pow(10,-6);ymax_s=pow(10,2.5);
-    ymin = 0.1 if not samples.args.normalize else hs_datamc.GetMaximum()*ymin_s
-    ymax = hs_datamc.GetMaximum()*ymax_s
     hs_bkg = hs_datamc.GetStack().Last()
     if samples.args.mc_solid:hs_bkg.Draw("hist")
     else:                    hs_datamc.Draw("hist")
         
     data.histo.Draw('pex0same')
     
-    if samples.signal != None:
+    if hasattr(samples,'signal'):
         signal = samples.processes['Signal']
         signal[0].histo.SetLineWidth(2)
         signal[0].histo.Draw("HIST SAME")
@@ -77,7 +74,7 @@ def plotVariable(samples,variable):
 
     leg = getLegend(); #0.62,0.60,0.86,0.887173
     leg.AddEntry(data.histo,"Data","lp");
-    if (samples.signal != None): leg.AddEntry(signal[0].histo, signal[0].name)
+    if (hasattr(samples,'signal')): leg.AddEntry(signal[0].histo, signal[0].process)
 
     if samples.args.mc_solid:
         leg.AddEntry(hs_bkg,"Background","f")
@@ -87,13 +84,13 @@ def plotVariable(samples,variable):
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
     if (samples.args.normalize): lumi_label="Normalized"
-    texLumi,texCMS = getCMSText(lumi_label,samples.version)
+    texLumi,texCMS = getCMSText(lumi_label,samples.year)
     texLumi.Draw();
     texCMS.Draw();
 
     
-    if samples.args.mc_solid:StackStyle(hs_bkg)
-    else:                    StackStyle(hs_datamc)
+    if samples.args.mc_solid:StackStyle(hs_bkg,scaleWidth=samples.scaleWidth)
+    else:                    StackStyle(hs_datamc,scaleWidth=samples.scaleWidth)
 
     c.cd();
     pad2 = TPad("pad2","pad2",0.01,0.01,0.99,0.25);
@@ -110,10 +107,10 @@ def plotVariable(samples,variable):
     RatioStyle(Ratio,rymin,rymax)
     Ratio.Draw("A");
 
-    if any( samples.nuisances ):
-        uncband = samples.getUncBand()
-        UncBandStyle(uncband)
-        uncband.Draw('2same')
+    # if any( samples.nuisances ):
+    #     uncband = samples.getUncBand(['JES','PFU_ecal','PSW_isrCon','PSW_fsrCon'])
+    #     UncBandStyle(uncband)
+    #     uncband.Draw('2same')
     Ratio.Draw('pex0same')
     line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
     line.Draw("same");
@@ -139,7 +136,7 @@ def plotVariable(samples,variable):
     yaxis.Draw("SAME");
 
     dir = os.getcwd().split("/")[-1]
-    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.version+"/"+dir+"Plots_EWK/"
+    file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.year+"/"+dir+"Plots_EWK/"
     #print file_path
     sub = ""
     if (samples.args.allHisto):sub = "all"
@@ -153,7 +150,7 @@ def plotVariable(samples,variable):
 ###################################################################
     
 def plotter(args=[]):
-    samples = datamc()
+    samples = Region()
     if not any(args): args = samples.args.argv
     for variable in args:
         plotVariable(samples,variable)
