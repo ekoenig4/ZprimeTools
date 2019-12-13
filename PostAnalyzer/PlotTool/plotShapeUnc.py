@@ -2,16 +2,16 @@ from ROOT import *
 import os
 from sys import argv
 from PlotTool import *
-from config import config
+import config
 
 gROOT.SetBatch(1)
 
 out_dir = "/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots%s/"
 def SaveCanvas(c,sample,uncname):
-    nhist = config['regions'][sample.region+'/']
-    variable = sample.variable.replace('_%s' % nhist,'')
+    nhist = config.regions[sample.region]
+    variable = b_info.template.GetName()
     varname = sample.varname.replace('_%s' % nhist,'')
-    outdir = out_dir % sample.version
+    outdir = out_dir % sample.year
     outdir = "%s/%sPlots_EWK/UncertaintyPlots/%s"  % (outdir,sample.region,variable)
     if not os.path.isdir(outdir): os.mkdir(outdir)
     
@@ -22,7 +22,7 @@ def plotCRUnc(sample,uncname):
     if 'Double' in sample.region: process = 'DYJets'
 
     norm = sample.processes[process].histo.Clone('norm')
-    up,dn = sample.processes[process].nuisances[uncname].GetHistos(norm)
+    up,dn = sample.processes[process].nuisances[uncname].GetHistos()
 
     r_up = up.Clone('ratio_up'); r_up.Divide(norm)
     r_dn = dn.Clone('ratio_dn'); r_dn.Divide(norm)
@@ -41,7 +41,7 @@ def plotCRUnc(sample,uncname):
     pad1.SetBottomMargin(0.);
 
     ymax = max( h.GetMaximum() for h in (norm,up,dn) ) * pow(10,2.5)
-    ymin = 0.05
+    ymin = 0.001
 
     for h in (up,dn): h.SetLineStyle(2)
     for h in (norm,up,dn):
@@ -54,7 +54,7 @@ def plotCRUnc(sample,uncname):
     dn.Draw('hist same')
     
     lumi_label = '%s' % float('%.3g' % (sample.lumi/1000.)) + " fb^{-1}"
-    texLumi,texCMS = getCMSText(lumi_label,sample.version)
+    texLumi,texCMS = getCMSText(lumi_label,sample.year)
     texLumi.Draw();
     texCMS.Draw();
 
@@ -145,7 +145,7 @@ def plotSRUnc(sample,uncname):
     pad1.SetBottomMargin(0.);
 
     ymax = max( h.GetMaximum() for h in (z_norm,w_norm,z_up,z_dn,w_up,w_dn) ) * pow(10,2.5)
-    ymin = 0.05
+    ymin = 0.001
 
     z_norm.SetLineColor(kRed)
     for h in (z_up,z_dn): h.SetLineStyle(2); h.SetLineColor(kRed)
@@ -159,7 +159,7 @@ def plotSRUnc(sample,uncname):
         h.Draw('hist same')
     
     lumi_label = '%s' % float('%.3g' % (sample.lumi/1000.)) + " fb^{-1}"
-    texLumi,texCMS = getCMSText(lumi_label,sample.version)
+    texLumi,texCMS = getCMSText(lumi_label,sample.year)
     texLumi.Draw();
     texCMS.Draw();
 
@@ -227,14 +227,9 @@ def plotSRUnc(sample,uncname):
 def runRegion(args):
     sample = Region()
     variable = args.argv[0]
-    cut = ''
-    if '>' in variable: cut = '>'+variable.split('>')[-1]
-    if '<' in variable: cut = '<'+variable.split('<')[-1]
-    varname = variable.replace('>','+').replace('<','-')
-    variable = variable.replace(cut,'')
-    nvariable = variable+'_'+config['regions'][sample.region+'/']+cut
-    variations = ['PSW_isrDef','PSW_fsrDef']
-    # for name,unclist in config['Uncertainty'].iteritems(): variations += unclist
+    nvariable = variable+'_'+config.regions[sample.region]
+    variations = []
+    for name,unclist in config.Uncertainty.iteritems(): variations += unclist
 
     print 'Running for %s' % nvariable
     sample.initiate(nvariable)
@@ -248,7 +243,7 @@ def runRegion(args):
         for uncname in variations: plotCRUnc(sample,uncname)
 def runAll(args):
     cwd = os.getcwd()
-    for region,nhist in config['regions'].items():
+    for region,nhist in config.regions.items():
         os.chdir(region)
         runRegion(args)
         os.chdir(cwd)

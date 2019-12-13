@@ -2,6 +2,7 @@ from ROOT import *
 import os
 from utilities import GetDirname
 from changeBinning import b_info
+from Nuisance import Nuisance
 
 def IsGlobal(variable,tfile):
     return tfile.GetListOfKeys().Contains(variable)
@@ -47,12 +48,26 @@ def GetFileTemplate(tfile,variable):
     template = tfile.Get('%s/%s' % (dirname,variable)).Clone(b_variable)
     template.Reset()
     return template
+def GetNuisanceList(tfile,dirname):
+    tdir = tfile.GetDirectory(dirname)
+    shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
+    tree = tdir.Get('norm')
+    scalelist = [ key.GetName().replace('Up','') for key in tree.GetListOfBranches() if 'Up' in key.GetName() ]
+    nuisances = {}
+    for shape in shapelist:
+        nuisances[shape] = 'shape'
+        if shape not in Nuisance.unclist: Nuisance.unclist.append(shape)
+    for scale in scalelist:
+        nuisances[scale] = 'scale'
+        if scale not in Nuisance.unclist: Nuisance.unclist.append(scale)
+    nuisances['Stat'] = True
+    return nuisances
 
 class SubProcess(object):
     def __init__(self,name,fname,xsec,year=None,region=None):
         self.process = name; self.name = name; self.year = year; self.region = region
-        if region is not None: self.name = "%s_%s" % (region,name)
-        if year is not None:   self.name = "%s_%s" % (year,name)
+        if region is not None: self.name = "%s_%s" % (region,self.name)
+        if year is not None:   self.name = "%s_%s" % (year,self.name)
         self.tfile = TFile.Open(fname); self.xsec = xsec; self.treemap = {}
 
         cutflow = GetTObject("h_cutflow",self.tfile)
@@ -72,7 +87,9 @@ class SubProcess(object):
         if cut != b_info.cut: b_info.cut = cut
         if b_template is None and b_info.template is None: b_info.template = GetFileTemplate(self.tfile,variable)
         elif not HistoEqual(b_template,b_info.template): b_info.template = b_template
-    def setTree(self,dirname,treename):
+    def setTree(self,treename,dirname=None):
+        if dirname is None: dirname = self.dirname
+        else: self.dirname = dirname
         if treename in self.treemap: return
         self.treemap[treename] = GetTObject('%s/%s' % (dirname,treename),self.tfile)
     def setBranch(self,b_template,variable,treename,weight,cut):
@@ -80,7 +97,8 @@ class SubProcess(object):
         dirname,ndir = GetDirname(variable)
         b_template = b_info.template
         b_variable = b_template.GetName()
-        self.setTree(dirname,treename)
+        self.setTree(treename,dirname)
+        self.nuisances = GetNuisanceList(self.tfile,'%s/trees' % dirname)
         self.histo = GetBranch('%s_%s' % (self.name,b_variable),b_template,b_variable,self.treemap[treename],weight,cut)
         if hasattr(b_info,'post'): b_info.post(self.histo)
     def fillRaw(self):
@@ -98,8 +116,9 @@ class SubProcess(object):
         elif self.scaling != 1: histo.Scale(self.scaling)
         if histo == self.histo: self.scaled_total = histo.Integral()
     def addUnc(self,nuisance):
-        if nuisance not in self.nuisance: return
-        if type(self.nuisances[nuisance] == Nuisance): return
+        if nuisance not in self.nuisances: return
+        if type(self.nuisances[nuisance]) == Nuisance: return
+        if nuisance == 'Stat': self.addStat(); return
         b_template = b_info.template
         b_variable = b_template.GetName()
         cut = b_info.cut
@@ -108,24 +127,24 @@ class SubProcess(object):
         if isScale:
             treename = 'trees/norm'
             self.setTree(treename)
-            up = GetBranch('%sUp' % name,b_tempalate,b_variable,self.treemap[treename],'%sUp' % nuisance,cut)
-            dn = GetBranch('%sDown' % name,b_tempalate,b_variable,self.treemap[treename],'%sDown' % nuisance,cut)
+            up = GetBranch('%sUp' % name,b_template,b_variable,self.treemap[treename],'%sUp' % nuisance,cut)
+            dn = GetBranch('%sDown' % name,b_template,b_variable,self.treemap[treename],'%sDown' % nuisance,cut)
         else:
             treeup = 'trees/%sUp' % nuisance; self.setTree(treeup)
             treedn = 'trees/%sDown' % nuisance; self.setTree(treedn)
             up = GetBranch('%sUp' % name,b_template,b_variable,self.treemap[treeup],'weight',cut)
             dn = GetBranch('%sDown' % name,b_template,b_variable,self.treemap[treeup],'weight',cut)
         self.scale(up); self.scale(dn)
-        self.nuisances[nuisance] = Nuisance(nuisance,up,dn,self.histo,type="abs")
+        self.nuisances[nuisance] = Nuisance(self.process,nuisance,up,dn,self.histo,type="abs")
     def addStat(self):
-        b_variable = b_info.b_variable
-        up = self.histo.clone('%s_%s_StatUp' % (self.name,b_variable)); up.Reset()
-        dn = self.histo.clone('%s_%s_StatDown' % (self.name,b_variable)); up.Reset()
+        b_variable = b_info.template.GetName()
+        up = self.histo.Clone('%s_%s_StatUp' % (self.name,b_variable)); up.Reset()
+        dn = self.histo.Clone('%s_%s_StatDown' % (self.name,b_variable)); up.Reset()
         nbins = self.histo.GetNbinsX()
         for ibin in range(1,nbins+1):
             up[ibin] = self.histo.GetBinError(ibin)
             dn[ibin] = self.histo.GetBinError(ibin)
-        self.nuisances["Stat"] = Nuisance("Stat",up,dn,self.histo)
+        self.nuisances["Stat"] = Nuisance(self.process,"Stat",up,dn,self.histo)
 
 class Process(object):
     isGlobal = False
@@ -133,12 +152,13 @@ class Process(object):
     isBranch = False
     def __init__(self,name,filenames,xsecs,proctype,year=None,region=None,leg=None,lumi=1,color=kGray+1):
         self.process = name; self.name = name; self.year = year; self.region = region
-        if region is not None: self.name = "%s_%s" % (region,name)
-        if year is not None:   self.name = "%s_%s" % (year,name)
+        if region is not None: self.name = "%s_%s" % (region,self.name)
+        if year is not None:   self.name = "%s_%s" % (year,self.name)
         self.filenames = [ filename for filename in filenames ]; self.xsecs = xsecs; self.proctype = proctype
         self.leg = leg; self.lumi = lumi; self.color = color
 
         self.open()
+        self.initVariable()
     def __len__(self): return len(self.filenames)
     def __getitem__(self,i):
         f = self.filenames[i]
@@ -204,20 +224,25 @@ class Process(object):
         for subprocess in self:
             if self.histo is None: self.histo = subprocess.histo.Clone('%s_%s' % (self.name,variable))
             else:                  self.histo.Add(subprocess.histo)
-    def addUnc(self,nuisance):
+    def addUnc(self,nuisance,show=True):
+        if self.proctype == 'data': return
         if not Process.isBranch: return
         for subprocess in self: subprocess.addUnc(nuisance)
         if self.proctype == 'signal': return
-        b_template = b_info.b_tempalte
+        b_template = b_info.template
         b_variable = b_template.GetName()
         cut = b_info.cut
         nbins = self.histo.GetNbinsX()
         up = self.histo.Clone("%s_%s_%sUp" % (self.name,b_variable,nuisance))
         dn = self.histo.Clone("%s_%s_%sDown" % (self.name,b_variable,nuisance))
         for ibin in range(1,nbins+1):
-            up[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].up[ibin]**2 for subprocess in self ) )
-            dn[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].dn[ibin]**2 for subprocess in self ) )
-        self.nuisances[nuisance] = Nuisance(nuisance,up,dn,self.histo)
+            up[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].up[ibin]**2 for subprocess in self
+                                        if nuisance in subprocess.nuisances and type(subprocess.nuisances[nuisance]) == Nuisance) )
+            dn[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].dn[ibin]**2 for subprocess in self
+                                        if nuisance in subprocess.nuisances and type(subprocess.nuisances[nuisance]) == Nuisance) )
+        self.nuisances[nuisance] = Nuisance(self.process,nuisance,up,dn,self.histo)
+        if not show or self.scaled_total == 0: return
+        print self.nuisances[nuisance]
     def addStat(self):
         b_template = b_info.b_tempalte
         b_variable = b_template.GetName()
@@ -227,31 +252,33 @@ class Process(object):
         for ibin in range(1,nbins+1):
             up[ibin] = self.histo.GetBinError(ibin)
             dn[ibin] = self.histo.GetBinError(ibin)
-        self.nuisances["Stat"] = Nuisance("Stat",up,dn,self.histo)
-    def fullUnc(self,unclist=None,stat=False):
+        self.nuisances["Stat"] = Nuisance(self.process,"Stat",up,dn,self.histo)
+    def fullUnc(self,unclist=None,stat=False,show=True):
         if not self.isBranch: return
         if self.proctype != 'bkg': return
         
         if unclist is None: unclist = self.nuisances.keys()
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
-        elif stat: unclist.append('Stat')
+        elif stat and 'Stat' not in unclist: unclist.append('Stat')
 
-        for nuisance in unclist: self.addUnc(nuisance)
-        b_template = b_info.b_tempalte
+        for nuisance in unclist: self.addUnc(nuisance,show=show)
+        b_template = b_info.template
         b_variable = b_template.GetName()
         up = self.histo.Clone('%s_%s_TotalUp' % (self.name,b_variable));  up.Reset()
         dn = self.histo.Clone('%s_%s_TotalDown' % (self.name,b_variable)); dn.Reset()
+        nbins = up.GetNbinsX()
         for ibin in range(1,nbins+1):
             if self.histo[ibin] == 0: continue
             up[ibin] = self.histo[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].up[ibin]/self.histo[ibin])**2 for nuisance in unclist) )
             dn[ibin] = self.histo[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].dn[ibin]/self.histo[ibin])**2 for nuisance in unclist) )
-        self.nuisances['Total'] = Nuisance('Total',up,dn,self.histo)
+        self.nuisances['Total'] = Nuisance(self.process,'Total',up,dn,self.histo)
     def add(self,other):
-        if self.process != other.process: raise ValueError("%s is not %s" % (self.process,other.process))
+        if self.process != other.process:
+            if not (self.proctype == 'sumofbkg' and other.proctype == 'bkg'):raise ValueError("%s is not %s" % (self.process,other.process))
         if self.histo is None: self.histo = other.histo.Clone(self.name)
         else: self.histo.Add(other.histo)
         self.raw_total += other.raw_total
         self.scaled_total += other.scaled_total
         for nuisance in other.nuisances:
-            if nuisance not in self.nuisances: self.nuisances[nuisance] = other.nuisances[nuisance]
+            if nuisance not in self.nuisances: self.nuisances[nuisance] = other.nuisances[nuisance].copy(self.process)
             else: self.nuisances[nuisance].add(other.nuisances[nuisance])

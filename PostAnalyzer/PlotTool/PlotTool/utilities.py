@@ -1,3 +1,4 @@
+from ROOT import *
 import os
 import sys
 from array import array
@@ -40,7 +41,6 @@ def GetUncBand(up,dn,norm=None):
         else:            y.append(norm)
         ey.append(abs(up.GetBinContent(ibin)-dn.GetBinContent(ibin))/2)
         nbins += 1
-    from ROOT import TGraphErrors
     return TGraphErrors(nbins,array('d',x),array('d',y),array('d',ex),array('d',ey))
 def valid_directory(directory):
     if not os.path.isdir(directory): raise ValueError("%s is not a valid directory" % directory)

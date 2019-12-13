@@ -4,6 +4,7 @@ import os
 import mergeFiles as merge
 from Parser import parser
 from Process import Process
+from Nuisance import Nuisance
 from utilities import *
 from samplenames import samplenames
 from changeBinning import b_info
@@ -53,7 +54,7 @@ class Region(object):
         datafile = DataFileMap[self.region]
         self.processes["Data"] =    Process("Data",[ '%s_%s' % (datafile,era) for era in sorted(self.lumimap.keys()) ],None,'data',year=self.year,region=self.region)
         for mc in config.mclist:
-            self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc])
+            self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],year=self.year,region=self.region)
 
         if self.region == "SignalRegion" and self.args.signal != None:
             self.setSignalInfo()
@@ -96,15 +97,22 @@ class Region(object):
             fname = 'post'+signal
             xsecmap = {fname:xsecmap[fname]}
             self.processes['Signal'] = Process('Signal',[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+    def initVariable(self,variable=None):
+        b_info.initVariable()
+        Nuisance.unclist = []
+        self.bkgIntegral = 0
+        if 'SumOfBkg' in self.processes:
+            tmp = self.processes.pop('SumOfBkg')
+            del tmp
+        if variable is not None:
+            self.setXaxisTitle(variable)
+            self.varname = variable
+            self.cut = self.args.cut
+            self.setBinning(variable,self.cut)
     def initiate(self,variable):
         if os.getcwd() != self.path: os.chdir(self.path)
-        self.setXaxisTitle(variable)
-        self.varname = variable
-        self.cut = self.args.cut
-        self.setBinning(variable,self.cut)
-        self.bkgIntegral = 0
+        self.initVariable(variable)
         for process in self:
-            if process.proctype == 'sumofbkg': continue
             process.setVariable(variable,b_info.template,b_info.cut)
             self.scaleWidth = process.scaleWidth
         if self.show: self.output()
@@ -130,6 +138,7 @@ class Region(object):
         for process in self:
             if process.proctype == 'bkg': sumofbkg.add(process)
         self.processes['SumOfBkg'] = sumofbkg
+        for nuisance in sumofbkg.nuisances: print sumofbkg.nuisances[nuisance]
     def setXaxisTitle(self,variable):
         self.name = 'Xaxis Title'
         for title in samplenames:
@@ -140,7 +149,6 @@ class Region(object):
                 self.name = samplenames[title];
                 break
     def setBinning(self,variable,cut):
-        b_info.initVariable()
         _,ndir = GetDirname(variable)
         b_variable = variable.replace('_%s' % ndir,'')
         b_info.cut = cut
@@ -158,15 +166,15 @@ class Region(object):
     def fullUnc(self,unclist=None,stat=None):
         if unclist is None: unclist = self.nuisances.keys()
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
-        elif stat: unclist.append('Stat')
+        elif stat and 'Stat' not in unclist: unclist.append('Stat')
         self.unclist = unclist
         for process in self: process.fullUnc(unclist,stat)
         self.setSumOfBkg()
     def getUncBand(self,unclist=None):
-        if not hasattr(self,'unclist'): fullUnc(unclist,True)
-        elif sorted(unclist) != sorted(self.unclist): fullUnc(unclist,True)
-        data = self.processes['Data'].histo
-        up,dn = self['sumofbkg'].nuisances['Total'].GetHistos()
+        if not hasattr(self,'unclist'): self.fullUnc(unclist,True)
+        elif sorted(unclist) != sorted(self.unclist): self.fullUnc(unclist,True)
+        data = self['Data'].histo
+        up,dn = self['SumOfBkg'].nuisances['Total'].GetHistos()
         rup = GetRatio(data,up); rdn = GetRatio(data,dn)
         uncband = GetUncBand(rup,rdn,norm=1)
         return uncband

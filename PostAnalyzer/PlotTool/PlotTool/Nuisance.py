@@ -9,15 +9,16 @@ def MakeDiff(self):
 
 class Nuisance(object):
     unclist = []
-    def __init__(self,name,up,dn,norm,type="diff"):
+    def __init__(self,process,name,up,dn,norm,type="diff"):
+        self.process = process
         self.name = name
         self.norm = norm
         self.up,self.dn = up,dn
         if type == "abs": MakeDiff(self)
-    def Integral(self,norm):
-        nbins = norm.GetNbinsX()
-        intUp = sum( norm[ibin] + self.up[ibin] for ibin in range(1,nbins+1) )
-        intDn = sum( norm[ibin] - self.dn[ibin] for ibin in range(1,nbins+1) )
+    def Integral(self):
+        nbins = self.norm.GetNbinsX()
+        intUp = sum( self.norm[ibin] + self.up[ibin] for ibin in range(1,nbins+1) )
+        intDn = sum( self.norm[ibin] - self.dn[ibin] for ibin in range(1,nbins+1) )
         return intUp,intDn
     def GetHistos(self):
         up = self.up.Clone(); dn = self.dn.Clone()
@@ -26,8 +27,21 @@ class Nuisance(object):
             up[ibin] = self.norm[ibin] + self.up[ibin]
             dn[ibin] = self.norm[ibin] - self.dn[ibin]
         return up,dn
+    def __str__(self):
+        norm = self.norm.Integral()
+        up,dn = self.Integral()
+	varup = (up-norm)/norm
+        vardn = (dn-norm)/norm
+        return '{0:<20}'.format('%s %s' % (self.name,self.process))+'%+.1e/%+.1e' % (varup,vardn)
+    def copy(self,process=None):
+        if process is None: process = self.process
+        name = self.name
+        norm = self.norm.Clone()
+        up = self.up.Clone()
+        dn = self.dn.Clone()
+        return Nuisance(process,name,up,dn,norm)
     def add(self,other):
-        if self.nuisance != other.nuisance: raise ValueError("%s is not %s" % (self.nuisance,other.nuisance))
+        if self.name != other.name: raise ValueError("%s is not %s" % (self.nuisance,other.nuisance))
         self.norm.Add(other.norm)
         nbins = self.norm.GetNbinsX()
         for ibin in range(1,nbins+1):

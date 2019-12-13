@@ -1,6 +1,6 @@
 year=2016
 regions={'SignalRegion':'8','SingleEleCR':'11','SingleMuCR':'10','DoubleEleCR':'10','DoubleMuCR':'10'}
-uncertainty={
+Uncertainty={
     'PFU': [ # ID is relative to the regions basic histogram number
         # 'PFU_tracker',
         'PFU_ecal',

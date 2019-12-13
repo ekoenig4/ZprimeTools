@@ -21,9 +21,9 @@ Uncertainty={
     'PSW': [
         # "PSW_isrRed",   
 	    # "PSW_fsrRed",      
-	"PSW_isrDef",    
+	# "PSW_isrDef",    
 	"PSW_fsrDef",  
-	# "PSW_isrCon",
+	"PSW_isrCon",
 	# "PSW_fsrCon",      
 	# "PSW_fsr_G2GG_muR",
 	# "PSW_fsr_G2QQ_muR",
