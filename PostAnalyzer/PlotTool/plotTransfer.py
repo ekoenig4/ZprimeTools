@@ -34,13 +34,24 @@ processMap = {
     },
 }
 
-def SetBounds(hs):
+def SetBounds(hs,num_sample,den_sample):
 
     bins = list(hs)[1:-1]
     avg = sum( ibin for ibin in bins ) / len(bins)
     maxdiff = max( abs(ibin - avg) for ibin in bins )
-    hs.SetMinimum( (avg - maxdiff)*0.7 )
-    hs.SetMaximum( (avg + maxdiff)*1.3 )
+    hs.SetMinimum( max(0,avg - maxdiff*2) )
+    hs.SetMaximum( (avg + maxdiff*3) )
+
+    if num_sample.region == 'SignalRegion':
+        hs.SetMinimum(0); hs.SetMaximum(5.5)
+    if num_sample.region == 'SingleEleCR':
+        hs.SetMinimum(0); hs.SetMaximum(1.7)
+    if num_sample.region == 'SingleMuCR':
+        hs.SetMinimum(0); hs.SetMaximum(3)
+    if num_sample.region == 'DoubleEleCR':
+        hs.SetMinimum(0); hs.SetMaximum(0.1)
+    if num_sample.region == 'DoubleMuCR':
+        hs.SetMinimum(0); hs.SetMaximum(0.1)
 def getTFUncertainty(norm,num_proc,den_proc):
     unclist = [
             "QCD_Scale",
@@ -92,7 +103,7 @@ def plotTF(num_sample,den_sample):
     # pad1.SetLeftMargin(0.2)
     # pad1.SetBottomMargin(0.);
     
-    SetBounds(tf)
+    SetBounds(tf,num_sample,den_sample)
     tf.Draw("axis")
     uncband = getTFUncertainty(tf,num_proc,den_proc)
     UncBandStyle(uncband)

@@ -79,11 +79,11 @@ def MCStyle(hs_mc,color):
     hs_mc.SetFillColor(color);
 ###################################################################
 
-def UncBandStyle(uncband):
+def UncBandStyle(uncband,color=kGray+1):
     uncband.SetTitle("")
     # uncband.SetFillStyle(3144)
     uncband.SetFillStyle(2001)
-    uncband.SetFillColor(kGray+1)
+    uncband.SetFillColor(color)
 ###################################################################
 
 def fillStack(samples,hs_datamc):
@@ -105,13 +105,13 @@ def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
     return leg
 ###################################################################
 
-def getCMSText(lumi,year):
+def getCMSText(lumi,year,scale=1):
     global boundaries
     x1,y1 = 0.62,0.907173
     texS = TLatex(x1,y1,("%s (13 TeV, %s)" % (lumi,year)));#VS
     texS.SetNDC();
     texS.SetTextFont(42);
-    texS.SetTextSize(0.040);
+    texS.SetTextSize(0.040*scale);
     texS.Draw();
     box1 = Box(x=x1,y=y1,w=texS.GetXsize(),h=texS.GetYsize())
 
@@ -119,7 +119,7 @@ def getCMSText(lumi,year):
     texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}"); 
     texS1.SetNDC();
     texS1.SetTextFont(42);
-    texS1.SetTextSize(0.040);
+    texS1.SetTextSize(0.040*scale);
     texS1.Draw();
     box2 = Box(x=x2,y=y2,w=texS1.GetXsize(),h=texS1.GetYsize())
 

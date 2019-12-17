@@ -5,6 +5,7 @@ import numpy as np
 class b_info:
     template = None
     cut = None
+    weight = None
     @staticmethod
     def initVariable():
         b_info.template = None

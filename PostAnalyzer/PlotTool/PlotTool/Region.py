@@ -26,19 +26,24 @@ parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int
 parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",default=False)
 parser.add_argument("-d","--directory",help="Specify directory to get post files from",type=valid_directory)
 parser.add_argument("-c","--cut",help="Specify cut on branch variable using TTree string",type=lambda arg:str(arg).replace('"','').replace("'",""),default=None)
+parser.add_argument("-e","--era",help="Specify the eras to use",type=lambda arg:sorted(arg.upper()),default=None)
+parser.add_argument("--autovar",help="Specify to use the automatic basic nhist",action="store_true",default=False)
+parser.add_argument("--normalize",help="Specify to normalize plots to unity",action="store_true",default=False)
+parser.add_argument("-w","--weight",help="Specify the weight to use for branch variables",type=str,default="weight")
 
 class Region(object):
-    def __init__(self,year=None,region=None,lumi=None,path=None,show=True):
+    def __init__(self,year=None,region=None,lumi=None,path=None,config=None,autovar=False,useMaxLumi=False,copy=None,show=True):
+        if copy is not None: self.copy(copy); return
         self.args = parser.parse_args()
         self.year = year; self.region = region; self.lumi = lumi; self.path = path; self.show = show
         self.cwd = os.getcwd()
         if self.path is None: self.path = self.cwd
-        elif self.args.directory is not None:
+        if self.args.directory is not None:
             print "Using %s to get files" % self.args.directory
             os.chdir(self.args.directory); self.path = os.getcwd()
         else: os.chdir(self.path); self.path = os.getcwd();
-        
-        import config
+
+        if config is None: import config
         if self.year is None: self.year = config.version
         self.xsec = config.xsec
 
@@ -46,6 +51,16 @@ class Region(object):
         self.lumimap = config.lumi_by_era[self.region]
         if self.lumi is None: self.lumi = config.lumi[self.region]
         if self.args.lumi is not None: self.lumi = self.args.lumi
+        if self.args.era is not None:
+            self.lumimap = { era:self.lumimap[era] for era in self.args.era }
+            self.lumi = sum(self.lumimap.values())
+        if useMaxLumi: self.lumi = max( config.lumi.values() )
+            
+        self.lumi_label = '%s' % float('%.3g' % (self.lumi/1000.)) + " fb^{-1}"
+        if (self.args.normalize): self.lumi_label="Normalized"
+
+        if autovar: self.nhist = config.regions[self.region]
+        if self.args.autovar: self.nhist = config.regions[self.region]
 
         self.MCList = config.mclist
         self.SampleList = ["Data"] + self.MCList
@@ -63,7 +78,7 @@ class Region(object):
             print "Plotting at",self.lumi,"pb^{-1}"
         self.haddFiles()
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
-    def __len__(self): return len(self.processes)
+    def __len__(self): return len(self.SampleList)
     def __getitem__(self,i):
         if type(i) == str: key = i
         if type(i) == int: key = self.SampleList[i];
@@ -81,22 +96,22 @@ class Region(object):
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     def setSignalInfo(self,scale=1):
         from monoZprime_XS import centralxsec as signalxsec
-        self.signal = self.args.signal
-        self.SampleList.insert(1,'Signal')
-        filelist = []
-        xsecmap = {}
-        for data in signalxsec:
-            fn="post"+data
-            xsec=signalxsec[data]
-            filelist.append(fn)
-            xsecmap[fn] = scale*xsec
+        self.SignalList = [ ]
         if self.args.signal == '-1':
-            self.processes['Signal'] = Process('Signal',filelist,xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+            self.signal = 'Signal'
+            for signal in self.SignalList:
+                self.SignalList.append(signal)
+                fname = 'post'+signal
+                xsecmap = { fname:signalxsec[signal]}
+                self.processes[signal] = Process(signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+                self.SampleList.insert(1,signal)
         elif IsSignal(self.args.signal):
-            signal = self.args.signal
-            fname = 'post'+signal
-            xsecmap = {fname:xsecmap[fname]}
-            self.processes['Signal'] = Process('Signal',[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+            self.signal = self.args.signal
+            self.SignalList.append(self.signal)
+            fname = 'post'+self.signal
+            xsecmap = {fname:signalxsec[self.signal]}
+            self.processes[self.signal] = Process(self.signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+            self.SampleList.insert(1,self.signal)
     def initVariable(self,variable=None):
         b_info.initVariable()
         Nuisance.unclist = []
@@ -105,16 +120,18 @@ class Region(object):
             tmp = self.processes.pop('SumOfBkg')
             del tmp
         if variable is not None:
-            self.setXaxisTitle(variable)
             self.varname = variable
             self.cut = self.args.cut
-            self.setBinning(variable,self.cut)
+            self.weight = self.args.weight
+            self.setBinning(variable,self.weight,self.cut)
     def initiate(self,variable):
         if os.getcwd() != self.path: os.chdir(self.path)
         self.initVariable(variable)
+        if hasattr(self,'nhist'): variable = '%s_%s' % (variable,self.nhist)
         for process in self:
-            process.setVariable(variable,b_info.template,b_info.cut)
+            process.setVariable(variable,b_info.template,b_info.weight,b_info.cut)
             self.scaleWidth = process.scaleWidth
+        self.setXaxisTitle(variable)
         if self.show: self.output()
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     def output(self):
@@ -122,9 +139,9 @@ class Region(object):
         prompt = 'integral of %s: %s'
         ntemp = '{0:<15}'; itemp = '{0:<8}'
         print prompt % ( ntemp.format('Data'),itemp.format( '%.6g' % self.processes['Data'].scaled_total ) )
-        if 'Signal' in self.processes:
-            process = self.processes['Signal']
-            for signal in process:
+        if hasattr(self,'signal'):
+            for signal in self.SignalList:
+                signal = self[signal]
                 print prompt % ( ntemp.format(signal.process),itemp.format( '%.6g' % signal.scaled_total ) )
         BkgIntegral = sum( process.scaled_total for name,process in self.processes.iteritems() if process.proctype == 'bkg' )
         for sample in sorted(self.MCList,key=lambda sample: self.processes[sample].scaled_total,reverse=True):
@@ -136,9 +153,9 @@ class Region(object):
     def setSumOfBkg(self):
         sumofbkg = Process('SumOfBkg',[],{},'sumofbkg',year=self.year,region=self.region)
         for process in self:
-            if process.proctype == 'bkg': sumofbkg.add(process)
+            if process.proctype == 'bkg':
+                sumofbkg.add(process)
         self.processes['SumOfBkg'] = sumofbkg
-        for nuisance in sumofbkg.nuisances: print sumofbkg.nuisances[nuisance]
     def setXaxisTitle(self,variable):
         self.name = 'Xaxis Title'
         for title in samplenames:
@@ -148,46 +165,66 @@ class Region(object):
             if key == title:
                 self.name = samplenames[title];
                 break
-    def setBinning(self,variable,cut):
+        if self.name == 'Xaxis Title':
+            for process in self:
+                for subprocess in process:
+                    self.name = subprocess.histo.GetXaxis().GetTitle()
+                    break
+    def setBinning(self,variable,weight,cut):
         _,ndir = GetDirname(variable)
-        b_variable = variable.replace('_%s' % ndir,'')
+        if ndir is None: ndir = ''
+        else: ndir = '_%s' % ndir
+        b_variable = variable.replace(ndir,'')
         b_info.cut = cut
+        b_info.weight = weight
+        self.varname = b_variable
         if cut is not None:
             cutvar = cut.replace('>','?').replace('<','?').split('?')[0]
-            if cutvar in variable: self.varname = self.varname.replace('_%s' % ndir,'%s_%s' % (cut.replace(cutvar,'').replace('<','-').replace('>','+'),ndir))
-            else: self.varname = self.varname.replace('_%s' % ndir,'_%s_%s' % (cut.replace('<','-').replace('>','+'),ndir))
+            if cutvar in variable: self.varname += cut.replace(cutvar,'').replace('<','-').replace('>','+')
+            else: self.varname  += cut.replace('<','-').replace('>','+')
+        self.varname += ndir
         if self.args.binning == None: return
         for label,binning in b_info.binninglist.iteritems():
             if label in self.args.binning:
-                self.varname += self.args.binning
+                self.varname += '_'+self.args.binning
                 binning(self.args.binning,self,b_variable) 
-    def addUnc(self,nuisance):
-        for process in self: process.addUnc(nuisance)
-    def fullUnc(self,unclist=None,stat=None):
-        if unclist is None: unclist = self.nuisances.keys()
+    def addUnc(self,nuisance,show=True):
+        for process in self: process.addUnc(nuisance,show=show)
+    def fullUnc(self,unclist=None,stat=False):
+        if unclist is None: unclist = Nuisance.unclist
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
         elif stat and 'Stat' not in unclist: unclist.append('Stat')
         self.unclist = unclist
         for process in self: process.fullUnc(unclist,stat)
         self.setSumOfBkg()
-    def getUncBand(self,unclist=None):
-        if not hasattr(self,'unclist'): self.fullUnc(unclist,True)
-        elif sorted(unclist) != sorted(self.unclist): self.fullUnc(unclist,True)
+        print self["SumOfBkg"].nuisances["Total"]
+    def getUncBand(self,unclist=None,stat=False):
+        if not hasattr(self,'unclist'): self.fullUnc(unclist,stat)
+        elif sorted(unclist) != sorted(self.unclist): self.fullUnc(unclist,stat)
         data = self['Data'].histo
         up,dn = self['SumOfBkg'].nuisances['Total'].GetHistos()
         rup = GetRatio(data,up); rdn = GetRatio(data,dn)
         uncband = GetUncBand(rup,rdn,norm=1)
         return uncband
-    def __add__(self,other):
+    def copy(self,other):
+        self.args = other.args; self.year = other.year; self.region = other.region; self.lumi = other.lumi; self.path = other.path; self.show = other.show
+        self.MCList = list(other.MCList); self.SampleList = list(other.SampleList);
+        if hasattr(other,'signal'):
+            self.signal = other.signal
+            self.SignalList = list(other.SignalList)
+        self.processes = { name:Process(copy=process) for name,process in other.processes.iteritems() }
+        self.scaleWidth = other.scaleWidth
+        self.name = other.name
+        self.varname = other.varname
+        self.cut = other.cut
+    def add(self,other):
         # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
-        from copy import deepcopy
-        new = deepcopy(self)
-        samplelist = new.processes.keys()
+        samplelist = self.processes.keys()
+        self.lumi += other.lumi
         for sample in other.processes.keys():
             if sample not in samplelist: samplelist.append(sample)
         for sample in samplelist:
-            if sample in new.processes and sample in other.processes:
-                new.processes[sample].add(other.processes[sample])
-            if sample not in new.processes and sample in other.processes:
-                new.processes[sample] = deepcopy(other.processes)
-        return new
+            if sample in self.processes and sample in other.processes:
+                self.processes[sample].add(other.processes[sample])
+            if sample not in self.processes and sample in other.processes:
+                self.processes[sample] = Process(copy=other.processes[sample])

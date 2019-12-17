@@ -4,7 +4,7 @@ from ROOT import *
 from sys import argv,path
 from PlotTool import *
 from os import system,getcwd,path,mkdir
-from config import config,lumi as mc,version
+import config
 
 gROOT.SetBatch(1)
 
@@ -15,7 +15,7 @@ def printVars(obj):
 
 outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
-dir = {"SignalRegion/":"sr","DoubleEleCR/":"ze","DoubleMuCR/":"zm","SingleEleCR/":"we","SingleMuCR/":"wm"}
+dir = {"SignalRegion":"sr","DoubleEleCR":"ze","DoubleMuCR":"zm","SingleEleCR":"we","SingleMuCR":"wm"}
 
 def GetZWLinking(rfile):
     if type(rfile) == str: rfile = TFile.Open(rfile)
@@ -54,7 +54,7 @@ def GetTransferFactors(rfile):
             for key in cr:
                 cr_hs = cr[key]
                 sr_hs = sr[key]
-                thistos[key] = GetRatio(sr_hs,cr_hs).Clone(key)
+                thistos[key] = GetRatio(cr_hs,sr_hs).Clone(key)
             transfer[region] = thistos
     # Write transfer factor histograms to systematic file
     for sample,transfer in tfactors.iteritems():
@@ -67,61 +67,48 @@ def GetTransferFactors(rfile):
 
 def saveplot(variable):
     print variable
-    cut = ''
-    if '>' in variable: cut = '>'+variable.split('>')[-1]
-    if '<' in variable: cut = '<'+variable.split('<')[-1]
-    varname = variable.replace('>','+').replace('<','-')
-    variable = variable.replace(cut,'')
-    rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,version) ,'recreate')
-    Uncertainty = config['Uncertainty']
-    lumi = max( lumi for region,lumi in mc.items() )
-    for region,nhisto in config['regions'].items():
-        rfile.cd()
-        # if variable == 'recoil' and region == 'SignalRegion/': variable = 'pfMET'
-        # elif variable == 'pfMET' and region != 'SignalRegion/' : variable = 'recoil'
-        var = variable+'_'+nhisto+cut
-        print region,var
-        directory = rfile.mkdir(dir[region])
-        norm = Region(path=region,lumi=lumi,show=False)
-        norm.initiate(var)
-        directory.cd()
-        sumOfBkg = norm.getSumOfBkg()
-        sumOfBkg.SetName('sumOfBkg')
-        sumOfBkg.Write()
-        if region == 'SignalRegion/': data_obs = norm.getSumOfBkg()
-        else:                         data_obs = norm.processes['Data'].histo
-        data_obs.SetName('data_obs')
-        data_obs.Write()
-        for sample in norm.SampleList:
-            if sample == "Signal":
-                signals = norm.processes['Signal']
-                for signal in signals:
-                    signal.histo.SetName(signal.name)
-                    signal.histo.Write()
+    lumi = max( config.lumi.values() )
+    centmap = {}
+    for region,nhisto in config.regions.iteritems():
+        centmap[region] = Region(path=region,lumi=lumi,show=False)
+        centmap[region].initiate(variable+'_'+nhisto)
+        centmap[region].setSumOfBkg()
+        varname = centmap[region].varname.split('_')[0]
+    rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,config.version) ,'recreate')
+    for region,norm in centmap.iteritems():
+        print region
+        directory = rfile.mkdir(dir[region]); directory.cd()
+        norm["SumOfBkg"].histo.Write("SumOfBkg")
+        for process in norm:
+            if process.proctype == 'data':
+                if region == 'SignalRegion':
+                    data_obs = norm["SumOfBkg"].histo.Clone("data_obs")
+                else:
+                    data_obs = process.histo.Clone("data_obs")
+                data_obs.Write()
+            elif process.proctype == 'signal':
+                for subprocess in process:
+                    signal = subprocess.histo.Clone(subprocess.process)
+                    signal.Write()
             else:
-                process = norm.processes[sample]
-                process.histo.SetName(sample)
-                process.histo.Write()
-        ##############################################
-        for name,nuisances in Uncertainty.iteritems():
-            for nuisance in nuisances:
-                print '\t',nuisance,
-                norm.addUnc(nuisance)
-                directory.cd()
-                for sample in norm.SampleList:
-                    if sample == 'Data': continue
-                    for variation in ('Up','Down'):
-                        if sample == "Signal":
-                            for signal in signals:
-                                signal.nuisances[nuisance][variation].SetName(signal.name+'_'+nuisance+variation)
-                                signal.nuisances[nuisance][variation].Write()
-                        else:
-                            process = norm.processes[sample]
-                            process.nuisances[nuisance][variation].SetName(process.name+'_'+nuisance+variation)
-                            process.nuisances[nuisance][variation].Write()
-                        
-            ###############################################################
-            print
+                bkg = process.histo.Clone(process.process)
+                bkg.Write()
+        for unclist in config.Uncertainty.values():
+            for unc in unclist:
+                for process in norm:
+                    process.addUnc(unc,show=False)
+                    if process.proctype == 'data': continue
+                    elif process.proctype == 'signal':
+                        for subprocess in process:
+                            up,dn = subprocess.nuisances[unc].GetHistos()
+                            up = up.Clone('%s_%sUp' % (subprocess.process,unc))
+                            dn = dn.Clone('%s_%sDown' % (subprocess.process,unc))
+                            up.Write();dn.Write()
+                    else:
+                        up,dn = process.nuisances[unc].GetHistos()
+                        up = up.Clone('%s_%sUp' % (process.process,unc))
+                        dn = dn.Clone('%s_%sDown' % (process.process,unc))
+                        up.Write(); dn.Write()
     ###########################################################################
     GetZWLinking(rfile)
     GetTransferFactors(rfile)
@@ -130,10 +117,10 @@ def saveplot(variable):
     lumi_hs.SetBinContent(1,norm.lumi)
     lumi_hs.Write()
     year_hs = TH1F("year","year",1,0,1)
-    year_hs.SetBinContent(1,int(norm.version))
+    year_hs.SetBinContent(1,config.year)
     year_hs.Write()
     var_hs = TH1F("variable",variable+';'+norm.name,1,0,1)
-    var_hs = sumOfBkg.Clone('variable')
+    var_hs = b_info.template.Clone('variable')
     var_hs.Reset(); var_hs.SetTitle(variable); var_hs.GetXaxis().SetTitle(norm.name);
     var_hs.Write()
     rfile.Close()

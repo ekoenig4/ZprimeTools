@@ -3,6 +3,7 @@
 from ROOT import *
 from sys import argv,path
 from PlotTool import *
+import config
 import os
 
 """
@@ -17,16 +18,29 @@ gROOT.SetBatch(1)
 weightedMC = Region(show=0)
 unweightedMC = Region(show=0)
 
-puTrueReWeighted = "puTrueReWeight_10";
-puTrueUnWeighted = "puTrueUnWeight_10";
+nhist = config.regions[weightedMC.region]
+# nhist= '1'
 
-weightedMC.initiate(puTrueReWeighted);
-unweightedMC.initiate(puTrueUnWeighted);
-dataFile = TFile.Open("PlotTool/dataPileup.root")
+puTrueReWeighted = "puTrueReW_%s" % nhist;
+puTrueUnWeighted = "puTrueNoW_%s" % nhist;
+
+weightedMC.initiate(puTrueReWeighted); weightedMC.setSumOfBkg()
+unweightedMC.initiate(puTrueUnWeighted); unweightedMC.setSumOfBkg()
+dataFile = config.data_pileup
 data_hs = dataFile.Get("pileup")
 
-weightedBKG = weightedMC.getSumOfBkg()
-unweightedBKG = unweightedMC.getSumOfBkg()
+def fixBinning(hs):
+    if data_hs.GetNbinsX() != hs.GetNbinsX():
+        new = data_hs.Clone()
+        for ibin in range(1,data_hs.GetNbinsX()+1):
+            new[ibin] = hs[ibin]
+        return new
+    return hs
+
+weightedBKG = fixBinning(weightedMC["SumOfBkg"].histo)
+unweightedBKG = fixBinning(unweightedMC["SumOfBkg"].histo)
+
+xmin,xmax = weightedBKG.GetXaxis().GetXmin(),weightedBKG.GetXaxis().GetXmax()
 
 data_hs.SetTitle("")
 unweightedBKG.SetTitle("")
@@ -80,6 +94,8 @@ weightedBKG.GetYaxis().SetTitle("Noramlized Events")
 weightedBKG.GetXaxis().SetTickLength(0);
 weightedBKG.GetXaxis().SetLabelOffset(999);
 
+Ratio = GetRatio(data_hs,weightedBKG)
+
 leg = TLegend(0.62,0.60,0.86,0.887173,"");
 leg.AddEntry(unweightedBKG,"MC out of the box","l");
 leg.AddEntry(weightedBKG,"reweighted MC","l");
@@ -95,7 +111,7 @@ texS.SetNDC();
 texS.SetTextFont(42);
 texS.SetTextSize(0.040);
 texS.Draw();
-texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+weightedMC.version+")");
+texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+weightedMC.year+")");
 texS1.SetNDC();
 texS1.SetTextFont(42);
 texS1.SetTextSize(0.040);
@@ -109,8 +125,6 @@ pad2.SetTopMargin(0);
 pad2.SetBottomMargin(0.35);
 
 ######################################
-
-Ratio = GetRatio(data_hs,weightedBKG)
 rmin = 0.3; rmax = 1.7;
 Ratio.GetYaxis().SetRangeUser(rmin,rmax);
 Ratio.SetStats(0);
@@ -119,7 +133,7 @@ Ratio.GetYaxis().CenterTitle();
 Ratio.SetMarkerStyle(20);
 Ratio.SetMarkerSize(0.7);
 
-line = TLine(weightedBKG.GetXaxis().GetXmin(), 1.,weightedBKG.GetXaxis().GetXmax(), 1.);
+line = TLine(xmin, 1.,xmax, 1.);
 line.SetLineStyle(8);
 
 
@@ -146,8 +160,6 @@ c.Update();
 ########################################
 
 nbins = data_hs.GetNbinsX();
-xmin = weightedBKG.GetXaxis().GetXmin();
-xmax = weightedBKG.GetXaxis().GetXmax();
 xwmin = xmin;
 xwmax = xmax;
 
@@ -170,7 +182,7 @@ yaxis.SetTitleOffset(0.35);
 yaxis.Draw("SAME");
 
 dir = os.getcwd().split("/")[-1]
-file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+weightedMC.version+"/"+dir+"Plots_EWK/"
+file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+weightedMC.year+"/"+dir+"Plots_EWK/"
 #print file_path
 directory=os.path.join(os.path.dirname(file_path),"")
 if not os.path.exists(directory):

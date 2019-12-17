@@ -154,7 +154,8 @@ if __name__ == "__main__":
         process = samples.processes[name]
         if name == 'Signal': process = process[0]
         hslist.append( (name,process.histo) )
-    hslist.insert(1, ('SumOfBkg',samples.getSumOfBkg()) )
+    samples.setSumOfBkg()
+    hslist.insert(1, ('SumOfBkg',samples.processes['SumOfBkg'].histo) )
 
     tableSet = TableSet()
     if args.yields: tableSet.add(getYields(hslist,binlist))
