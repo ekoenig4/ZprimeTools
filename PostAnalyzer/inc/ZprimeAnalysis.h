@@ -107,7 +107,7 @@ public:
   Cutflow *cutflow;
 
   /* Event Weight Variables */
-  float weight,weight_nogen;
+  float weight,weight_nogen,weight_nopileup;
   float kfactor;
   float sf;
   float pileup;

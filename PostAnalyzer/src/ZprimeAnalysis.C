@@ -22,6 +22,10 @@ void ZprimeAnalysis::SetScalingHistos() {
 
 void ZprimeAnalysis::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
+  tree->Branch("genWeight",&genWeight);
+  tree->Branch("pileup",&pileup);
+  tree->Branch("sf",&sf);
+  tree->Branch("kfactor",&kfactor);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
   tree->Branch("recoil",&recoil,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
@@ -101,8 +105,8 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     // MC Info          ;
-    h_puTrueNoW[nhist]  ->Fill(puTrue->at(0),genWeight);
-    h_puTrueReW[nhist]  ->Fill(puTrue->at(0),genWeight*pileup);
+    h_puTrueNoW[nhist]  ->Fill(puTrue->at(0),weight_nopileup);
+    h_puTrueReW[nhist]  ->Fill(puTrue->at(0),event_weight);
     h_genHT[nhist]      ->Fill(genHT,event_weight);
     h_bosonPt[nhist]    ->Fill(bosonPt,genWeight);
     h_bosonPtwK[nhist]  ->Fill(bosonPt,genWeight * kfactor);
@@ -270,6 +274,7 @@ void ZprimeAnalysis::SetKFactors(float bosonPt) {
 void ZprimeAnalysis::ApplyKFactor(float &event_weight) {
   event_weight *= kfactor;
   weight_nogen *= kfactor;
+  weight_nopileup *= kfactor;
 }
 
 void ZprimeAnalysis::SetSF(float sf) {
@@ -279,6 +284,7 @@ void ZprimeAnalysis::SetSF(float sf) {
 void ZprimeAnalysis::ApplySF(float &event_weight) {
   event_weight *= sf;
   weight_nogen *= sf;
+  weight_nopileup *= sf;
 }
 
 void ZprimeAnalysis::ApplyPileup(float &event_weight) {
@@ -288,6 +294,7 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
   event_weight *= pileup * genWeight;
   weight_nogen *= pileup;
+  weight_nopileup *= genWeight;
 }
 
 bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }
@@ -312,7 +319,7 @@ void ZprimeAnalysis::initVars() {
     genWeight = 1;
   }
 
-  weight = weight_nogen = kfactor = pileup = sf = 1;
+  weight = weight_nogen = weight_nopileup = kfactor = pileup = sf = 1;
 
   bosonPt = Pt123Fraction = Pt123 = j1pT = -99;
   ChNemPtFrac = ChNemPt = ChNemPt123 = -99;

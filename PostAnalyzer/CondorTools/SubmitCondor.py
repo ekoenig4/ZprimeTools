@@ -24,15 +24,18 @@ def output(string,redirect=False):
 def findInputDirectories():
     # search current directory and parent directories for input directories
     directories = []
-    find_these = ['RootFiles','ntuples']
+    find_these = [['RootFiles'],['ntuples','datasets/ntuples']]
     def helper(path,check):
         realpath = os.path.realpath(path)
         check_path = os.path.join(realpath,check)
         if os.path.isdir(check_path) and not os.path.islink(check_path): return os.path.realpath(check_path)
         elif realpath != repo_path: return helper( updirectory(realpath),check )
     for check in find_these:
-        path = helper('.',check)
-        if path != None: directories.append(path)
+        for priority in check:
+            path = helper('.',priority)
+            if path != None:
+                directories.append(path)
+                break
     return directories
     
 def init():
