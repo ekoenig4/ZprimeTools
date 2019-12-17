@@ -15,54 +15,46 @@ def printVars(obj):
 
 outdir = "Systematics"
 if not path.isdir(outdir): mkdir(outdir)
-dir = {"SignalRegion":"sr","DoubleEleCR":"ze","DoubleMuCR":"zm","SingleEleCR":"we","SingleMuCR":"wm"}
+dirmap = {"SignalRegion":"sr","DoubleEleCR":"ze","DoubleMuCR":"zm","SingleEleCR":"we","SingleMuCR":"wm"}
 
-def GetZWLinking(rfile):
+def GetZWLinking(rfile,centmap):
     if type(rfile) == str: rfile = TFile.Open(rfile)
-    rfile.cd(); rfile.cd('sr')
-    lhistos = {}
-    keylist = [ key.GetName().replace('WJets','ZWlink') for key in gDirectory.GetListOfKeys() if 'WJets' in key.GetName() and 'WJets' != key.GetName() ]
-    wjet_norm = gDirectory.Get('WJets')
-    zjet_norm = gDirectory.Get('ZJets')
-    lhistos['ZWlink'] = GetRatio(zjet_norm,wjet_norm).Clone('ZWlink')
-    for key in keylist:
-        wkey = '%s_WJets' % key; zkey = '%s_ZJets' % key
-        wjet_unc = gDirectory.Get(key.replace('ZWlink','WJets'))
-        zjet_unc = gDirectory.Get(key.replace('ZWlink','ZJets'))
-        lhistos[wkey] = GetRatio(zjet_norm,wjet_unc).Clone(wkey)
-        lhistos[zkey] = GetRatio(zjet_unc,wjet_norm).Clone(zkey)
     rfile.cd(); rfile.mkdir('sr/zwlink'); rfile.cd('sr/zwlink')
-    for key,hs in lhistos.iteritems():
-        hs.Write()
+    sr = centmap["SignalRegion"]
+    tf = Transfer('zwlink',sr['ZJets'],sr['WJets'],namelist=['Znn','Wln'])
+    rfile.cd('sr/zwlink')
+    tf.histo.SetName('ZWlink'); tf.histo.Write()
+    for nuisance in tf.nuisances.values():
+        uncname = 'ZWlink_%s' % nuisance.name
+        up,dn = nuisance.GetHistos()
+        rfile.cd('sr/zwlink')
+        up.SetName('%sUp' % uncname); up.Write()
+        dn.SetName('%sDown' % uncname); dn.Write()
 ##################################################################
 
-def GetTransferFactors(rfile):
+def GetTransferFactors(rfile,centmap):
     if type(rfile) == str: rfile = TFile.Open(rfile)
-    tfactors = {'ZJets':{},'WJets':{}}
-    varmap = {'ZJets':{'sample':'DYJets','regions':['ze','zm']},
-              'WJets':{'sample':'WJets' ,'regions':['we','wm']}}
-    for sample,transfer in tfactors.items():
-        rfile.cd(); rfile.cd('sr')
-        sr = { key.GetName():rfile.Get('sr/%s' % key.GetName()).Clone() for key in gDirectory.GetListOfKeys()
-               if sample in key.GetName() }
-        infomap = varmap[sample]
-        for region in infomap['regions']:
-            thistos = {}
-            rfile.cd(); rfile.cd(region)
-            cr = { key.GetName().replace(infomap['sample'],sample):rfile.Get( '%s/%s' % (region,key.GetName()) ).Clone() for key in gDirectory.GetListOfKeys()
-                   if infomap['sample'] in key.GetName() }
-            for key in cr:
-                cr_hs = cr[key]
-                sr_hs = sr[key]
-                thistos[key] = GetRatio(cr_hs,sr_hs).Clone(key)
-            transfer[region] = thistos
-    # Write transfer factor histograms to systematic file
-    for sample,transfer in tfactors.iteritems():
-        for region,histos in transfer.iteritems():
-            rfile.cd(); rfile.cd(region);
-            rfile.mkdir('%s/transfer' % region); rfile.cd('%s/transfer' % region)
-            for key,hs in histos.items():
-                hs.Write()
+    namemap = {''}
+    for region,dirname in dirmap.iteritems():
+        if 'CR' not in region: continue
+        rfile.cd(); rfile.mkdir('%s/transfer' % dirname); rfile.cd('%s/transfer' % dirname)
+        if 'Double' in region:
+            num = centmap[region]['DYJets']; den = centmap['SignalRegion']['ZJets']
+            if 'Ele' in region: namelist = ['Zee','Znn']
+            else:               namelist = ['Zmm','Znn']
+        else:
+            num = centmap[region]['WJets']; den = centmap['SignalRegion']['WJets']
+            if 'Ele' in region: namelist = ['Wen','Wln']
+            else:               namelist = ['Wmn','Wln']
+        tf = Transfer('CSlink',num,den,namelist=namelist)
+        rfile.cd('%s/transfer' % dirname)
+        tf.histo.SetName(den.process); tf.histo.Write()
+        for nuisance in tf.nuisances.values():
+            uncname = '%s_%s' % (den.process,nuisance.name)
+            up,dn = nuisance.GetHistos()
+            rfile.cd('%s/transfer' % dirname)
+            up.SetName('%sUp' % uncname); up.Write()
+            dn.SetName('%sDown' % uncname); dn.Write()
 ###################################################################
 
 def saveplot(variable):
@@ -70,14 +62,14 @@ def saveplot(variable):
     lumi = max( config.lumi.values() )
     centmap = {}
     for region,nhisto in config.regions.iteritems():
-        centmap[region] = Region(path=region,lumi=lumi,show=False)
-        centmap[region].initiate(variable+'_'+nhisto)
+        centmap[region] = Region(path=region,lumi=lumi,show=False,autovar=True)
+        centmap[region].initiate(variable)
         centmap[region].setSumOfBkg()
         varname = centmap[region].varname.split('_')[0]
     rfile = TFile( "%s/%s_%s.sys.root" % (outdir,varname,config.version) ,'recreate')
     for region,norm in centmap.iteritems():
         print region
-        directory = rfile.mkdir(dir[region]); directory.cd()
+        rfile.cd(); cwd = rfile.mkdir(dirmap[region]); cwd.cd()
         norm["SumOfBkg"].histo.Write("SumOfBkg")
         for process in norm:
             if process.proctype == 'data':
@@ -87,9 +79,8 @@ def saveplot(variable):
                     data_obs = process.histo.Clone("data_obs")
                 data_obs.Write()
             elif process.proctype == 'signal':
-                for subprocess in process:
-                    signal = subprocess.histo.Clone(subprocess.process)
-                    signal.Write()
+                signal = process.histo.Clone(process.process)
+                signal.Write()
             else:
                 bkg = process.histo.Clone(process.process)
                 bkg.Write()
@@ -97,6 +88,7 @@ def saveplot(variable):
             for unc in unclist:
                 for process in norm:
                     process.addUnc(unc,show=False)
+                    cwd.cd()
                     if process.proctype == 'data': continue
                     elif process.proctype == 'signal':
                         for subprocess in process:
@@ -110,8 +102,8 @@ def saveplot(variable):
                         dn = dn.Clone('%s_%sDown' % (process.process,unc))
                         up.Write(); dn.Write()
     ###########################################################################
-    GetZWLinking(rfile)
-    GetTransferFactors(rfile)
+    GetZWLinking(rfile,centmap)
+    GetTransferFactors(rfile,centmap)
     rfile.cd()
     lumi_hs = TH1F("lumi","lumi",1,0,1)
     lumi_hs.SetBinContent(1,norm.lumi)

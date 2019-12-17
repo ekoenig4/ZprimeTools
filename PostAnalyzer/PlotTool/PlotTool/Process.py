@@ -209,6 +209,8 @@ class Process(object):
             if not self[subkey].open():
                 self.filenames.remove(filekey)
                 self.subprocesses.pop(subkey)
+                self.sublist.remove(subkey)
+        return any(self)
     def initVariable(self):
         for subprocess in self: subprocess.initVariable()
         self.histo = None
@@ -248,7 +250,6 @@ class Process(object):
             self.scaleWidth = subprocess.scaleWidth
             self.scaled_total += subprocess.scaled_total
     def setVariable(self,variable,b_template=None,weight=None,cut=None):
-        self.open()
         self.initVariable()
         tfile = iter(self).next().tfile
         if IsGlobal(variable,tfile): self.setGlobal(variable)
@@ -313,6 +314,7 @@ class Process(object):
         self.histo = other.histo
         self.raw_total = other.raw_total
         self.scaled_total = other.scaled_total
+        self.nuisances = other.nuisances
         # self.isOpen = other.isOpen
         # self.filenames = list(other.filenames)
         # self.xsecs = other.xsecs

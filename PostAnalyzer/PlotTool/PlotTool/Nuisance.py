@@ -28,11 +28,18 @@ class Nuisance(object):
             dn[ibin] = self.norm[ibin] - self.dn[ibin]
         return up,dn
     def __str__(self):
-        norm = self.norm.Integral()
-        up,dn = self.Integral()
-	varup = (up-norm)/norm
-        vardn = (dn-norm)/norm
-        return '{0:<20}'.format('%s %s' % (self.name,self.process))+'%+.1e/%+.1e' % (varup,vardn)
+            norm = self.norm.Integral()
+            up,dn = self.Integral()
+	    varup = (up-norm)/norm
+            vardn = (dn-norm)/norm
+            return '{0:<20}'.format('%s %s' % (self.name,self.process))+'%+.1e/%+.1e' % (varup,vardn)
+    def printByBin(self):
+        string = '{0:<20}'.format('%s %s' % (self.name,self.process))
+        for ibin in range(1,self.norm.GetNbinsX()+1):
+            varup = self.up[ibin]/self.norm[ibin]
+            vardn = -self.dn[ibin]/self.norm[ibin]
+            string += '{0:<10}'.format('\n%i bin:' % ibin) + '%+.1e/%+.1e' % (varup,vardn)
+        print string
     def copy(self,process=None):
         if process is None: process = self.process
         name = self.name

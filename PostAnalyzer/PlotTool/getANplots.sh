@@ -55,12 +55,7 @@ region2() {
 
 YEARS="2016 2017 2018"
 if [ -d "2016" ]; then
-    region2 || exit
-    for y in $YEARS; do
-    	pushd $y
-    	region || exit
-    	popd;
-    done
+    region2
 else
     region
 fi

@@ -34,6 +34,7 @@ parser.add_argument("-w","--weight",help="Specify the weight to use for branch v
 class Region(object):
     def __init__(self,year=None,region=None,lumi=None,path=None,config=None,autovar=False,useMaxLumi=False,copy=None,show=True):
         if copy is not None: self.copy(copy); return
+        self.isOpen = False
         self.args = parser.parse_args()
         self.year = year; self.region = region; self.lumi = lumi; self.path = path; self.show = show
         self.cwd = os.getcwd()
@@ -99,7 +100,7 @@ class Region(object):
         self.SignalList = [ ]
         if self.args.signal == '-1':
             self.signal = 'Signal'
-            for signal in self.SignalList:
+            for signal in signalxsec:
                 self.SignalList.append(signal)
                 fname = 'post'+signal
                 xsecmap = { fname:signalxsec[signal]}
@@ -124,9 +125,20 @@ class Region(object):
             self.cut = self.args.cut
             self.weight = self.args.weight
             self.setBinning(variable,self.weight,self.cut)
+    def open(self):
+        if self.isOpen: return
+        self.isOpen = True
+        proclist = self.processes.keys()
+        for process in proclist:
+            if not self[process].open():
+                self.processes.pop(process)
+                if process in self.SampleList: self.SampleList.remove(process)
+                if process in self.MCList: self.MCList.remove(process)
+                if process in self.SignalList: self.SignalList.remove(process)
     def initiate(self,variable):
         if os.getcwd() != self.path: os.chdir(self.path)
         self.initVariable(variable)
+        self.open()
         if hasattr(self,'nhist'): variable = '%s_%s' % (variable,self.nhist)
         for process in self:
             process.setVariable(variable,b_info.template,b_info.weight,b_info.cut)
@@ -190,12 +202,13 @@ class Region(object):
                 binning(self.args.binning,self,b_variable) 
     def addUnc(self,nuisance,show=True):
         for process in self: process.addUnc(nuisance,show=show)
-    def fullUnc(self,unclist=None,stat=False):
+    def fullUnc(self,unclist=None,stat=False,show=None):
+        if show is None: show = self.show
         if unclist is None: unclist = Nuisance.unclist
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
         elif stat and 'Stat' not in unclist: unclist.append('Stat')
         self.unclist = unclist
-        for process in self: process.fullUnc(unclist,stat)
+        for process in self: process.fullUnc(unclist,stat,show=show)
         self.setSumOfBkg()
         print self["SumOfBkg"].nuisances["Total"]
     def getUncBand(self,unclist=None,stat=False):

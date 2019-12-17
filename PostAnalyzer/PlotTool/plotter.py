@@ -139,7 +139,7 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False,do
         
         if doUncband and any( Nuisance.unclist ):
             uncband.Draw('2same')
-            Ratio.Draw('pex0same')
+        Ratio.Draw('pex0same')
         line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())
         line.Draw("same");
         
