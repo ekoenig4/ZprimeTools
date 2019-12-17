@@ -74,7 +74,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 	  if ( CRSelection(mulist_leading,mulist_subleading) ) {
 	    if ( !sample.isData ) {
 	      SetSF( getSF(lepindex_leading,lepindex_subleading) );
-	      ApplySF(event_weight);
+	      // ApplySF(event_weight);
 	    }
 	    cutflow->Fill("CRSelection",event_weight);
 	    fillHistos(4,event_weight);
@@ -229,7 +229,10 @@ void ZprimeClass::JetEnergyScale(float start_weight) {
       vector<int> mulist_leading = muon_tightID(jetindex,muTightPtCut);
       vector<int> mulist_subleading = muon_looseID(jetindex,muLoosePtCut);
       if ( CRSelection(mulist_leading,mulist_subleading) ) {
-	if ( !sample.isData ) event_weight *= getSF(lepindex_leading,lepindex_subleading);
+	if ( !sample.isData ) {
+	  SetSF( getSF(lepindex_leading,lepindex_subleading) );
+	  // ApplySF(event_weight);
+	}
 	      
 	if (recoil > recoilCut) {
 	  //invariant mass of the two muons is betwen 60 and 120GeV

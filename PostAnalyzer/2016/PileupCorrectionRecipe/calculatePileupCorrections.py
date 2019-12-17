@@ -31,9 +31,16 @@ f = ROOT.TFile("mcPileup.root", "recreate")
 hist.Write()
 f.Close()
 
-def divide(dataFileName, outputFileName) :
+def fixhs(hs):
+   if hist.GetNbinsX() < hs.GetNbinsX():
+      tmp = hist.Clone()
+      for ibin in range(1,hist.GetNbinsX()+1):
+         tmp[ibin] = hs[ibin]
+      tmp.SetName(hs.GetName())
+      return tmp
+def divide(dataFileName, outputFileName):
     df = ROOT.TFile.Open(dataFileName)
-    data = df.Get("pileup")
+    data = fixhs(df.Get("pileup"))
     data.Scale(1./data.Integral())
     data.Divide(hist)
 
@@ -43,5 +50,5 @@ def divide(dataFileName, outputFileName) :
     f.Close()
 
 divide('dataPileup.root', 'PU_Central.root')
-divide('dataPileup_minBiasUP.root', 'PU_minBiasUP.root')
-divide('dataPileup_minBiasDOWN.root', 'PU_minBiasDOWN.root')
+# divide('dataPileup_minBiasUP.root', 'PU_minBiasUP.root')
+# divide('dataPileup_minBiasDOWN.root', 'PU_minBiasDOWN.root')

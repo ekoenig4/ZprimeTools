@@ -1,4 +1,4 @@
-REGIONS=SignalRegion SingleEleCR SingleMuCR DoubleEleCR DoubleMuCR
+REGIONS=SingleEleCR SingleMuCR DoubleEleCR DoubleMuCR
 
 .PHONY: $(REGIONS) all
 
