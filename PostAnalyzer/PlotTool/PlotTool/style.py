@@ -92,6 +92,7 @@ def fillStack(samples,hs_datamc):
         nbin = samples.processes['Data'].histo.GetNbinsX()
         order.sort(key=lambda process: process.histo.GetBinContent(nbin))
     else: order.sort(key=lambda process: process.scaled_total)
+    samples.MCOrder = [ _.process for _ in reversed(order) ]
     for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 

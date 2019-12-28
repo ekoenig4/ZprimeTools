@@ -65,9 +65,9 @@ def GetNuisanceList(tfile,dirname):
     return nuisances
 
 class SubProcess(object):
-    def __init__(self,name=None,fname=None,xsec=None,lumi=None,year=None,region=None,copy=None):
+    def __init__(self,name=None,fname=None,xsec=None,lumi=None,year=None,region=None,copy=None,args=None):
         if copy is not None: self.copy(copy); return
-        self.process = name; self.name = name; self.year = year; self.region = region; self.lumi = lumi
+        self.process = name; self.name = name; self.year = year; self.region = region; self.lumi = lumi; self.args = args
         if region is not None: self.name = "%s_%s" % (region,self.name)
         if year is not None:   self.name = "%s_%s" % (year,self.name)
         self.fname = fname; self.xsec = xsec; self.treemap = {}
@@ -122,8 +122,9 @@ class SubProcess(object):
         #scaling = Luminosity * NNLO-cross-section / Total-Events
         if histo is None:
             histo = self.histo
-            self.scaleWidth = any( "%.3f" % histo.GetBinWidth(ibin) != "%.3f" % histo.GetBinWidth(ibin+1) for ibin in range(1,histo.GetNbinsX()) )
-            self.scaleWidth = False
+            if not self.args.no_width:
+                self.scaleWidth = any( "%.3f" % histo.GetBinWidth(ibin) != "%.3f" % histo.GetBinWidth(ibin+1) for ibin in range(1,histo.GetNbinsX()) )
+            else: self.scaleWidth = False
             if self.xsec is None: self.scaling = 1
             else:                 self.scaling = lumi * self.xsec / self.cutflow
         if self.scaleWidth:     histo.Scale(self.scaling,"width")
@@ -164,6 +165,7 @@ class SubProcess(object):
     def copy(self,other):
         self.process = other.name; self.name = other.name; self.year = other.year;
         self.region = other.region; self.lumi = other.lumi; self.fname = other.fname; self.xsec = other.xsec;
+        self.args = other.args
         self.tfile = other.tfile
         self.histo = other.histo.Clone()
         self.raw_total = other.raw_total
@@ -173,7 +175,7 @@ class Process(object):
     isGlobal = False
     isNhisto = False
     isBranch = False
-    def __init__(self,name=None,filenames=None,xsecs=None,proctype=None,year=None,region=None,leg=None,lumi=1,color=kGray+1,copy=None):
+    def __init__(self,name=None,filenames=None,xsecs=None,proctype=None,year=None,region=None,leg=None,lumi=1,color=kGray+1,copy=None,args=None):
         if copy is not None: self.copy(copy); return
         self.process = name; self.name = name; self.year = year; self.region = region
         if region is not None: self.name = "%s_%s" % (region,self.name)
@@ -182,7 +184,7 @@ class Process(object):
         self.xsecs = { '%s_%s' % (self.name,filename):xsecs[filename] for filename in filenames } if xsecs is not None else xsecs
         self.filenames = list(filenames);
         self.proctype = proctype
-        self.leg = leg; self.lumi = lumi; self.color = color
+        self.leg = leg; self.lumi = lumi; self.color = color; self.args = args
         self.isOpen = False
         self.subprocesses = {}; self.nuisances = {}
         filelist = list(self.filenames)
@@ -191,7 +193,7 @@ class Process(object):
             name = filename.replace('post','')
             if self.proctype == 'data': xsec = None
             else: xsec = self.xsecs[sub]
-            self.subprocesses[sub] = SubProcess(name,fname,xsec,self.lumi,self.year,self.region)
+            self.subprocesses[sub] = SubProcess(name,fname,xsec,self.lumi,self.year,self.region,args=self.args)
         self.initVariable()
     def __len__(self): return len(self.sublist)
     def __getitem__(self,i):
@@ -315,6 +317,7 @@ class Process(object):
         self.raw_total = other.raw_total
         self.scaled_total = other.scaled_total
         self.nuisances = other.nuisances
+        self.args = args
         # self.isOpen = other.isOpen
         # self.filenames = list(other.filenames)
         # self.xsecs = other.xsecs

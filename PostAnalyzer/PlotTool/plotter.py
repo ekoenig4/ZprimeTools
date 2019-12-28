@@ -10,6 +10,8 @@ gROOT.SetBatch(1)
 parser.add_argument("--thn",help="specifies that all following plots are TH2 or TH3 plots",action="store_true", default=False)
 parser.add_argument("--sub",help="specify a sub directory to place output",action="store",type=str,default=None)
 parser.add_argument("--run2",help="Specify the region to run an entire run2 plot",action="store",type=str,default=None)
+parser.add_argument("--no-plot",help="Dont plot variables",action="store_true",default=False)
+parser.add_argument("-u","--uncertainty",help="Specify the uncertainty to apply on variable if available",default=[],nargs="*",type=str)
 
 def HigherDimension(samples,variable):
     axis = variable[-1]
@@ -30,7 +32,6 @@ def AutoSave(samples,c):
     file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+samples.year+"/"+samples.region+"Plots_EWK/"
     #print file_path
     sub = ""
-    if (samples.args.allHisto):sub = "all"
     if (samples.args.sub != None): sub = samples.args.sub
     directory=os.path.join(os.path.dirname(file_path),sub)
     if not os.path.exists(directory):
@@ -39,8 +40,7 @@ def AutoSave(samples,c):
     c.SaveAs(directory+"/datamc_"+samples.varname+".pdf")
     c.SaveAs(directory+"/datamc_"+samples.varname+".png")
 ###################################################################
-
-def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False,doUncband=True):
+def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False):
     del store[:] # Clear storage list 
     print "Plotting",variable
     if initiate:
@@ -48,7 +48,12 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False,do
             HigherDimension(samples,variable)
         else:
             samples.initiate(variable)
-            if doUncband and any(Nuisance.unclist): samples.fullUnc(['JES','PFU_ecal','PSW_isrCon','PSW_fsrDef'],stat=True)
+            samples.hasUncertainty = any(samples.args.uncertainty) and any(Nuisance.unclist)
+            if samples.args.no_plot: return
+            if samples.hasUncertainty: samples.fullUnc(samples.args.uncertainty,stat=True)
+    if samples.args.no_plot: return
+    samples.hasUncertainty = any(samples.args.uncertainty) and any(Nuisance.unclist)
+    if samples['Data'].histo.Integral() == 0: blinded = True
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
     gStyle.SetLegendBorderSize(0);
@@ -98,10 +103,12 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False,do
     if samples.args.mc_solid:
         leg.AddEntry(hs_bkg,"Background","f")
     else:
-        for mc in samples.MCList: leg.AddEntry(samples.processes[mc].histo,samples.processes[mc].leg,'f')
+        for mc in samples.MCOrder:
+            if samples[mc].scaled_total == 0: continue
+            leg.AddEntry(samples[mc].histo,samples[mc].leg,'f')
 
-    if doUncband and any( Nuisance.unclist ):
-        uncband = samples.getUncBand(['JES','PFU_ecal','PSW_isrCon','PSW_fsrDef'],stat=True)
+    if samples.hasUncertainty:
+        uncband = samples.getUncBand(samples.args.uncertainty,stat=True)
         UncBandStyle(uncband)
         leg.AddEntry(uncband,"syst #otimes stat",'f')
         
@@ -137,7 +144,7 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False,do
         RatioStyle(Ratio,rymin,rymax)
         Ratio.Draw("A");
         
-        if doUncband and any( Nuisance.unclist ):
+        if samples.hasUncertainty:
             uncband.Draw('2same')
         Ratio.Draw('pex0same')
         line = getRatioLine(data.histo.GetXaxis().GetXmin(),data.histo.GetXaxis().GetXmax())

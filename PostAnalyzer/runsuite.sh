@@ -9,7 +9,7 @@ for y in $YEARS; do
     	pushd $r
     	python PlotTool/plotShapeUnc.py -b incu40 -c '"ChNemPtFrac>0.5"' || exit
     	python PlotTool/plotShapeUnc.py recoil || exit
-    	popd;
+     	popd;
     done
     popd
 done

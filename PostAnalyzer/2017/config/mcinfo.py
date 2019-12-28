@@ -23,7 +23,7 @@ filemap = {
     "DYJets": ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"],
     "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
     "TTJets": ["postTTJetsDiLept"],
-    "DiBoson":["postWW","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ","postWWto2L2Nu"],
+    "DiBoson":["postWW","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ","postWWTo2L2Nu"],
     "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
 }
 legmap = {
@@ -90,9 +90,9 @@ xsec = {
 "postQCD2000toInf":2.023e+01,
     
 "postWW":7.590e+01,
-"postWWtoLNuQQ":4.599e+01,
-"postWWto2L2Nu":1.108e+01,
-"postWWto4Q":4.773e+01,
+"postWWToLNuQQ":4.599e+01,
+"postWWTo2L2Nu":1.108e+01,
+"postWWTo4Q":4.773e+01,
     
 "postWZ":2.757e+01,
 "postZZ":1.214e+01

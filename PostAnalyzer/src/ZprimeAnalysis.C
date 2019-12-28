@@ -62,6 +62,7 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     // Jet Info
     h_nJets[i]          = MakeTH1F(new TH1F(Name("nJets").c_str()        ,"nJets;Number of Jets"                                   ,21,-0.5,20.5));
     h_j1pT[i]           = MakeTH1F(new TH1F(Name("j1pT").c_str()         ,"j1pT;p_{T} of Leading Jet (GeV)"                        ,nPtBins,PtBins));
+    h_j1pTall[i]        = MakeTH1F(new TH1F(Name("j1pTall").c_str()      ,"j1pT;p_{T} of Leading Jet (GeV)"                        ,50,0,2000));
     h_j1Eta[i]          = MakeTH1F(new TH1F(Name("j1Eta").c_str()        ,"j1Eta; #eta of Leading Jet"                             ,nEtaBins,lEta,uEta));
     h_j1Phi[i]          = MakeTH1F(new TH1F(Name("j1Phi").c_str()        ,"j1Phi; #phi of Leading Jet"                             ,nPhiBins,lPhi,uPhi));
     h_j1etaWidth[i]     = MakeTH1F(new TH1F(Name("j1etaWidth").c_str()   ,"j1etaWidth; #eta width of Leading Jet"                  ,50,0,0.25));
@@ -130,6 +131,7 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
     // Jet Info         ;
     h_nJets[nhist]        ->Fill(nJet,event_weight);
     h_j1pT[nhist]         ->Fill(j1pT,event_weight);
+    h_j1pTall[nhist]      ->Fill(j1pT,event_weight);
     h_j1Eta[nhist]        ->Fill(jetEta->at(jetindex),event_weight);
     h_j1Phi[nhist]        ->Fill(jetPhi->at(jetindex),event_weight);
     h_j1etaWidth[nhist]   ->Fill(jetetaWidth->at(jetindex),event_weight);

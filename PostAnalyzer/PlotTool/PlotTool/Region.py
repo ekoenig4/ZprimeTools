@@ -19,7 +19,6 @@ DataFileMap = {
 
 parser.add_argument("-r","--reset",help="removes all post files from currently directory and rehadds them from the .output directory",action="store_true", default=False)
 parser.add_argument("-l","--lumi",help="set the luminosity for scaling",action="store",type=float,dest="lumi")
-parser.add_argument("-a","--allHisto",help="plot all 1D histograms in the post root files",action="store_true",default=False)
 parser.add_argument("-s","--signal",help="specify the signal file to use",action="store",type=str,default=None,dest="signal")
 parser.add_argument("-b","--binning",help="specify function for rebinning histogram",action="store",type=str,default=None)
 parser.add_argument("--nhists",help="Plot all 1D plots at nhists level",type=int)
@@ -27,9 +26,10 @@ parser.add_argument("--mc-solid",help="Make MC solid color",action="store_true",
 parser.add_argument("-d","--directory",help="Specify directory to get post files from",type=valid_directory)
 parser.add_argument("-c","--cut",help="Specify cut on branch variable using TTree string",type=lambda arg:str(arg).replace('"','').replace("'",""),default=None)
 parser.add_argument("-e","--era",help="Specify the eras to use",type=lambda arg:sorted(arg.upper()),default=None)
-parser.add_argument("--autovar",help="Specify to use the automatic basic nhist",action="store_true",default=False)
+parser.add_argument("-a","--autovar",help="Specify to use the automatic basic nhist",action="store_true",default=False)
 parser.add_argument("--normalize",help="Specify to normalize plots to unity",action="store_true",default=False)
 parser.add_argument("-w","--weight",help="Specify the weight to use for branch variables",type=str,default="weight")
+parser.add_argument("--no-width",help="Disable bin width scaling",action="store_true",default=False)
 
 class Region(object):
     def __init__(self,year=None,region=None,lumi=None,path=None,config=None,autovar=False,useMaxLumi=False,copy=None,show=True):
@@ -68,9 +68,9 @@ class Region(object):
 
         self.processes = {}
         datafile = DataFileMap[self.region]
-        self.processes["Data"] =    Process("Data",[ '%s_%s' % (datafile,era) for era in sorted(self.lumimap.keys()) ],None,'data',year=self.year,region=self.region)
+        self.processes["Data"] =    Process("Data",[ '%s_%s' % (datafile,era) for era in sorted(self.lumimap.keys()) ],None,'data',year=self.year,region=self.region,args=self.args)
         for mc in config.mclist:
-            self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],year=self.year,region=self.region)
+            self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],year=self.year,region=self.region,args=self.args)
 
         if self.region == "SignalRegion" and self.args.signal != None:
             self.setSignalInfo()
@@ -134,7 +134,7 @@ class Region(object):
                 self.processes.pop(process)
                 if process in self.SampleList: self.SampleList.remove(process)
                 if process in self.MCList: self.MCList.remove(process)
-                if process in self.SignalList: self.SignalList.remove(process)
+                if hasattr(self,'SignalList') and process in self.SignalList: self.SignalList.remove(process)
     def initiate(self,variable):
         if os.getcwd() != self.path: os.chdir(self.path)
         self.initVariable(variable)
@@ -156,6 +156,7 @@ class Region(object):
                 signal = self[signal]
                 print prompt % ( ntemp.format(signal.process),itemp.format( '%.6g' % signal.scaled_total ) )
         BkgIntegral = sum( process.scaled_total for name,process in self.processes.iteritems() if process.proctype == 'bkg' )
+        print prompt % ( ntemp.format('SumOfBkg'),itemp.format( '%.6g' % BkgIntegral ) )
         for sample in sorted(self.MCList,key=lambda sample: self.processes[sample].scaled_total,reverse=True):
             process = self.processes[sample]
             percent = ("%.4g%%" % (100*process.scaled_total/BkgIntegral)) if BkgIntegral != 0 else 'Nan'

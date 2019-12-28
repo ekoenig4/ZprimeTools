@@ -28,7 +28,8 @@ void ZprimeDoubleCR::BookHistos(int i,string histname) {
     h_subleadingLeptonEta[i] = MakeTH1F(new TH1F(Name("subleadingLeptonEta").c_str(),"subleadingLeptonEta;Subleading Lepton #eta"       ,nEtaBins,lEta,uEta));              
     h_subleadingLeptonPhi[i] = MakeTH1F(new TH1F(Name("subleadingLeptonPhi").c_str(),"subleadingLeptonPhi;Subleading Lepton #phi"       ,nPhiBins,lPhi,uPhi));        
     h_dileptonPt[i]          = MakeTH1F(new TH1F(Name("dileptonPt").c_str()         ,"dileptonPt;Z P_{T} (GeV)"                         ,30,0.,1500.));              
-    h_dileptonM[i]           = MakeTH1F(new TH1F(Name("dileptonM").c_str()          ,"dileptonM;Z Mass (GeV)"                           ,24,60.,120.));              
+    h_dileptonM[i]           = MakeTH1F(new TH1F(Name("dileptonM").c_str()          ,"dileptonM;Z Mass (GeV)"                           ,24,60.,120.));
+    h_dileptonMall[i]        = MakeTH1F(new TH1F(Name("dileptonMall").c_str()       ,"dileptonM;Z Mass (GeV)"                           ,50,30.,200.));
   }
 }
 
@@ -43,6 +44,7 @@ void ZprimeDoubleCR::fillHistos(int nhist,float event_weight) {
     
     h_dileptonPt[nhist]         ->Fill(dilepton_pt,event_weight);
     h_dileptonM[nhist]          ->Fill(dilepton_mass,event_weight);
+    h_dileptonMall[nhist]       ->Fill(dilepton_mass,event_weight);
   }
 }
 

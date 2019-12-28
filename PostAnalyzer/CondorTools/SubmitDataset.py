@@ -13,7 +13,7 @@ options = {
     'parallel':False,
     'batchsize':20,
     'submit':True,
-    'doData':False,
+    'doData':True,
     'doMC':True
 }
     

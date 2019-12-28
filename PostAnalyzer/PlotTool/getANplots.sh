@@ -15,7 +15,7 @@ plot() {
 run() {
     pushd $1
     shift 1
-    array=$nvariables $@
+    array="$nvariables $@"
     for variable in ${array[@]}; do
 	plot $options --sub AN --autovar $variable || exit 1
     done
@@ -28,7 +28,7 @@ run() {
 run2() {
     region=$1
     shift 1
-    array=$nvariables $@
+    array="$nvariables $@"
     for variable in ${array[@]}; do
 	plot --run2 $region $options $variable || exit 1
     done

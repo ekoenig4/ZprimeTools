@@ -18,11 +18,11 @@ region_masks = {}
 mclist = ["ZJets","WJets","DYJets","GJets","TTJets","DiBoson","QCD"]
 filemap = {
     "ZJets":  ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"],
-    "WJets":  ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"],
+    "WJets":  ["postW70to100","postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"],
     "DYJets": ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"],
     "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
-    "TTJets": ["postTTJetsDiLept"],
-    "DiBoson":["postWW","postWWto2L2Nu","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ"],
+    "TTJets": ["postTTJetsFXFX"],
+    "DiBoson":["postWW","postWWTo2L2Nu","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ"],
     "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
 }
 legmap = {
@@ -54,7 +54,7 @@ xsec = {
 "postZ1200to2500":3.425e-01,
 "postZ2500toInf":5.263e-03,
     
-"postWJets_MLM":5.276e+04,
+"postW70to100":0, # need to calculate
 "postW100to200":1.392e+03,
 "postW200to400":4.103e+02,
 "postW400to600":5.785e+01,
@@ -78,9 +78,9 @@ xsec = {
 "postGJets400to600":2.578e+02,
 "postGJets600toInf":8.492e+01,
     
-"postTTJetsDiLept":5.436e+01,
-"postTTJetsSingleLeptFromT":1.091e+02,
-# "postTTJetsMLM":7.503e+02,
+# "postTTJetsDiLept":5.436e+01,
+# "postTTJetsSingleLeptFromT":1.091e+02,
+"postTTJetsFXFX":7.503e+02,
     
 "postQCD100to200":2.366e+07,
 "postQCD200to300":1.549e+06,
@@ -92,9 +92,9 @@ xsec = {
 "postQCD2000toInf":2.025e+01,
     
 "postWW":7.592e+01,
-"postWWtoLNuQQ":4.599e+01,
-"postWWto2L2Nu":1.108e+01,
-"postWWto4Q":4.773e+01,
+"postWWToLNuQQ":4.599e+01,
+"postWWTo2L2Nu":1.108e+01,
+"postWWTo4Q":4.773e+01,
     
 "postWZ":2.758e+01,
 "postZZ":1.214e+01,
