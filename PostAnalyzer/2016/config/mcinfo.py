@@ -43,7 +43,59 @@ colmap = {
     "QCD"    :kGray
 }
 
-xsec = {
+xsec = {                                                                                                                                                                    
+"postDY100to200":1.473e+02,
+"postDY200to400":4.104e+01,
+"postDY400to600":5.676e+00,
+"postDY600to800":1.358e+00,
+"postDY800to1200":6.229e-01,
+"postDY1200to2500":1.512e-01,
+"postDY2500toInf":3.659e-03,
+"postDYFXFX":5.932e+03,
+"postDYMLM":4.928e+03,
+    
+"postGJets40to100":1.743e+04,
+"postGJets100to200":5.384e+03,
+"postGJets200to400":1.176e+03,
+"postGJets400to600":1.321e+02,
+"postGJets600toInf":4.427e+01,
+    
+"postQCD100to200":2.801e+07,
+"postQCD200to300":1.710e+06,
+"postQCD300to500":3.473e+05,
+"postQCD500to700":3.220e+04,
+"postQCD700to1000":6.839e+03,
+"postQCD1000to1500":1.207e+03,
+"postQCD1500to2000":1.201e+02,
+"postQCD2000toInf":2.524e+01,
+    
+"postTTJetsFXFX":7.467e+02,
+"postTTJetsMLM":5.093e+02,
+    
+"postW100to200":1.349e+03,
+"postW200to400":3.595e+02,
+"postW400to600":4.890e+01,
+"postW600to800":1.206e+01,
+"postW800to1200":5.477e+00,
+"postW1200to2500":1.329e+00,
+"postW2500toInf":3.219e-02,
+"postWFXFX":6.038e+04,
+"postWMLM":5.033e+04,
+    
+"postZ100to200":9.350e+01,
+"postZ200to400":2.585e+01,
+"postZ400to600":3.584e+00,
+"postZ600to800":8.536e-01,
+"postZ800to1200":3.927e-01,
+"postZ1200to2500":9.543e-02,
+"postZ2500toInf":2.304e-03,
+    
+"postWW":6.430e+01,
+"postWZ":2.343e+01,
+"postZZ":1.016e+01 
+}
+
+xsec_old = {
 'postZ100to200': 280.5,
 'postZ200to400': 77.67,
 'postZ400to600': 10.73,

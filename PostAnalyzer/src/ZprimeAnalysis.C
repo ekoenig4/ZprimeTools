@@ -29,8 +29,18 @@ void ZprimeAnalysis::initTree(TTree* tree) {
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
   tree->Branch("recoil",&recoil,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
+  tree->Branch("j1Eta",&j1Eta,"Leading Jet Eta");
+  tree->Branch("j1Phi",&j1Phi,"Leading Jet Phi");
+  tree->Branch("nJets",&n_Jet,"Number of Jets");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
+  tree->Branch("TotPFCands",&TotalPFCands,"Number of Constituents");
+  tree->Branch("ChPFCands",&ChargedPFCands,"Number of Charged Constituents");
+  tree->Branch("NhPFCands",&NeutralPFCands,"Number of Neutral Constituents");
+  tree->Branch("GammaPFCands",&GammaPFCands,"Number of Gamma Constituents");
+  tree->Branch("MiscPFCands",&MiscPFCands,"Number of Misc Constituents");
+  tree->Branch("bosonPt",&bosonPt,"Boson Pt");
+  tree->Branch("nVtx",&n_Vtx,"Number of Verticies");
 }
 
 void ZprimeAnalysis::BookHistos(int i,string histname) {
@@ -207,6 +217,8 @@ void ZprimeAnalysis::SetJetPFInfo(vector<int> jetCands) {
   if (jetCands.size() == 0) return;
   jetindex = jetCands[0];
   j1pT = jetPt->at(jetindex);
+  j1Eta = jetEta->at(jetindex);
+  j1Phi = jetPhi->at(jetindex);
   SetPFVectors(jetindex);
 
   TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = 0;
@@ -331,6 +343,8 @@ void ZprimeAnalysis::initVars() {
   }
   recoil = pfMET;
   recoilPhi = pfMETPhi;
+  n_Vtx = nVtx;
+  n_Jet = nJet;
 }
 
 vector<int> ZprimeAnalysis::electron_tightID(int jet_index, float elePtCut) {

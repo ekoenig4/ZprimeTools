@@ -112,10 +112,12 @@ public:
   float sf;
   float pileup;
 
+  float n_Vtx;
   /* Selected Boson Variables */
   float bosonPt;
 
   /* Selected Jet Variables */
+  float n_Jet;
   int jetindex;
   vector<int> jetCand;
   vector<float> j1PFConsEt;
@@ -124,6 +126,7 @@ public:
   vector<float>j1PFConsPhi;
   vector<int>j1PFConsPID;
 
+  float j1Eta,j1Phi;
   float Pt123Fraction,Pt123,j1pT;
   float ChNemPtFrac,ChNemPt,ChNemPt123;
   float TotalPFCands,ChargedPFCands,NeutralPFCands,GammaPFCands,MiscPFCands;
