@@ -17,7 +17,7 @@ void ZprimeDoubleCR::initVars() {
   subleadingLepton_pt = subleadingLepton_eta = subleadingLepton_phi = -99;
 }
 
-void initTree(TTree* tree) {
+void ZprimeDoubleCR::initTree(TTree* tree) {
   tree->Branch("dileptonM",&dilepton_mass,"Z Mass (GeV)");
   tree->Branch("dileptonPt",&dilepton_pt,"Z P_{T} (GeV)");
   tree->Branch("leadingLeptonPt",&leadingLepton_pt,"Leading Lepton P_{T} (GeV)");
