@@ -265,7 +265,8 @@ float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   
   float minDPhiJetMET_first4 = TMath::Pi();
   for (int ijet = 0; ijet < njets; ijet++) {
-    float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
+    int index = jets[ijet];
+    float dPhiJetMET = deltaPhi(jetPhi->at(index),metPhi);
     if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
   }
   return minDPhiJetMET_first4;
