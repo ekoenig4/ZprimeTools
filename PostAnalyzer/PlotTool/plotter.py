@@ -192,14 +192,15 @@ def run2plotter(region):
     args = parser.parse_args()
     for variable in args.argv:
 
-        for year in yearlist: yearmap[year].initiate(variable)
+        for year in yearlist:
+            yearmap[year].initiate(variable)
         combined = Region(copy=yearmap["2016"])
         combined.add(yearmap["2017"])
         combined.add(yearmap["2018"])
         combined.year = 'Run2'
         combined.region = region
         combined.output()
-        plotVariable(combined,variable,initiate=False,doUncband=False,blinded=blinded)
+        plotVariable(combined,variable,initiate=False,blinded=blinded)
 ###################################################################
   
 

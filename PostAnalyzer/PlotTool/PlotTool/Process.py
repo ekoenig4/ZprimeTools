@@ -317,7 +317,7 @@ class Process(object):
         self.raw_total = other.raw_total
         self.scaled_total = other.scaled_total
         self.nuisances = other.nuisances
-        self.args = args
+        self.args = other.args
         # self.isOpen = other.isOpen
         # self.filenames = list(other.filenames)
         # self.xsecs = other.xsecs

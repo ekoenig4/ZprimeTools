@@ -43,7 +43,7 @@ colmap = {
     "QCD"    :kGray
 }
 
-xsec = {                                                                                                                                                                    
+xsec_new = {                                                                                                                                                                    
 "postDY100to200":1.473e+02,
 "postDY200to400":4.104e+01,
 "postDY400to600":5.676e+00,
@@ -95,7 +95,7 @@ xsec = {
 "postZZ":1.016e+01 
 }
 
-xsec_old = {
+xsec = {
 'postZ100to200': 280.5,
 'postZ200to400': 77.67,
 'postZ400to600': 10.73,

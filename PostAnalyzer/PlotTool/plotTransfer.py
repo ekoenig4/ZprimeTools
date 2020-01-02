@@ -34,24 +34,67 @@ processMap = {
     },
 }
 
-def SetBounds(tf,num_sample,den_sample):
+rangemap = {
+    "ChNemPtFrac" : { 
+        "DoubleMuCR" : {
+            "SignalRegion" : (0,0.5),
+            "SingleMuCR" : (0,0.25)
+        },
+        "DoubleEleCR" : {
+            "SignalRegion" : (0,0.25),
+            "SingleEleCR" : (0,0.45)
+        },
+        "SingleEleCR" : {
+            "SignalRegion" : (0,5.5),
+        },
+        "SingleMuCR" : {
+            "SignalRegion" : (0,5),
+        },
+        "SignalRegion" : {
+            "SignalRegion" : (0,5)
+        },
+        "DoubleLepCR" : {
+            "SingleLepCR" : (0,0.25)
+        }
+    },
+    "recoil" : {
+        "DoubleMuCR" : {
+            "SignalRegion" : (0,0.5),
+            "SingleMuCR" : (0,0.5)
+        },
+        "DoubleEleCR" : {
+            "SignalRegion" : (0,0.5),
+            "SingleEleCR" : (0,0.3)
+        },
+        "SingleEleCR" : {
+            "SignalRegion" : (0,15),
+        },
+        "SingleMuCR" : {
+            "SignalRegion" : (0,15),
+        },
+        "SignalRegion" : {
+            "SignalRegion" : (0,15)
+        },
+        "DoubleLepCR" : {
+            "SingleLepCR" : (0,0.3)
+        }
+    }
+}
 
+varmap = {}
+
+def SetBounds(tf,num_sample,den_sample):
+    global varmap
     bins = list(tf.histo)[1:-1]
     avg = sum( ibin for ibin in bins ) / len(bins)
     maxdiff = max( abs(ibin - avg) for ibin in bins )
     tf.histo.SetMinimum( max(0,avg - maxdiff*5) )
     tf.histo.SetMaximum( (avg + maxdiff*5) )
-    return
-    if num_sample.region == 'SignalRegion':
-        tf.histo.SetMinimum(0); tf.histo.SetMaximum(5.5)
-    if num_sample.region == 'SingleEleCR':
-        tf.histo.SetMinimum(0); tf.histo.SetMaximum(1.7)
-    if num_sample.region == 'SingleMuCR':
-        tf.histo.SetMinimum(0); tf.histo.SetMaximum(3)
-    if num_sample.region == 'DoubleEleCR':
-        tf.histo.SetMinimum(0); tf.histo.SetMaximum(0.1)
-    if num_sample.region == 'DoubleMuCR':
-        tf.histo.SetMinimum(0); tf.histo.SetMaximum(0.1)
+    
+    if not any(varmap): return
+    yrange = varmap[num_sample.region][den_sample.region]
+    tf.histo.SetMinimum(yrange[0]); tf.histo.SetMaximum(yrange[1])
+
 def getTFUncertainty(norm,num_proc,den_proc):
     unclist = [
             "QCD_Scale",
@@ -248,6 +291,8 @@ def plotTF_datamc(num_sample,den_sample):
     output = os.path.join(outdir,outname)
     c.SaveAs( output )
 def plotTransfer(variable,samplemap):
+    global varmap
+    varmap = rangemap[variable]
     for region in samplemap:
         samplemap[region].initiate(variable)
         print region

@@ -104,14 +104,14 @@ class Region(object):
                 self.SignalList.append(signal)
                 fname = 'post'+signal
                 xsecmap = { fname:signalxsec[signal]}
-                self.processes[signal] = Process(signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+                self.processes[signal] = Process(signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region,args=self.args)
                 self.SampleList.insert(1,signal)
         elif IsSignal(self.args.signal):
             self.signal = self.args.signal
             self.SignalList.append(self.signal)
             fname = 'post'+self.signal
             xsecmap = {fname:signalxsec[self.signal]}
-            self.processes[self.signal] = Process(self.signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region)
+            self.processes[self.signal] = Process(self.signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region,args=self.args)
             self.SampleList.insert(1,self.signal)
     def initVariable(self,variable=None):
         b_info.initVariable()
