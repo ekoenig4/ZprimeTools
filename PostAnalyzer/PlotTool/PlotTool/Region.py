@@ -113,7 +113,7 @@ class Region(object):
             xsecmap = {fname:signalxsec[self.signal]}
             self.processes[self.signal] = Process(self.signal,[fname],xsecmap,'signal',lumi=self.lumi,year=self.year,region=self.region,args=self.args)
             self.SampleList.insert(1,self.signal)
-    def initVariable(self,variable=None):
+    def initVariable(self,variable=None,weight=None):
         b_info.initVariable()
         Nuisance.unclist = []
         self.bkgIntegral = 0
@@ -123,7 +123,8 @@ class Region(object):
         if variable is not None:
             self.varname = variable
             self.cut = self.args.cut
-            self.weight = self.args.weight
+            self.weight = weight
+            if self.weight is None: self.weight = self.args.weight
             self.setBinning(variable,self.weight,self.cut)
     def open(self):
         if self.isOpen: return
@@ -135,9 +136,9 @@ class Region(object):
                 if process in self.SampleList: self.SampleList.remove(process)
                 if process in self.MCList: self.MCList.remove(process)
                 if hasattr(self,'SignalList') and process in self.SignalList: self.SignalList.remove(process)
-    def initiate(self,variable):
+    def initiate(self,variable,weight=None):
         if os.getcwd() != self.path: os.chdir(self.path)
-        self.initVariable(variable)
+        self.initVariable(variable,weight)
         self.open()
         if hasattr(self,'nhist'): variable = '%s_%s' % (variable,self.nhist)
         for process in self:

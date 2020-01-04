@@ -15,20 +15,14 @@ Usage: python ../PlotTool/makePileup.py
 
 gROOT.SetBatch(1)
 
-weightedMC = Region(show=0)
-unweightedMC = Region(show=0)
+sample = Region(show=0,autovar=True)
 
-nhist = config.regions[weightedMC.region]
-# nhist= '1'
-
-bosonPtReWeighted = "bosonPtwK_%s" % nhist;
-bosonPtUnWeighted = "bosonPt_%s" % nhist;
-
-weightedMC.initiate(bosonPtReWeighted); weightedMC.setSumOfBkg()
-unweightedMC.initiate(bosonPtUnWeighted); unweightedMC.setSumOfBkg()
-
-weightedBKG = weightedMC["SumOfBkg"].histo
-unweightedBKG = unweightedMC["SumOfBkg"].histo
+sample.initiate('bosonPt','genWeight')
+sample.setSumOfBkg()
+unweightedBKG = sample['SumOfBkg'].histo.Clone()
+sample.initiate('bosonPt','genWeight*kfactor')
+sample.setSumOfBkg()
+weightedBKG = sample['SumOfBkg'].histo.Clone()
 
 weightedEvents = weightedBKG.Integral()
 unweightedEvents = unweightedBKG.Integral()
@@ -84,13 +78,13 @@ leg.SetFillStyle(0);
 leg.SetTextSize(0.025);
 leg.Draw();
 
-lumi_label = '%s' % float('%.3g' % (weightedMC.lumi/1000.))
+lumi_label = '%s' % float('%.3g' % (sample.lumi/1000.))
 texS = TLatex(0.20,0.837173,("#sqrt{s} = 13 TeV, "+lumi_label+" fb^{-1}"));
 texS.SetNDC();
 texS.SetTextFont(42);
 texS.SetTextSize(0.040);
 texS.Draw();
-texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+weightedMC.year+")");
+texS1 = TLatex(0.12092,0.907173,"#bf{CMS} : #it{Preliminary} ("+sample.year+")");
 texS1.SetNDC();
 texS1.SetTextFont(42);
 texS1.SetTextSize(0.040);
@@ -159,7 +153,7 @@ yaxis.SetTitleOffset(0.35);
 yaxis.Draw("SAME");
 
 dir = os.getcwd().split("/")[-1]
-file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+weightedMC.year+"/"+dir+"Plots_EWK/"
+file_path="/afs/hep.wisc.edu/home/ekoenig4/public_html/MonoZprimeJet/Plots"+sample.year+"/"+dir+"Plots_EWK/"
 #print file_path
 directory=os.path.join(os.path.dirname(file_path),"")
 if not os.path.exists(directory):

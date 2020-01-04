@@ -49,7 +49,6 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False):
         else:
             samples.initiate(variable)
             samples.hasUncertainty = any(samples.args.uncertainty) and any(Nuisance.unclist)
-            if samples.args.no_plot: return
             if samples.hasUncertainty: samples.fullUnc(samples.args.uncertainty,stat=True)
     if samples.args.no_plot: return
     samples.hasUncertainty = any(samples.args.uncertainty) and any(Nuisance.unclist)
