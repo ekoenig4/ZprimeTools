@@ -16,7 +16,7 @@ lumi_by_era = {"SingleEleCR":{"A":14024,"B":7061,"C":6895,"D":31720},
 
 region_masks = {"GammaCR":["GJets","QCD","WJets"]}
 
-WJets_FileNames = ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"]
+WJets_FileNames = ["postW70to100","postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"]
 
 ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
 
@@ -24,7 +24,9 @@ GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","p
 
 DYJets_FileNames = ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"]
 
-TTJets_FileNames = ["postTTJetsDiLept"];#"postTTJets_MLM"
+ST_FileNames = ["STs_4f","STtW_antitop_5f","STtW_top_5f","STt_antitop_4f"]
+
+TTJets_FileNames = ["postTTJetsFXFX"];#"postTTJets_MLM"
 
 DiBoson_FileNames = ["postWW","postWWto2L2Nu","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ"]#,"postWWto2L2NuPS"]
 
@@ -39,7 +41,8 @@ xsec = {
 "postZ800to1200":1.496e+00,
 "postZ1200to2500":3.425e-01,
 "postZ2500toInf":5.263e-03,
-    
+
+"postW70to100":1292.0,
 "postWJets_MLM":5.276e+04,
 "postW100to200":1.392e+03,
 "postW200to400":4.103e+02,
@@ -66,7 +69,7 @@ xsec = {
     
 "postTTJetsDiLept":5.436e+01,
 "postTTJetsSingleLeptFromT":1.091e+02,
-# "postTTJetsMLM":7.503e+02,
+"postTTJetsFXFX":7.503e+02,
     
 "postQCD100to200":2.366e+07,
 "postQCD200to300":1.549e+06,
