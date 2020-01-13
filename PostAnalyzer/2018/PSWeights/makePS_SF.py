@@ -5,60 +5,63 @@ sys.path.append('PlotTool')
 from PlotTool import *
 import config
 
-gROOT.SetBatch(1)
+# gROOT.SetBatch(1)
 
-# HaddFiles([],ZJets_FileNames+WJets_FileNames+DYJets_FileNames)
+# HaddFiles([],config.filemap['ZJets']+config.filemap['WJets']+config.filemap['DYJets'])
+# exit()
 
-# output = TFile("PSW_SF.root","RECREATE")
+output = TFile("PSW_SF.root","RECREATE")
 pswlist = [ "isrRed","fsrRed","isrDef","fsrDef","isrCon","fsrCon",      
 	    "fsr_G2GG_muR","fsr_G2QQ_muR","fsr_Q2QG_muR","fsr_X2XG_muR",
 	    "fsr_G2GG_cNS","fsr_G2QQ_cNS","fsr_Q2QG_cNS","fsr_X2XG_cNS",
 	    "isr_G2GG_muR","isr_G2QQ_muR","isr_Q2QG_muR","isr_X2XG_muR",
 	    "isr_G2GG_cNS","isr_G2QQ_cNS","isr_Q2QG_cNS","isr_X2XG_cNS"]
-pswlist = ["fsrCon"]
+# pswlist = [ "fsr%s" % psw for psw in ("Red","Def","Con") ]
 
-def MakeSubSF(subprocess):
-    print subprocess.name
-    subprocess.norm = subprocess.tfile.Get("norm")
-    subprocess.pswmap = { }
-    subprocess.scale = subprocess.xsec/float(subprocess.cutflow)
-    subprocess.norm.Scale(subprocess.scale)
-    for psw in pswlist:
-        for var in ("Up","Down"):
-            subprocess.pswmap[psw+var] = subprocess.tfile.Get(psw+var)
-            subprocess.pswmap[psw+var].Scale(subprocess.scale)
-def MakeSF(process):
-    print process.name
-    process.initVariable()
-    for subprocess in process: MakeSubSF(subprocess)
-    process.pswmap = {}
-    process.norm = None
-    for subprocess in process:
-        if process.norm is None: process.norm = subprocess.norm.Clone(process.name)
-        else:                    process.norm.Add(subprocess.norm)
-    intmap = {'norm':process.norm.Integral()}
-    for psw in pswlist:
-        for var in ("Up","Down"):
-            for subprocess in process:
-                if psw+var not in process.pswmap: process.pswmap[psw+var] = subprocess.pswmap[psw+var].Clone("PSW_%s%s" % (psw,var))
-                else:                             process.pswmap[psw+var].Add(subprocess.pswmap[psw+var])
-            intmap[var] = process.pswmap[psw+var].Integral()
-            process.pswmap[psw+var].Divide(process.norm)
-    print intmap
-    exit()
-    output.cd()
-    # process.output = output.mkdir(process.name)
+template = TH1F("template","template",50,0,1.05)
+line = TLine(0,1,1.05,1)
+def DebugDraw(process):
+    process.up.SetMarkerStyle(22); process.up.SetLineStyle(1)
+    process.dn.SetMarkerStyle(23); process.dn.SetLineStyle(1)
+    process.up.Draw("p hist"); process.dn.Draw("p hist same"); line.Draw("same")
+    process.up.GetYaxis().SetRangeUser(0.5,1.5)
+    raw_input()
+def getVariable(process,variable,weight):
+    def getSubVariable(subprocess,variable,weight):
+        if not hasattr(subprocess,'tree'):
+            subprocess.tree = subprocess.tfile.Get("trees/norm")
+            subprocess.scaling = subprocess.xsec / subprocess.cutflow
+        hsname = '%s_%s_%s' % (subprocess.name,variable,weight)
+        print '---Getting %s' % hsname
+        histo = template.Clone(hsname); histo.Reset()
+        subprocess.tree.Draw("%s>>%s" % (variable,hsname),"%s*(%s<160)" % (weight,weight),'goff')
+        histo.Scale(subprocess.scaling)
+        return histo
+    hsname = '%s_%s_%s' % (process.name,variable,weight)
+    print 'Getting %s' % hsname
+    histo = template.Clone(hsname); histo.Reset()
+    for subprocess in process: histo.Add( getSubVariable(subprocess,variable,weight) )
+    return histo
+def MakeSF(process,psw):
+    process.up = getVariable(process,'ChNemPtFrac','PSW_%sUp' % psw)
+    process.dn = getVariable(process,'ChNemPtFrac','PSW_%sDown' % psw)
+
+    process.up.Divide(process.norm); process.dn.Divide(process.norm)
+    
     process.output.cd()
-    for psw in pswlist:
-        for var in ("Up","Down"):
-            process.pswmap[psw+var].Write()
-    # process.output.Close()
+    process.up.SetName("PSW_%sUp" % psw)
+    process.dn.SetName("PSW_%sDown" % psw)
+    process.up.Write()
+    process.dn.Write()
+def GenerateSF(process):
+    process.open()
+    process.norm = getVariable(process,'ChNemPtFrac','genWeight')
+    process.output = output.mkdir(process.process)
+    for psw in pswlist: MakeSF(process,psw)
     
 processes = {
-    "ZJets": Process("ZJets", config.filelist[], GetMCxsec(ZJets_FileNames, xsec),'bkg'),
-    "WJets": Process("WJets", WJets_FileNames, GetMCxsec(WJets_FileNames, xsec),'bkg'),
-    "DYJets":Process("DYJets",DYJets_FileNames,GetMCxsec(DYJets_FileNames,xsec),'bkg')
+    mc:Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg') for mc in ("ZJets","WJets","DYJets")
 }
 
-MakeSF(processes['ZJets'])
-# for process in processes: MakeSF(processes[process])
+# GenerateSF(processes['ZJets'])
+for process in processes: GenerateSF(processes[process])

@@ -747,7 +747,7 @@ void ZprimeAnalysis::PSWeights(float event_weight) {
     for (string psw : pswlist) {
       scaleUncs.addUnc("PSW_"+psw,NULL);
       if (isW_or_ZJet()) {
-	string path = prefix+"/"+prefix+"_PSW_"+psw;
+	string path = prefix+"/PSW_"+psw;
 	th1fmap[psw+"Up"] = (TH1F*)file->Get( (path+"Up").c_str() );
 	th1fmap[psw+"Down"] = (TH1F*)file->Get( (path+"Down").c_str() );
       }

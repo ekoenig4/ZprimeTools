@@ -17,10 +17,6 @@ public:
   TBranch        *b_psWeight;   //!
   static const int nHisto = 1;
   static const int bHisto = 0;
-
-  string pswlist[22];
-  map<string,pair<int,int>> pswmap;
-  map<string,TH1F*> h_psWeights;
   
   ZprimeClass(const char* file1,const char* file2,int nfiles) : ZprimeYear(file1,file2,nfiles) {
     Init(fChain);
@@ -37,6 +33,7 @@ public:
   virtual void BookHistos(const char* file2);
   virtual void fillHistos(int nhist,float event_weight);
   virtual void Init(TTree* tree);
+  virtual void PSWeights(float event_weight);
 };
 
 #endif
