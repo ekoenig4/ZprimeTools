@@ -96,7 +96,7 @@ def fillStack(samples,hs_datamc):
     for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 
-def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
+def getLegend(xmin=0.75,ymin=0.5,xmax=0.95,ymax=0.887173):
     leg = TLegend(xmin,ymin,xmax,ymax,"")
     boundaries.append( Box(xmin,ymin,xmax,ymax) )
     leg.SetFillColor(kWhite);
@@ -117,7 +117,8 @@ def getCMSText(lumi,year,scale=1):
     box1 = Box(x=x1,y=y1,w=texS.GetXsize(),h=texS.GetYsize())
 
     x2,y2 = 0.15,0.837173
-    texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}"); 
+    # texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}");
+    texS1 = TLatex(x2,y2,"#bf{CMS} #it{Analysis in Progress}"); 
     texS1.SetNDC();
     texS1.SetTextFont(42);
     texS1.SetTextSize(0.040*scale);

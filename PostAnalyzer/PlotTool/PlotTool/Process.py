@@ -22,6 +22,8 @@ def IsBranch(variable,tfile):
     isBranch = tree.GetListOfBranches().Contains(b_variable)
     # tdir.Close()
     return isBranch
+def CheckHisto(histo):
+    pass
 def GetTObject(name,tfile):
     tobject = tfile.Get(name)
     if tobject == None: raise ValueError("Unable to find %s in %s" % (name,tfile.GetName()))

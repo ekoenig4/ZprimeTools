@@ -36,47 +36,21 @@ processMap = {
 
 rangemap = {
     "ChNemPtFrac" : { 
+        "SignalRegion" : {
+            "SignalRegion" : (0,5),
+            "SingleEleCR" :  (0,5.5),
+            "SingleMuCR" : (0,5),
+            "DoubleEleCR" : (0,0.25),
+            "DoubleMuCR" : (0,0.5),
+        },
         "DoubleMuCR" : {
-            "SignalRegion" : (0,0.5),
             "SingleMuCR" : (0,0.25)
         },
         "DoubleEleCR" : {
-            "SignalRegion" : (0,0.25),
             "SingleEleCR" : (0,0.45)
-        },
-        "SingleEleCR" : {
-            "SignalRegion" : (0,5.5),
-        },
-        "SingleMuCR" : {
-            "SignalRegion" : (0,5),
-        },
-        "SignalRegion" : {
-            "SignalRegion" : (0,5)
         },
         "DoubleLepCR" : {
             "SingleLepCR" : (0,0.25)
-        }
-    },
-    "recoil" : {
-        "DoubleMuCR" : {
-            "SignalRegion" : (0,0.5),
-            "SingleMuCR" : (0,0.5)
-        },
-        "DoubleEleCR" : {
-            "SignalRegion" : (0,0.5),
-            "SingleEleCR" : (0,0.3)
-        },
-        "SingleEleCR" : {
-            "SignalRegion" : (0,15),
-        },
-        "SingleMuCR" : {
-            "SignalRegion" : (0,15),
-        },
-        "SignalRegion" : {
-            "SignalRegion" : (0,15)
-        },
-        "DoubleLepCR" : {
-            "SingleLepCR" : (0,0.3)
         }
     }
 }
@@ -304,22 +278,22 @@ def plotTransfer(variable,samplemap):
     plotTF(samplemap["SignalRegion"],samplemap["SignalRegion"])
     
     print "DoubleEleCR Transfer"
-    samplemap["DoubleEleCR"].num_boson = "Z"
-    samplemap["SignalRegion"].den_boson = "Z"
-    plotTF(samplemap["DoubleEleCR"],samplemap["SignalRegion"])
+    samplemap["SignalRegion"].num_boson = "Z"
+    samplemap["DoubleEleCR"].den_boson = "Z"
+    plotTF(samplemap["SignalRegion"],samplemap["DoubleEleCR"])
     print "DoubleMuCR Transfer"
-    samplemap["DoubleMuCR"].num_boson = "Z"
-    samplemap["SignalRegion"].den_boson = "Z"
-    plotTF(samplemap["DoubleMuCR"],samplemap["SignalRegion"])
+    samplemap["SignalRegion"].num_boson = "Z"
+    samplemap["DoubleMuCR"].den_boson = "Z"
+    plotTF(samplemap["SignalRegion"],samplemap["DoubleMuCR"])
     
     print "SingleEleCR Transfer"
-    samplemap["SingleEleCR"].num_boson = "W"
-    samplemap["SignalRegion"].den_boson = "W"
-    plotTF(samplemap["SingleEleCR"],samplemap["SignalRegion"])
+    samplemap["SignalRegion"].num_boson = "W"
+    samplemap["SingleEleCR"].den_boson = "W"
+    plotTF(samplemap["SignalRegion"],samplemap["SingleEleCR"])
     print "SingleMuCR Transfer"
-    samplemap["SingleMuCR"].num_boson = "W"
-    samplemap["SignalRegion"].den_boson = "W"
-    plotTF(samplemap["SingleMuCR"],samplemap["SignalRegion"])
+    samplemap["SignalRegion"].num_boson = "W"
+    samplemap["SingleMuCR"].den_boson = "W"
+    plotTF(samplemap["SignalRegion"],samplemap["SingleMuCR"])
 
     print "Electron CR Z/W Linking"
     samplemap["DoubleEleCR"].num_boson = "Z"
