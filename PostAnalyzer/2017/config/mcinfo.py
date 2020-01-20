@@ -17,32 +17,47 @@ lumi_by_era = {"SingleEleCR":{"B":4793,"C":9631,"D":4248,"E":9314,"F":13498},
 region_masks = {}
 
 mclist = ["ZJets","WJets","DYJets","GJets","TTJets","DiBoson","QCD"]
+nlomap = {"ZJets":"ZJets-NLO",
+          "WJets":"WJets-NLO",
+          "DYJets":"DYJets-NLO"}
 filemap = {
-    "ZJets":  ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"],
-    "WJets":  ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"],
-    "DYJets": ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"],
-    "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
-    "TTJets": ["postTTJetsDiLept"],
-    "DiBoson":["postWW","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ","postWWTo2L2Nu"],
-    "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
+    "ZJets":     ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"],
+    "ZJets-NLO": ["postZNLO1j50to150","postZNLO1j150to250","postZNLO1j250to400","postZNLO1j400toInf",
+                  "postZNLO2j50to150","postZNLO2j150to250","postZNLO2j250to400","postZNLO2j400toInf"],
+    "WJets":     ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"],
+    "WJets-NLO": ["postWNLO1j0to50","postWNLO1j50to100","postWNLO1j100to150","postWNLO1j150to250","postWNLO1j250to400","postWNLO1j400toInf",
+                  "postWNLO2j0to50","postWNLO2j50to100","postWNLO2j100to150","postWNLO2j150to250","postWNLO2j250to400","postWNLO2j400toInf"],
+    "DYJets":    ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"],
+    "DYJets-NLO":["postDYNLO1j50to150","postDYNLO1j150to250","postDYNLO1j250to400","postDYNLO1j400toInf",
+                  "postDYNLO2j50to150","postDYNLO2j150to250","postDYNLO2j250to400","postDYNLO2j400toInf"],
+    "GJets":     ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
+    "TTJets":    ["postTTJetsDiLept"],
+    "DiBoson":   ["postWW","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ","postWWTo2L2Nu"],
+    "QCD":       ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
 }
 legmap = {
-    "ZJets"  :"Z#rightarrow#nu#nu",  
-    "WJets"  :"W#rightarrowl#nu",     
-    "DYJets" :"Z#rightarrow ll",   
-    "GJets"  :"#gamma+jets",  
-    "TTJets" :"Top Quark",         
-    "DiBoson":"WW/WZ/ZZ",          
-    "QCD"    :"QCD"
+    "ZJets"     :"Z#rightarrow#nu#nu",
+    "ZJets-NLO" :"Z#rightarrow#nu#nu (NLO)",
+    "WJets"     :"W#rightarrowl#nu",
+    "WJets-NLO" :"W#rightarrowl#nu (NLO)",
+    "DYJets"    :"Z#rightarrow ll",
+    "DYJets-NLO":"Z#rightarrow ll (NLO)",
+    "GJets"     :"#gamma+jets",  
+    "TTJets"    :"Top Quark",         
+    "DiBoson"   :"WW/WZ/ZZ",          
+    "QCD"       :"QCD"
 }
 colmap = {
-    "ZJets"  :kAzure+10,  
-    "WJets"  :kRed-10,
-    "DYJets" :kTeal-9,  
-    "GJets"  :kGray+2,  
-    "TTJets" :kOrange-2,
-    "DiBoson":kCyan-10, 
-    "QCD"    :kGray
+    "ZJets"     :kAzure+10,
+    "ZJets-NLO" :kAzure+10,
+    "WJets"     :kRed-10,
+    "WJets-NLO" :kRed-10,
+    "DYJets"    :kTeal-9,
+    "DYJets-NLO":kTeal-9,
+    "GJets"     :kGray+2,  
+    "TTJets"    :kOrange-2,
+    "DiBoson"   :kCyan-10, 
+    "QCD"       :kGray
 }
 
 xsec = {
@@ -53,6 +68,16 @@ xsec = {
 "postZ800to1200":1.499e+00,
 "postZ1200to2500":3.430e-01,
 "postZ2500toInf":5.146e-03,
+
+"postZNLO1j50to150":5.964e+02,
+"postZNLO1j150to250":1.798e+01,
+"postZNLO1j250to400":2.057e+00,
+"postZNLO1j400toInf":2.240e-01,
+
+"postZNLO2j50to150":3.258e+02,
+"postZNLO2j150to250":2.976e+01,
+"postZNLO2j250to400":5.164e+00,
+"postZNLO2j400toInf":8.457e-01,
     
 "postWMLM":5.279e+04,
 "postW100to200":1.395e+03,
@@ -62,6 +87,20 @@ xsec = {
 "postW800to1200":5.395e+00,
 "postW1200to2500":1.080e+00,
 "postW2500toInf":8.053e-03,
+
+"postWNLO1j0to50":0.000e+00,
+"postWNLO1j50to100":0.000e+00,
+"postWNLO1j100to150":0.000e+00,
+"postWNLO1j150to250":0.000e+00,
+"postWNLO1j250to400":0.000e+00,
+"postWNLO1j400toInf":0.000e+00,
+    
+"postWNLO2j0to50":0.000e+00,
+"postWNLO2j50to100":0.000e+00,
+"postWNLO2j100to150":0.000e+00,
+"postWNLO2j150to250":0.000e+00,
+"postWNLO2j250to400":0.000e+00,
+"postWNLO2j400toInf":0.000e+00,
     
 "postDY70to100":1.471e+02,
 "postDY100to200":1.610e+02,
@@ -71,6 +110,16 @@ xsec = {
 "postDY800to1200":8.052e-01,
 "postDY1200to2500":1.927e-01,
 "postDY2500toInf":3.478e-03,
+
+"postDYNLO1j50to150":3.138e+02,
+"postDYNLO1j150to250":9.528e+00,
+"postDYNLO1j250to400":1.091e+00,
+"postDYNLO1j400toInf":1.209e-01,
+
+"postDYNLO2j50to150":1.703e+02,
+"postDYNLO2j150to250":1.548e+01,
+"postDYNLO2j250to400":2.724e+00,
+"postDYNLO2j400toInf":4.487e-01,
     
 "postGJets40to100":1.862e+04,
 "postGJets100to200":8.622e+03,
