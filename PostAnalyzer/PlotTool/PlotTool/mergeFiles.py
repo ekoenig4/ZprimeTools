@@ -78,10 +78,8 @@ def mergeData(datafiles,eralist,show=False):
         os.system(' '.join(command))
 ###################################
 
-def HaddFiles(datafiles,mcfiles,eralist=None,single=False,show=False):
-    haddfiles = datafiles + mcfiles
+def HaddFiles(haddfiles,single=False,show=False):
     if (single): singleThread(haddfiles,show=show)
     else:multiThread(haddfiles,show=show)
-    mergeData(datafiles,eralist,show=show)
 ###############################################################################################################
     

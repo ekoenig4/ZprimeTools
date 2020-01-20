@@ -17,8 +17,7 @@ options = {
     'doMC':True
 }
     
-def submit(data,sub=None,label=None,split=-1,filelist=False,script='analyze'):
-    if not any( pattern in data for pattern in ('dyjets','zjets','wjets') ): print 'Warning submitting %s. Only ZJets, WJets, and DYJets is enabled' % data; return
+def submit(data,sub=None,label=None,split=-1,filelist=True,script='analyze'):
     if not options['doData'] and data in datalist: print 'Warning submitting %s. Data is disabled' % data; return
     if not options['doMC'] and data in mclist: print 'Warning submitting %s. MC is disabled' % data; return
     SubmitCondor.NFILE_PER_BATCH = options['batchsize']

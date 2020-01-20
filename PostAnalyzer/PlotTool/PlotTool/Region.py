@@ -30,6 +30,7 @@ parser.add_argument("-a","--autovar",help="Specify to use the automatic basic nh
 parser.add_argument("--normalize",help="Specify to normalize plots to unity",action="store_true",default=False)
 parser.add_argument("-w","--weight",help="Specify the weight to use for branch variables",type=str,default="weight")
 parser.add_argument("--no-width",help="Disable bin width scaling",action="store_true",default=False)
+parser.add_argument("--nlo",help="Use all available NLO samples",action="store_true",default=False)
 
 class Region(object):
     def __init__(self,year=None,region=None,lumi=None,path=None,config=None,autovar=False,useMaxLumi=False,copy=None,show=True):
@@ -63,15 +64,20 @@ class Region(object):
         if autovar: self.nhist = config.regions[self.region]
         if self.args.autovar: self.nhist = config.regions[self.region]
 
-        self.MCList = config.mclist
+        self.MCList = []
+        for mc in config.mclist:
+            if self.args.nlo and mc in config.nlomap:
+                self.MCList.append(config.nlomap[mc])
+            else: self.MCList.append(mc)
         self.SampleList = ["Data"] + self.MCList
 
         self.processes = {}
         datafile = DataFileMap[self.region]
-        self.processes["Data"] =    Process("Data",[ '%s_%s' % (datafile,era) for era in sorted(self.lumimap.keys()) ],None,'data',year=self.year,region=self.region,args=self.args)
-        for mc in config.mclist:
-            self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],year=self.year,region=self.region,args=self.args)
-
+        datalist = [ '%s_%s' % (datafile,era) for era in sorted(self.lumimap.keys()) ]
+        self.processes["Data"] =    Process("Data",datalist,None,'data',year=self.year,region=self.region,args=self.args)
+        for mc in self.MCList: self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',
+                                                              lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],
+                                                              year=self.year,region=self.region,args=self.args)
         if self.region == "SignalRegion" and self.args.signal != None:
             self.setSignalInfo()
         if self.show:
@@ -93,7 +99,8 @@ class Region(object):
         def validfile(fname): return os.path.isfile(fname)
         filelist = []
         for process in self: filelist += [ filename for filename in process.filenames if not validfile(filename+'.root') ]
-        merge.HaddFiles([],filelist)
+        filelist += [ filename for filename in self.xsec if filename not in filelist and not validfile(filename+'.root') ]
+        merge.HaddFiles(filelist)
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     def setSignalInfo(self,scale=1):
         from monoZprime_XS import centralxsec as signalxsec

@@ -30,6 +30,10 @@ def getSub(sub):
     if any(htbin): return htbin[0].replace('To','to')
     htbin = re.findall('MLM',sub)
     if any(htbin): return htbin[0]
+    htbin = re.findall('\d+-\d+',sub)
+    if any(htbin): return htbin[0].replace('-','to')
+    htbin = re.findall('\d+-Inf',sub)
+    if any(htbin): return htbin[0].replace('-','to')
     return sub
     
 def build_dataset(data,path):
@@ -52,5 +56,5 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    if 'DYJets' in data or 'WJets' in data or 'ZJets' in data:
-        build_dataset(data,os.path.join(directory,data))
+    if 'NLO' not in data: continue
+    build_dataset(data,os.path.join(directory,data))
