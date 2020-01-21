@@ -20,9 +20,10 @@ bool contains(string str,string delim) {
   return strstr(str.c_str(),delim.c_str()) != NULL;
 }
 
-const std::string Dataset::datalist[] = {"egamma","met","signal","zjets","wjets","dyjets","gjets","ttjets","ewk","qcd"};
+const std::string Dataset::datalist[] = {"egamma","met","signal","zjets","zjets_nlo","wjets","wjets_nlo","dyjets","dyjets_nlo","gjets","ttjets","ewk","qcd"};
 const std::map<std::string,Type> Dataset::typemap = {
-  {"egamma",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"wjets",WJets},{"dyjets",DYJets},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
+  {"egamma",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"zjets_nlo",ZJets_NLO},{"wjets",WJets},{"wjets_nlo",WJets_NLO},
+  {"dyjets",DYJets},{"dyjets_nlo",DYJets_NLO},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
 };
 Dataset::SubsetList Dataset::dataset;
 
@@ -75,6 +76,7 @@ Dataset::Dataset() {
   isInclusive = false;
   isData = false;
   isSignal = false;
+  isNLO = false;
   PID = 0;
 }
 
@@ -85,6 +87,7 @@ void Dataset::setTypeInfo(string path) {
       for (string directory : sub.second) {
 	if ( contains(path,directory) ) {
 	  type = typemap.find(data)->second;
+	  isNLO = contains(data,"NLO");
 	  if ( type == WJets || type == DYJets ) {
 	    isInclusive = contains(sub.first,"MLM");
 	  } else {
@@ -100,8 +103,8 @@ void Dataset::setInfo(string path) {
   setTypeInfo(path);
   isData = (type == Data);
   isSignal = (type == Signal);
-  if (type == WJets) PID = 24;
-  if (type == ZJets || type == DYJets) PID = 23;
+  if (type == WJets || type == WJets_NLO) PID = 24;
+  else if (type == ZJets || type == ZJets_NLO || type == DYJets || DYJets_NLO) PID = 23;
 }
 
 void Dataset::printDataset() {

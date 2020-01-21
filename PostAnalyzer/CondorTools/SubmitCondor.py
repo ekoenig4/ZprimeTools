@@ -16,7 +16,8 @@ NFILE_PER_BATCH = 30
 DoSubmit = True
 
 def ignore(path,fn):
-    toignore = ["/hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_May2019/MET/MET2018D_prompt/Data_MET2018D_578.root"]
+    toignore = ["/hdfs/store/user/varuns/NTuples/Data/Run2018_17Sep2018_May2019/MET/MET2018D_prompt/Data_MET2018D_578.root",
+                "/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets_NLO/W1JetsToLNu_LHEWpT250-400/0002/MC_W1JetsToLNu_LHEWpT250-400_2075.root"]
     return (path+fn) in toignore
 def output(string,redirect=False):
     if redirect is False: print string

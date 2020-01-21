@@ -16,7 +16,7 @@ class Dataset {
   };
   static SubsetList dataset;
 public:
-  static const std::string datalist[10];
+  static const std::string datalist[13];
   static const std::map<std::string,Type> typemap;
 
   Type type;
@@ -25,6 +25,7 @@ public:
   bool isInclusive;
   bool isData;
   bool isSignal;
+  bool isNLO;
   int PID;
 
   Dataset();

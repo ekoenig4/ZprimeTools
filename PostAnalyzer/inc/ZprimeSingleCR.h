@@ -17,7 +17,7 @@ public:
   virtual void fillHistos(int nhist,float event_weight);
   virtual void initVars();
   virtual void initTree(TTree* tree);
-  inline bool isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets || sample.type == DYJets; }
+  inline bool isW_or_ZJet() { return ZprimeAnalysis::isW_or_ZJet() || sample.type == DYJets || sample.type == DYJets_NLO; }
   bool electron_veto(int jet_index,int lepindex,float elePtCut);
   bool muon_veto(int jet_index,int lepindex,float muPtCut);
   bool photon_veto(int jet_index,int lepindex,float phoPtCut);

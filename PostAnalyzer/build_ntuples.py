@@ -56,5 +56,4 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
-    if 'NLO' not in data: continue
     build_dataset(data,os.path.join(directory,data))

@@ -312,7 +312,7 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   weight_nopileup *= genWeight;
 }
 
-bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }
+bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == WJets_NLO || sample.type == ZJets || sample.type == ZJets_NLO; }
 
 bool ZprimeAnalysis::inclusiveCut() {
   if (sample.isInclusive)
@@ -689,13 +689,13 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
     TFile* file = NULL;
     string prefix = "";
     if (isW_or_ZJet()) {
-      if (sample.type == WJets) {
+      if (sample.type == WJets || sample.type == WJets_NLO) {
 	file = TFile::Open("RootFiles/WJets_NLO_EWK.root");
 	prefix = "evj_pTV_";
-      } else if (sample.type == ZJets) {
+      } else if (sample.type == ZJets || sample.type == ZJets_NLO) {
 	file = TFile::Open("RootFiles/ZJets_NLO_EWK.root");
 	prefix = "vvj_pTV_";
-      } else if (sample.type == DYJets) {
+      } else if (sample.type == DYJets || sample.type == DYJets_NLO) {
 	file = TFile::Open("RootFiles/DYJets_NLO_EWK.root");
 	prefix = "eej_pTV_";
       }
@@ -740,9 +740,9 @@ void ZprimeAnalysis::PSWeights(float event_weight) {
     TFile* file = TFile::Open("RootFiles/PSW_2018_SF.root");
     string prefix = "";
     if (isW_or_ZJet()) {
-      if (sample.type == WJets) prefix = "WJets";
-      else if (sample.type == ZJets) prefix = "ZJets";
-      else if (sample.type == DYJets) prefix = "DYJets";
+      if (sample.type == WJets || sample.type == WJets_NLO) prefix = "WJets";
+      else if (sample.type == ZJets || sample.type == ZJets_NLO) prefix = "ZJets";
+      else if (sample.type == DYJets || sample.type == DYJets_NLO) prefix = "DYJets";
     }
     for (string psw : pswlist) {
       scaleUncs.addUnc("PSW_"+psw,NULL);
