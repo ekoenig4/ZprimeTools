@@ -74,7 +74,9 @@ float ZprimeYear::getKFactor(float bosonPt) {
   float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
   float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
   float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
-  float kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+  float kfactor = 1;
+  if (sample.isNLO) kfactor = nlo_ewk * nnlo_qcd;
+  else kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
   return kfactor;
 }
 
