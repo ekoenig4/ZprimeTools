@@ -5,6 +5,7 @@
 #include <TSystemDirectory.h>
 #include <TList.h>
 #include <fstream>
+#include <algorithm>
 
 #include "Dataset.h"
 
@@ -16,14 +17,14 @@ bool isDir(const string &s)
   return (stat (s.c_str(), &buffer) == 0);
 }
 
-bool contains(string str,string delim) {
+bool contains_substr(string str,string delim) {
   return strstr(str.c_str(),delim.c_str()) != NULL;
 }
 
-const std::string Dataset::datalist[] = {"egamma","met","signal","zjets","zjets_nlo","wjets","wjets_nlo","dyjets","dyjets_nlo","gjets","ttjets","ewk","qcd"};
+const vector<std::string> Dataset::datalist = {"egamma","singleele","singlepho","met","signal","zjets","zjets_nlo","wjets","wjets_nlo","dyjets","dyjets_nlo","gjets","ttjets","st","ewk","qcd"};
 const std::map<std::string,Type> Dataset::typemap = {
-  {"egamma",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"zjets_nlo",ZJets_NLO},{"wjets",WJets},{"wjets_nlo",WJets_NLO},
-  {"dyjets",DYJets},{"dyjets_nlo",DYJets_NLO},{"qcd",QCD},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
+  {"egamma",Data},{"singleele",Data},{"singlepho",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"zjets_nlo",ZJets_NLO},{"wjets",WJets},{"wjets_nlo",WJets_NLO},
+  {"dyjets",DYJets},{"dyjets_nlo",DYJets_NLO},{"qcd",QCD},{"ttjets",TTJets},{"st",ST},{"gjets",GJets},{"ewk",EWK}
 };
 Dataset::SubsetList Dataset::dataset;
 
@@ -40,7 +41,7 @@ Dataset::SubsetList::SubsetList() {
   TSystemFile* file;
   while ( (file = (TSystemFile*)fileiter()) ) {
     string filename = (string)file->GetName();
-    if ( contains(filename,".txt") ) {
+    if ( contains_substr(filename,".txt") ) {
       addDataset(ntuples,filename);
     }
   }
@@ -53,11 +54,15 @@ void Dataset::SubsetList::addDataset(string path,string filename) {
     return;
   }
   string data = filename.erase( filename.length()-4,4 );
+  if ( std::find(datalist.begin(),datalist.end(),data) == datalist.end() ) {
+    cout << "Unable to find "+data+" in known datalist" << endl;
+							   return;
+  }
   string line;
   Subset subset; string subname;
   while ( infile >> line ) {
-    if ( contains(line,"#") ) continue;
-    if ( contains(line,">>") ) {
+    if ( contains_substr(line,"#") ) continue;
+    if ( contains_substr(line,">>") ) {
       subname = line.erase(0,2);
       subset[subname] = vector<string>();
     } else {
@@ -85,11 +90,11 @@ void Dataset::setTypeInfo(string path) {
     Subset subset = dataset[data];
     for (auto& sub : subset) {
       for (string directory : sub.second) {
-	if ( contains(path,directory) ) {
+	if ( contains_substr(path,directory) ) {
 	  type = typemap.find(data)->second;
-	  isNLO = contains(data,"NLO");
+	  isNLO = contains_substr(data,"NLO");
 	  if ( type == WJets || type == DYJets ) {
-	    isInclusive = contains(sub.first,"MLM");
+	    isInclusive = contains_substr(sub.first,"MLM");
 	  } else {
 	    isInclusive = false;
 	  }
@@ -109,6 +114,7 @@ void Dataset::setInfo(string path) {
 
 void Dataset::printDataset() {
   for (string data : datalist) {
+    if (!this->contains(data)) continue;
     Subset subset = dataset[data];
     for (auto& sub : subset) {
       cout << data << "----" << sub.first << endl;

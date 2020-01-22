@@ -89,11 +89,21 @@ int setup_test(int argc, const char* argv[]) {
       signaldir = dataset.getDirlist("signal","Mx1_Mv1000")[0];
   } else if ( ZprimeClass::REGION == "SingleEleCR" || ZprimeClass::REGION == "SingleMuCR" ) {
     mcdir = dataset.getDirlist("wjets","400to600")[0];
-    if ( ZprimeClass::REGION == "SingleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
+    if ( ZprimeClass::REGION == "SingleEleCR" ) {
+      if (dataset.contains("singleele"))
+	datadir = dataset.getSubset("singleele").begin()->second[0];
+      else
+	datadir = dataset.getSubset("egamma").begin()->second[0];
+    }
     if ( ZprimeClass::REGION == "SingleMuCR"  ) datadir = dataset.getSubset("met").begin()->second[0];
   } else if ( ZprimeClass::REGION == "DoubleEleCR" || ZprimeClass::REGION == "DoubleMuCR" ) {
     mcdir = dataset.getDirlist("dyjets","400to600")[0];
-    if ( ZprimeClass::REGION == "DoubleEleCR" ) datadir = dataset.getSubset("egamma").begin()->second[0];
+    if ( ZprimeClass::REGION == "DoubleEleCR" ) {
+      if (dataset.contains("singleele"))
+	datadir = dataset.getSubset("singleele").begin()->second[0];
+      else
+	datadir = dataset.getSubset("egamma").begin()->second[0];
+    }
     if ( ZprimeClass::REGION == "DoubleMuCR"  ) datadir = dataset.getSubset("met").begin()->second[0];
   }
   int mc = run_mc_test(mcdir,argv);

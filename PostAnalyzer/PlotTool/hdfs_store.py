@@ -58,6 +58,11 @@ def autodirectory(args):
     if args.region is None:
         args.region = GetRegion()
         if args.region is not None: directory.append(args.region)
+        else:
+            region = os.path.basename(os.getcwd())
+            ans = raw_input("%s is not a recognized region, do you want to save to this region (y/Y)? " % region)
+            if not valid_ans(ans): exit()
+            directory.append(region)
     label = '%s_%s' % (args.date,args.label)
     directory.append(label)
     directory = '/'.join(directory)

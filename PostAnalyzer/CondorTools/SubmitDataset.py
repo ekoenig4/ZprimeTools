@@ -3,7 +3,7 @@ import sys
 from multiprocessing import Process
 import SubmitCondor
 from dataset import getDataset
-labelmap = { 'dyjets_nlo':'DYNLO','dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','st':'ST','ttjets':'TTJets','wjets_nlo':'WNLO','wjets':'W','zjets_nlo':'ZNLO','zjets':'Z','met':'METdata_','egamma':'EGdata_','singleele':'SEdata_','singlepho':'SPdata_','signal':'' }
+labelmap = { 'dyjets_nlo':'DYNLO','dyjets':'DY','ewk':'','gjets':'GJets','qcd':'QCD','st':'ST_','ttjets':'TTJets','wjets_nlo':'WNLO','wjets':'W','zjets_nlo':'ZNLO','zjets':'Z','met':'METdata_','egamma':'EGdata_','singleele':'SEdata_','singlepho':'SPdata_','signal':'' }
 mclist = ['dyjets_nlo','dyjets','ewk','gjets','qcd','st','ttjets','wjets_nlo','wjets','zjets_nlo','zjets']
 datalist = ['met','egamma','singleele','singlepho']
 
@@ -18,7 +18,6 @@ options = {
 }
     
 def submit(data,sub=None,label=None,split=-1,filelist=True,script='analyze'):
-    if not 'nlo' in data: print 'Warning submitting %s. Onlg NLO is enabled' % data; return
     if not options['doData'] and data in datalist: print 'Warning submitting %s. Data is disabled' % data; return
     if not options['doMC'] and data in mclist: print 'Warning submitting %s. MC is disabled' % data; return
     SubmitCondor.NFILE_PER_BATCH = options['batchsize']
