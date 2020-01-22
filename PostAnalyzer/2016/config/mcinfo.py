@@ -20,7 +20,7 @@ filemap = {
     "WJets":  ["postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf","postWMLM"],
     "DYJets": ["postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf","postDYMLM"],
     "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
-    "TTJets": ["postTTJetsMLM"],
+    "TTJets": ["postTTJetsMLM","postST_tW_antitop_5f"],
     "DiBoson":["postWW","postWZ","postZZ"],
     "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
 }
@@ -71,6 +71,8 @@ xsec_new = {
     
 "postTTJetsFXFX":7.467e+02,
 "postTTJetsMLM":5.093e+02,
+
+"postST_tW_antitop_5f":3.806e+01,
     
 "postW100to200":1.349e+03,
 "postW200to400":3.595e+02,
@@ -130,6 +132,8 @@ xsec = {
 
 'postTTJetsMLM': 831.76,
 
+"postST_tW_antitop_5f":3.806e+01,
+    
 'postQCD100to200': 27500000,
 'postQCD200to300': 1735000,
 'postQCD300to500': 367000,
