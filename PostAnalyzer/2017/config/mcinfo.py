@@ -31,7 +31,7 @@ filemap = {
     "DYJets-NLO":["postDYNLO1j50to150","postDYNLO1j150to250","postDYNLO1j250to400","postDYNLO1j400toInf",
                   "postDYNLO2j50to150","postDYNLO2j150to250","postDYNLO2j250to400","postDYNLO2j400toInf"],
     "GJets":     ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
-    "TTJets":    ["postTTJetsDiLept"],
+    "TTJets":    ["postTTJetsDiLept","postST_tW_antitop_5f"],
     "DiBoson":   ["postWW","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ","postWWTo2L2Nu"],
     "QCD":       ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
 }
@@ -128,6 +128,8 @@ xsec = {
 "postGJets600toInf":8.521e+01,
     
 "postTTJetsDiLept":5.424e+01,
+
+"postST_tW_antitop_5f":3.806e+01,
     
 "postQCD100to200":2.369e+07,
 "postQCD200to300":1.556e+06,

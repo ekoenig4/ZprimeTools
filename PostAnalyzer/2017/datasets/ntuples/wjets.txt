@@ -1,3 +1,8 @@
+>>70to100
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets/WJetsToLNu_HT70-100/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets/WJetsToLNu_HT70-100/0001/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets/WJetsToLNu_HT70-100/0002/
+
 >>100to200
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets/WJetsToLNu_HT100-200/0000/
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/WJets/WJetsToLNu_HT100-200/0001/

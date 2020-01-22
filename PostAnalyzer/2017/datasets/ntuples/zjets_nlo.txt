@@ -15,3 +15,9 @@
 >>2j50to150
 /hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/ZJets_NLO/Z2JetsToNuNu_LHEZpT50-150/0000/
 
+>>2j250to400
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/ZJets_NLO/Z2JetsToNuNu_LHEZpT250-400/0000/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/ZJets_NLO/Z2JetsToNuNu_LHEZpT250-400/0001/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/ZJets_NLO/Z2JetsToNuNu_LHEZpT250-400/0002/
+/hdfs/store/user/varuns/NTuples/MC/MC2017_12Apr2018_JECv32/ZJets_NLO/Z2JetsToNuNu_LHEZpT250-400/0003/
+
