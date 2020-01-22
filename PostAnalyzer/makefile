@@ -5,9 +5,7 @@ YEARS=2016 2017 2018
 all: $(YEARS)
 
 $(YEARS):
-	@$(MAKE) -C $@
+	@$(MAKE) -C $@ ${SUB_TARGET}
 
-%::	
-	@for year in $(YEARS); do \
-		$(MAKE) -C $${year} $@; \
-	done
+%::
+	@$(MAKE) SUB_TARGET=$@

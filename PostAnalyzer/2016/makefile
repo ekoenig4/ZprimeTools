@@ -5,9 +5,7 @@ REGIONS=SignalRegion SingleEleCR SingleMuCR DoubleEleCR DoubleMuCR
 all: $(REGIONS)
 
 $(REGIONS):
-	@$(MAKE) -C $@
+	@$(MAKE) -C $@ ${SUB_TARGET}
 
-%::	
-	@for region in $(REGIONS); do \
-		$(MAKE) -C $${region} $@; \
-	done
+%::
+	@$(MAKE) SUB_TARGET=$@
