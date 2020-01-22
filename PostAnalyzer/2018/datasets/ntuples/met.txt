@@ -7,3 +7,5 @@
 >>C
 /hdfs/store/user/varuns/NTuples/Data/Run2018_JECv19/MET/MET2018C_17Sep2018/
 
+>>D
+/hdfs/store/user/varuns/NTuples/Data/Run2018_JECv19/MET/MET2018D_Prompt/

@@ -5,9 +5,9 @@ sys.path.append('PlotTool')
 from PlotTool import *
 import config
 
-# gROOT.SetBatch(1)
+gROOT.SetBatch(1)
 
-# HaddFiles([],config.filemap['ZJets']+config.filemap['WJets']+config.filemap['DYJets'])
+HaddFiles(config.filemap['ZJets']+config.filemap['WJets']+config.filemap['DYJets'])
 # exit()
 
 output = TFile("PSW_SF.root","RECREATE")
