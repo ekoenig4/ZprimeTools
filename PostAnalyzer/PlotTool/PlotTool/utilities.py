@@ -55,6 +55,14 @@ def GetRegion():
         if os.path.isdir('.output/'):
             if any( pattern in fname for fname in os.listdir('.output/') ): found = True; break
         if any( pattern in fname for fname in os.listdir('.') ): found = True; break
+    if not found and os.path.isfile('postpath.txt'):
+        with open('postpath.txt') as f: postpath = f.read().strip()
+        cwd = os.getcwd(); os.chdir(postpath)
+        for region,pattern in zip(RegionName,region_pattern):
+            if os.path.isdir('.output/'):
+                if any( pattern in fname for fname in os.listdir('.output/') ): found = True; break
+            if any( pattern in fname for fname in os.listdir('.') ): found = True; break
+        os.chdir(cwd)
     if not found: return None
     return region
 def GetMCxsec(filenames,xsecMap):

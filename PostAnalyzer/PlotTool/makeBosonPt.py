@@ -107,6 +107,8 @@ Ratio.GetYaxis().CenterTitle();
 Ratio.SetMarkerStyle(20);
 Ratio.SetMarkerSize(0.7);
 
+xmin,xmax = unweightedBKG.GetXaxis().GetXmin(),unweightedBKG.GetXaxis().GetXmax()
+
 line = TLine(xmin, 1.,xmax, 1.);
 line.SetLineStyle(8);
 

@@ -161,7 +161,7 @@ def getRatioLine(xmin,xmax):
 ###################################################################
 
 def StackStyle(hs_stack,ymin=None,ymax=None,scaleWidth=False):
-    hs_stack.GetYaxis().SetTitle("Events" if not scaleWidth else "Events / Bin");
+    hs_stack.GetYaxis().SetTitle("Events" if not scaleWidth else "Events / GeV");
     hs_stack.GetYaxis().SetTitleOffset(1.5);
     hs_stack.SetTitle("");
     def checkbin(x,y,box):

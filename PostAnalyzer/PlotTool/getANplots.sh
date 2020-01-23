@@ -20,9 +20,7 @@ run() {
     pushd $1
     shift 1
     array="$@ $nvariables"
-    for variable in ${array[@]}; do
-    	plot $options --sub AN --autovar $variable $uncertainty || exit 1
-    done
+    plot $options --sub AN --autovar $array $uncertainty || exit 1
     plot $options --sub AN $cutvars || exit 1
     plot $options --sub AN --autovar $extraction1 $extraction_uncertainty || exit 1
     plot $options --sub AN --autovar $extraction2 $extraction_uncertainty || exit 1
@@ -34,10 +32,8 @@ run2() {
     region=$1
     shift 1
     array="$@ $nvariables"
-    for variable in ${array[@]}; do
-    	plot --run2 $region $options $variable || exit 1
-    done
-    plot --run2 $region $options $cutvars || exit 1
+    plot --run2 $region $options $array || exit 1
+    # plot --run2 $region $options $cutvars || exit 1
     plot --run2 $region $options $extraction1 || exit 1
     plot --run2 $region $options $extraction2 || exit 1
     plot --run2 $region $options $extraction3 || exit 1

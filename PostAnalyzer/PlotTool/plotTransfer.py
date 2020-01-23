@@ -266,7 +266,7 @@ def plotTF_datamc(num_sample,den_sample):
     c.SaveAs( output )
 def plotTransfer(variable,samplemap):
     global varmap
-    varmap = rangemap[variable]
+    if variable in rangemap: varmap = rangemap[variable]
     for region in samplemap:
         samplemap[region].initiate(variable)
         print region

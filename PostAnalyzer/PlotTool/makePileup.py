@@ -40,7 +40,8 @@ def fixBinning(hs):
 weightedBKG = fixBinning(weightedMC["SumOfBkg"].histo)
 unweightedBKG = fixBinning(unweightedMC["SumOfBkg"].histo)
 
-xmin,xmax = weightedBKG.GetXaxis().GetXmin(),weightedBKG.GetXaxis().GetXmax()
+xmin = weightedBKG.GetXaxis().GetXmin()
+xmax = weightedBKG.GetXaxis().GetXmax()
 
 data_hs.SetTitle("")
 unweightedBKG.SetTitle("")
@@ -132,6 +133,9 @@ Ratio.SetStats(0);
 Ratio.GetYaxis().CenterTitle();
 Ratio.SetMarkerStyle(20);
 Ratio.SetMarkerSize(0.7);
+
+xmin = unweightedBKG.GetXaxis().GetXmin()
+xmax = unweightedBKG.GetXaxis().GetXmax()
 
 line = TLine(xmin, 1.,xmax, 1.);
 line.SetLineStyle(8);
