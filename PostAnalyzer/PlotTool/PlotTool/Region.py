@@ -104,8 +104,8 @@ class Region(object):
         hasLocalFiles = any( re.search('post.*\.root',fname) for fname in os.listdir('.') )
         hasOutputFiles = os.path.isdir('.output') and any( re.search('post.*\.root',fname) for fname in os.listdir('.output') )
         if self.path is None: self.path = self.cwd
-        if self.args.directory is not None: self.path = self.args.directory
-        if os.path.isfile('postpath.txt') and not (hasLocalFiles or hasOutputFiles):
+        elif self.args.directory is not None: self.path = self.args.directory
+        elif os.path.isfile('postpath.txt') and not (hasLocalFiles or hasOutputFiles):
             with open('postpath.txt') as f: self.path = f.read().strip()
         os.chdir(self.path); self.path = os.getcwd()
         print 'Using %s' % self.path
