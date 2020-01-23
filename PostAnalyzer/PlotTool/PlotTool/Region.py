@@ -101,13 +101,14 @@ class Region(object):
         merge.HaddFiles(filelist)
         if os.getcwd() != self.cwd: os.chdir(self.cwd)
     def setPath(self):
+        if self.path is None: self.path = self.cwd
+        if self.args.directory is not None: self.path = self.args.directory
+        os.chdir(self.path); self.path = os.getcwd()
         hasLocalFiles = any( re.search('post.*\.root',fname) for fname in os.listdir('.') )
         hasOutputFiles = os.path.isdir('.output') and any( re.search('post.*\.root',fname) for fname in os.listdir('.output') )
-        if self.path is None: self.path = self.cwd
-        elif self.args.directory is not None: self.path = self.args.directory
-        elif os.path.isfile('postpath.txt') and not (hasLocalFiles or hasOutputFiles):
+        if os.path.isfile('postpath.txt') and not (hasLocalFiles or hasOutputFiles):
             with open('postpath.txt') as f: self.path = f.read().strip()
-        os.chdir(self.path); self.path = os.getcwd()
+            os.chdir(self.path); self.path = os.getcwd()
         print 'Using %s' % self.path
     def setSignalInfo(self,scale=1):
         from monoZprime_XS import centralxsec as signalxsec
