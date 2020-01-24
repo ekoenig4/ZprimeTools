@@ -38,10 +38,10 @@ rangemap = {
     "ChNemPtFrac" : { 
         "SignalRegion" : {
             "SignalRegion" : (0,5),
-            "SingleEleCR" :  (0,5.5),
-            "SingleMuCR" : (0,5),
-            "DoubleEleCR" : (0,0.25),
-            "DoubleMuCR" : (0,0.5),
+            "SingleEleCR" :  (0,6),
+            "SingleMuCR" : (0,6),
+            "DoubleEleCR" : (0,25),
+            "DoubleMuCR" : (0,15),
         },
         "DoubleMuCR" : {
             "SingleMuCR" : (0,0.25)
@@ -51,6 +51,24 @@ rangemap = {
         },
         "DoubleLepCR" : {
             "SingleLepCR" : (0,0.25)
+        }
+    },
+    "recoil" : {
+        "SignalRegion" : {
+            "SignalRegion" : (0,13),
+            "SingleEleCR" :  (0,2),
+            "SingleMuCR" : (0,1.5),
+            "DoubleEleCR" : (0,20),
+            "DoubleMuCR" : (0,20),
+        },
+        "DoubleMuCR" : {
+            "SingleMuCR" : (0,0.25)
+        },
+        "DoubleEleCR" : {
+            "SingleEleCR" : (0,0.3)
+        },
+        "DoubleLepCR" : {
+            "SingleLepCR" : (0,0.3)
         }
     }
 }
@@ -64,7 +82,7 @@ def SetBounds(tf,num_sample,den_sample):
     maxdiff = max( abs(ibin - avg) for ibin in bins )
     tf.histo.SetMinimum( max(0,avg - maxdiff*5) )
     tf.histo.SetMaximum( (avg + maxdiff*5) )
-    
+
     if not any(varmap): return
     yrange = varmap[num_sample.region][den_sample.region]
     tf.histo.SetMinimum(yrange[0]); tf.histo.SetMaximum(yrange[1])
@@ -103,6 +121,7 @@ def plotTF(num_sample,den_sample):
 
     tfname = "Ratio_{%s/%s}" % (num_info['label'],den_info['label'])
     tf = Transfer(tfname,num_proc,den_proc)
+    tf.printUnc()
 
     c = TCanvas("c", "canvas",800,800);
     gStyle.SetOptStat(0);
@@ -268,8 +287,8 @@ def plotTransfer(variable,samplemap):
     global varmap
     if variable in rangemap: varmap = rangemap[variable]
     for region in samplemap:
-        samplemap[region].initiate(variable)
         print region
+        samplemap[region].initiate(variable)
         samplemap[region].fullUnc(Transfer.tranunc,stat=True,show=False)
 
     print "Z/W Linking"

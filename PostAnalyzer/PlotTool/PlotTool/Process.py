@@ -302,6 +302,7 @@ class Process(object):
         if self.proctype != 'bkg': return
         
         if unclist is None: unclist = self.nuisances.keys()
+        unclist = list(unclist)
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
         elif stat and 'Stat' not in unclist: unclist.append('Stat')
         

@@ -223,6 +223,7 @@ class Region(object):
     def fullUnc(self,unclist=None,stat=False,show=None):
         if show is None: show = self.show
         if unclist is None: unclist = Nuisance.unclist
+        unclist = list(unclist)
         if not stat and 'Stat' in unclist: unclist.remove('Stat')
         elif stat and 'Stat' not in unclist: unclist.append('Stat')
         self.unclist = unclist

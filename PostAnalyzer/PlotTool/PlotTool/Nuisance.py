@@ -20,6 +20,12 @@ class Nuisance(object):
         intUp = sum( self.norm[ibin] + self.up[ibin] for ibin in range(1,nbins+1) )
         intDn = sum( self.norm[ibin] - self.dn[ibin] for ibin in range(1,nbins+1) )
         return intUp,intDn
+    def VarDiff(self):
+        norm = self.norm.Integral()
+        up,dn = self.Integral()
+	varup = (up-norm)/norm
+        vardn = (dn-norm)/norm
+        return varup,vardn
     def GetHistos(self):
         up = self.up.Clone(); dn = self.dn.Clone()
         nbins = self.norm.GetNbinsX()
@@ -28,11 +34,8 @@ class Nuisance(object):
             dn[ibin] = self.norm[ibin] - self.dn[ibin]
         return up,dn
     def __str__(self):
-            norm = self.norm.Integral()
-            up,dn = self.Integral()
-	    varup = (up-norm)/norm
-            vardn = (dn-norm)/norm
-            return '{0:<20}'.format('%s %s' % (self.name,self.process))+'%+.1e/%+.1e' % (varup,vardn)
+        varup,vardn = self.VarDiff()
+        return '{0:<20}'.format('%s %s' % (self.name,self.process))+'%+.1e/%+.1e' % (varup,vardn)
     def printByBin(self):
         string = '{0:<20}'.format('%s %s' % (self.name,self.process))
         for ibin in range(1,self.norm.GetNbinsX()+1):
