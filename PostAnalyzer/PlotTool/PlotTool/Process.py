@@ -67,18 +67,24 @@ def GetNuisanceList(tfile,dirname):
     return nuisances
 
 class SubProcess(object):
-    def __init__(self,name=None,fname=None,xsec=None,lumi=None,year=None,region=None,copy=None,args=None):
+    def __init__(self,name=None,fname=None,xsec=None,lumi=None,year=None,region=None,copy=None,args=None,config=None):
         if copy is not None: self.copy(copy); return
-        self.process = name; self.name = name; self.year = year; self.region = region; self.lumi = lumi; self.args = args
+        self.process = name; self.name = name; self.year = year; self.region = region; self.lumi = lumi; self.args = args; self.config = config
         if region is not None: self.name = "%s_%s" % (region,self.name)
         if year is not None:   self.name = "%s_%s" % (year,self.name)
         self.fname = fname; self.xsec = xsec; self.treemap = {}
         self.initVariable()
     def open(self):
-        if not os.path.isfile(self.fname):
-            print "No file %s, skipping" % self.fname;
-            return False
-        self.tfile = TFile.Open(self.fname)
+        if not os.path.isfile(self.fname+'.root'):
+            print 'No file %s.root,' % self.fname,
+            if self.config is not None and self.fname in self.config.filevariants:
+                tmp_fname = next( (fname for fname in self.config.filevariants[self.fname] if os.path.isfile(fname+'.root')),None )
+                if tmp_fname == None: print 'skipping'; return False
+                self.fname = tmp_fname
+                print 'using %s.root instead' % self.fname
+                self.xsec = self.config.xsec[self.fname]
+            else: print 'skipping'; return False
+        self.tfile = TFile.Open(self.fname+'.root')
         cutflow = GetTObject("h_cutflow",self.tfile)
         self.cutflow = cutflow.GetBinContent(1)
         return True
@@ -177,7 +183,7 @@ class Process(object):
     isGlobal = False
     isNhisto = False
     isBranch = False
-    def __init__(self,name=None,filenames=None,xsecs=None,proctype=None,year=None,region=None,leg=None,lumi=1,color=kGray+1,copy=None,args=None):
+    def __init__(self,name=None,filenames=None,xsecs=None,proctype=None,year=None,region=None,leg=None,lumi=1,color=kGray+1,copy=None,args=None,config=None):
         if copy is not None: self.copy(copy); return
         self.process = name; self.name = name; self.year = year; self.region = region
         if region is not None: self.name = "%s_%s" % (region,self.name)
@@ -186,16 +192,15 @@ class Process(object):
         self.xsecs = { '%s_%s' % (self.name,filename):xsecs[filename] for filename in filenames } if xsecs is not None else xsecs
         self.filenames = list(filenames);
         self.proctype = proctype
-        self.leg = leg; self.lumi = lumi; self.color = color; self.args = args
+        self.leg = leg; self.lumi = lumi; self.color = color; self.args = args; self.config = config
         self.isOpen = False
         self.subprocesses = {}; self.nuisances = {}
         filelist = list(self.filenames)
         for sub,filename in zip(self.sublist,filelist):
-            fname = filename + '.root'
             name = filename.replace('post','')
             if self.proctype == 'data': xsec = None
             else: xsec = self.xsecs[sub]
-            self.subprocesses[sub] = SubProcess(name,fname,xsec,self.lumi,self.year,self.region,args=self.args)
+            self.subprocesses[sub] = SubProcess(name,filename,xsec,self.lumi,self.year,self.region,args=self.args,config=self.config)
         self.initVariable()
     def __len__(self): return len(self.sublist)
     def __getitem__(self,i):

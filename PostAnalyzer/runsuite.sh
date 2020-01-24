@@ -1,6 +1,5 @@
 
 sh PlotTool/getANplots.sh -s Mx1_Mv1000 || exit
-YEARS="2017 2018"
 for y in $YEARS; do
     pushd $y
     sh PlotTool/getANplots.sh -s Mx1_Mv1000 || exit

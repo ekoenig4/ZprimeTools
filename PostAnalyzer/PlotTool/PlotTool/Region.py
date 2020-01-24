@@ -44,6 +44,7 @@ class Region(object):
         self.setPath()
 
         if config is None: import config
+        self.config = config
         if self.year is None: self.year = config.version
         self.xsec = config.xsec
 
@@ -75,7 +76,7 @@ class Region(object):
         self.processes["Data"] =    Process("Data",datalist,None,'data',year=self.year,region=self.region,args=self.args)
         for mc in self.MCList: self.processes[mc] = Process(mc,config.filemap[mc],GetMCxsec(config.filemap[mc],config.xsec),'bkg',
                                                               lumi=self.lumi,leg=config.legmap[mc],color=config.colmap[mc],
-                                                              year=self.year,region=self.region,args=self.args)
+                                                              year=self.year,region=self.region,args=self.args,config=self.config)
         if self.region == "SignalRegion" and self.args.signal != None:
             self.setSignalInfo()
         if self.show:

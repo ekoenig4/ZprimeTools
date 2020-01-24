@@ -96,11 +96,12 @@ def compareVariable(num,den,variable):
     num.setSumOfBkg(); den.setSumOfBkg()
     makeComparison(num,den,'SumOfBkg')
 def compare():
-    newjec = Region()
-    oldjec = Region(path=hdfs_store%(newjec.year,newjec.region))
+    newjec = Region(autovar=True)
+    oldjec = Region(path=hdfs_store%(newjec.year,newjec.region),autovar=True)
 
+    jec_variables = ['ChNemPtFrac','j1pT','pfMET','recoil']
     newjec.label = 'New JEC'
     oldjec.label = 'Old JEC'
-    for variable in newjec.args.argv:
+    for variable in jec_variables:
         compareVariable(newjec,oldjec,variable)
 if __name__ == '__main__': compare()
