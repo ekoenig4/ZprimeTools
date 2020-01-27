@@ -6,9 +6,6 @@
 class ZprimeYear : public virtual ZprimeAnalysis {
 public:
   static const std::string SRDATA;
-  
-  vector<double>  *psWeight;
-  TBranch        *b_psWeight;   //!
 
   ZprimeYear(const char* inputFilename,const char* outputFilename,int nfiles);
   ZprimeYear(const char* inputFilename,const char* outputFilename,vector<const char*> filelist);
@@ -37,8 +34,6 @@ public:
   virtual bool EGamma_Triggers();
   virtual bool getEleHEMVeto(float elePtCut);
   virtual bool getJetHEMVeto(float jetPtCut);
-
-  virtual void PSWeights(float event_weight);
 };
 
 #endif

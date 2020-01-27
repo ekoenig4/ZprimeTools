@@ -29,6 +29,20 @@ def getSub(sub):
     if any(htbin): return prefix+htbin[0].replace('-','to')
     subtype = re.sub('^\w[^_]+_','',sub)
     if any(subtype): return prefix+subtype
+    htbin = re.findall('\d+to\d+',sub)
+    if any(htbin): return htbin[0]
+    htbin = re.findall('\d+toInf',sub)
+    if any(htbin): return htbin[0]
+    htbin = re.findall('\d+To\d+',sub)
+    if any(htbin): return htbin[0].replace('To','to')
+    htbin = re.findall('\d+ToInf',sub)
+    if any(htbin): return htbin[0].replace('To','to')
+    htbin = re.findall('MLM',sub)
+    if any(htbin): return htbin[0]
+    htbin = re.findall('\d+-\d+',sub)
+    if any(htbin): return htbin[0].replace('-','to')
+    htbin = re.findall('\d+-Inf',sub)
+    if any(htbin): return htbin[0].replace('-','to')
     return sub
     
 def build_dataset(data,path):
@@ -51,4 +65,5 @@ def build_dataset(data,path):
     print
 
 for data in os.listdir(directory):
+    if 'TTJets' not in data: continue
     build_dataset(data,os.path.join(directory,data))

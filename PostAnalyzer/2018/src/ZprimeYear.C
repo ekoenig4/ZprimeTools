@@ -78,7 +78,9 @@ float ZprimeYear::getKFactor(float bosonPt) {
   float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
   float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
   float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
-  float kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+  float kfactor = 1;
+  if (sample.isNLO) kfactor = nlo_ewk * nnlo_qcd;
+  else kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
   return kfactor;
 }
 
@@ -94,7 +96,18 @@ bool ZprimeYear::MET_Filters() {
   for (int bit = 0; bit < 8; bit++)
     if (metFilters >> bit & 1 == 1)
       h_metfilters->Fill(bit + 1);
-  return metFilters == 0;
+  // Ignore the 6th metfilter per recommendation
+  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2018_data
+  if(metFilters>>0 & 1) return false;                                             
+  if(metFilters>>1 & 1) return false;
+  if(metFilters>>2 & 1) return false;
+  if(metFilters>>3 & 1) return false;
+  if(metFilters>>4 & 1) return false;
+  if(metFilters>>5 & 1) return false;
+  if(metFilters>>7 & 1) return false;
+  if(metFilters>>8 & 1) return false;
+      
+  return true;
 }
 
 bool ZprimeYear::MET_Triggers() {
@@ -177,90 +190,6 @@ bool ZprimeYear::getEleHEMVeto(float elePtCut){
     }
 
   return pass;
-}
-
-void ZprimeYear::PSWeights(float event_weight) {
-  return; // new MC don't have psweights...
-  /* 44 Histograms
-     up  dn
-     isrRed        0   2
-     fsrRed        1   3
-     isrDef        4   6
-     fsrDef        5   7
-     isrCon        8  10 
-     fsrCon        9  11
-     fsr_G2GG_muR  12 13
-     fsr_G2QQ_muR  14 15
-     fsr_Q2QG_muR  16 17
-     fsr_X2XG_muR  18 19
-     fsr_G2GG_cNS  20 21
-     fsr_G2QQ_cNS  22 23
-     fsr_Q2QG_cNS  24 25
-     fsr_X2XG_cNS  26 27 
-     isr_G2GG_muR  28 29
-     isr_G2QQ_muR  30 31
-     isr_Q2QG_muR  32 33
-     isr_X2XG_muR  34 35
-     isr_G2GG_cNS  36 37
-     isr_G2QQ_cNS  38 39
-     isr_Q2QG_cNS  40 41
-     isr_X2XG_cNS  42 43
-  */
-  
-  string psw_uncs[22] = { "isrRed",   
-			  "fsrRed",      
-			  "isrDef",    
-			  "fsrDef",  
-			  "isrCon",
-			  "fsrCon",      
-			  "fsr_G2GG_muR",
-			  "fsr_G2QQ_muR",
-			  "fsr_Q2QG_muR",
-			  "fsr_X2XG_muR",
-			  "fsr_G2GG_cNS",
-			  "fsr_G2QQ_cNS",
-			  "fsr_Q2QG_cNS",
-			  "fsr_X2XG_cNS",
-			  "isr_G2GG_muR",
-			  "isr_G2QQ_muR",
-			  "isr_Q2QG_muR",
-			  "isr_X2XG_muR",
-			  "isr_G2GG_cNS",
-			  "isr_G2QQ_cNS",
-			  "isr_Q2QG_cNS",
-			  "isr_X2XG_cNS"  };
-  
-  string uncname = "PSW_";
-  // Initializing
-  if ( !scaleUncs.contains(uncname+psw_uncs[0]) ) {
-    for (int i = 0; i < 22; i++) {
-      string name = uncname + psw_uncs[i];
-      scaleUncs.addUnc(name,NULL);
-    }
-  }
-  
-  int nPS = 22;
-  for (int i = 0; i < nPS; i++) {
-    string name = uncname + psw_uncs[i];
-    float weightUp = event_weight;
-    float weightDn = event_weight;
-    if ( !sample.isData && !sample.isSignal ) {
-      if ( i < 2 ) {
-	weightUp *= psWeight->at(2 + i);
-	weightDn *= psWeight->at(2 + i + 2);
-      } else if ( i < 4 ) {
-	weightUp *= psWeight->at(2 + i + 2);
-	weightDn *= psWeight->at(2 + i + 4);
-      } else if ( i < 6 ) {
-	weightUp *= psWeight->at(2 + i + 4);
-	weightDn *= psWeight->at(2 + i + 6);
-      } else {
-	weightUp *= psWeight->at(2 + 2*i);
-	weightDn *= psWeight->at(2 + 2*i + 1);
-      }
-    }
-    scaleUncs.setUnc(name,weightUp,weightDn);
-  }
 }
 
 int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
@@ -659,7 +588,6 @@ void ZprimeYear::Init(TTree *tree) {
   taubyIsolationMVArun2017v2DBoldDMwLTraw2017 = 0;
   pdf = 0;
   pdfSystWeight = 0;
-  psWeight = 0;
   nPU = 0;
   puBX = 0;
   puTrue = 0;
@@ -909,9 +837,6 @@ void ZprimeYear::Init(TTree *tree) {
     fChain->SetBranchAddress("mcEt", &mcEt, &b_mcEt);
     fChain->SetBranchAddress("mcStatus", &mcStatus, &b_mcStatus);
     fChain->SetBranchAddress("mcStatusFlag", &mcStatusFlag, &b_mcStatusFlag);
-    if (!sample.isSignal){
-      fChain->SetBranchAddress("psWeight", &psWeight, &b_psWeight);
-    }
   }
 }
 

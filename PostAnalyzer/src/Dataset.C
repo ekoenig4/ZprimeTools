@@ -5,6 +5,7 @@
 #include <TSystemDirectory.h>
 #include <TList.h>
 #include <fstream>
+#include <algorithm>
 
 #include "Dataset.h"
 
@@ -20,11 +21,10 @@ bool contains_substr(string str,string delim) {
   return strstr(str.c_str(),delim.c_str()) != NULL;
 }
 
-const std::string Dataset::datalist[] = {"egamma","met","singleele","singlepho","signal","zjets_nlo","zjets","wjets_nlo","wjets","dyjets_nlo","dyjets","gjets","st","ttjets","ewk","qcd"};
+const vector<std::string> Dataset::datalist = {"egamma","singleele","singlepho","met","signal","zjets","zjets_nlo","wjets","wjets_nlo","dyjets","dyjets_nlo","gjets","ttjets","st","ewk","qcd"};
 const std::map<std::string,Type> Dataset::typemap = {
-  {"egamma",Data},{"met",Data},{"singleele",Data},{"singlepho",Data},{"signal",Signal},{"zjets_nlo",ZJets},{"zjets",ZJets},
-  {"wjets_nlo",WJets},{"wjets",WJets},{"dyjets_nlo",DYJets},{"dyjets",DYJets},
-  {"qcd",QCD},{"st",ST},{"ttjets",TTJets},{"gjets",GJets},{"ewk",EWK}
+  {"egamma",Data},{"singleele",Data},{"singlepho",Data},{"met",Data},{"signal",Signal},{"zjets",ZJets},{"zjets_nlo",ZJets_NLO},{"wjets",WJets},{"wjets_nlo",WJets_NLO},
+  {"dyjets",DYJets},{"dyjets_nlo",DYJets_NLO},{"qcd",QCD},{"ttjets",TTJets},{"st",ST},{"gjets",GJets},{"ewk",EWK}
 };
 Dataset::SubsetList Dataset::dataset;
 
@@ -54,6 +54,10 @@ void Dataset::SubsetList::addDataset(string path,string filename) {
     return;
   }
   string data = filename.erase( filename.length()-4,4 );
+  if ( std::find(datalist.begin(),datalist.end(),data) == datalist.end() ) {
+    cout << "Unable to find "+data+" in known datalist" << endl;
+							   return;
+  }
   string line;
   Subset subset; string subname;
   while ( infile >> line ) {
@@ -77,6 +81,7 @@ Dataset::Dataset() {
   isInclusive = false;
   isData = false;
   isSignal = false;
+  isNLO = false;
   PID = 0;
 }
 
@@ -87,6 +92,7 @@ void Dataset::setTypeInfo(string path) {
       for (string directory : sub.second) {
 	if ( contains_substr(path,directory) ) {
 	  type = typemap.find(data)->second;
+	  isNLO = contains_substr(data,"NLO");
 	  if ( type == WJets || type == DYJets ) {
 	    isInclusive = contains_substr(sub.first,"MLM");
 	  } else {
@@ -102,12 +108,13 @@ void Dataset::setInfo(string path) {
   setTypeInfo(path);
   isData = (type == Data);
   isSignal = (type == Signal);
-  if (type == WJets) PID = 24;
-  if (type == ZJets || type == DYJets) PID = 23;
+  if (type == WJets || type == WJets_NLO) PID = 24;
+  else if (type == ZJets || type == ZJets_NLO || type == DYJets || DYJets_NLO) PID = 23;
 }
 
 void Dataset::printDataset() {
   for (string data : datalist) {
+    if (!this->contains(data)) continue;
     Subset subset = dataset[data];
     for (auto& sub : subset) {
       cout << data << "----" << sub.first << endl;

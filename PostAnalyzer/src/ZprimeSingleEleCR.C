@@ -11,7 +11,13 @@ using namespace std;
 const string ZprimeSingleCR::REGION = "SingleEleCR";
 
 void ZprimeSingleCR::initVars() {
-  lepindex = lepton_pt = -1;
+  lepindex = lepton_pt = lepton_eta = lepton_phi = -99;
+}
+
+void ZprimeSingleCR::initTree(TTree* tree) {
+  tree->Branch("LeptonPt",&lepton_pt,"Lepton P_{T} (GeV)");
+  tree->Branch("LeptonEta",&lepton_eta,"Lepton Eta");
+  tree->Branch("LeptonPhi",&lepton_phi,"LeptonPhi");
 }
 
 void ZprimeSingleCR::BookHistos(int i,string histname) {
@@ -28,9 +34,9 @@ void ZprimeSingleCR::BookHistos(int i,string histname) {
 void ZprimeSingleCR::fillHistos(int nhist,float event_weight) {
   //CR Histograms
   if(lepindex >= 0){
-    h_LeptonPt[nhist] ->Fill(elePt->at(lepindex),event_weight);
-    h_LeptonEta[nhist]->Fill(eleEta->at(lepindex),event_weight);
-    h_LeptonPhi[nhist]->Fill(elePhi->at(lepindex),event_weight);
+    h_LeptonPt[nhist] ->Fill(lepton_pt,event_weight);
+    h_LeptonEta[nhist]->Fill(lepton_eta,event_weight);
+    h_LeptonPhi[nhist]->Fill(lepton_phi,event_weight);
   }
 }
 
@@ -40,6 +46,8 @@ bool ZprimeSingleCR::CRSelection(vector<int> tight,vector<int> loose) {
     lep.SetPtEtaPhiE(elePt->at(lepindex),eleEta->at(lepindex),elePhi->at(lepindex),eleE->at(lepindex));
     
     lepton_pt = lep.Pt();
+    lepton_eta = eleEta->at(lepindex);
+    lepton_phi = elePhi->at(lepindex);
     TLorentzVector met_4vec;
     met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);
     TLorentzVector leptoMET_4vec = lep+met_4vec;

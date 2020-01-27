@@ -147,14 +147,15 @@ if __name__ == "__main__":
     if args.raw_output: optionmap['raw-output'] = True
     binlist = [ int(ibin) for ibin in args.argv ]
     
-    samples = datamc(show=False)
+    samples = Region(show=False)
     samples.initiate('h_cutflow')
     hslist = []
     for name in samples.SampleList:
         process = samples.processes[name]
         if name == 'Signal': process = process[0]
         hslist.append( (name,process.histo) )
-    hslist.insert(1, ('SumOfBkg',samples.getSumOfBkg()) )
+    samples.setSumOfBkg()
+    hslist.insert(1, ('SumOfBkg',samples.processes['SumOfBkg'].histo) )
 
     tableSet = TableSet()
     if args.yields: tableSet.add(getYields(hslist,binlist))

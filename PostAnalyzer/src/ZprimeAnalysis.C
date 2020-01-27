@@ -22,11 +22,25 @@ void ZprimeAnalysis::SetScalingHistos() {
 
 void ZprimeAnalysis::initTree(TTree* tree) {
   tree->Branch("weight",&weight);
+  tree->Branch("genWeight",&genWeight);
+  tree->Branch("pileup",&pileup);
+  tree->Branch("sf",&sf);
+  tree->Branch("kfactor",&kfactor);
   tree->Branch("ChNemPtFrac",&ChNemPtFrac,"Ch + NEM P_{T}^{123} Fraction");
   tree->Branch("recoil",&recoil,"Recoil (GeV)");
   tree->Branch("j1pT",&j1pT,"Leading Jet P_{T} (GeV)");
+  tree->Branch("j1Eta",&j1Eta,"Leading Jet Eta");
+  tree->Branch("j1Phi",&j1Phi,"Leading Jet Phi");
+  tree->Branch("nJets",&n_Jet,"Number of Jets");
   tree->Branch("ChNemPt",&ChNemPt,"Ch + NEM Leading Jet P_{T} (GeV)");
   tree->Branch("ChNemPt123",&ChNemPt123,"Ch + NEM Leading Jet P^{123}_{T} (GeV)");
+  tree->Branch("TotPFCands",&TotalPFCands,"Number of Constituents");
+  tree->Branch("ChPFCands",&ChargedPFCands,"Number of Charged Constituents");
+  tree->Branch("NhPFCands",&NeutralPFCands,"Number of Neutral Constituents");
+  tree->Branch("GammaPFCands",&GammaPFCands,"Number of Gamma Constituents");
+  tree->Branch("MiscPFCands",&MiscPFCands,"Number of Misc Constituents");
+  tree->Branch("bosonPt",&bosonPt,"Boson Pt");
+  tree->Branch("nVtx",&n_Vtx,"Number of Verticies");
 }
 
 void ZprimeAnalysis::BookHistos(int i,string histname) {
@@ -58,6 +72,7 @@ void ZprimeAnalysis::BookHistos(int i,string histname) {
     // Jet Info
     h_nJets[i]          = MakeTH1F(new TH1F(Name("nJets").c_str()        ,"nJets;Number of Jets"                                   ,21,-0.5,20.5));
     h_j1pT[i]           = MakeTH1F(new TH1F(Name("j1pT").c_str()         ,"j1pT;p_{T} of Leading Jet (GeV)"                        ,nPtBins,PtBins));
+    h_j1pTall[i]        = MakeTH1F(new TH1F(Name("j1pTall").c_str()      ,"j1pT;p_{T} of Leading Jet (GeV)"                        ,50,0,2000));
     h_j1Eta[i]          = MakeTH1F(new TH1F(Name("j1Eta").c_str()        ,"j1Eta; #eta of Leading Jet"                             ,nEtaBins,lEta,uEta));
     h_j1Phi[i]          = MakeTH1F(new TH1F(Name("j1Phi").c_str()        ,"j1Phi; #phi of Leading Jet"                             ,nPhiBins,lPhi,uPhi));
     h_j1etaWidth[i]     = MakeTH1F(new TH1F(Name("j1etaWidth").c_str()   ,"j1etaWidth; #eta width of Leading Jet"                  ,50,0,0.25));
@@ -101,8 +116,8 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
   if (sample.isData) event_weight = 1;
   else {
     // MC Info          ;
-    h_puTrueNoW[nhist]  ->Fill(puTrue->at(0),genWeight);
-    h_puTrueReW[nhist]  ->Fill(puTrue->at(0),genWeight*pileup);
+    h_puTrueNoW[nhist]  ->Fill(puTrue->at(0),weight_nopileup);
+    h_puTrueReW[nhist]  ->Fill(puTrue->at(0),event_weight);
     h_genHT[nhist]      ->Fill(genHT,event_weight);
     h_bosonPt[nhist]    ->Fill(bosonPt,genWeight);
     h_bosonPtwK[nhist]  ->Fill(bosonPt,genWeight * kfactor);
@@ -126,6 +141,7 @@ void ZprimeAnalysis::fillHistos(int nhist,float event_weight) {
     // Jet Info         ;
     h_nJets[nhist]        ->Fill(nJet,event_weight);
     h_j1pT[nhist]         ->Fill(j1pT,event_weight);
+    h_j1pTall[nhist]      ->Fill(j1pT,event_weight);
     h_j1Eta[nhist]        ->Fill(jetEta->at(jetindex),event_weight);
     h_j1Phi[nhist]        ->Fill(jetPhi->at(jetindex),event_weight);
     h_j1etaWidth[nhist]   ->Fill(jetetaWidth->at(jetindex),event_weight);
@@ -201,6 +217,8 @@ void ZprimeAnalysis::SetJetPFInfo(vector<int> jetCands) {
   if (jetCands.size() == 0) return;
   jetindex = jetCands[0];
   j1pT = jetPt->at(jetindex);
+  j1Eta = jetEta->at(jetindex);
+  j1Phi = jetPhi->at(jetindex);
   SetPFVectors(jetindex);
 
   TotalPFCands = ChargedPFCands = NeutralPFCands = GammaPFCands = MiscPFCands = 0;
@@ -247,7 +265,8 @@ float ZprimeAnalysis::dPhiJetMETmin(vector<int> jets,float metPhi) {
   
   float minDPhiJetMET_first4 = TMath::Pi();
   for (int ijet = 0; ijet < njets; ijet++) {
-    float dPhiJetMET = deltaPhi(jetPhi->at(ijet),metPhi);
+    int index = jets[ijet];
+    float dPhiJetMET = deltaPhi(jetPhi->at(index),metPhi);
     if (dPhiJetMET < minDPhiJetMET_first4) minDPhiJetMET_first4 = dPhiJetMET;
   }
   return minDPhiJetMET_first4;
@@ -270,6 +289,7 @@ void ZprimeAnalysis::SetKFactors(float bosonPt) {
 void ZprimeAnalysis::ApplyKFactor(float &event_weight) {
   event_weight *= kfactor;
   weight_nogen *= kfactor;
+  weight_nopileup *= kfactor;
 }
 
 void ZprimeAnalysis::SetSF(float sf) {
@@ -279,6 +299,7 @@ void ZprimeAnalysis::SetSF(float sf) {
 void ZprimeAnalysis::ApplySF(float &event_weight) {
   event_weight *= sf;
   weight_nogen *= sf;
+  weight_nopileup *= sf;
 }
 
 void ZprimeAnalysis::ApplyPileup(float &event_weight) {
@@ -288,9 +309,10 @@ void ZprimeAnalysis::ApplyPileup(float &event_weight) {
   genWeight = fabs(genWeight) > 0 ? genWeight/fabs(genWeight) : 0;
   event_weight *= pileup * genWeight;
   weight_nogen *= pileup;
+  weight_nopileup *= genWeight;
 }
 
-bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == ZJets; }
+bool ZprimeAnalysis::isW_or_ZJet() { return sample.type == WJets || sample.type == WJets_NLO || sample.type == ZJets || sample.type == ZJets_NLO; }
 
 bool ZprimeAnalysis::inclusiveCut() {
   if (sample.isInclusive)
@@ -312,7 +334,7 @@ void ZprimeAnalysis::initVars() {
     genWeight = 1;
   }
 
-  weight = weight_nogen = kfactor = pileup = sf = 1;
+  weight = weight_nogen = weight_nopileup = kfactor = pileup = sf = 1;
 
   bosonPt = Pt123Fraction = Pt123 = j1pT = -99;
   ChNemPtFrac = ChNemPt = ChNemPt123 = -99;
@@ -322,6 +344,8 @@ void ZprimeAnalysis::initVars() {
   }
   recoil = pfMET;
   recoilPhi = pfMETPhi;
+  n_Vtx = nVtx;
+  n_Jet = nJet;
 }
 
 vector<int> ZprimeAnalysis::electron_tightID(int jet_index, float elePtCut) {
@@ -682,14 +706,14 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
     string hnames[7] = {"d1K_NLO","d2K_NLO","d3K_NLO","d1kappa_EW","d2kappa_EW","d3kappa_EW","dK_NLO_mix"};
     TFile* file = NULL;
     string prefix = "";
-    if (isW_or_Z_or_G) {
-      if (sample.type == WJets) {
+    if (isW_or_ZJet()) {
+      if (sample.type == WJets || sample.type == WJets_NLO) {
 	file = TFile::Open("RootFiles/WJets_NLO_EWK.root");
 	prefix = "evj_pTV_";
-      } else if (sample.type == ZJets) {
+      } else if (sample.type == ZJets || sample.type == ZJets_NLO) {
 	file = TFile::Open("RootFiles/ZJets_NLO_EWK.root");
 	prefix = "vvj_pTV_";
-      } else if (sample.type == DYJets) {
+      } else if (sample.type == DYJets || sample.type == DYJets_NLO) {
 	file = TFile::Open("RootFiles/DYJets_NLO_EWK.root");
 	prefix = "eej_pTV_";
       } else if (sample.type == GJets) {
@@ -726,4 +750,41 @@ void ZprimeAnalysis::QCDVariations(float event_weight) {
   }
 }
 
+
+void ZprimeAnalysis::PSWeights(float event_weight) {
+  string pswlist[22] = { "isrRed", "fsrRed", "isrDef","fsrDef","isrCon","fsrCon",      
+			  "fsr_G2GG_muR","fsr_G2QQ_muR","fsr_Q2QG_muR","fsr_X2XG_muR",
+			  "fsr_G2GG_cNS","fsr_G2QQ_cNS","fsr_Q2QG_cNS","fsr_X2XG_cNS",
+			  "isr_G2GG_muR","isr_G2QQ_muR","isr_Q2QG_muR","isr_X2XG_muR",
+			  "isr_G2GG_cNS","isr_G2QQ_cNS","isr_Q2QG_cNS","isr_X2XG_cNS"  };
+  if ( !scaleUncs.contains("PSW_"+pswlist[0]) ) {
+    TFile* file = TFile::Open("RootFiles/PSW_2018_SF.root");
+    string prefix = "";
+    if (isW_or_ZJet()) {
+      if (sample.type == WJets || sample.type == WJets_NLO) prefix = "WJets";
+      else if (sample.type == ZJets || sample.type == ZJets_NLO) prefix = "ZJets";
+      else if (sample.type == DYJets || sample.type == DYJets_NLO) prefix = "DYJets";
+    }
+    for (string psw : pswlist) {
+      scaleUncs.addUnc("PSW_"+psw,NULL);
+      if (isW_or_ZJet()) {
+	string path = prefix+"/PSW_"+psw;
+	th1fmap[psw+"Up"] = (TH1F*)file->Get( (path+"Up").c_str() );
+	th1fmap[psw+"Down"] = (TH1F*)file->Get( (path+"Down").c_str() );
+      }
+    }
+  }
+
+  for (string psw : pswlist) {
+    float weightUp = event_weight;
+    float weightDn = event_weight;
+    if (isW_or_ZJet()) {
+      float uncUp = th1fmap.getBin(psw+"Up",ChNemPtFrac);
+      float uncDn = th1fmap.getBin(psw+"Down",ChNemPtFrac);
+      weightUp *= uncUp;
+      weightDn *= uncDn;
+    }
+    scaleUncs.setUnc("PSW_"+psw,weightUp,weightDn);
+  }
+}
 #endif

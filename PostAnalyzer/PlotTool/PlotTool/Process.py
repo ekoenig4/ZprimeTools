@@ -1,18 +1,9 @@
 from ROOT import *
 import os
+from utilities import GetDirname
+from changeBinning import b_info
+from Nuisance import Nuisance
 
-def ValidProctype(proctype):
-    if not (proctype == 'data' or proctype == 'bkg' or proctype == 'signal'):
-        raise ValueError('Invalid proctype: %s' % proctype)
-def GetDirname(variable,sub=None):
-    ndir = variable.split('_')[-1]
-    dirname = 'ZprimeJet_%s' % ndir
-    if sub != None: dirname += '/%s' % sub
-    return dirname,ndir
-def GetTObject(name,tfile):
-    tobject = tfile.Get(name)
-    if tobject == None: raise ValueError("Unable to find %s in %s" % (name,tfile.GetName()))
-    return tobject
 def IsGlobal(variable,tfile):
     return tfile.GetListOfKeys().Contains(variable)
 def IsNhisto(variable,tfile):
@@ -31,271 +22,322 @@ def IsBranch(variable,tfile):
     isBranch = tree.GetListOfBranches().Contains(b_variable)
     # tdir.Close()
     return isBranch
-def GetBranch(b_template,b_variable,tree,weight,cut):
-    b_template.Reset()
-    b_name = 'template_%s_%s_%s' % (b_variable,tree.GetName(),weight)
-    histo = b_template.Clone(b_name)
-    histo.SetDirectory(gDirectory)
-    if not tree.GetListOfBranches().Contains(weight): weight = 'weight'
-    if cut == '': tree.Draw('%s>>%s' % (b_variable,b_name),weight,'goff')
-    else:         tree.Draw('%s>>%s' % (b_variable,b_name),'%s*(%s%s)' % (weight,b_variable,cut),'goff')
-    
+def CheckHisto(histo):
+    pass
+def GetTObject(name,tfile):
+    tobject = tfile.Get(name)
+    if tobject == None: raise ValueError("Unable to find %s in %s" % (name,tfile.GetName()))
+    return tobject
+def GetBranch(name,b_template,b_variable,tree,weight,cut):
+    histo = b_template.Clone(name); histo.Reset()
+    if cut == None: tree.Draw("%s>>%s" % (b_variable,name),weight,'goff')
+    else:         tree.Draw("%s>>%s" % (b_variable,name),'%s*(%s)' % (weight,cut),'goff')
     return histo
+def HistoEqual(hs1,hs2):
+    if hs1 == hs2: return True
+    if hs1 is None: return True
+    if hs2 is None: return False
+    xarray1 = list(hs1.GetXaxis().GetXbins())
+    xmin1,xmax1 = hs1.GetXaxis().GetXmin(),hs1.GetXaxis().GetXmax()
+    xarray2 = list(hs2.GetXaxis().GetXbins())
+    xmin2,xmax2 = hs2.GetXaxis().GetXmin(),hs2.GetXaxis().GetXmax()
+    if len(xarray1) != len(xarray2): return False
+    if xmin1 != xmin2 or xmax1 != xmax2: return False
+    return not any( width1 != width2 for width1,width2 in zip(xarray1,xarray2) )
+def GetFileTemplate(tfile,variable):
+    dirname,ndir = GetDirname(variable)
+    b_variable = variable.replace('_%s' % ndir,'')
+    template = tfile.Get('%s/%s' % (dirname,variable)).Clone(b_variable)
+    template.Reset()
+    return template
 def GetNuisanceList(tfile,dirname):
+    tfile.cd()
     tdir = tfile.GetDirectory(dirname)
     shapelist = [ key.GetName().replace('Up','') for key in tdir.GetListOfKeys() if 'Up' in key.GetName() ]
     tree = tdir.Get('norm')
     scalelist = [ key.GetName().replace('Up','') for key in tree.GetListOfBranches() if 'Up' in key.GetName() ]
     nuisances = {}
-    for shape in shapelist: nuisances[shape] = {type:'shape'}
-    for scale in scalelist: nuisances[scale] = {type:'scale'}
+    for shape in shapelist:
+        nuisances[shape] = 'shape'
+        if shape not in Nuisance.unclist: Nuisance.unclist.append(shape)
+    for scale in scalelist:
+        nuisances[scale] = 'scale'
+        if scale not in Nuisance.unclist: Nuisance.unclist.append(scale)
+    nuisances['Stat'] = True
     return nuisances
+
 class SubProcess(object):
-    def __init__(self,name,filename,tfile,xsec):
-        self.name = name
-        self.filename = filename
-        self.tfile = tfile
-        self.xsec = xsec
-        # self.tdir = None
-        self.dirname = None
-        self.nuisances = {}
-        self.tree = None
-        self.cutflow = 0
-        self.init()
-    def init(self):
+    def __init__(self,name=None,fname=None,xsec=None,lumi=None,year=None,region=None,copy=None,args=None,config=None):
+        if copy is not None: self.copy(copy); return
+        self.process = name; self.name = name; self.year = year; self.region = region; self.lumi = lumi; self.args = args; self.config = config
+        if region is not None: self.name = "%s_%s" % (region,self.name)
+        if year is not None:   self.name = "%s_%s" % (year,self.name)
+        self.fname = fname; self.xsec = xsec; self.treemap = {}
+        self.initVariable()
+    def open(self):
+        if not os.path.isfile(self.fname+'.root'):
+            print 'No file %s.root,' % self.fname,
+            if self.config is not None and self.fname in self.config.filevariants:
+                tmp_fname = next( (fname for fname in self.config.filevariants[self.fname] if os.path.isfile(fname+'.root')),None )
+                if tmp_fname == None: print 'skipping'; return False
+                self.fname = tmp_fname
+                print 'using %s.root instead' % self.fname
+                self.xsec = self.config.xsec[self.fname]
+            else: print 'skipping'; return False
+        self.tfile = TFile.Open(self.fname+'.root')
+        cutflow = GetTObject("h_cutflow",self.tfile)
+        self.cutflow = cutflow.GetBinContent(1)
+        return True
+    def initVariable(self):
         self.nuisances = {}
         self.histo = None
         self.raw_total = 0
         self.scaled_total = 0
-    def getCutflow(self):
-        cutflow = GetTObject("h_cutflow",self.tfile)
-        cutflow = cutflow.GetBinContent(1)
-        self.cutflow = cutflow
-    def getGlobal(self,variable):
+    def setGlobal(self,variable):
+        self.tfile.cd()
         self.histo = GetTObject(variable,self.tfile)
-    def setDir(self,dirname):
-        # if self.tdir != None: self.tdir.Close()
-        # self.tdir = self.tfile.Get(dirname)
-        self.dirname = dirname
-    def setTree(self,treename):
-        if self.tree is None or treename != self.tree.GetName():
-            self.tree = GetTObject('%s/%s' % (self.dirname,treename),self.tfile)
-    def getNhisto(self,variable):
+    def setNhisto(self,variable):
         self.tfile.cd()
-        hs = GetTObject('%s/%s' % (self.dirname,variable),self.tfile).Clone('%s_%s' % (variable,self.filename))
-        self.histo = hs
-    def getBranch(self,b_template,b_variable,treename,weight,cut):
+        dirname,ndir = GetDirname(variable)
+        self.histo = GetTObject( '%s/%s' % (dirname,variable),self.tfile).Clone('%s_%s' % (self.name,variable))
+    def setBranchInfo(self,b_template,cut,variable):
+        if cut != b_info.cut: b_info.cut = cut
+        if b_template is None and b_info.template is None: b_info.template = GetFileTemplate(self.tfile,variable)
+        elif not HistoEqual(b_template,b_info.template): b_info.template = b_template
+    def setTree(self,treename,dirname=None):
         self.tfile.cd()
-        self.setTree(treename)
-        if self.tree.GetName() == "norm": self.nuisances = GetNuisanceList(self.tfile,self.dirname)
-        self.histo = GetBranch(b_template,b_variable,self.tree,weight,cut)
-        self.histo.SetName('%s_%s' % (b_variable,self.filename))
-        if 'post' in dir(b_template): b_template.post(self.histo)
+        if dirname is None: dirname = self.dirname
+        else: self.dirname = dirname
+        if treename not in self.treemap:
+            self.treemap[treename] = GetTObject('%s/%s' % (dirname,treename),self.tfile)
+        elif self.treemap[treename] == None:
+            self.treemap[treename] = GetTObject('%s/%s' % (dirname,treename),self.tfile)
+    def setBranch(self,b_template,variable,treename,weight,cut):
+        self.tfile.cd()
+        self.setBranchInfo(b_template,cut,variable)
+        dirname,ndir = GetDirname(variable)
+        b_template = b_info.template
+        b_variable = b_template.GetName()
+        self.setTree(treename,dirname)
+        self.nuisances = GetNuisanceList(self.tfile,'%s/trees' % dirname)
+        self.histo = GetBranch('%s_%s' % (self.name,b_variable),b_template,b_variable,self.treemap[treename],weight,cut)
+        if hasattr(b_info,'post'): b_info.post(self.histo)
     def fillRaw(self):
         self.raw_total = self.histo.Integral()
         return self.raw_total != 0
-    def scale(self,lumi):
-        #Scaling = (1/TotalEvents)*Luminosity*NNLO-cross-section
-        self.scaling = (1./self.cutflow) * self.xsec * lumi
-        self.histo.Scale(self.scaling)
-        self.scaled_total = self.histo.Integral()
-    def addUnc(self,nuisance,b_template,b_variable,cut):
-        if nuisance not in self.nuisances:
-            self.nuisances[nuisance] = {'Up':self.histo,'Down':self.histo}
-            return
-        info = self.nuisances[nuisance]
-        isScale = info[type] == 'scale'
+    def scale(self,histo=None,lumi=None):
+        if lumi is None: lumi = self.lumi
+        #scaling = Luminosity * NNLO-cross-section / Total-Events
+        if histo is None:
+            histo = self.histo
+            if not self.args.no_width:
+                self.scaleWidth = any( "%.3f" % histo.GetBinWidth(ibin) != "%.3f" % histo.GetBinWidth(ibin+1) for ibin in range(1,histo.GetNbinsX()) )
+            else: self.scaleWidth = False
+            if self.xsec is None: self.scaling = 1
+            else:                 self.scaling = lumi * self.xsec / self.cutflow
+        if self.scaleWidth:     histo.Scale(self.scaling,"width")
+        elif self.scaling != 1: histo.Scale(self.scaling)
+        if histo == self.histo: self.scaled_total = histo.Integral()
+    def addUnc(self,nuisance):
         self.tfile.cd()
-        for variation in ('Up','Down'):
-            if isScale:
-                self.setTree('norm')
-                hs_unc = GetBranch(b_template,b_variable,self.tree,nuisance+variation,cut)
-            else:
-                self.setTree(nuisance+variation)
-                hs_unc = GetBranch(b_template,b_variable,self.tree,'weight',cut)
-            hs_unc.SetName('%s_%s_%s%s' % (b_variable,self.filename,nuisance,variation))
-            hs_unc.Scale(self.scaling)
-            info[variation] = hs_unc
+        if nuisance not in self.nuisances: return
+        if type(self.nuisances[nuisance]) == Nuisance: return
+        if nuisance == 'Stat': self.addStat(); return
+        b_template = b_info.template
+        b_variable = b_template.GetName()
+        cut = b_info.cut
+        isScale = self.nuisances[nuisance] == 'scale'
+        name = '%s_%s_%s' % (self.name,b_variable,nuisance)
+        if isScale:
+            treename = 'trees/norm'
+            self.setTree(treename)
+            up = GetBranch('%sUp' % name,b_template,b_variable,self.treemap[treename],'%sUp' % nuisance,cut)
+            dn = GetBranch('%sDown' % name,b_template,b_variable,self.treemap[treename],'%sDown' % nuisance,cut)
+        else:
+            treeup = 'trees/%sUp' % nuisance; self.setTree(treeup)
+            treedn = 'trees/%sDown' % nuisance; self.setTree(treedn)
+            up = GetBranch('%sUp' % name,b_template,b_variable,self.treemap[treeup],'weight',cut)
+            dn = GetBranch('%sDown' % name,b_template,b_variable,self.treemap[treeup],'weight',cut)
+        self.scale(up); self.scale(dn)
+        self.nuisances[nuisance] = Nuisance(self.process,nuisance,up,dn,self.histo,type="abs")
+    def addStat(self):
+        self.tfile.cd()
+        b_variable = b_info.template.GetName()
+        up = self.histo.Clone('%s_%s_StatUp' % (self.name,b_variable)); up.Reset()
+        dn = self.histo.Clone('%s_%s_StatDown' % (self.name,b_variable)); up.Reset()
+        nbins = self.histo.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            up[ibin] = self.histo.GetBinError(ibin)
+            dn[ibin] = self.histo.GetBinError(ibin)
+        self.nuisances["Stat"] = Nuisance(self.process,"Stat",up,dn,self.histo)
+    def copy(self,other):
+        self.process = other.name; self.name = other.name; self.year = other.year;
+        self.region = other.region; self.lumi = other.lumi; self.fname = other.fname; self.xsec = other.xsec;
+        self.args = other.args
+        self.tfile = other.tfile
+        self.histo = other.histo.Clone()
+        self.raw_total = other.raw_total
+        self.scaled_total = other.scaled_total
+        self.treemap = other.treemap
 class Process(object):
-    def __init__(self,name,filenames,xsecs,proctype,leg=None,lumi=1,color = None):
-        ValidProctype(proctype)
-        self.name = name
-        self.leg = leg
-        if self.leg is None: self.leg = self.name
-        self.filenames = [ filename for filename in filenames ]
-        self.xsecs = xsecs
+    isGlobal = False
+    isNhisto = False
+    isBranch = False
+    def __init__(self,name=None,filenames=None,xsecs=None,proctype=None,year=None,region=None,leg=None,lumi=1,color=kGray+1,copy=None,args=None,config=None):
+        if copy is not None: self.copy(copy); return
+        self.process = name; self.name = name; self.year = year; self.region = region
+        if region is not None: self.name = "%s_%s" % (region,self.name)
+        if year is not None:   self.name = "%s_%s" % (year,self.name)
+        self.sublist = [ '%s_%s' % (self.name,filename) for filename in filenames ]
+        self.xsecs = { '%s_%s' % (self.name,filename):xsecs[filename] for filename in filenames } if xsecs is not None else xsecs
+        self.filenames = list(filenames);
         self.proctype = proctype
-        
-        self.lumi = lumi
-
-        self.color = color
-
-        self.variable = None
-        self.dirname = None
-        self.ndir = None
-        self.b_template = None
-        self.b_variable = None
-        
-        self.subprocesses = {}
-        self.nuisances = {}
-        
+        self.leg = leg; self.lumi = lumi; self.color = color; self.args = args; self.config = config
+        self.isOpen = False
+        self.subprocesses = {}; self.nuisances = {}
+        filelist = list(self.filenames)
+        for sub,filename in zip(self.sublist,filelist):
+            name = filename.replace('post','')
+            if self.proctype == 'data': xsec = None
+            else: xsec = self.xsecs[sub]
+            self.subprocesses[sub] = SubProcess(name,filename,xsec,self.lumi,self.year,self.region,args=self.args,config=self.config)
+        self.initVariable()
+    def __len__(self): return len(self.sublist)
+    def __getitem__(self,i):
+        if type(i) == int: key = self.sublist[i]
+        if type(i) == str: key = i
+        return self.subprocesses[key];
+    def __iter__(self):
+        for i in range(len(self)): yield self[i]
+    def open(self):
+        if self.isOpen: return
+        self.isOpen = False
+        filelist = list(self.filenames)
+        sublist = list(self.sublist)
+        for subkey,filekey in zip(sublist,filelist):
+            if not self[subkey].open():
+                self.filenames.remove(filekey)
+                self.subprocesses.pop(subkey)
+                self.sublist.remove(subkey)
+        return any(self)
+    def initVariable(self):
+        for subprocess in self: subprocess.initVariable()
         self.histo = None
         self.raw_total = 0
         self.scaled_total = 0
+        self.nuisances = {}
 
-        self.isGlobal = False
-        self.isNhisto = False
-        self.isBranch = False
-        self.isOpen = False
-    def __len__(self): return len(self.filenames)
-    def __getitem__(self,i):
-        f = self.filenames[i]
-        return self.subprocesses[f]
-    def __iter__(self):
-        for i in range( len(self) ):
-            yield self[i]
-    def open(self):
-        self.isOpen = True
-        filelist = [ file for file in self.filenames ]
-        for filename in filelist:
-            fname = filename + '.root'
-            name = filename.replace('post','')
-            if not os.path.isfile(fname): print 'No file %s, skipping...' % fname; self.filenames.remove(filename); continue
-            tfile = TFile.Open(fname)
-            if self.proctype != 'data': xsec = self.xsecs[filename]
-            else:                  xsec = None
-            subprocess = SubProcess(name,filename,tfile,xsec)
-            self.subprocesses[filename] = subprocess
-    def getCutflow(self):
-        for subprocess in self: subprocess.getCutflow()
-    def getGlobal(self,variable):
-        self.isGlobal = True
-        self.variable = variable
-        for subprocess in self: subprocess.getGlobal(self.variable)
-    def setDir(self,dirname,ndir):
-        self.dirname = dirname
-        self.ndir = ndir
-        for subprocess in self: subprocess.setDir(dirname)
-    def getNhisto(self,variable):
-        self.isNhisto = True
-        dirname,ndir = GetDirname(variable)
-        if self.dirname != dirname:
-            self.setDir(dirname,ndir)
-            self.variable = variable
-        for subprocess in self: subprocess.getNhisto(variable)
-    def getFileTemplate(self,variable):
-        tfile = iter(self).next().tfile
-        dirname,_ = GetDirname(variable)
-        tdir = tfile.Get(dirname)
-        if 'jetPt' in variable:    variable = variable.replace('jetPt','j1pT')
-        if 'recoil' in variable: variable = variable.replace('recoil','pfMET')
-        self.b_template = tdir.Get(variable)
-    def getBranch(self,variable,b_template,cut):
-        self.isBranch = True
-        if b_template == None: self.getFileTemplate(variable);
-        else: self.b_template = b_template
-        self.cut = cut
-        
-        dirname,ndir = GetDirname(variable,sub='trees')
-        if self.dirname != dirname:
-            self.setDir(dirname,ndir)
-            self.variable = variable
-        self.b_variable = variable.replace('_%s' % ndir,'')
-        for subprocess in self:
-            subprocess.getBranch(self.b_template,self.b_variable,'norm','weight',cut)
-            self.nuisances.update( subprocess.nuisances )
+        Process.isGlobal = False
+        Process.isNhisto = False
+        Process.isBranch = False
+    def setGlobal(self,variable):
+        Process.isGlobal = True
+        for subprocess in self: subprocess.setGlobal(variable)
+    def setNhisto(self,variable):
+        Process.isNhisto = True
+        for subprocess in self: subprocess.setNhisto(variable)
+    def setBranchInfo(self,b_template,weight,cut):
+        if cut != b_info.cut: b_info.cut = cut
+        if weight != b_info.weight: b_info.weight = weight
+        if not HistoEqual(b_template,b_info.template): b_info.template = b_template
+    def setBranch(self,variable,b_template,weight,cut):
+        Process.isBranch = True
+        self.setBranchInfo(b_template,weight,cut)
+        b_template = b_info.template
+        cut = b_info.cut
+        weight = b_info.weight
+        for subprocess in self: subprocess.setBranch(b_template,variable,'trees/norm',weight,cut)
     def fillRaw(self):
         self.raw_total = 0
         for subprocess in self:
             subprocess.fillRaw()
             self.raw_total += subprocess.raw_total
     def scale(self):
-        if self.proctype == 'data': return
         self.scaled_total = 0
         for subprocess in self:
-            subprocess.scale(self.lumi)
+            subprocess.scale(lumi=self.lumi)
+            self.scaleWidth = subprocess.scaleWidth
             self.scaled_total += subprocess.scaled_total
-    def combine(self):
-        self.histo = iter(self).next().histo.Clone('%s_%s' % (self.variable,self.name))
-        self.histo.Reset()
-        for subprocess in self: self.histo.Add(subprocess.histo)
-    def initVariable(self):
-        if not self.isOpen:
-            self.open()
-            self.getCutflow()
-
-        for subprocess in self: subprocess.init()
-
-        self.b_template = None
-        self.histo = None
-        self.raw_total = 0
-        self.scaled_total = 0
-        self.nuisances = {}
-        
-        self.isGlobal = False
-        self.isNhisto = False
-        self.isBranch = False
-    def getVariable(self,variable,b_template,cut):
+    def setVariable(self,variable,b_template=None,weight=None,cut=None):
         self.initVariable()
         tfile = iter(self).next().tfile
-        if IsGlobal(variable,tfile):   self.getGlobal(variable)
-        elif IsBranch(variable,tfile): self.getBranch(variable,b_template,cut)
-        elif IsNhisto(variable,tfile): self.getNhisto(variable)
+        if IsGlobal(variable,tfile): self.setGlobal(variable)
+        elif IsBranch(variable,tfile): self.setBranch(variable,b_template,weight,cut)
+        elif IsNhisto(variable,tfile): self.setNhisto(variable)
         self.fillRaw()
         self.scale()
-        if self.proctype != 'signal': self.combine()
-    def addUnc(self,nuisance,show=False):
-        if not self.isBranch: return
-        if nuisance not in self.nuisances:
-            self.nuisances[nuisance] = {}
-        for subprocess in self: subprocess.addUnc(nuisance,self.b_template,self.b_variable,self.cut)
-        if self.proctype == 'signal': return
-        for variation in ('Up','Down'):
-            histo = self.b_template.Clone('%s_%s%s' % (self.name,nuisance,variation))
-            histo.Reset()
-            for subprocess in self:
-                histo.Add(subprocess.nuisances[nuisance][variation])
-                subprocess.nuisances[nuisance].pop(variation)
-            
-            self.nuisances[nuisance][variation] = histo
+        self.histo = None
+        for subprocess in self:
+            if self.histo is None: self.histo = subprocess.histo.Clone('%s_%s' % (self.name,variable))
+            else:                  self.histo.Add(subprocess.histo)
+    def addUnc(self,nuisance,show=True):
+        if nuisance in self.nuisances: return
+        if self.proctype == 'data': return
+        for subprocess in self: subprocess.addUnc(nuisance)
+        b_template = b_info.template
+        b_variable = b_template.GetName()
+        cut = b_info.cut
+        nbins = self.histo.GetNbinsX()
+        up = self.histo.Clone("%s_%s_%sUp" % (self.name,b_variable,nuisance))
+        dn = self.histo.Clone("%s_%s_%sDown" % (self.name,b_variable,nuisance))
+        for ibin in range(1,nbins+1):
+            up[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].up[ibin]**2 for subprocess in self
+                                        if nuisance in subprocess.nuisances and type(subprocess.nuisances[nuisance]) == Nuisance) )
+            dn[ibin] = TMath.Sqrt( sum( subprocess.nuisances[nuisance].dn[ibin]**2 for subprocess in self
+                                        if nuisance in subprocess.nuisances and type(subprocess.nuisances[nuisance]) == Nuisance) )
+        self.nuisances[nuisance] = Nuisance(self.process,nuisance,up,dn,self.histo)
         if not show or self.scaled_total == 0: return
-	varup = self.nuisances[nuisance]['Up'].Integral()/self.scaled_total
-        vardn = self.nuisances[nuisance]['Down'].Integral()/self.scaled_total
-        print '{0:<20}'.format('%s %s' % (nuisance,self.name))+'+%f/-%f' % (varup,vardn)
-    def removeUnc(self,nuisance):
-        if nuisance not in self.nuisances: return
-        if self.proctype == 'signal':
-            for subprocess in self:
-                subprocess.nuisances[nuisance].pop('Up')
-                subprocess.nuisances[nuisance].pop('Down')
-        else:
-            self.nuisances[nuisance].pop('Up')
-            self.nuisances[nuisance].pop('Down')
-    def fullUnc(self):
-        if not self.isBranch: return
+        print self.nuisances[nuisance]
+    def addStat(self):
+        b_template = b_info.b_tempalte
+        b_variable = b_template.GetName()
+        up = self.histo.Clone('%s_%s_StatUp' % (self.name,b_variable)); up.Reset()
+        dn = self.histo.Clone('%s_%s_StatDown' % (self.name,b_variable)); dn.Reset()
+        nbins = self.histo.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            up[ibin] = self.histo.GetBinError(ibin)
+            dn[ibin] = self.histo.GetBinError(ibin)
+        self.nuisances["Stat"] = Nuisance(self.process,"Stat",up,dn,self.histo)
+    def fullUnc(self,unclist=None,stat=False,show=True):
         if self.proctype != 'bkg': return
-        up = self.b_template.Clone('%s_totalUp' % self.name)
-        dn = self.b_template.Clone('%s_totalDown' % self.name)
-        norm = self.histo
-        unclist = [ nuisance for nuisance in self.nuisances if 'Up' in self.nuisances[nuisance]]
-        for ibin in range(1,self.b_template.GetNbinsX()+1):
-            up[ibin] = 0; dn[ibin] = 0;
-            for nuisance in unclist:
-                if norm[ibin] == 0: continue
-                tmpUp = self.nuisances[nuisance]['Up'][ibin]
-                tmpDn = self.nuisances[nuisance]['Down'][ibin]
-                if tmpUp == tmpDn: continue
-                binUp = max(tmpUp,tmpDn); binDn = min(tmpUp,tmpDn)
-
-                up[ibin] = up[ibin] + (norm[ibin] - binUp)**2
-                dn[ibin] = dn[ibin] + (norm[ibin] - binDn)**2
-            up[ibin] = norm[ibin] + TMath.Sqrt(up[ibin])
-            dn[ibin] = norm[ibin] - TMath.Sqrt(dn[ibin])
-        self.nuisances['Total'] = {'Up':up,'Down':dn}
+        
+        if unclist is None: unclist = self.nuisances.keys()
+        unclist = list(unclist)
+        if not stat and 'Stat' in unclist: unclist.remove('Stat')
+        elif stat and 'Stat' not in unclist: unclist.append('Stat')
+        
+        for nuisance in unclist: self.addUnc(nuisance,show=show)
+        b_template = b_info.template
+        b_variable = b_template.GetName()
+        up = self.histo.Clone('%s_%s_TotalUp' % (self.name,b_variable));  up.Reset()
+        dn = self.histo.Clone('%s_%s_TotalDown' % (self.name,b_variable)); dn.Reset()
+        nbins = up.GetNbinsX()
+        for ibin in range(1,nbins+1):
+            if self.histo[ibin] == 0: continue
+            up[ibin] = self.histo[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].up[ibin]/self.histo[ibin])**2 for nuisance in unclist) )
+            dn[ibin] = self.histo[ibin] * TMath.Sqrt( sum( (self.nuisances[nuisance].dn[ibin]/self.histo[ibin])**2 for nuisance in unclist) )
+        self.nuisances['Total'] = Nuisance(self.process,'Total',up,dn,self.histo)
+    def copy(self,other):
+        self.process = other.process; self.name = other.name; self.year = other.year; self.region = other.region
+        self.proctype = other.proctype
+        self.leg = other.leg; self.lumi = other.lumi; self.color = other.color
+        self.histo = other.histo
+        self.raw_total = other.raw_total
+        self.scaled_total = other.scaled_total
+        self.nuisances = other.nuisances
+        self.args = other.args
+        # self.isOpen = other.isOpen
+        # self.filenames = list(other.filenames)
+        # self.xsecs = other.xsecs
+        # self.subprocesses = { filename:SubProcess(copy=other.subprocesses[filename]) for filename in self.filenames }
     def add(self,other):
-        if self.name != other.name: raise ValueError("%s is not %s" % (self.name,other.name))
-        # if self.variable != other.variable: raise ValueError("%s is not %s" % (self.variable,other.variable))
-        self.histo.Add(other.histo)
+        # if self.process != other.process:
+        #     if not (self.proctype == 'sumofbkg' and other.proctype == 'bkg'):raise ValueError("%s is not %s" % (self.process,other.process))
+        if self.histo is not None: self.histo.Add(other.histo)
+        else: self.histo = other.histo.Clone(self.name)
         self.raw_total += other.raw_total
-        self.scaled_total += self.scaled_total
-        # self.subprocess.update(other.subprocesses)
+        self.scaled_total += other.scaled_total
+        # self.subprocesses.update(other.subprocesses)
+        for nuisance in other.nuisances:
+            if nuisance not in self.nuisances: self.nuisances[nuisance] = other.nuisances[nuisance].copy(self.process)
+            else: self.nuisances[nuisance].add(other.nuisances[nuisance])

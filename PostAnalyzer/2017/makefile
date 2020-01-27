@@ -3,11 +3,11 @@ REGIONS=SignalRegion SingleEleCR SingleMuCR DoubleEleCR DoubleMuCR GammaCR
 .PHONY: $(REGIONS) all
 
 all: $(REGIONS)
+	@#
 
-$(REGIONS):
-	@$(MAKE) -C $@
+$(REGIONS): 
+	@$(MAKE) -C $@ $(TARGET)
 
-%::	
-	@for region in $(REGIONS); do \
-		$(MAKE) -C $${region} $@; \
-	done
+%:: TARGET:=$(MAKECMDGOALS)
+%:: $(REGIONS)
+	@#

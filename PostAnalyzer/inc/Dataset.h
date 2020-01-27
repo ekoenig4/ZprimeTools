@@ -16,7 +16,7 @@ class Dataset {
   };
   static SubsetList dataset;
 public:
-  static const std::string datalist[16];
+  static const std::vector<std::string> datalist;
   static const std::map<std::string,Type> typemap;
 
   Type type;
@@ -25,6 +25,7 @@ public:
   bool isInclusive;
   bool isData;
   bool isSignal;
+  bool isNLO;
   int PID;
 
   Dataset();
@@ -42,6 +43,13 @@ public:
     return false;
   }
   static inline std::vector<std::string> getDirlist(std::string data,std::string subset) { return dataset[data][subset]; }
+  static inline bool contains(std::string data,std::string subset="") {
+    if (dataset.find(data) != dataset.end()) {
+      if (subset == "") return true;
+      return dataset[data].find(subset) != dataset[data].end();
+    }
+    return false;
+  }
   inline const char* GetTypeName() { return TypeName[type]; }
   inline const char* GetRegionName() { return RegionName[region]; }
   inline int GetYear() { return year; }

@@ -3,11 +3,11 @@ YEARS=2017 2018
 .PHONY: $(YEARS) all
 
 all: $(YEARS)
+	@#
 
-$(YEARS):
-	@$(MAKE) -C $@
+$(YEARS): 
+	@$(MAKE) -C $@ $(TARGET)
 
-%::	
-	@for year in $(YEARS); do \
-		$(MAKE) -C $${year} $@; \
-	done
+%:: TARGET:=$(MAKECMDGOALS)
+%:: $(YEARS)
+	@#

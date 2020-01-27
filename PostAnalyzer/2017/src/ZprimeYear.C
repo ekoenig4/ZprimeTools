@@ -78,7 +78,9 @@ float ZprimeYear::getKFactor(float bosonPt) {
   float nlo_ewk = th1fmap.getBin("NLO_EWK",bosonPt);
   float nlo_qcd = th1fmap.getBin("NLO_QCD",bosonPt);
   float nnlo_qcd = th1fmap.getBin("NNLO_QCD",bosonPt);
-  float kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
+  float kfactor = 1;
+  if (sample.isNLO) kfactor = nlo_ewk * nnlo_qcd;
+  else kfactor = nlo_ewk * nlo_qcd * nnlo_qcd;
   return kfactor;
 }
 
@@ -94,7 +96,18 @@ bool ZprimeYear::MET_Filters() {
   for (int bit = 0; bit < 8; bit++)
     if (metFilters >> bit & 1 == 1)
       h_metfilters->Fill(bit + 1);
-  return metFilters == 0;
+  // Ignore the 6th metfilter per recommendation
+  // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#2017_data
+  if(metFilters>>0 & 1) return false;                                             
+  if(metFilters>>1 & 1) return false;
+  if(metFilters>>2 & 1) return false;
+  if(metFilters>>3 & 1) return false;
+  if(metFilters>>4 & 1) return false;
+  if(metFilters>>5 & 1) return false;
+  if(metFilters>>7 & 1) return false;
+  if(metFilters>>8 & 1) return false;
+      
+  return true;
 }
 
 bool ZprimeYear::MET_Triggers() {
@@ -146,7 +159,6 @@ bool ZprimeYear::bjetSelectionID(int ijet) {
   float bjet = jetDeepCSVTags_b->at(ijet) + jetDeepCSVTags_bb->at(ijet);
   return bjet > bjetDeepCSVCut;
 }
-
 
 int ZprimeYear::getNfiles(TChain *chain,TString path,int nfiles) {
   TSystemDirectory sourceDir("hi",path);

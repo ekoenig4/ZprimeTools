@@ -5,7 +5,8 @@ nohup.out
 .status
 .output
 post*.root
-test*
-Systematics
 Output/
 analyze
+test
+Systematics
+debug.out

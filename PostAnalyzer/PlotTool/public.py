@@ -5,7 +5,7 @@ import os
 
 gROOT.SetBatch(1)
 
-samples = datamc()
+samples = Region()
     
 for variable in samples.args:          
     print "Plotting",variable
@@ -45,12 +45,12 @@ for variable in samples.args:
     hs_datamc.GetXaxis().SetTitle(samples.name)
     hs_datamc.GetXaxis().SetTitleOffset(1.5)
     
-    if samples.signal != None:
+    if hasattr(samples,'signal'):
         samples.histo[samples.signal[0]].SetLineWidth(2)
         samples.histo[samples.signal[0]].Draw("HIST SAME")
 
     leg = TLegend(0.62,0.60,0.86,0.887173,"");
-    if (samples.signal != None):
+    if (hasattr(samples,'signal')):
         mx = samples.signal[0].split("_")[0].replace("Mx","")
         mv = samples.signal[0].split("_")[1].replace("Mv","")
         leg.AddEntry(samples.histo[samples.signal[0]],"M_{\chi}="+mx+", M_{v}="+mv)   

@@ -13,6 +13,19 @@ const string ZprimeDoubleCR::REGION = "DoubleEleCR";
 void ZprimeDoubleCR::initVars() {
   lepindex_leading = lepindex_subleading = -1;
   dilepton_mass = dilepton_pt = -1;
+  leadingLepton_pt = leadingLepton_eta = leadingLepton_phi = -99;
+  subleadingLepton_pt = subleadingLepton_eta = subleadingLepton_phi = -99;
+}
+
+void ZprimeDoubleCR::initTree(TTree* tree) {
+  tree->Branch("dileptonM",&dilepton_mass,"Z Mass (GeV)");
+  tree->Branch("dileptonPt",&dilepton_pt,"Z P_{T} (GeV)");
+  tree->Branch("leadingLeptonPt",&leadingLepton_pt,"Leading Lepton P_{T} (GeV)");
+  tree->Branch("leadingLeptonEta",&leadingLepton_eta,"Leading Lepton Eta");
+  tree->Branch("leadingLeptonPhi",&leadingLepton_phi,"Leading Lepton Phi");
+  tree->Branch("subleadingLeptonPt",&subleadingLepton_pt,"Subleading Lepton P_{T} (GeV)");
+  tree->Branch("subleadingLeptonEta",&subleadingLepton_eta,"Subleading Lepton Eta");
+  tree->Branch("subleadingLeptonPhi",&subleadingLepton_phi,"Subleading Lepton Phi");
 }
 
 void ZprimeDoubleCR::BookHistos(int i,string histname) {
@@ -28,21 +41,23 @@ void ZprimeDoubleCR::BookHistos(int i,string histname) {
     h_subleadingLeptonEta[i] = MakeTH1F(new TH1F(Name("subleadingLeptonEta").c_str(),"subleadingLeptonEta;Subleading Lepton #eta"       ,nEtaBins,lEta,uEta));              
     h_subleadingLeptonPhi[i] = MakeTH1F(new TH1F(Name("subleadingLeptonPhi").c_str(),"subleadingLeptonPhi;Subleading Lepton #phi"       ,nPhiBins,lPhi,uPhi));        
     h_dileptonPt[i]          = MakeTH1F(new TH1F(Name("dileptonPt").c_str()         ,"dileptonPt;Z P_{T} (GeV)"                         ,30,0.,1500.));              
-    h_dileptonM[i]           = MakeTH1F(new TH1F(Name("dileptonM").c_str()          ,"dileptonM;Z Mass (GeV)"                           ,24,60.,120.));              
+    h_dileptonM[i]           = MakeTH1F(new TH1F(Name("dileptonM").c_str()          ,"dileptonM;Z Mass (GeV)"                           ,24,60.,120.));
+    h_dileptonMall[i]        = MakeTH1F(new TH1F(Name("dileptonMall").c_str()       ,"dileptonM;Z Mass (GeV)"                           ,50,30.,200.));
   }
 }
 
 void ZprimeDoubleCR::fillHistos(int nhist,float event_weight) {
   if(lepindex_leading >= 0 && lepindex_subleading >= 0){ 
-    h_leadingLeptonPt[nhist]    ->Fill(elePt->at(lepindex_leading),event_weight);
-    h_leadingLeptonEta[nhist]   ->Fill(eleEta->at(lepindex_leading),event_weight);
-    h_leadingLeptonPhi[nhist]   ->Fill(elePhi->at(lepindex_leading),event_weight);
-    h_subleadingLeptonPt[nhist] ->Fill(elePt->at(lepindex_subleading),event_weight);
-    h_subleadingLeptonEta[nhist]->Fill(eleEta->at(lepindex_subleading),event_weight);
-    h_subleadingLeptonPhi[nhist]->Fill(elePhi->at(lepindex_subleading),event_weight);
+    h_leadingLeptonPt[nhist]    ->Fill(leadingLepton_pt,event_weight);
+    h_leadingLeptonEta[nhist]   ->Fill(leadingLepton_eta,event_weight);
+    h_leadingLeptonPhi[nhist]   ->Fill(leadingLepton_phi,event_weight);
+    h_subleadingLeptonPt[nhist] ->Fill(subleadingLepton_pt,event_weight);
+    h_subleadingLeptonEta[nhist]->Fill(subleadingLepton_eta,event_weight);
+    h_subleadingLeptonPhi[nhist]->Fill(subleadingLepton_phi,event_weight);
     
     h_dileptonPt[nhist]         ->Fill(dilepton_pt,event_weight);
     h_dileptonM[nhist]          ->Fill(dilepton_mass,event_weight);
+    h_dileptonMall[nhist]       ->Fill(dilepton_mass,event_weight);
   }
 }
 
@@ -58,6 +73,14 @@ bool ZprimeDoubleCR::CRSelection(vector<int> tightlist,vector<int> looselist) {
 	TLorentzVector ll = lep1 + lep2;
 	dilepton_mass = ll.M();
 	dilepton_pt = ll.Pt();
+
+	leadingLepton_pt = lep1.Pt();
+	leadingLepton_eta = lep1.Eta();
+	leadingLepton_phi = lep1.Phi();
+	
+	subleadingLepton_pt = lep2.Pt();
+	subleadingLepton_eta = lep2.Eta();
+	subleadingLepton_phi = lep2.Phi();
 	
 	TLorentzVector met_4vec;
 	met_4vec.SetPtEtaPhiE(pfMET,0.,pfMETPhi,pfMET);

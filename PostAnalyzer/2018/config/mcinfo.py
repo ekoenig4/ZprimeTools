@@ -1,3 +1,4 @@
+from ROOT import *
 version = "2018"
 
 lumi = {"SingleEleCR":59699,
@@ -16,21 +17,34 @@ lumi_by_era = {"SingleEleCR":{"A":14024,"B":7061,"C":6895,"D":31720},
 
 region_masks = {"GammaCR":["GJets","QCD","WJets"]}
 
-WJets_FileNames = ["postW70to100","postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"]
-
-ZJets_FileNames = ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"];
-
-GJets_FileNames = ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"];
-
-DYJets_FileNames = ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"]
-
-ST_FileNames = ["STs_4f","STtW_antitop_5f","STtW_top_5f","STt_antitop_4f"]
-
-TTJets_FileNames = ["postTTJetsFXFX"];#"postTTJets_MLM"
-
-DiBoson_FileNames = ["postWW","postWWto2L2Nu","postWWto4Q","postWWtoLNuQQ","postWZ","postZZ"]#,"postWWto2L2NuPS"]
-
-QCD_FileNames = ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"];
+mclist = ["ZJets","WJets","DYJets","GJets","TTJets","DiBoson","QCD"]
+filemap = {
+    "ZJets":  ["postZ100to200","postZ200to400","postZ400to600","postZ600to800","postZ800to1200","postZ1200to2500","postZ2500toInf"],
+    "WJets":  ["postW70to100","postW100to200","postW200to400","postW400to600","postW600to800","postW800to1200","postW1200to2500","postW2500toInf"],
+    "DYJets": ["postDY70to100","postDY100to200","postDY200to400","postDY400to600","postDY600to800","postDY800to1200","postDY1200to2500","postDY2500toInf"],
+    "GJets":  ["postGJets40to100","postGJets100to200","postGJets200to400","postGJets400to600","postGJets600toInf"],
+    "TTJets": ["postTTJetsFXFX","postST_s_4f","postST_t_antitop_4f","postST_tW_top_5f","postST_tW_antitop_5f"],
+    "DiBoson":["postWW","postWWTo2L2Nu","postWWTo4Q","postWWToLNuQQ","postWZ","postZZ"],
+    "QCD":    ["postQCD100to200","postQCD200to300","postQCD300to500","postQCD500to700","postQCD700to1000","postQCD1000to1500","postQCD1500to2000","postQCD2000toInf"]
+}
+legmap = {
+    "ZJets"  :"Z#rightarrow#nu#nu",  
+    "WJets"  :"W#rightarrowl#nu",     
+    "DYJets" :"Z#rightarrow ll",   
+    "GJets"  :"#gamma+jets",  
+    "TTJets" :"Top Quark",         
+    "DiBoson":"WW/WZ/ZZ",          
+    "QCD"    :"QCD"
+}
+colmap = {
+    "ZJets"  :kAzure+10,  
+    "WJets"  :kRed-10,
+    "DYJets" :kTeal-9,  
+    "GJets"  :kGray+2,  
+    "TTJets" :kOrange-2,
+    "DiBoson":kCyan-10, 
+    "QCD"    :kGray
+}
 
 # 2018 xsec
 xsec = { 
@@ -41,9 +55,14 @@ xsec = {
 "postZ800to1200":1.496e+00,
 "postZ1200to2500":3.425e-01,
 "postZ2500toInf":5.263e-03,
+<<<<<<< HEAD
 
 "postW70to100":1292.0,
 "postWJets_MLM":5.276e+04,
+=======
+    
+"postW70to100":0, # need to calculate
+>>>>>>> Run2
 "postW100to200":1.392e+03,
 "postW200to400":4.103e+02,
 "postW400to600":5.785e+01,
@@ -67,9 +86,18 @@ xsec = {
 "postGJets400to600":2.578e+02,
 "postGJets600toInf":8.492e+01,
     
+<<<<<<< HEAD
 "postTTJetsDiLept":5.436e+01,
 "postTTJetsSingleLeptFromT":1.091e+02,
 "postTTJetsFXFX":7.503e+02,
+=======
+"postTTJetsFXFX":7.503e+02,
+
+"postST_s_4f":1.153+02,
+"postST_t_antitop_4f":6.909e+01,
+"postST_tW_antitop_5f":3.497e+01,
+"postST_tW_top_5f":3.491e+01,
+>>>>>>> Run2
     
 "postQCD100to200":2.366e+07,
 "postQCD200to300":1.549e+06,
@@ -81,9 +109,9 @@ xsec = {
 "postQCD2000toInf":2.025e+01,
     
 "postWW":7.592e+01,
-"postWWtoLNuQQ":4.599e+01,
-"postWWto2L2Nu":1.108e+01,
-"postWWto4Q":4.773e+01,
+"postWWToLNuQQ":4.599e+01,
+"postWWTo2L2Nu":1.108e+01,
+"postWWTo4Q":4.773e+01,
     
 "postWZ":2.758e+01,
 "postZZ":1.214e+01,

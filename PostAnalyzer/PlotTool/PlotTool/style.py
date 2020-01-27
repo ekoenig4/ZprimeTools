@@ -79,10 +79,11 @@ def MCStyle(hs_mc,color):
     hs_mc.SetFillColor(color);
 ###################################################################
 
-def UncBandStyle(uncband):
+def UncBandStyle(uncband,color=kGray+1):
     uncband.SetTitle("")
-    uncband.SetFillStyle(3144)
-    uncband.SetFillColor(kGray+2)
+    # uncband.SetFillStyle(3144)
+    uncband.SetFillStyle(2001)
+    uncband.SetFillColor(color)
 ###################################################################
 
 def fillStack(samples,hs_datamc):
@@ -91,10 +92,11 @@ def fillStack(samples,hs_datamc):
         nbin = samples.processes['Data'].histo.GetNbinsX()
         order.sort(key=lambda process: process.histo.GetBinContent(nbin))
     else: order.sort(key=lambda process: process.scaled_total)
+    samples.MCOrder = [ _.process for _ in reversed(order) ]
     for process in order: hs_datamc.Add(process.histo)
 ###################################################################
 
-def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
+def getLegend(xmin=0.75,ymin=0.5,xmax=0.95,ymax=0.887173):
     leg = TLegend(xmin,ymin,xmax,ymax,"")
     boundaries.append( Box(xmin,ymin,xmax,ymax) )
     leg.SetFillColor(kWhite);
@@ -104,21 +106,22 @@ def getLegend(xmin=0.75,ymin=0.65,xmax=0.95,ymax=0.887173):
     return leg
 ###################################################################
 
-def getCMSText(lumi,year):
+def getCMSText(lumi,year,scale=1):
     global boundaries
     x1,y1 = 0.62,0.907173
     texS = TLatex(x1,y1,("%s (13 TeV, %s)" % (lumi,year)));#VS
     texS.SetNDC();
     texS.SetTextFont(42);
-    texS.SetTextSize(0.040);
+    texS.SetTextSize(0.040*scale);
     texS.Draw();
     box1 = Box(x=x1,y=y1,w=texS.GetXsize(),h=texS.GetYsize())
 
     x2,y2 = 0.15,0.837173
-    texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}"); 
+    texS1 = TLatex(x2,y2,"#bf{CMS} #it{Preliminary}");
+    # texS1 = TLatex(x2,y2,"#bf{CMS} #it{Analysis in Progress}"); 
     texS1.SetNDC();
     texS1.SetTextFont(42);
-    texS1.SetTextSize(0.040);
+    texS1.SetTextSize(0.040*scale);
     texS1.Draw();
     box2 = Box(x=x2,y=y2,w=texS1.GetXsize(),h=texS1.GetYsize())
 
@@ -157,11 +160,10 @@ def getRatioLine(xmin,xmax):
     return line
 ###################################################################
 
-def StackStyle(hs_stack,ymin=None,ymax=None):
-    hs_stack.GetYaxis().SetTitle("Events");
+def StackStyle(hs_stack,ymin=None,ymax=None,scaleWidth=False):
+    hs_stack.GetYaxis().SetTitle("Events" if not scaleWidth else "Events / GeV");
     hs_stack.GetYaxis().SetTitleOffset(1.5);
     hs_stack.SetTitle("");
-    hs_stack.SetMinimum(0.1)
     def checkbin(x,y,box):
         if x > box.userx1() and x < box.userx2() and y > box.usery1():
             # print '%f < %f < %f && %f > %f' % (box.userx1(),x,box.userx2(),y,box.usery1())
@@ -170,13 +172,15 @@ def StackStyle(hs_stack,ymin=None,ymax=None):
     hs = hs_stack
     if type(hs) == THStack: hs = hs.GetStack().Last()
     scale = 1
-    ymin = hs.GetMinimum()
-    ymax = hs.GetMaximum()
+    ymax = max( hs[ibin] for ibin in range(1,hs.GetNbinsX()+1) if hs[ibin] != 0 )
     for box in boundaries:
         for ibin in range(1,hs.GetNbinsX()+1):
             scale = max(scale,checkbin(hs.GetBinCenter(ibin),hs[ibin],box))
-    ymax *= scale*pow(10,1.2)
+    ymax *= scale*pow(10,2.5)
+    ymin = pow(10,-2)
+    
     hs_stack.SetMaximum(ymax)
+    hs_stack.SetMinimum(ymin)
 ###################################################################
 
 def makeXaxis(xmin,xmax,ymin,ndiv,name=None):

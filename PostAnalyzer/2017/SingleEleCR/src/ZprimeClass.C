@@ -44,7 +44,6 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
     float event_weight = 1.;
     if (!sample.isData) {
       ApplyPileup(event_weight);
-      
       if (isW_or_ZJet()) {
 	SetBoson(sample.PID);
 	ApplyKFactor(event_weight);
@@ -119,6 +118,7 @@ void ZprimeClass::Loop(Long64_t maxEvents, int reportEvery) {
 			  cutflow->Fill("DeltaPhiCut",event_weight);
 
 			  QCDVariations(event_weight);
+			  PSWeights(weight_nogen);
 			  fillHistos(11,event_weight);
 			  PFUncertainty(event_weight);
 			}
