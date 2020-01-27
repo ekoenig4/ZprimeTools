@@ -34,13 +34,13 @@ legmap = {
     "QCD"    :"QCD"
 }
 colmap = {
-    "ZJets"  :kAzure+10,  
-    "WJets"  :kRed-10,
-    "DYJets" :kTeal-9,  
-    "GJets"  :kGray+2,  
-    "TTJets" :kOrange-2,
-    "DiBoson":kCyan-10, 
-    "QCD"    :kGray
+    "ZJets"  :9,  
+    "WJets"  :kOrange-2,
+    "DYJets" :7,  
+    "GJets"  :46,  
+    "TTJets" :kSpring-9,
+    "DiBoson":kMagenta-7, 
+    "QCD"    :41
 }
 
 xsec_new = {                                                                                                                                                                    

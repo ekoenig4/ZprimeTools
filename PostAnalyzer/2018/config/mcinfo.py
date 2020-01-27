@@ -37,13 +37,13 @@ legmap = {
     "QCD"    :"QCD"
 }
 colmap = {
-    "ZJets"  :kAzure+10,  
-    "WJets"  :kRed-10,
-    "DYJets" :kTeal-9,  
-    "GJets"  :kGray+2,  
-    "TTJets" :kOrange-2,
-    "DiBoson":kCyan-10, 
-    "QCD"    :kGray
+    "ZJets"  :9,  
+    "WJets"  :kOrange-2,
+    "DYJets" :7,  
+    "GJets"  :46,  
+    "TTJets" :kSpring-9,
+    "DiBoson":kMagenta-7, 
+    "QCD"    :41
 }
 
 # 2018 xsec
@@ -55,14 +55,8 @@ xsec = {
 "postZ800to1200":1.496e+00,
 "postZ1200to2500":3.425e-01,
 "postZ2500toInf":5.263e-03,
-<<<<<<< HEAD
-
-"postW70to100":1292.0,
-"postWJets_MLM":5.276e+04,
-=======
     
-"postW70to100":0, # need to calculate
->>>>>>> Run2
+"postW70to100":1292.0,
 "postW100to200":1.392e+03,
 "postW200to400":4.103e+02,
 "postW400to600":5.785e+01,
@@ -86,18 +80,12 @@ xsec = {
 "postGJets400to600":2.578e+02,
 "postGJets600toInf":8.492e+01,
     
-<<<<<<< HEAD
-"postTTJetsDiLept":5.436e+01,
-"postTTJetsSingleLeptFromT":1.091e+02,
-"postTTJetsFXFX":7.503e+02,
-=======
 "postTTJetsFXFX":7.503e+02,
 
 "postST_s_4f":1.153+02,
 "postST_t_antitop_4f":6.909e+01,
 "postST_tW_antitop_5f":3.497e+01,
 "postST_tW_top_5f":3.491e+01,
->>>>>>> Run2
     
 "postQCD100to200":2.366e+07,
 "postQCD200to300":1.549e+06,

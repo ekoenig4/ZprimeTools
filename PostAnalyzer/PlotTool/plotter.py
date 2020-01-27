@@ -102,7 +102,15 @@ def plotVariable(samples,variable,initiate=True,saveas=AutoSave,blinded=False):
     if samples.args.mc_solid:
         leg.AddEntry(hs_bkg,"Background","f")
     else:
-        for mc in samples.MCList: leg.AddEntry(samples.processes[mc].histo,samples.processes[mc].leg,'f')
+        for mc in samples.MCOrder:
+            if samples[mc].scaled_total == 0: continue
+            leg.AddEntry(samples[mc].histo,samples[mc].leg,'f')
+
+    if samples.hasUncertainty:
+        uncband = samples.getUncBand(samples.args.uncertainty,stat=True)
+        UncBandStyle(uncband)
+        leg.AddEntry(uncband,"syst #otimes stat",'f')
+        
     leg.Draw();
 
     lumi_label = '%s' % float('%.3g' % (samples.lumi/1000.)) + " fb^{-1}"
@@ -174,7 +182,7 @@ def run2plotter(region):
     cwd = os.getcwd(); sys.path.append(cwd)
     from importlib import import_module
     yearmap = {}
-    yearlist = ["2016","2017","2018"]
+    yearlist = ["2017","2018"]
     blinded = region == 'SignalRegion'
     for year in yearlist:
         useMaxLumi = region == 'SignalRegion' and blinded
@@ -185,8 +193,7 @@ def run2plotter(region):
 
         for year in yearlist:
             yearmap[year].initiate(variable)
-        combined = Region(copy=yearmap["2016"])
-        combined.add(yearmap["2017"])
+        combined = Region(copy=yearmap["2017"])
         combined.add(yearmap["2018"])
         combined.year = 'Run2'
         combined.region = region
