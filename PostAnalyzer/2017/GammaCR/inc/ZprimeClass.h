@@ -37,7 +37,7 @@ public :
   }
   void initTree(TTree* tree) {
     ZprimeYear::initTree(tree);
-    ZprimeDoubleCR::initTree(tree);
+    ZprimeGammaCR::initTree(tree);
   }
   
   void JetEnergyScale(float start_weight);
